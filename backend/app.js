@@ -5,6 +5,7 @@ import helmet from "helmet";
 import errorMiddleware from "./middleware/errorMiddleware.js";
 import notFoundMiddleware from "./middleware/notFoundMiddleware.js";
 import authRoutes from "./routes/authRoutes.js";
+import candidateRoutes from "./routes/candidateRoutes.js";
 import companyRoutes from "./routes/companyRoutes.js";
 import recruiterRoutes from "./routes/recruiterRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
@@ -31,6 +32,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/recruiters", recruiterRoutes);
 app.use("/api/companies", companyRoutes);
+app.use("/api/candidates",candidateRoutes);
 
 // Error Handling
 app.use(notFoundMiddleware);

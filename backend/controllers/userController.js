@@ -14,9 +14,7 @@ import {
 
 
 const getMe = asyncHandler(async (req, res) => {
-
     const user = await getUserById(req.user.id);
-
     res.status(200).json({
         success: true,
         data: {
@@ -27,7 +25,6 @@ const getMe = asyncHandler(async (req, res) => {
 
 
 const updateProfile = asyncHandler(async (req, res) => {
-
     const { error, value } = updateProfileSchema.validate(
         req.body,
         {
@@ -35,7 +32,6 @@ const updateProfile = asyncHandler(async (req, res) => {
             stripUnknown: true,
         }
     );
-
     if (error) {
         return res.status(400).json({
             success: false,
@@ -45,12 +41,10 @@ const updateProfile = asyncHandler(async (req, res) => {
             ),
         });
     }
-
     const user = await updateUserProfile(
         req.user.id,
         value
     );
-
     res.status(200).json({
         success: true,
         message: "Profile updated successfully",
@@ -62,7 +56,6 @@ const updateProfile = asyncHandler(async (req, res) => {
 
 
 const updatePassword = asyncHandler(async (req, res) => {
-
     const { error, value } = changePasswordSchema.validate(
         req.body,
         {
@@ -70,7 +63,6 @@ const updatePassword = asyncHandler(async (req, res) => {
             stripUnknown: true,
         }
     );
-
     if (error) {
         return res.status(400).json({
             success: false,
@@ -80,13 +72,11 @@ const updatePassword = asyncHandler(async (req, res) => {
             ),
         });
     }
-
     await changePassword(
         req.user.id,
         value.currentPassword,
         value.newPassword
     );
-
     res.status(200).json({
         success: true,
         message: "Password changed successfully",
@@ -95,9 +85,7 @@ const updatePassword = asyncHandler(async (req, res) => {
 
 
 const removeAccount = asyncHandler(async (req, res) => {
-
     await deleteAccount(req.user.id);
-
     res.status(200).json({
         success: true,
         message: "Account deleted successfully",
