@@ -8,6 +8,7 @@ import authRoutes from "./routes/authRoutes.js";
 import candidateRoutes from "./routes/candidateRoutes.js";
 import companyRoutes from "./routes/companyRoutes.js";
 import recruiterRoutes from "./routes/recruiterRoutes.js";
+import skillRoutes from "./routes/skillRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 
 dotenv.config();
@@ -33,6 +34,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/recruiters", recruiterRoutes);
 app.use("/api/companies", companyRoutes);
 app.use("/api/candidates",candidateRoutes);
+app.use("/api/skills",skillRoutes);
 
 // Error Handling
 app.use(notFoundMiddleware);
