@@ -5,6 +5,7 @@ import {
     updateRecruiterProfile,
 } from "../services/recruiterService.js";
 
+import { STATUS_CODES } from "../utils/setConstants.js";
 import {
     updateRecruiterProfileSchema,
 } from "../validation/recruiterValidation.js";
@@ -16,7 +17,7 @@ const getProfile = asyncHandler(async (req, res) => {
         req.user.id
     );
 
-    res.status(200).json({
+    res.status(STATUS_CODES.OK).json({
         success: true,
         data: {
             recruiter,
@@ -52,7 +53,7 @@ const updateProfile = asyncHandler(async (req, res) => {
             value
         );
 
-    res.status(200).json({
+    res.status(STATUS_CODES.OK).json({
         success: true,
         message: "Recruiter profile updated successfully",
         data: {

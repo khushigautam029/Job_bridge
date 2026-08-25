@@ -5,6 +5,7 @@ import {
     updateCandidateProfile,
 } from "../services/candidateService.js";
 
+import { STATUS_CODES } from "../utils/setConstants.js";
 import {
     updateCandidateProfileSchema,
 } from "../validation/candidateValidation.js";
@@ -18,7 +19,7 @@ const getProfile = asyncHandler(
                 req.user.id
             );
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
                 candidate,
@@ -58,7 +59,7 @@ const updateProfile = asyncHandler(
                 value
             );
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             message:
                 "Candidate profile updated successfully",

@@ -7,6 +7,7 @@ import {
     updateMyCompany,
 } from "../services/companyService.js";
 
+import { STATUS_CODES } from "../utils/setConstants.js";
 import {
     updateCompanySchema,
 } from "../validation/companyValidation.js";
@@ -19,7 +20,7 @@ const getMyCompanyController = asyncHandler(
             req.user.id
         );
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
                 company,
@@ -59,7 +60,7 @@ const updateMyCompanyController = asyncHandler(
                 value
             );
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             message:
                 "Company updated successfully",
@@ -77,7 +78,7 @@ const getCompanies = asyncHandler(
         const companies =
             await getAllCompanies();
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
                 companies,
@@ -95,7 +96,7 @@ const getCompany = asyncHandler(
                 req.params.id
             );
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
                 company,

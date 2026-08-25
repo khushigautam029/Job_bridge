@@ -8,6 +8,7 @@ import {
     updateJob,
 } from "../services/jobService.js";
 
+import { STATUS_CODES } from "../utils/setConstants.js";
 import {
     createJobSchema,
     updateJobSchema,
@@ -43,7 +44,7 @@ const create = asyncHandler(
             value
         );
 
-        res.status(201).json({
+        res.status(STATUS_CODES.CREATED).json({
             success: true,
             message: "Job created successfully",
             data: {
@@ -59,7 +60,7 @@ const getAll = asyncHandler(
 
         const jobs = await getAllJobs();
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
                 jobs,
@@ -76,7 +77,7 @@ const getOne = asyncHandler(
             req.params.id
         );
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
                 job,
@@ -116,7 +117,7 @@ const update = asyncHandler(
             value
         );
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             message: "Job updated successfully",
             data: {
@@ -135,7 +136,7 @@ const remove = asyncHandler(
             req.params.id
         );
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             message: "Job deleted successfully",
         });

@@ -7,6 +7,7 @@ import {
     updateUserProfile,
 } from "../services/userService.js";
 
+import { STATUS_CODES } from "../utils/setConstants.js";
 import {
     changePasswordSchema,
     updateProfileSchema,
@@ -15,7 +16,7 @@ import {
 
 const getMe = asyncHandler(async (req, res) => {
     const user = await getUserById(req.user.id);
-    res.status(200).json({
+    res.status(STATUS_CODES.OK).json({
         success: true,
         data: {
             user,
@@ -45,7 +46,7 @@ const updateProfile = asyncHandler(async (req, res) => {
         req.user.id,
         value
     );
-    res.status(200).json({
+    res.status(STATUS_CODES.OK).json({
         success: true,
         message: "Profile updated successfully",
         data: {
@@ -77,7 +78,7 @@ const updatePassword = asyncHandler(async (req, res) => {
         value.currentPassword,
         value.newPassword
     );
-    res.status(200).json({
+    res.status(STATUS_CODES.OK).json({
         success: true,
         message: "Password changed successfully",
     });
@@ -86,7 +87,7 @@ const updatePassword = asyncHandler(async (req, res) => {
 
 const removeAccount = asyncHandler(async (req, res) => {
     await deleteAccount(req.user.id);
-    res.status(200).json({
+    res.status(STATUS_CODES.OK).json({
         success: true,
         message: "Account deleted successfully",
     });

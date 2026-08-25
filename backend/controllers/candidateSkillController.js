@@ -6,6 +6,7 @@ import {
     removeCandidateSkill,
 } from "../services/candidateSkillService.js";
 
+import { STATUS_CODES } from "../utils/setConstants.js";
 import {
     addCandidateSkillSchema,
 } from "../validation/candidateSkillValidation.js";
@@ -19,7 +20,7 @@ const getSkills = asyncHandler(
                 req.user.id
             );
 
-        res.status(200).json({
+        res.status(STATUS_CODES,OK).json({
             success: true,
             data: {
                 skills,
@@ -59,7 +60,7 @@ const addSkill = asyncHandler(
                 value.skillId
             );
 
-        res.status(201).json({
+        res.status(STATUS_CODES.CREATED).json({
             success: true,
             message: "Skill added successfully",
             data: {
@@ -78,7 +79,7 @@ const removeSkill = asyncHandler(
             req.params.skillId
         );
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             message: "Skill removed successfully",
         });

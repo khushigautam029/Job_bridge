@@ -4,6 +4,7 @@ import {
     getAllSkills,
     getSkillById,
 } from "../services/skillService.js";
+import { STATUS_CODES } from "../utils/setConstants.js";
 
 
 const getSkills = asyncHandler(
@@ -12,7 +13,7 @@ const getSkills = asyncHandler(
         const skills =
             await getAllSkills();
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
                 skills,
@@ -30,7 +31,7 @@ const getSkill = asyncHandler(
                 req.params.id
             );
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
                 skill,
