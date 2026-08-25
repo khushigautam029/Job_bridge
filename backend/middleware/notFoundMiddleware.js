@@ -1,4 +1,4 @@
-import { STATUS_CODES } from "../utils/setConstants";
+import { STATUS_CODES } from "../utils/setConstants.js";
 
 const notFoundMiddleware = (req, res) => {
     res.status(STATUS_CODES.NOT_FOUND).json({

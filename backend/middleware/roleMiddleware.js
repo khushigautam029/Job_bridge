@@ -1,4 +1,4 @@
-import { STATUS_CODES } from "../utils/setConstants";
+import { STATUS_CODES } from "../utils/setConstants.js";
 
 const authorize = (...allowedRoles) => {
     return (req, res, next) => {

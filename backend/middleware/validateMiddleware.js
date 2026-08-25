@@ -1,4 +1,4 @@
-import { STATUS_CODES } from "../utils/setConstants";
+import { STATUS_CODES } from "../utils/setConstants.js";
 
 const validate = (schema) => {
     return (req, res, next) => {
