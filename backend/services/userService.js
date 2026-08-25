@@ -6,6 +6,7 @@ import {
     RecruiterProfile,
     User,
 } from "../models/index.js";
+import { STATUS_CODES } from "../utils/setConstants.js";
 
 
 const getUserById = async (userId) => {
@@ -37,7 +38,7 @@ const getUserById = async (userId) => {
 
     if (!user) {
         const error = new Error("User not found");
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -51,7 +52,7 @@ const updateUserProfile = async (userId, data) => {
 
     if (!user) {
         const error = new Error("User not found");
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -74,7 +75,7 @@ const changePassword = async (
 
     if (!user) {
         const error = new Error("User not found");
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -85,7 +86,7 @@ const changePassword = async (
 
     if (!isPasswordValid) {
         const error = new Error("Current password is incorrect");
-        error.statusCode = 400;
+        error.statusCode = STATUS_CODES.BAD_REQUEST;
         throw error;
     }
 
@@ -108,7 +109,7 @@ const deleteAccount = async (userId) => {
 
     if (!user) {
         const error = new Error("User not found");
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 

@@ -5,6 +5,7 @@ import {
     RecruiterProfile,
     User,
 } from "../models/index.js";
+import { STATUS_CODES } from "../utils/setConstants.js";
 
 const registerUser = async ({
         name,
@@ -20,7 +21,7 @@ const registerUser = async ({
 
     if (existingUser) {
         const error = new Error("Email is already registered");
-        error.statusCode = 409;
+        error.statusCode = STATUS_CODES.CONFLICT;
         throw error;
     }
 
@@ -55,12 +56,12 @@ const loginUser = async ({ email, password }) => {
     });
     if (!user) {
         const error = new Error("Invalid email or password");
-        error.statusCode = 401;
+        error.statusCode = STATUS_CODES.UNAUTHORIZED;
         throw error;
     }
     if (!user.isActive) {
         const error = new Error("Your account is inactive");
-        error.statusCode = 403;
+        error.statusCode = STATUS_CODES.FORBIDDEN;
         throw error;
     }
     const isPasswordValid = await bcrypt.compare(
@@ -69,7 +70,7 @@ const loginUser = async ({ email, password }) => {
     );
     if (!isPasswordValid) {
         const error = new Error("Invalid email or password");
-        error.statusCode = 401;
+        error.statusCode = STATUS_CODES.UNAUTHORIZED;
         throw error;
     }
     return user;

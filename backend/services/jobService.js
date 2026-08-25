@@ -4,6 +4,7 @@ import {
     JobCategory,
     RecruiterProfile,
 } from "../models/index.js";
+import { STATUS_CODES } from "../utils/setConstants.js";
 
 
 const getRecruiterProfile = async (userId) => {
@@ -20,7 +21,7 @@ const getRecruiterProfile = async (userId) => {
             "Recruiter profile not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
 
         throw error;
     }
@@ -47,7 +48,7 @@ const createJob = async (
             "Job category not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
 
         throw error;
     }
@@ -127,7 +128,7 @@ const getJobById = async (
             "Job not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
 
         throw error;
     }
@@ -154,7 +155,7 @@ const updateJob = async (
             "Job not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
 
         throw error;
     }
@@ -167,7 +168,7 @@ const updateJob = async (
             "You are not allowed to update this job"
         );
 
-        error.statusCode = 403;
+        error.statusCode = STATUS_CODES.FORBIDDEN;
 
         throw error;
     }
@@ -184,7 +185,7 @@ const updateJob = async (
                 "Job category not found"
             );
 
-            error.statusCode = 404;
+            error.statusCode = STATUS_CODES.NOT_FOUND;
 
             throw error;
         }
@@ -213,7 +214,7 @@ const deleteJob = async (
             "Job not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
 
         throw error;
     }
@@ -226,7 +227,7 @@ const deleteJob = async (
             "You are not allowed to delete this job"
         );
 
-        error.statusCode = 403;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
 
         throw error;
     }

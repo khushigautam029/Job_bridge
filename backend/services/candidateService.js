@@ -2,6 +2,7 @@ import {
     CandidateProfile,
     User,
 } from "../models/index.js";
+import { STATUS_CODES } from "../utils/setConstants.js";
 
 
 const getCandidateProfile = async (userId) => {
@@ -29,7 +30,7 @@ const getCandidateProfile = async (userId) => {
         const error = new Error(
             "Candidate profile not found"
         );
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.BAD_REQUEST;
         throw error;
     }
     return candidateProfile;
@@ -50,7 +51,7 @@ const updateCandidateProfile = async (
         const error = new Error(
             "Candidate profile not found"
         );
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.BAD_REQUEST;
         throw error;
     }
     await candidateProfile.update(data);

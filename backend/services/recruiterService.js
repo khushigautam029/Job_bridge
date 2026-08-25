@@ -3,6 +3,7 @@ import {
     RecruiterProfile,
     User,
 } from "../models/index.js";
+import { STATUS_CODES } from "../utils/setConstants.js";
 
 
 const getRecruiterProfile = async (userId) => {
@@ -34,7 +35,7 @@ const getRecruiterProfile = async (userId) => {
             "Recruiter profile not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
 
         throw error;
     }
@@ -60,7 +61,7 @@ const updateRecruiterProfile = async (
             "Recruiter profile not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
 
         throw error;
     }

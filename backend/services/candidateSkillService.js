@@ -3,6 +3,7 @@ import {
     CandidateSkill,
     Skill,
 } from "../models/index.js";
+import { STATUS_CODES } from "../utils/setConstants.js";
 
 
 const getCandidateSkills = async (userId) => {
@@ -19,7 +20,7 @@ const getCandidateSkills = async (userId) => {
             "Candidate profile not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
 
         throw error;
     }
@@ -64,7 +65,7 @@ const addCandidateSkill = async (
             "Candidate profile not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
 
         throw error;
     }
@@ -78,7 +79,7 @@ const addCandidateSkill = async (
             "Skill not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
 
         throw error;
     }
@@ -96,7 +97,7 @@ const addCandidateSkill = async (
             "Skill already added"
         );
 
-        error.statusCode = 409;
+        error.statusCode = STATUS_CODES.CONFLICT;
 
         throw error;
     }
@@ -127,7 +128,7 @@ const removeCandidateSkill = async (
             "Candidate profile not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
 
         throw error;
     }
@@ -145,7 +146,7 @@ const removeCandidateSkill = async (
             "Skill is not added to your profile"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
 
         throw error;
     }

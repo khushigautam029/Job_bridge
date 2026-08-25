@@ -2,6 +2,7 @@ import {
     Company,
     RecruiterProfile,
 } from "../models/index.js";
+import { STATUS_CODES } from "../utils/setConstants.js";
 
 
 const getMyCompany = async (userId) => {
@@ -24,7 +25,7 @@ const getMyCompany = async (userId) => {
             "Recruiter profile not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
 
         throw error;
     }
@@ -34,7 +35,7 @@ const getMyCompany = async (userId) => {
             "Company not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
 
         throw error;
     }
@@ -60,7 +61,7 @@ const updateMyCompany = async (
             "Recruiter profile not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
 
         throw error;
     }
@@ -74,7 +75,7 @@ const updateMyCompany = async (
             "Company not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
 
         throw error;
     }
@@ -95,7 +96,7 @@ const updateMyCompany = async (
                 "Company name already exists"
             );
 
-            error.statusCode = 409;
+            error.statusCode = STATUS_CODES.CONFLICT;
 
             throw error;
         }
@@ -130,7 +131,7 @@ const getCompanyById = async (companyId) => {
             "Company not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
 
         throw error;
     }

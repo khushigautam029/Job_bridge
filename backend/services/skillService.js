@@ -1,4 +1,5 @@
 import { Skill } from "../models/index.js";
+import { STATUS_CODES } from "../utils/setConstants.js";
 
 
 const getAllSkills = async () => {
@@ -24,7 +25,7 @@ const getSkillById = async (skillId) => {
             "Skill not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
 
         throw error;
     }
