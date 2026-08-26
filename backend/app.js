@@ -9,6 +9,7 @@ import candidateRoutes from "./routes/candidateRoutes.js";
 import candidateSkillRoutes from "./routes/candidateSkillRoutes.js";
 import companyRoutes from "./routes/companyRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
+import jobSkillRoutes from "./routes/jobSkillRoutes.js";
 import recruiterRoutes from "./routes/recruiterRoutes.js";
 import skillRoutes from "./routes/skillRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
@@ -39,6 +40,7 @@ app.use("/api/candidates",candidateRoutes);
 app.use("/api/skills",skillRoutes);
 app.use( "/api/candidates/skills", candidateSkillRoutes );
 app.use( "/api/jobs", jobRoutes);
+app.use("/api", jobSkillRoutes);
 
 // Error Handling
 app.use(notFoundMiddleware);
