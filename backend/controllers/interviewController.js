@@ -53,7 +53,7 @@ const schedule = asyncHandler(
             );
 
 
-        res.status(201).json({
+        res.status(STATUS_CODES.CREATED).json({
             success: true,
             message:
                 "Interview scheduled successfully",
@@ -77,7 +77,7 @@ const getMine = asyncHandler(
             );
 
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
                 interviews,
@@ -100,7 +100,7 @@ const getOne = asyncHandler(
             );
 
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
                 interview,
@@ -146,7 +146,7 @@ const update = asyncHandler(
             );
 
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             message:
                 "Interview updated successfully",
@@ -194,7 +194,7 @@ const updateStatus = asyncHandler(
             );
 
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             message:
                 "Interview status updated successfully",
@@ -218,7 +218,7 @@ const cancel = asyncHandler(
         );
 
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             message:
                 "Interview cancelled successfully",

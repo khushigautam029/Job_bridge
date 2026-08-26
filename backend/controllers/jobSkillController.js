@@ -20,7 +20,7 @@ const getSkills = asyncHandler(
         const skills =
             await getJobSkills(jobId);
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
                 skills,
@@ -63,7 +63,7 @@ const addSkill = asyncHandler(
             );
 
 
-        res.status(201).json({
+        res.status(STATUS_CODES.CREATED).json({
             success: true,
             message: "Skill added to job successfully",
             data: {
@@ -90,7 +90,7 @@ const removeSkill = asyncHandler(
         );
 
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             message: "Skill removed from job successfully",
         });

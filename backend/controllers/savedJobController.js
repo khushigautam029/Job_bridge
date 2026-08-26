@@ -6,6 +6,7 @@ import {
     removeSavedJob,
     saveJob,
 } from "../services/savedJobService.js";
+import { STATUS_CODES } from "../utils/setConstants.js";
 
 
 /*
@@ -21,7 +22,7 @@ const save = asyncHandler(
             );
 
 
-        res.status(201).json({
+        res.status(STATUS_CODES.CREATED).json({
             success: true,
             message: "Job saved successfully",
             data: {
@@ -44,7 +45,7 @@ const getMine = asyncHandler(
             );
 
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
                 savedJobs,
@@ -67,7 +68,7 @@ const checkSaved = asyncHandler(
             );
 
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
                 saved,
@@ -89,7 +90,7 @@ const remove = asyncHandler(
         );
 
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             message: "Job removed from saved jobs",
         });

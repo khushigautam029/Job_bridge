@@ -51,7 +51,7 @@ const apply = asyncHandler(
             );
 
 
-        res.status(201).json({
+        res.status(STATUS_CODES.CREATED).json({
             success: true,
             message: "Application submitted successfully",
             data: {
@@ -74,7 +74,7 @@ const getMine = asyncHandler(
             );
 
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
                 applications,
@@ -97,7 +97,7 @@ const getOne = asyncHandler(
             );
 
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
                 application,
@@ -119,7 +119,7 @@ const withdraw = asyncHandler(
         );
 
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             message: "Application withdrawn successfully",
         });
@@ -140,7 +140,7 @@ const getForJob = asyncHandler(
             );
 
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
                 applications,
@@ -185,7 +185,7 @@ const updateStatus = asyncHandler(
             );
 
 
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             message: "Application status updated successfully",
             data: {
