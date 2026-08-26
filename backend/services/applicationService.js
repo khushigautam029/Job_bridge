@@ -6,6 +6,7 @@ import {
     RecruiterProfile,
     User,
 } from "../models/index.js";
+import createNotification from "../utils/createNotification.js";
 import { STATUS_CODES } from "../utils/setConstants.js";
 
 /*
@@ -117,6 +118,8 @@ const applyForJob = async (
                 data.noticePeriod || null,
         });
 
+
+    // Create initial status history
     await ApplicationStatusHistory.create({
         applicationId: application.id,
         status: "APPLIED",
@@ -124,13 +127,28 @@ const applyForJob = async (
     });
 
 
+    // Find recruiter who owns this job
+    const recruiter =
+        await RecruiterProfile.findByPk(
+            job.recruiterId
+        );
+
+
+    if (recruiter) {
+
+        await createNotification({
+            userId: recruiter.userId,
+            title: "New Job Application",
+            message: `A candidate has applied for your job: ${job.title}`,
+            type: "APPLICATION",
+        });
+    }
+
+
     return application;
 };
 
-
-/*
-    Candidate gets all of their applications
-*/
+// Candidate gets all of their applications
 const getMyApplications = async (
     userId
 ) => {
@@ -346,6 +364,12 @@ const withdrawApplication = async (
 
     await application.save();
 
+    await ApplicationStatusHistory.create({
+        applicationId: application.id,
+        status: "WITHDRAWN",
+        changedBy: userId,
+    });
+
 
     return application;
 };
@@ -520,6 +544,21 @@ const updateApplicationStatus = async (
         status: status,
         changedBy: userId,
     });
+
+    const candidate =
+        await CandidateProfile.findByPk(
+            application.candidateId
+        );
+
+    if (candidate) {
+
+        await createNotification({
+            userId: candidate.userId,
+            title: "Application Status Updated",
+            message: `Your application for "${application.job.title}" has been moved to ${status}.`,
+            type: "APPLICATION",
+        });
+    }
 
 
     return application;

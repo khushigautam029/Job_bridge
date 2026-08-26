@@ -1,13 +1,14 @@
 import {
     Application,
+    ApplicationStatusHistory,
     CandidateProfile,
     Interview,
     Job,
     RecruiterProfile,
     User,
 } from "../models/index.js";
+import createNotification from "../utils/createNotification.js";
 import { STATUS_CODES } from "../utils/setConstants.js";
-
 
 /*
     Recruiter schedules an interview
@@ -165,17 +166,28 @@ const scheduleInterview = async (
 
         });
 
+    await createNotification({
+        userId: CandidateProfile.userId,
+        title: "Interview Scheduled",
+        message: `Your interview for "${Job.title}" has been scheduled.`,
+        type: "INTERVIEW",
+    });
+
 
     // Update application status
-    if (
-        application.status !==
-        "INTERVIEW"
-    ) {
+    if (application.status !== "INTERVIEW") {
 
-        application.status =
-            "INTERVIEW";
+        const previousStatus = application.status;
+
+        application.status = "INTERVIEW";
 
         await application.save();
+
+        await ApplicationStatusHistory.create({
+            applicationId: application.id,
+            status: "INTERVIEW",
+            changedBy: userId,
+        });
     }
 
 
