@@ -6,6 +6,7 @@ import {
     removeJobSkill,
 } from "../services/jobSkillService.js";
 
+import { STATUS_CODES } from "../utils/setConstants.js";
 import {
     addJobSkillSchema,
 } from "../validation/jobSkillValidation.js";
@@ -42,7 +43,7 @@ const addSkill = asyncHandler(
             );
 
         if (error) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Validation failed",
                 errors: error.details.map(

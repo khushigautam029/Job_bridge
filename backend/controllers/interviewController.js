@@ -9,6 +9,7 @@ import {
     updateInterviewStatus,
 } from "../services/interviewService.js";
 
+import { STATUS_CODES } from "../utils/setConstants.js";
 import {
     createInterviewSchema,
     updateInterviewSchema,
@@ -33,7 +34,7 @@ const schedule = asyncHandler(
 
 
         if (error) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Validation failed",
                 errors: error.details.map(
@@ -126,7 +127,7 @@ const update = asyncHandler(
 
 
         if (error) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Validation failed",
                 errors: error.details.map(
@@ -174,7 +175,7 @@ const updateStatus = asyncHandler(
 
 
         if (error) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Validation failed",
                 errors: error.details.map(

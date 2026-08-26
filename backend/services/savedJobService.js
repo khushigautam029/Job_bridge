@@ -3,6 +3,7 @@ import {
     Job,
     SavedJob,
 } from "../models/index.js";
+import { STATUS_CODES } from "../utils/setConstants.js";
 
 
 /*
@@ -27,7 +28,7 @@ const saveJob = async (
             "Candidate profile not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -41,7 +42,7 @@ const saveJob = async (
             "Job not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -52,7 +53,7 @@ const saveJob = async (
             "Only open jobs can be saved"
         );
 
-        error.statusCode = 400;
+        error.statusCode = STATUS_CODES.BAD_REQUEST;
         throw error;
     }
 
@@ -72,7 +73,7 @@ const saveJob = async (
             "Job is already saved"
         );
 
-        error.statusCode = 409;
+        error.statusCode = STATUS_CODES.CONFLICT;
         throw error;
     }
 
@@ -109,7 +110,7 @@ const getMySavedJobs = async (
             "Candidate profile not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -159,7 +160,7 @@ const isJobSaved = async (
             "Candidate profile not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -195,7 +196,7 @@ const removeSavedJob = async (
         const error = new Error(
             "Candidate profile not found"
         );
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -211,7 +212,7 @@ const removeSavedJob = async (
         const error = new Error(
             "Saved job not found"
         );
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
     await savedJob.destroy();

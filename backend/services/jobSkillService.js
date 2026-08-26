@@ -4,6 +4,7 @@ import {
     RecruiterProfile,
     Skill,
 } from "../models/index.js";
+import { STATUS_CODES } from "../utils/setConstants.js";
 
 
 const getJobSkills = async (jobId) => {
@@ -12,7 +13,7 @@ const getJobSkills = async (jobId) => {
 
     if (!job) {
         const error = new Error("Job not found");
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -49,7 +50,7 @@ const addJobSkill = async (
 
     if (!job) {
         const error = new Error("Job not found");
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -66,7 +67,7 @@ const addJobSkill = async (
             "Recruiter profile not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -78,7 +79,7 @@ const addJobSkill = async (
             "You are not authorized to modify this job"
         );
 
-        error.statusCode = 403;
+        error.statusCode = STATUS_CODES.FORBIDDEN;
         throw error;
     }
 
@@ -87,7 +88,7 @@ const addJobSkill = async (
 
     if (!skill) {
         const error = new Error("Skill not found");
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -105,7 +106,7 @@ const addJobSkill = async (
             "Skill is already added to this job"
         );
 
-        error.statusCode = 409;
+        error.statusCode = STATUS_CODES.CONFLICT;
         throw error;
     }
 
@@ -138,7 +139,7 @@ const removeJobSkill = async (
 
     if (!job) {
         const error = new Error("Job not found");
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -155,7 +156,7 @@ const removeJobSkill = async (
             "Recruiter profile not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -167,7 +168,7 @@ const removeJobSkill = async (
             "You are not authorized to modify this job"
         );
 
-        error.statusCode = 403;
+        error.statusCode = STATUS_CODES.FORBIDDEN;
         throw error;
     }
 
@@ -185,7 +186,7 @@ const removeJobSkill = async (
             "Skill is not associated with this job"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 

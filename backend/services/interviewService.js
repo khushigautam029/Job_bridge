@@ -6,6 +6,7 @@ import {
     RecruiterProfile,
     User,
 } from "../models/index.js";
+import { STATUS_CODES } from "../utils/setConstants.js";
 
 
 /*
@@ -88,7 +89,7 @@ const scheduleInterview = async (
             "Candidate must be shortlisted before scheduling an interview"
         );
 
-        error.statusCode = 400;
+        error.statusCode = STATUS_CODES.BAD_REQUEST;
         throw error;
     }
 
@@ -103,7 +104,7 @@ const scheduleInterview = async (
             "Interview date must be in the future"
         );
 
-        error.statusCode = 400;
+        error.statusCode = STATUS_CODES.BAD_REQUEST;
         throw error;
     }
 
@@ -118,7 +119,7 @@ const scheduleInterview = async (
             "Meeting link is required for online interviews"
         );
 
-        error.statusCode = 400;
+        error.statusCode = STATUS_CODES.BAD_REQUEST;
         throw error;
     }
 
@@ -133,7 +134,7 @@ const scheduleInterview = async (
             "Location is required for offline interviews"
         );
 
-        error.statusCode = 400;
+        error.statusCode = STATUS_CODES.BAD_REQUEST;
         throw error;
     }
 
@@ -430,7 +431,7 @@ const updateInterview = async (
             "Interview date must be in the future"
         );
 
-        error.statusCode = 400;
+        error.statusCode = STATUS_CODES.BAD_REQUEST;
         throw error;
     }
 
@@ -445,7 +446,7 @@ const updateInterview = async (
             "Meeting link is required for online interviews"
         );
 
-        error.statusCode = 400;
+        error.statusCode = STATUS_CODES.BAD_REQUEST;
         throw error;
     }
 

@@ -6,6 +6,7 @@ import {
     RecruiterProfile,
     User,
 } from "../models/index.js";
+import { STATUS_CODES } from "../utils/setConstants.js";
 
 /*
     Candidate applies for a job
@@ -50,7 +51,7 @@ const applyForJob = async (
             "This job is not open for applications"
         );
 
-        error.statusCode = 400;
+        error.statusCode = STATUS_CODES.BAD_REQUEST;
         throw error;
     }
 
@@ -64,7 +65,7 @@ const applyForJob = async (
             "Application deadline has passed"
         );
 
-        error.statusCode = 400;
+        error.statusCode = STATUS_CODES.BAD_REQUEST;
         throw error;
     }
 
@@ -336,7 +337,7 @@ const withdrawApplication = async (
             "This application cannot be withdrawn"
         );
 
-        error.statusCode = 400;
+        error.statusCode = STATUS_CODES.BAD_REQUEST;
         throw error;
     }
 
@@ -502,7 +503,7 @@ const updateApplicationStatus = async (
             "Withdrawn applications cannot be updated"
         );
 
-        error.statusCode = 400;
+        error.statusCode = STATUS_CODES.BAD_REQUEST;
         throw error;
     }
 
