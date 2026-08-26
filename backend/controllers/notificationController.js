@@ -7,6 +7,7 @@ import {
     markAsRead,
 } from "../services/notificationService.js";
 import asyncHandler from "../utils/asyncHandler.js";
+import { STATUS_CODES } from "../utils/setConstants.js";
 
 // GET /api/notifications
 const getNotifications = asyncHandler(
@@ -15,7 +16,7 @@ const getNotifications = asyncHandler(
             await getMyNotifications(
                 req.user.id
             );
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
                 notifications,
@@ -31,7 +32,7 @@ const unreadCount = asyncHandler(
             await getUnreadCount(
                 req.user.id
             );
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
                 unreadCount: count,
