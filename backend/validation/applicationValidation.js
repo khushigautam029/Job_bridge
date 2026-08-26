@@ -53,4 +53,3 @@ export {
     createApplicationSchema,
     updateApplicationStatusSchema
 };
-ss
