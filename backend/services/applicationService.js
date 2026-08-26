@@ -1,11 +1,11 @@
 import {
     Application,
+    ApplicationStatusHistory,
     CandidateProfile,
     Job,
     RecruiterProfile,
     User,
 } from "../models/index.js";
-
 
 /*
     Candidate applies for a job
@@ -115,6 +115,12 @@ const applyForJob = async (
             noticePeriod:
                 data.noticePeriod || null,
         });
+
+    await ApplicationStatusHistory.create({
+        applicationId: application.id,
+        status: "APPLIED",
+        changedBy: userId,
+    });
 
 
     return application;
@@ -442,7 +448,6 @@ const updateApplicationStatus = async (
             },
         });
 
-
     if (!recruiter) {
         const error = new Error(
             "Recruiter profile not found"
@@ -481,7 +486,6 @@ const updateApplicationStatus = async (
         application.job.recruiterId !==
         recruiter.id
     ) {
-
         const error = new Error(
             "You are not authorized to update this application"
         );
@@ -492,10 +496,8 @@ const updateApplicationStatus = async (
 
 
     if (
-        application.status ===
-        "WITHDRAWN"
+        application.status === "WITHDRAWN"
     ) {
-
         const error = new Error(
             "Withdrawn applications cannot be updated"
         );
@@ -505,9 +507,18 @@ const updateApplicationStatus = async (
     }
 
 
+    // Update application status
     application.status = status;
 
     await application.save();
+
+
+    // Create status history
+    await ApplicationStatusHistory.create({
+        applicationId: application.id,
+        status: status,
+        changedBy: userId,
+    });
 
 
     return application;
