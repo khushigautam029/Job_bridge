@@ -32,7 +32,7 @@ const scheduleInterview = async (
             "Recruiter profile not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -57,7 +57,7 @@ const scheduleInterview = async (
             "Application not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -71,7 +71,7 @@ const scheduleInterview = async (
             "You are not authorized to schedule an interview for this application"
         );
 
-        error.statusCode = 403;
+        error.statusCode = STATUS_CODES.FORBIDDEN;
         throw error;
     }
 
@@ -203,7 +203,7 @@ const getMyInterviews = async (
             "Candidate profile not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -302,7 +302,7 @@ const getInterviewById = async (
             "Interview not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -340,7 +340,7 @@ const getInterviewById = async (
             "You are not authorized to view this interview"
         );
 
-        error.statusCode = 403;
+        error.statusCode = STATUS_CODES.FORBIDDEN;
         throw error;
     }
 
@@ -371,7 +371,7 @@ const updateInterview = async (
             "Recruiter profile not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -402,7 +402,7 @@ const updateInterview = async (
             "Interview not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -416,7 +416,7 @@ const updateInterview = async (
             "You are not authorized to update this interview"
         );
 
-        error.statusCode = 403;
+        error.statusCode = STATUS_CODES.FORBIDDEN;
         throw error;
     }
 
@@ -480,7 +480,7 @@ const updateInterviewStatus = async (
             "Recruiter profile not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -511,7 +511,7 @@ const updateInterviewStatus = async (
             "Interview not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -525,7 +525,7 @@ const updateInterviewStatus = async (
             "You are not authorized to update this interview"
         );
 
-        error.statusCode = 403;
+        error.statusCode = STATUS_CODES.FORBIDDEN;
         throw error;
     }
 
@@ -560,7 +560,7 @@ const cancelInterview = async (
             "Recruiter profile not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -591,7 +591,7 @@ const cancelInterview = async (
             "Interview not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -605,7 +605,7 @@ const cancelInterview = async (
             "You are not authorized to cancel this interview"
         );
 
-        error.statusCode = 403;
+        error.statusCode = STATUS_CODES.FORBIDDEN;
         throw error;
     }
 

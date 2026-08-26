@@ -9,9 +9,7 @@ import {
 import { STATUS_CODES } from "../utils/setConstants.js";
 
 
-/*
-    Save a job
-*/
+// Save a job
 const save = asyncHandler(
     async (req, res) => {
 
@@ -33,9 +31,7 @@ const save = asyncHandler(
 );
 
 
-/*
-    Get my saved jobs
-*/
+// Get my saved jobs
 const getMine = asyncHandler(
     async (req, res) => {
 
@@ -55,9 +51,7 @@ const getMine = asyncHandler(
 );
 
 
-/*
-    Check whether job is saved
-*/
+// Check whether job is saved
 const checkSaved = asyncHandler(
     async (req, res) => {
 
@@ -78,9 +72,7 @@ const checkSaved = asyncHandler(
 );
 
 
-/*
-    Remove saved job
-*/
+//  Remove saved job
 const remove = asyncHandler(
     async (req, res) => {
 

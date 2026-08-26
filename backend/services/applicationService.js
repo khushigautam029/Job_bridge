@@ -29,7 +29,7 @@ const applyForJob = async (
             "Candidate profile not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -41,7 +41,7 @@ const applyForJob = async (
             "Job not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -100,7 +100,7 @@ const applyForJob = async (
             "You have already applied for this job"
         );
 
-        error.statusCode = 409;
+        error.statusCode = STATUS_CODES.CONFLICT;
         throw error;
     }
 
@@ -147,7 +147,7 @@ const getMyApplications = async (
             "Candidate profile not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -238,7 +238,7 @@ const getApplicationById = async (
             "Application not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -271,7 +271,7 @@ const getApplicationById = async (
                 "You are not authorized to view this application"
             );
 
-            error.statusCode = 403;
+            error.statusCode = STATUS_CODES.FORBIDDEN;
             throw error;
         }
     }
@@ -302,7 +302,7 @@ const withdrawApplication = async (
             "Candidate profile not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -321,7 +321,7 @@ const withdrawApplication = async (
             "Application not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -373,7 +373,7 @@ const getJobApplications = async (
             "Recruiter profile not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -391,7 +391,7 @@ const getJobApplications = async (
             "Job not found or you are not authorized"
         );
 
-        error.statusCode = 403;
+        error.statusCode = STATUS_CODES.FORBIDDEN;
         throw error;
     }
 
@@ -454,7 +454,7 @@ const updateApplicationStatus = async (
             "Recruiter profile not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -478,7 +478,7 @@ const updateApplicationStatus = async (
             "Application not found"
         );
 
-        error.statusCode = 404;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
@@ -491,7 +491,7 @@ const updateApplicationStatus = async (
             "You are not authorized to update this application"
         );
 
-        error.statusCode = 403;
+        error.statusCode = STATUS_CODES.FORBIDDEN;
         throw error;
     }
 
