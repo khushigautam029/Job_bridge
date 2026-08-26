@@ -4,6 +4,7 @@ import express from "express";
 import helmet from "helmet";
 import errorMiddleware from "./middleware/errorMiddleware.js";
 import notFoundMiddleware from "./middleware/notFoundMiddleware.js";
+import applicationRoutes from "./routes/applicationRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import candidateRoutes from "./routes/candidateRoutes.js";
 import candidateSkillRoutes from "./routes/candidateSkillRoutes.js";
@@ -41,6 +42,7 @@ app.use("/api/skills",skillRoutes);
 app.use( "/api/candidates/skills", candidateSkillRoutes );
 app.use( "/api/jobs", jobRoutes);
 app.use("/api", jobSkillRoutes);
+app.use("/api", applicationRoutes);
 
 // Error Handling
 app.use(notFoundMiddleware);
