@@ -4,8 +4,14 @@ import {
     JobCategory,
     RecruiterProfile,
 } from "../models/index.js";
+
+import { Op } from "sequelize";
 import { STATUS_CODES } from "../utils/setConstants.js";
 
+
+// ==========================================
+// GET RECRUITER PROFILE
+// ==========================================
 
 const getRecruiterProfile = async (userId) => {
 
@@ -29,6 +35,10 @@ const getRecruiterProfile = async (userId) => {
     return recruiterProfile;
 };
 
+
+// ==========================================
+// CREATE JOB
+// ==========================================
 
 const createJob = async (
     userId,
@@ -63,41 +73,261 @@ const createJob = async (
 };
 
 
-const getAllJobs = async () => {
+// ==========================================
+// GET ALL JOBS
+// SEARCH + FILTER + PAGINATION + SORTING
+// ==========================================
 
-    const jobs = await Job.findAll({
-        include: [
+const getAllJobs = async (query) => {
+
+    const {
+        search,
+        location,
+        categoryId,
+        jobType,
+        workMode,
+        minSalary,
+        maxSalary,
+        experienceMin,
+        experienceMax,
+        page = 1,
+        limit = 10,
+        sortBy = "createdAt",
+        order = "DESC",
+    } = query;
+
+
+    // --------------------------------------
+    // Pagination
+    // --------------------------------------
+
+    const currentPage =
+        Math.max(Number(page), 1);
+
+    const pageLimit =
+        Math.min(
+            Math.max(Number(limit), 1),
+            100
+        );
+
+    const offset =
+        (currentPage - 1) * pageLimit;
+
+
+    // --------------------------------------
+    // WHERE CONDITIONS
+    // --------------------------------------
+
+    const where = {
+        status: "OPEN",
+    };
+
+
+    // --------------------------------------
+    // SEARCH
+    // --------------------------------------
+
+    if (search) {
+
+        where[Op.or] = [
             {
-                model: Company,
-                as: "company",
-                attributes: [
-                    "id",
-                    "name",
-                    "logo",
-                    "website",
-                    "location",
-                ],
+                title: {
+                    [Op.like]: `%${search}%`,
+                },
             },
             {
-                model: JobCategory,
-                as: "category",
-                attributes: [
-                    "id",
-                    "name",
-                ],
+                description: {
+                    [Op.like]: `%${search}%`,
+                },
             },
-        ],
-        where: {
-            status: "OPEN",
+        ];
+    }
+
+
+    // --------------------------------------
+    // LOCATION
+    // --------------------------------------
+
+    if (location) {
+
+        where.location = {
+            [Op.like]: `%${location}%`,
+        };
+    }
+
+
+    // --------------------------------------
+    // CATEGORY
+    // --------------------------------------
+
+    if (categoryId) {
+
+        where.categoryId =
+            Number(categoryId);
+    }
+
+
+    // --------------------------------------
+    // JOB TYPE
+    // --------------------------------------
+
+    if (jobType) {
+
+        where.jobType = jobType;
+    }
+
+
+    // --------------------------------------
+    // WORK MODE
+    // --------------------------------------
+
+    if (workMode) {
+
+        where.workMode = workMode;
+    }
+
+
+    // --------------------------------------
+    // SALARY FILTER
+    // --------------------------------------
+
+    if (minSalary) {
+
+        where.maxSalary = {
+            [Op.gte]: Number(minSalary),
+        };
+    }
+
+
+    if (maxSalary) {
+
+        where.minSalary = {
+            [Op.lte]: Number(maxSalary),
+        };
+    }
+
+
+    // --------------------------------------
+    // EXPERIENCE FILTER
+    // --------------------------------------
+
+    if (experienceMin) {
+
+        where.experienceMax = {
+            [Op.gte]: Number(experienceMin),
+        };
+    }
+
+
+    if (experienceMax) {
+
+        where.experienceMin = {
+            [Op.lte]: Number(experienceMax),
+        };
+    }
+
+
+    // --------------------------------------
+    // ALLOWED SORT FIELDS
+    // --------------------------------------
+
+    const allowedSortFields = [
+        "createdAt",
+        "title",
+        "minSalary",
+        "maxSalary",
+        "applicationDeadline",
+    ];
+
+    const safeSortBy =
+        allowedSortFields.includes(sortBy)
+            ? sortBy
+            : "createdAt";
+
+
+    const safeOrder =
+        order.toUpperCase() === "ASC"
+            ? "ASC"
+            : "DESC";
+
+
+    // --------------------------------------
+    // DATABASE QUERY
+    // --------------------------------------
+
+    const { count, rows } =
+        await Job.findAndCountAll({
+
+            where,
+
+            include: [
+                {
+                    model: Company,
+                    as: "company",
+                    attributes: [
+                        "id",
+                        "name",
+                        "logo",
+                        "website",
+                        "location",
+                    ],
+                },
+
+                {
+                    model: JobCategory,
+                    as: "category",
+                    attributes: [
+                        "id",
+                        "name",
+                    ],
+                },
+            ],
+
+            order: [
+                [
+                    safeSortBy,
+                    safeOrder,
+                ],
+            ],
+
+            limit: pageLimit,
+
+            offset,
+        });
+
+
+    // --------------------------------------
+    // PAGINATION
+    // --------------------------------------
+
+    const totalPages =
+        Math.ceil(
+            count / pageLimit
+        );
+
+
+    return {
+        jobs: rows,
+
+        pagination: {
+            totalJobs: count,
+            currentPage,
+            totalPages,
+            limit: pageLimit,
+
+            hasNextPage:
+                currentPage < totalPages,
+
+            hasPreviousPage:
+                currentPage > 1,
         },
-        order: [
-            ["createdAt", "DESC"],
-        ],
-    });
-
-    return jobs;
+    };
 };
 
+
+// ==========================================
+// GET JOB BY ID
+// ==========================================
 
 const getJobById = async (
     jobId
@@ -111,10 +341,12 @@ const getJobById = async (
                     model: Company,
                     as: "company",
                 },
+
                 {
                     model: JobCategory,
                     as: "category",
                 },
+
                 {
                     model: RecruiterProfile,
                     as: "recruiter",
@@ -124,11 +356,13 @@ const getJobById = async (
     );
 
     if (!job) {
+
         const error = new Error(
             "Job not found"
         );
 
-        error.statusCode = STATUS_CODES.NOT_FOUND;
+        error.statusCode =
+            STATUS_CODES.NOT_FOUND;
 
         throw error;
     }
@@ -136,6 +370,10 @@ const getJobById = async (
     return job;
 };
 
+
+// ==========================================
+// UPDATE JOB
+// ==========================================
 
 const updateJob = async (
     userId,
@@ -146,32 +384,37 @@ const updateJob = async (
     const recruiterProfile =
         await getRecruiterProfile(userId);
 
-    const job = await Job.findByPk(
-        jobId
-    );
+    const job =
+        await Job.findByPk(jobId);
 
     if (!job) {
+
         const error = new Error(
             "Job not found"
         );
 
-        error.statusCode = STATUS_CODES.NOT_FOUND;
+        error.statusCode =
+            STATUS_CODES.NOT_FOUND;
 
         throw error;
     }
+
 
     if (
         job.recruiterId !==
         recruiterProfile.id
     ) {
+
         const error = new Error(
             "You are not allowed to update this job"
         );
 
-        error.statusCode = STATUS_CODES.FORBIDDEN;
+        error.statusCode =
+            STATUS_CODES.FORBIDDEN;
 
         throw error;
     }
+
 
     if (data.categoryId) {
 
@@ -181,21 +424,28 @@ const updateJob = async (
             );
 
         if (!category) {
+
             const error = new Error(
                 "Job category not found"
             );
 
-            error.statusCode = STATUS_CODES.NOT_FOUND;
+            error.statusCode =
+                STATUS_CODES.NOT_FOUND;
 
             throw error;
         }
     }
+
 
     await job.update(data);
 
     return getJobById(job.id);
 };
 
+
+// ==========================================
+// DELETE JOB
+// ==========================================
 
 const deleteJob = async (
     userId,
@@ -205,39 +455,46 @@ const deleteJob = async (
     const recruiterProfile =
         await getRecruiterProfile(userId);
 
-    const job = await Job.findByPk(
-        jobId
-    );
+    const job =
+        await Job.findByPk(jobId);
 
     if (!job) {
+
         const error = new Error(
             "Job not found"
         );
 
-        error.statusCode = STATUS_CODES.NOT_FOUND;
+        error.statusCode =
+            STATUS_CODES.NOT_FOUND;
 
         throw error;
     }
+
 
     if (
         job.recruiterId !==
         recruiterProfile.id
     ) {
+
         const error = new Error(
             "You are not allowed to delete this job"
         );
 
-        error.statusCode = STATUS_CODES.NOT_FOUND;
+        error.statusCode =
+            STATUS_CODES.FORBIDDEN;
 
         throw error;
     }
+
 
     await job.destroy();
 };
 
 
 export {
-    createJob, deleteJob, getAllJobs,
+    createJob,
+    deleteJob,
+    getAllJobs,
     getJobById,
     updateJob
 };

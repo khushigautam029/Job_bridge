@@ -1,25 +1,20 @@
-import asyncHandler from "../utils/asyncHandler.js";
-
 import {
     addCandidateSkill,
     getCandidateSkills,
     removeCandidateSkill,
 } from "../services/candidateSkillService.js";
-
-import { STATUS_CODES } from "../utils/setConstants.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 import {
     addCandidateSkillSchema,
 } from "../validation/candidateSkillValidation.js";
 
-
 const getSkills = asyncHandler(
     async (req, res) => {
-
         const skills =
             await getCandidateSkills(
                 req.user.id
             );
-
         res.status(STATUS_CODES,OK).json({
             success: true,
             data: {
@@ -47,7 +42,7 @@ const addSkill = asyncHandler(
         if (error) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
-                message: "Validation failed",
+                message: MESSAGES.VALIDATION_FAILED,
                 errors: error.details.map(
                     (detail) => detail.message
                 ),
@@ -62,7 +57,7 @@ const addSkill = asyncHandler(
 
         res.status(STATUS_CODES.CREATED).json({
             success: true,
-            message: "Skill added successfully",
+            message: MESSAGES.SKILL_ADDED,
             data: {
                 skill,
             },
@@ -81,7 +76,7 @@ const removeSkill = asyncHandler(
 
         res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Skill removed successfully",
+            message: MESSAGES.SKILL_REMOVED,
         });
     }
 );

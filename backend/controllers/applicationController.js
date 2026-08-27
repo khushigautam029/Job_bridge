@@ -1,5 +1,3 @@
-import asyncHandler from "../utils/asyncHandler.js";
-
 import {
     applyForJob,
     getApplicationById,
@@ -8,17 +6,13 @@ import {
     updateApplicationStatus,
     withdrawApplication,
 } from "../services/applicationService.js";
-
-import { STATUS_CODES } from "../utils/setConstants.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 import {
     createApplicationSchema,
     updateApplicationStatusSchema,
 } from "../validation/applicationValidation.js";
 
-
-/*
-    Candidate → Apply for job
-*/
 const apply = asyncHandler(
     async (req, res) => {
 
@@ -35,7 +29,7 @@ const apply = asyncHandler(
         if (error) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
-                message: "Validation failed",
+                message: MESSAGES.VALIDATION_FAILED,
                 errors: error.details.map(
                     (detail) => detail.message
                 ),
@@ -53,7 +47,7 @@ const apply = asyncHandler(
 
         res.status(STATUS_CODES.CREATED).json({
             success: true,
-            message: "Application submitted successfully",
+            message: MESSAGES.APPLIED,
             data: {
                 application,
             },
@@ -61,10 +55,6 @@ const apply = asyncHandler(
     }
 );
 
-
-/*
-    Candidate → My applications
-*/
 const getMine = asyncHandler(
     async (req, res) => {
 
@@ -121,15 +111,11 @@ const withdraw = asyncHandler(
 
         res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Application withdrawn successfully",
+            message: MESSAGES.APPLICATION_WITHDRAWN ,
         });
     }
 );
 
-
-/*
-    Recruiter → Job applications
-*/
 const getForJob = asyncHandler(
     async (req, res) => {
 
@@ -169,7 +155,7 @@ const updateStatus = asyncHandler(
         if (error) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
-                message: "Validation failed",
+                message: MESSAGES.VALIDATION_FAILED,
                 errors: error.details.map(
                     (detail) => detail.message
                 ),
@@ -187,7 +173,7 @@ const updateStatus = asyncHandler(
 
         res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Application status updated successfully",
+            message: MESSAGES.APPLICATION_STATUS_UPDATED,
             data: {
                 application,
             },

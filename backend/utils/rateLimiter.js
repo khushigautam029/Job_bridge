@@ -1,4 +1,5 @@
 import rateLimit from "express-rate-limit";
+import { MESSAGES } from "./setConstants";
 
 const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -7,7 +8,7 @@ const generalLimiter = rateLimit({
     legacyHeaders: false,
     message: {
         success: false,
-        message: "Too many requests. Please try again later.",
+        message: MESSAGES.TOO_MANY_REQUESTS,
     },
 });
 
@@ -18,7 +19,7 @@ const authLimiter = rateLimit({
     legacyHeaders: false,
     message: {
         success: false,
-        message: "Too many authentication attempts. Please try again later.",
+        message: MESSAGES.TOO_MANY_AUTHENTICATION_REQUESTS,
     },
 });
 
@@ -29,7 +30,7 @@ const loginLimiter = rateLimit({
     legacyHeaders: false,
     message: {
         success: false,
-        message: "Too many login attempts. Please try again later.",
+        message: MESSAGES.TOO_MANY_LOGIN_REQUESTS,
     },
 });
 

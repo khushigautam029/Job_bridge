@@ -7,7 +7,7 @@ import {
     updateUserProfile,
 } from "../services/userService.js";
 
-import { STATUS_CODES } from "../utils/setConstants.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 import {
     changePasswordSchema,
     updateProfileSchema,
@@ -36,7 +36,7 @@ const updateProfile = asyncHandler(async (req, res) => {
     if (error) {
         return res.status(STATUS_CODES.BAD_REQUEST).json({
             success: false,
-            message: "Validation failed",
+            message: MESSAGES.VALIDATION_FAILED,
             errors: error.details.map(
                 (detail) => detail.message
             ),
@@ -48,7 +48,7 @@ const updateProfile = asyncHandler(async (req, res) => {
     );
     res.status(STATUS_CODES.OK).json({
         success: true,
-        message: "Profile updated successfully",
+        message: MESSAGES.USER_PROFILE_FETCHED,
         data: {
             user,
         },
@@ -67,7 +67,7 @@ const updatePassword = asyncHandler(async (req, res) => {
     if (error) {
         return res.status(STATUS_CODES.BAD_REQUEST).json({
             success: false,
-            message: "Validation failed",
+            message: MESSAGES.VALIDATION_FAILED,
             errors: error.details.map(
                 (detail) => detail.message
             ),
@@ -80,7 +80,7 @@ const updatePassword = asyncHandler(async (req, res) => {
     );
     res.status(STATUS_CODES.OK).json({
         success: true,
-        message: "Password changed successfully",
+        message: MESSAGES.PASSWORD_CHANGED,
     });
 });
 
@@ -89,7 +89,7 @@ const removeAccount = asyncHandler(async (req, res) => {
     await deleteAccount(req.user.id);
     res.status(STATUS_CODES.OK).json({
         success: true,
-        message: "Account deleted successfully",
+        message: MESSAGES.USER_ACCOUNT_DELETED,
     });
 });
 

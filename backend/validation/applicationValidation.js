@@ -1,8 +1,8 @@
 import Joi from "joi";
+import { MESSAGES } from "../utils/setConstants.js";
 
 
 const createApplicationSchema = Joi.object({
-
     resume: Joi.string()
         .trim()
         .max(255)
@@ -42,8 +42,8 @@ const updateApplicationStatusSchema = Joi.object({
         )
         .required()
         .messages({
-            "any.only": "Invalid application status",
-            "any.required": "Application status is required",
+            "any.only": MESSAGES.INVALID_APPLICATION_STATUS,
+            "any.required": MESSAGES.APPLICATION_STATUS_REQUIRED,
         }),
 
 });

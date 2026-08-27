@@ -1,4 +1,5 @@
 import Joi from "joi";
+import { MESSAGES } from "../utils/setConstants.js";
 
 
 const addCandidateSkillSchema = Joi.object({
@@ -8,16 +9,16 @@ const addCandidateSkillSchema = Joi.object({
         .required()
         .messages({
             "number.base":
-                "Skill ID must be a number",
+                MESSAGES.SKILL_MUST_BE_NUMBER,
 
             "number.integer":
-                "Skill ID must be an integer",
+                MESSAGES.SKILL_ID_MUST_BE_INT,
 
             "number.positive":
-                "Skill ID must be positive",
+                MESSAGES.SKILL_ID_MUST_BE_POSITIVE,
 
             "any.required":
-                "Skill ID is required",
+                MESSAGES.SKILL_ID_REQUIRED,
         }),
 });
 

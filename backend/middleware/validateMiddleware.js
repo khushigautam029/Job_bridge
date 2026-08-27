@@ -1,4 +1,4 @@
-import { STATUS_CODES } from "../utils/setConstants.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 const validate = (schema) => {
     return (req, res, next) => {
@@ -10,19 +10,16 @@ const validate = (schema) => {
                 stripUnknown: true,
             }
         );
-
         if (error) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
-                message: "Validation failed",
+                message: MESSAGES.VALIDATION_FAILED,
                 errors: error.details.map(
                     (detail) => detail.message
                 ),
             });
         }
-
         req.body = value;
-
         next();
     };
 };

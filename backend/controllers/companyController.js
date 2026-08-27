@@ -1,25 +1,20 @@
-import asyncHandler from "../utils/asyncHandler.js";
-
 import {
     getAllCompanies,
     getCompanyById,
     getMyCompany,
     updateMyCompany,
 } from "../services/companyService.js";
-
-import { STATUS_CODES } from "../utils/setConstants.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 import {
     updateCompanySchema,
 } from "../validation/companyValidation.js";
 
-
 const getMyCompanyController = asyncHandler(
     async (req, res) => {
-
         const company = await getMyCompany(
             req.user.id
         );
-
         res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
@@ -47,7 +42,7 @@ const updateMyCompanyController = asyncHandler(
         if (error) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
-                message: "Validation failed",
+                message: MESSAGES.VALIDATION_FAILED,
                 errors: error.details.map(
                     (detail) => detail.message
                 ),
@@ -62,8 +57,7 @@ const updateMyCompanyController = asyncHandler(
 
         res.status(STATUS_CODES.OK).json({
             success: true,
-            message:
-                "Company updated successfully",
+            message:MESSAGES.COMPANY_UPDATED,
             data: {
                 company,
             },

@@ -8,8 +8,7 @@ import {
     updateInterview,
     updateInterviewStatus,
 } from "../services/interviewService.js";
-
-import { STATUS_CODES } from "../utils/setConstants.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 import {
     createInterviewSchema,
     updateInterviewSchema,
@@ -17,12 +16,8 @@ import {
 } from "../validation/interviewValidation.js";
 
 
-/*
-    Recruiter → Schedule interview
-*/
 const schedule = asyncHandler(
     async (req, res) => {
-
         const { error, value } =
             createInterviewSchema.validate(
                 req.body,
@@ -31,32 +26,25 @@ const schedule = asyncHandler(
                     stripUnknown: true,
                 }
             );
-
-
         if (error) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
-                message: "Validation failed",
+                message: MESSAGES.VALIDATION_FAILED,
                 errors: error.details.map(
                     (detail) =>
                         detail.message
                 ),
             });
         }
-
-
         const interview =
             await scheduleInterview(
                 req.user.id,
                 req.params.applicationId,
                 value
             );
-
-
         res.status(STATUS_CODES.CREATED).json({
             success: true,
-            message:
-                "Interview scheduled successfully",
+            message:MESSAGES.INTERVIEW_SCHEDULED,
             data: {
                 interview,
             },
@@ -64,19 +52,12 @@ const schedule = asyncHandler(
     }
 );
 
-
-/*
-    Candidate → My interviews
-*/
 const getMine = asyncHandler(
     async (req, res) => {
-
         const interviews =
             await getMyInterviews(
                 req.user.id
             );
-
-
         res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
@@ -129,7 +110,7 @@ const update = asyncHandler(
         if (error) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
-                message: "Validation failed",
+                message: MESSAGES.VALIDATION_FAILED,
                 errors: error.details.map(
                     (detail) =>
                         detail.message
@@ -148,8 +129,7 @@ const update = asyncHandler(
 
         res.status(STATUS_CODES.OK).json({
             success: true,
-            message:
-                "Interview updated successfully",
+            message:MESSAGES.INTERVIEW_UPDATED,
             data: {
                 interview,
             },
@@ -177,7 +157,7 @@ const updateStatus = asyncHandler(
         if (error) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
-                message: "Validation failed",
+                message: MESSAGES.VALIDATION_FAILED,
                 errors: error.details.map(
                     (detail) =>
                         detail.message
@@ -196,8 +176,7 @@ const updateStatus = asyncHandler(
 
         res.status(STATUS_CODES.OK).json({
             success: true,
-            message:
-                "Interview status updated successfully",
+            message:MESSAGES.INTERVIEW_STATUS_UPDATED,
             data: {
                 interview,
             },

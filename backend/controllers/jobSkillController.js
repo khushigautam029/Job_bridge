@@ -6,7 +6,7 @@ import {
     removeJobSkill,
 } from "../services/jobSkillService.js";
 
-import { STATUS_CODES } from "../utils/setConstants.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 import {
     addJobSkillSchema,
 } from "../validation/jobSkillValidation.js";
@@ -45,7 +45,7 @@ const addSkill = asyncHandler(
         if (error) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
-                message: "Validation failed",
+                message: MESSAGES.VALIDATION_FAILED,
                 errors: error.details.map(
                     (detail) => detail.message
                 ),
@@ -65,7 +65,7 @@ const addSkill = asyncHandler(
 
         res.status(STATUS_CODES.CREATED).json({
             success: true,
-            message: "Skill added to job successfully",
+            message: MESSAGES.SKILL_ADDED_TO_JOB,
             data: {
                 jobSkill,
             },
@@ -92,7 +92,7 @@ const removeSkill = asyncHandler(
 
         res.status(STATUS_CODES.OK).json({
             success: true,
-            message: "Skill removed from job successfully",
+            message: MESSAGES.SKILL_REMOVED_FROM_JOB,
         });
     }
 );

@@ -1,4 +1,4 @@
-import { STATUS_CODES } from "../utils/setConstants.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 const authorizeRoles = (...allowedRoles) => {
 
@@ -10,7 +10,7 @@ const authorizeRoles = (...allowedRoles) => {
                 STATUS_CODES.UNAUTHORIZED
             ).json({
                 success: false,
-                message: "Authentication required",
+                message: MESSAGES.AUTHENTICATION_REQUIRED,
             });
         }
 
@@ -34,8 +34,7 @@ const authorizeRoles = (...allowedRoles) => {
                 STATUS_CODES.FORBIDDEN
             ).json({
                 success: false,
-                message:
-                    "You are not authorized to access this resource",
+                message:MESSAGES.APPLICATION_NOT_AUTHORIZED_TO_ACCESS,
             });
         }
 

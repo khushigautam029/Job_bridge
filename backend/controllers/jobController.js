@@ -8,20 +8,19 @@ import {
     updateJob,
 } from "../services/jobService.js";
 
-import { STATUS_CODES } from "../utils/setConstants.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
+
 import {
     createJobSchema,
     updateJobSchema,
 } from "../validation/jobValidation.js";
 
 
-const create = asyncHandler(
-    async (req, res) => {
+// CREATE JOB
+const create = asyncHandler(async (req, res) => {
 
-        const {
-            error,
-            value,
-        } = createJobSchema.validate(
+    const { error, value } =
+        createJobSchema.validate(
             req.body,
             {
                 abortEarly: false,
@@ -29,120 +28,121 @@ const create = asyncHandler(
             }
         );
 
-        if (error) {
-            return res.status(STATUS_CODES.BAD_REQUEST).json({
-                success: false,
-                message: "Validation failed",
-                errors: error.details.map(
-                    (detail) => detail.message
-                ),
-            });
-        }
+    if (error) {
 
-        const job = await createJob(
-            req.user.id,
-            value
-        );
-
-        res.status(STATUS_CODES.CREATED).json({
-            success: true,
-            message: "Job created successfully",
-            data: {
-                job,
-            },
+        return res.status(
+            STATUS_CODES.BAD_REQUEST
+        ).json({
+            success: false,
+            message: MESSAGES.VALIDATION_FAILED,
+            errors: error.details.map(
+                (detail) => detail.message
+            ),
         });
     }
-);
 
 
-const getAll = asyncHandler(
-    async (req, res) => {
-
-        const jobs = await getAllJobs();
-
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            data: {
-                jobs,
-            },
-        });
-    }
-);
+    const job = await createJob(
+        req.user.id,
+        value
+    );
 
 
-const getOne = asyncHandler(
-    async (req, res) => {
+    return res.status(
+        STATUS_CODES.CREATED
+    ).json({
+        success: true,
+        message: MESSAGES.JOB_CREATED,
+        data: {
+            job,
+        },
+    });
+});
 
-        const job = await getJobById(
-            req.params.id
-        );
+// GET ALL JOBS
+const getAll = asyncHandler(async (req, res) => {
 
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            data: {
-                job,
-            },
-        });
-    }
-);
+    const result =
+        await getAllJobs(req.query);
 
 
-const update = asyncHandler(
-    async (req, res) => {
+    return res.status(
+        STATUS_CODES.OK
+    ).json({
+        success: true,
+        message: MESSAGES.JOB_FETCHED,
+        data: result,
+    });
+});
 
-        const {
-            error,
-            value,
-        } = updateJobSchema.validate(
+// GET JOB BY ID
+const getOne = asyncHandler(async (req, res) => {
+
+    const job = await getJobById(
+        req.params.id
+    );
+
+    return res.status(
+        STATUS_CODES.OK
+    ).json({
+        success: true,
+        message: MESSAGES.JOB_FETCHED,
+        data: {
+            job,
+        },
+    });
+});
+
+// UPDATE JOB
+const update = asyncHandler(async (req, res) => {
+    const { error, value } =
+        updateJobSchema.validate(
             req.body,
             {
                 abortEarly: false,
                 stripUnknown: true,
             }
         );
-
-        if (error) {
-            return res.status(STATUS_CODES.BAD_REQUEST).json({
-                success: false,
-                message: "Validation failed",
-                errors: error.details.map(
-                    (detail) => detail.message
-                ),
-            });
-        }
-
-        const job = await updateJob(
-            req.user.id,
-            req.params.id,
-            value
-        );
-
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: "Job updated successfully",
-            data: {
-                job,
-            },
+    if (error) {
+        return res.status(
+            STATUS_CODES.BAD_REQUEST
+        ).json({
+            success: false,
+            message: MESSAGES.VALIDATION_FAILED,
+            errors: error.details.map(
+                (detail) => detail.message
+            ),
         });
     }
-);
+    const job = await updateJob(
+        req.user.id,
+        req.params.id,
+        value
+    );
+    return res.status(
+        STATUS_CODES.OK
+    ).json({
+        success: true,
+        message: MESSAGES.JOB_UPDATED,
+        data: {
+            job,
+        },
+    });
+});
 
-
-const remove = asyncHandler(
-    async (req, res) => {
-
-        await deleteJob(
-            req.user.id,
-            req.params.id
-        );
-
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: "Job deleted successfully",
-        });
-    }
-);
-
+// DELETE JOB
+const remove = asyncHandler(async (req, res) => {
+    await deleteJob(
+        req.user.id,
+        req.params.id
+    );
+    return res.status(
+        STATUS_CODES.OK
+    ).json({
+        success: true,
+        message: MESSAGES.JOB_DELETED,
+    });
+});
 
 export {
     create,

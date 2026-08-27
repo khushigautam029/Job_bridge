@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import { User } from "../models/index.js";
-import { STATUS_CODES } from "../utils/setConstants.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 const protect = async (req, res, next) => {
     try {
@@ -9,7 +9,7 @@ const protect = async (req, res, next) => {
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
             return res.status(STATUS_CODES.UNAUTHORIZED).json({
                 success: false,
-                message: "Authentication required",
+                message: MESSAGES.AUTHENTICATION_REQUIRED,
             });
         }
 
@@ -29,14 +29,14 @@ const protect = async (req, res, next) => {
         if (!user) {
             return res.status(STATUS_CODES.UNAUTHORIZED).json({
                 success: false,
-                message: "User not found",
+                message: MESSAGES.USER_NOT_FOUND,
             });
         }
 
         if (!user.isActive) {
             return res.status(STATUS_CODES.FORBIDDEN).json({
                 success: false,
-                message: "Your account is inactive",
+                message: MESSAGES.ACCOUNT_INACTIVE,
             });
         }
 
@@ -49,14 +49,14 @@ const protect = async (req, res, next) => {
         if (error.name === "TokenExpiredError") {
             return res.status(STATUS_CODES.UNAUTHORIZED).json({
                 success: false,
-                message: "Token has expired",
+                message: MESSAGES.TOKEN_EXPIRED,
             });
         }
 
         if (error.name === "JsonWebTokenError") {
             return res.status(STATUS_CODES.UNAUTHORIZED).json({
                 success: false,
-                message: "Invalid token",
+                message: MESSAGES.INVALID_TOKEN,
             });
         }
 

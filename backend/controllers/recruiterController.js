@@ -5,7 +5,7 @@ import {
     updateRecruiterProfile,
 } from "../services/recruiterService.js";
 
-import { STATUS_CODES } from "../utils/setConstants.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 import {
     updateRecruiterProfileSchema,
 } from "../validation/recruiterValidation.js";
@@ -40,7 +40,7 @@ const updateProfile = asyncHandler(async (req, res) => {
     if (error) {
         return res.status(STATUS_CODES.BAD_REQUEST).json({
             success: false,
-            message: "Validation failed",
+            message: MESSAGES.VALIDATION_FAILED,
             errors: error.details.map(
                 (detail) => detail.message
             ),
@@ -55,7 +55,7 @@ const updateProfile = asyncHandler(async (req, res) => {
 
     res.status(STATUS_CODES.OK).json({
         success: true,
-        message: "Recruiter profile updated successfully",
+        message: MESSAGES.RECRUITER_PROFILE_FETCHED,
         data: {
             recruiter,
         },

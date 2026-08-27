@@ -7,7 +7,7 @@ import {
     markAsRead,
 } from "../services/notificationService.js";
 import asyncHandler from "../utils/asyncHandler.js";
-import { STATUS_CODES } from "../utils/setConstants.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 // GET /api/notifications
 const getNotifications = asyncHandler(
@@ -51,8 +51,7 @@ const markRead = asyncHandler(
             );
         res.status(200).json({
             success: true,
-            message:
-                "Notification marked as read",
+            message:MESSAGES.NOTIFICATIONS_MARKED_READ,
             data: {
                 notification,
             },
@@ -69,8 +68,7 @@ const markAllRead = asyncHandler(
         );
         res.status(200).json({
             success: true,
-            message:
-                "All notifications marked as read",
+            message:MESSAGES.NOTIFICATIONS_ALL_MARKED_READ,
         });
     }
 );
@@ -82,10 +80,9 @@ const removeNotification = asyncHandler(
             req.user.id,
             req.params.id
         );
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
-            message:
-                "Notification deleted successfully",
+            message:MESSAGES.NOTIFICATIONS_DELETED,
         });
     }
 );
@@ -97,10 +94,9 @@ const removeAllNotifications =
             await deleteAllNotifications(
                 req.user.id
             );
-            res.status(200).json({
+            res.status(STATUS_CODES.OK).json({
                 success: true,
-                message:
-                    "All notifications deleted successfully",
+                message:MESSAGES.NOTIFICATIONS_ALL_DELETED,
         });
     }
 );

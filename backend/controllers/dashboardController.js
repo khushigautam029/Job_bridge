@@ -1,56 +1,35 @@
-import asyncHandler from "../utils/asyncHandler.js";
-
 import {
     getCandidateDashboard,
     getRecruiterDashboard,
 } from "../services/dashboardService.js";
+import asyncHandler from "../utils/asyncHandler.js";
+import { STATUS_CODES } from "../utils/setConstants.js";
 
-
-/*
-    Candidate Dashboard
-*/
-
+// Candidate Dashboard
 const getCandidateDashboardController =
     asyncHandler(async (req, res) => {
-
         const dashboard =
             await getCandidateDashboard(
                 req.user.id
             );
-
-        res.status(200).json({
-
+        res.status(STATUS_CODES.OK).json({
             success: true,
-
             data: dashboard,
-
         });
-
     });
 
-
-/*
-    Recruiter Dashboard
-*/
-
+//  Recruiter Dashboard
 const getRecruiterDashboardController =
     asyncHandler(async (req, res) => {
-
         const dashboard =
             await getRecruiterDashboard(
                 req.user.id
             );
-
-        res.status(200).json({
-
+        res.status(STATUS_CODES.OK).json({
             success: true,
-
             data: dashboard,
-
         });
-
     });
-
 
 export {
     getCandidateDashboardController,

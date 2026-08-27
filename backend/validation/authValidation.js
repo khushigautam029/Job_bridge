@@ -1,4 +1,5 @@
 import Joi from "joi";
+import { MESSAGES } from "../utils/setConstants.js";
 
 const registerSchema = Joi.object({
     name: Joi.string()
@@ -39,15 +40,15 @@ const loginSchema = Joi.object({
         .email()
         .required()
         .messages({
-            "string.empty": "Email is required",
-            "string.email": "Please provide a valid email",
-            "any.required": "Email is required",
+            "string.empty": MESSAGES.EMAIL_REQUIRED,
+            "string.email": MESSAGES.PROVIDE_A_VALID_EMAIL,
+            "any.required": MESSAGES.EMAIL_REQUIRED,
         }),
     password: Joi.string()
         .required()
         .messages({
-            "string.empty": "Password is required",
-            "any.required": "Password is required",
+            "string.empty": MESSAGES.PASSWORD_REQUIRED,
+            "any.required": MESSAGES.PASSWORD_REQUIRED,
         }),
 });
 
