@@ -1,4 +1,5 @@
 import Joi from "joi";
+import { MESSAGES } from "../utils/setConstants.js";
 
 
 const updateProfileSchema = Joi.object({
@@ -13,7 +14,7 @@ const updateProfileSchema = Joi.object({
         .optional()
         .messages({
             "string.pattern.base":
-                "Please provide a valid Indian phone number",
+                MESSAGES.PROVIDE_VALID_PHONE_NO,
         }),
 }).min(1);
 

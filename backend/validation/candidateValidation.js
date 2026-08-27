@@ -1,4 +1,5 @@
 import Joi from "joi";
+import { MESSAGES } from "../utils/setConstants.js";
 
 const updateCandidateProfileSchema = Joi.object({
     location: Joi.string()
@@ -32,7 +33,7 @@ const updateCandidateProfileSchema = Joi.object({
         .allow("")
         .optional()
         .messages({
-            "string.uri": "Please provide a valid LinkedIn URL",
+            "string.uri": MESSAGES.PROVIDE_VALID_URL,
         }),
 
     githubUrl: Joi.string()
@@ -42,7 +43,7 @@ const updateCandidateProfileSchema = Joi.object({
         .allow("")
         .optional()
         .messages({
-            "string.uri": "Please provide a valid GitHub URL",
+            "string.uri": MESSAGES.PROVIDE_A_VALID_GITHUB_URL,
         }),
 
     portfolioUrl: Joi.string()
@@ -52,7 +53,7 @@ const updateCandidateProfileSchema = Joi.object({
         .allow("")
         .optional()
         .messages({
-            "string.uri": "Please provide a valid portfolio URL",
+            "string.uri": MESSAGES.PROVIDE_A_VALID_PORTFOLIO_URL,
         }),
 
     experienceYears: Joi.number()

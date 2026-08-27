@@ -1,4 +1,5 @@
 import Joi from "joi";
+import { MESSAGES } from "../utils/setConstants.js";
 
 const updateCompanySchema = Joi.object({
     name: Joi.string()
@@ -26,7 +27,7 @@ const updateCompanySchema = Joi.object({
         .allow("")
         .optional()
         .messages({
-            "string.uri": "Please provide a valid website URL",
+            "string.uri": MESSAGES.PROVIDE_A_VALID_WEB_URL,
         }),
 
     location: Joi.string()

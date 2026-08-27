@@ -1,4 +1,5 @@
 import Joi from "joi";
+import { MESSAGES } from "../utils/setConstants.js";
 
 
 const createInterviewSchema = Joi.object({
@@ -7,8 +8,8 @@ const createInterviewSchema = Joi.object({
         .iso()
         .required()
         .messages({
-            "date.base": "Please provide a valid interview date",
-            "any.required": "Interview date is required",
+            "date.base": MESSAGES.VALID_INTERVIEW_DATE,
+            "any.required": MESSAGES.INTERVIEW_DATE_REQUIRED,
         }),
 
     interviewType: Joi.string()
@@ -19,8 +20,8 @@ const createInterviewSchema = Joi.object({
         )
         .required()
         .messages({
-            "any.only": "Invalid interview type",
-            "any.required": "Interview type is required",
+            "any.only": MESSAGES.INVALID_INTERVIEW_TYPE,
+            "any.required": MESSAGES.INTERVIEW_TYPE_REQUIRED,
         }),
 
     meetingLink: Joi.string()
@@ -94,10 +95,10 @@ const updateInterviewStatusSchema =
             .required()
             .messages({
                 "any.only":
-                    "Invalid interview status",
+                    MESSAGES.INVALID_INTERVIEW_STATUS,
 
                 "any.required":
-                    "Interview status is required",
+                   MESSAGES.INTERVIEW_STATUS_REQUIRED,
             }),
 
     });
