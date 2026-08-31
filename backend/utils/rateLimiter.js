@@ -1,5 +1,5 @@
 import rateLimit from "express-rate-limit";
-import { MESSAGES } from "./setConstants";
+import { MESSAGES } from "../utils/setConstants.js";
 
 const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -34,4 +34,9 @@ const loginLimiter = rateLimit({
     },
 });
 
-export { authLimiter, generalLimiter, loginLimiter };
+export {
+    authLimiter,
+    generalLimiter,
+    loginLimiter
+};
+

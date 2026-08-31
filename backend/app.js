@@ -18,41 +18,64 @@ import recruiterRoutes from "./routes/recruiterRoutes.js";
 import savedJobRoutes from "./routes/savedJobRoutes.js";
 import skillRoutes from "./routes/skillRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import {
+    authLimiter,
+    generalLimiter,
+    loginLimiter,
+} from "./utils/rateLimiter.js";
 
 dotenv.config();
 
 const app = express();
-
-// Global Middleware
 app.use(helmet());
+
 app.use(
     cors({
         origin: "http://localhost:5173",
         credentials: true,
     })
 );
+
 app.use(express.json());
-app.use(express.urlencoded({
-    extended: true,
-}));
+app.use(
+    express.urlencoded({
+        extended: true,
+    })
+);
 
-// Routes
+app.use("/api", generalLimiter);
+app.use("/api/auth", authLimiter);
+
+// Authentication
+app.use("/api/auth/login", loginLimiter);
 app.use("/api/auth", authRoutes);
+// Users
 app.use("/api/users", userRoutes);
+// Recruiters
 app.use("/api/recruiters", recruiterRoutes);
+// Companies
 app.use("/api/companies", companyRoutes);
-app.use("/api/candidates",candidateRoutes);
-app.use("/api/skills",skillRoutes);
-app.use( "/api/candidates/skills", candidateSkillRoutes );
-app.use( "/api/jobs", jobRoutes);
+// Candidates
+app.use("/api/candidates", candidateRoutes);
+// Skills
+app.use("/api/skills", skillRoutes);
+// Candidate Skills
+app.use("/api/candidates/skills", candidateSkillRoutes);
+// Jobs
+app.use("/api/jobs", jobRoutes);
+// Job Skills
 app.use("/api", jobSkillRoutes);
+// Applications
 app.use("/api", applicationRoutes);
-app.use( "/api", savedJobRoutes);
-app.use( "/api",interviewRoutes);
-app.use( "/api/notifications", notificationRoutes);
-app.use( "/api/dashboard", dashboardRoutes);
+// Saved Jobs
+app.use("/api", savedJobRoutes);
+// Interviews
+app.use("/api", interviewRoutes);
+// Notifications
+app.use("/api/notifications", notificationRoutes);
+// Dashboard
+app.use("/api/dashboard", dashboardRoutes);
 
-// Error Handling
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
 
