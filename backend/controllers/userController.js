@@ -1,18 +1,15 @@
-import asyncHandler from "../utils/asyncHandler.js";
-
 import {
     changePassword,
     deleteAccount,
     getUserById,
     updateUserProfile,
 } from "../services/userService.js";
-
+import asyncHandler from "../utils/asyncHandler.js";
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 import {
     changePasswordSchema,
     updateProfileSchema,
 } from "../validation/userValidation.js";
-
 
 const getMe = asyncHandler(async (req, res) => {
     const user = await getUserById(req.user.id);
@@ -23,7 +20,6 @@ const getMe = asyncHandler(async (req, res) => {
         },
     });
 });
-
 
 const updateProfile = asyncHandler(async (req, res) => {
     const { error, value } = updateProfileSchema.validate(
@@ -55,7 +51,6 @@ const updateProfile = asyncHandler(async (req, res) => {
     });
 });
 
-
 const updatePassword = asyncHandler(async (req, res) => {
     const { error, value } = changePasswordSchema.validate(
         req.body,
@@ -84,7 +79,6 @@ const updatePassword = asyncHandler(async (req, res) => {
     });
 });
 
-
 const removeAccount = asyncHandler(async (req, res) => {
     await deleteAccount(req.user.id);
     res.status(STATUS_CODES.OK).json({
@@ -92,7 +86,6 @@ const removeAccount = asyncHandler(async (req, res) => {
         message: MESSAGES.USER_ACCOUNT_DELETED,
     });
 });
-
 
 export {
     getMe, removeAccount, updatePassword, updateProfile

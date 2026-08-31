@@ -1,22 +1,17 @@
-import asyncHandler from "../utils/asyncHandler.js";
-
 import {
     getRecruiterProfile,
     updateRecruiterProfile,
 } from "../services/recruiterService.js";
-
+import asyncHandler from "../utils/asyncHandler.js";
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 import {
     updateRecruiterProfileSchema,
 } from "../validation/recruiterValidation.js";
 
-
 const getProfile = asyncHandler(async (req, res) => {
-
     const recruiter = await getRecruiterProfile(
         req.user.id
     );
-
     res.status(STATUS_CODES.OK).json({
         success: true,
         data: {
@@ -25,9 +20,7 @@ const getProfile = asyncHandler(async (req, res) => {
     });
 });
 
-
 const updateProfile = asyncHandler(async (req, res) => {
-
     const { error, value } =
         updateRecruiterProfileSchema.validate(
             req.body,
@@ -36,7 +29,6 @@ const updateProfile = asyncHandler(async (req, res) => {
                 stripUnknown: true,
             }
         );
-
     if (error) {
         return res.status(STATUS_CODES.BAD_REQUEST).json({
             success: false,
@@ -46,13 +38,11 @@ const updateProfile = asyncHandler(async (req, res) => {
             ),
         });
     }
-
     const recruiter =
         await updateRecruiterProfile(
             req.user.id,
             value
         );
-
     res.status(STATUS_CODES.OK).json({
         success: true,
         message: MESSAGES.RECRUITER_PROFILE_FETCHED,
@@ -61,7 +51,6 @@ const updateProfile = asyncHandler(async (req, res) => {
         },
     });
 });
-
 
 export {
     getProfile,

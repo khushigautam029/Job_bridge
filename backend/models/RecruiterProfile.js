@@ -9,25 +9,21 @@ const RecruiterProfile = sequelize.define(
             autoIncrement: true,
             primaryKey: true,
         },
-
         userId: {
             type: DataTypes.INTEGER,
             allowNull: false,
             unique: true,
             field: "user_id",
         },
-
         companyId: {
             type: DataTypes.INTEGER,
             allowNull: false,
             field: "company_id",
         },
-
         designation: {
             type: DataTypes.STRING(100),
             allowNull: true,
         },
-
         phone: {
             type: DataTypes.STRING(15),
             allowNull: true,

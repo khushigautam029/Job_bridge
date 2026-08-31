@@ -9,7 +9,6 @@ const User = sequelize.define(
             autoIncrement: true,
             primaryKey: true,
         },
-
         name: {
             type: DataTypes.STRING(100),
             allowNull: false,
@@ -19,7 +18,6 @@ const User = sequelize.define(
                 },
             },
         },
-
         email: {
             type: DataTypes.STRING(150),
             allowNull: false,
@@ -30,17 +28,14 @@ const User = sequelize.define(
                 },
             },
         },
-
         password: {
             type: DataTypes.STRING(255),
             allowNull: false,
         },
-
         phone: {
             type: DataTypes.STRING(15),
             allowNull: true,
         },
-
         role: {
             type: DataTypes.ENUM(
                 "CANDIDATE",
@@ -50,7 +45,6 @@ const User = sequelize.define(
             allowNull: false,
             defaultValue: "CANDIDATE",
         },
-
         isActive: {
             type: DataTypes.BOOLEAN,
             allowNull: false,

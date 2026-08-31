@@ -1,18 +1,14 @@
-import asyncHandler from "../utils/asyncHandler.js";
-
 import {
     getAllSkills,
     getSkillById,
 } from "../services/skillService.js";
+import asyncHandler from "../utils/asyncHandler.js";
 import { STATUS_CODES } from "../utils/setConstants.js";
-
 
 const getSkills = asyncHandler(
     async (req, res) => {
-
         const skills =
             await getAllSkills();
-
         res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
@@ -22,15 +18,12 @@ const getSkills = asyncHandler(
     }
 );
 
-
 const getSkill = asyncHandler(
     async (req, res) => {
-
         const skill =
             await getSkillById(
                 req.params.id
             );
-
         res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
@@ -39,7 +32,6 @@ const getSkill = asyncHandler(
         });
     }
 );
-
 
 export {
     getSkill, getSkills

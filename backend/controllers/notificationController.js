@@ -49,7 +49,7 @@ const markRead = asyncHandler(
                 req.user.id,
                 req.params.id
             );
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             message:MESSAGES.NOTIFICATIONS_MARKED_READ,
             data: {
@@ -59,14 +59,13 @@ const markRead = asyncHandler(
     }
 );
 
-
 // PATCH /api/notifications/read-all
 const markAllRead = asyncHandler(
     async (req, res) => {
         await markAllAsRead(
             req.user.id
         );
-        res.status(200).json({
+        res.status(STATUS_CODES.OK).json({
             success: true,
             message:MESSAGES.NOTIFICATIONS_ALL_MARKED_READ,
         });

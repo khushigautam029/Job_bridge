@@ -1,11 +1,10 @@
-import asyncHandler from "../utils/asyncHandler.js";
-
 import {
     getMySavedJobs,
     isJobSaved,
     removeSavedJob,
     saveJob,
 } from "../services/savedJobService.js";
+import asyncHandler from "../utils/asyncHandler.js";
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 // Save a job
@@ -72,7 +71,6 @@ const remove = asyncHandler(
         });
     }
 );
-
 
 export {
     checkSaved, getMine, remove, save
