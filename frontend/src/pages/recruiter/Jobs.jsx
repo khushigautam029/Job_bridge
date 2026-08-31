@@ -9,11 +9,13 @@ import {
     Users,
 } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Jobs = () => {
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("All");
     const [categoryFilter, setCategoryFilter] = useState("All");
+    const navigate = useNavigate();
 
     const jobs = [
         {
@@ -140,6 +142,7 @@ const Jobs = () => {
 
                 <button
                     type="button"
+                    onClick={() => navigate("/recruiter/post-job")}
                     className="flex w-fit items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
                 >
                     <Plus size={18} />

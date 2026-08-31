@@ -11,6 +11,7 @@ import Interviews from "./pages/candidate/Interviews";
 import SavedJobs from "./pages/candidate/SavedJobs";
 import Candidates from "./pages/recruiter/Candidate";
 import Jobs from "./pages/recruiter/Jobs";
+import PostJob from "./pages/recruiter/PostJob";
 import RecruiterApplications from "./pages/recruiter/RecruiterApplications";
 import RecruiterDashboard from "./pages/recruiter/RecruiterDashboard";
 import RecruiterInterviews from "./pages/recruiter/RecruiterInterviews";
@@ -78,7 +79,9 @@ const App = () => {
             path="/recruiter/interviews"
             element={<RecruiterInterviews />}
           />
+          <Route path="/recruiter/post-job" element={<PostJob />} />
         </Route>
+
       </Routes>
     </BrowserRouter>
   );

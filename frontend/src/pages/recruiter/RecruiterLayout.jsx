@@ -165,24 +165,6 @@ const RecruiterLayout = () => {
                     </nav>
                 </div>
 
-                {/* Recruiter Mini Profile */}
-                <div className="border-t border-slate-200 p-4">
-                    <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
-                            <User size={19} />
-                        </div>
-
-                        <div className="min-w-0">
-                            <p className="truncate text-sm font-semibold text-slate-800">
-                                Khushi Gautam
-                            </p>
-
-                            <p className="truncate text-xs text-slate-500">
-                                Recruiter
-                            </p>
-                        </div>
-                    </div>
-                </div>
             </aside>
 
             {/* Main Area */}
