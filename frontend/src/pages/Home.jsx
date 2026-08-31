@@ -3,15 +3,56 @@ import {
     BriefcaseBusiness,
     Building2,
     CheckCircle2,
+    LockKeyhole,
+    LogIn,
     MapPin,
     Search,
     ShieldCheck,
+    UserPlus,
     Users,
+    X,
 } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Home = () => {
     const navigate = useNavigate();
+
+    const [showAuthModal, setShowAuthModal] = useState(false);
+    const [authAction, setAuthAction] = useState("");
+
+    // --------------------------------------------------
+    // Authentication Check
+    // --------------------------------------------------
+
+    const isLoggedIn = Boolean(localStorage.getItem("token"));
+
+    const requireLogin = (action) => {
+        if (!isLoggedIn) {
+            setAuthAction(action);
+            setShowAuthModal(true);
+            return;
+        }
+
+        // User is logged in
+        if (action === "apply") {
+            navigate("/jobs");
+        }
+
+        if (action === "save") {
+            // Later connect this to save-job API
+            console.log("Save job");
+        }
+
+        if (action === "jobs") {
+            navigate("/jobs");
+        }
+    };
+
+    // --------------------------------------------------
+    // Data
+    // --------------------------------------------------
+
     const categories = [
         {
             name: "Software Development",
@@ -47,28 +88,34 @@ const Home = () => {
 
     const featuredJobs = [
         {
+            id: 1,
             title: "Senior React Developer",
             company: "TechNova Solutions",
             location: "Delhi, India",
             type: "Full Time",
             salary: "₹8L - ₹14L",
             skills: ["React", "JavaScript", "Node.js"],
+            posted: "2 days ago",
         },
         {
+            id: 2,
             title: "Backend Developer",
             company: "CloudCore Technologies",
             location: "Bangalore, India",
             type: "Full Time",
             salary: "₹7L - ₹12L",
             skills: ["Node.js", "Express", "MySQL"],
+            posted: "1 day ago",
         },
         {
+            id: 3,
             title: "UI/UX Designer",
             company: "Creative Labs",
             location: "Remote",
             type: "Full Time",
             salary: "₹5L - ₹9L",
             skills: ["Figma", "UI Design", "UX"],
+            posted: "3 days ago",
         },
     ];
 
@@ -93,145 +140,206 @@ const Home = () => {
         },
     ];
 
+    // --------------------------------------------------
+    // Search
+    // --------------------------------------------------
+
+    const handleSearch = () => {
+        navigate("/jobs");
+    };
+
+    // --------------------------------------------------
+    // JSX
+    // --------------------------------------------------
+
     return (
         <div className="min-h-screen bg-slate-50 text-slate-800">
-            {/* Navbar */}
-            <header className="border-b border-slate-200 bg-white">
-                <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
+
+            {/* =====================================================
+                NAVBAR
+            ===================================================== */}
+
+            <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
+                <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
+
                     {/* Logo */}
-                    <div className="flex items-center gap-2">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm">
-                            <BriefcaseBusiness size={21} />
+                    <button
+                        type="button"
+                        onClick={() => navigate("/")}
+                        className="flex items-center gap-2"
+                    >
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-white">
+                            <BriefcaseBusiness size={19} />
                         </div>
 
                         <span className="text-xl font-bold tracking-tight text-slate-900">
                             Job<span className="text-indigo-600">Bridge</span>
                         </span>
-                    </div>
+                    </button>
 
                     {/* Navigation */}
                     <nav className="hidden items-center gap-8 md:flex">
-                        <a
-                            href="#jobs"
+                        <button
+                            onClick={() =>
+                                document
+                                    .getElementById("jobs")
+                                    ?.scrollIntoView({
+                                        behavior: "smooth",
+                                    })
+                            }
                             className="text-sm font-medium text-slate-600 transition hover:text-indigo-600"
                         >
                             Find Jobs
-                        </a>
+                        </button>
 
-                        <a
-                            href="#companies"
+                        <button
+                            onClick={() =>
+                                document
+                                    .getElementById("companies")
+                                    ?.scrollIntoView({
+                                        behavior: "smooth",
+                                    })
+                            }
                             className="text-sm font-medium text-slate-600 transition hover:text-indigo-600"
                         >
                             Companies
-                        </a>
+                        </button>
 
-                        <a
-                            href="#categories"
+                        <button
+                            onClick={() =>
+                                document
+                                    .getElementById("categories")
+                                    ?.scrollIntoView({
+                                        behavior: "smooth",
+                                    })
+                            }
                             className="text-sm font-medium text-slate-600 transition hover:text-indigo-600"
                         >
                             Categories
-                        </a>
+                        </button>
                     </nav>
 
-                    {/* Auth buttons */}
-                    {/* Auth buttons */}
-                    <div className="flex items-center gap-3">
-                        <button
-                            type="button"
-                            onClick={() => navigate("/login")}
-                            className="hidden rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 sm:block"
-                        >
-                            Login
-                        </button>
+                    {/* Auth */}
+                    <div className="flex items-center gap-2">
+                        {!isLoggedIn ? (
+                            <>
+                                <button
+                                    onClick={() => navigate("/login")}
+                                    className="hidden rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 sm:block"
+                                >
+                                    Login
+                                </button>
 
-                        <button
-                            type="button"
-                            onClick={() => navigate("/register")}
-                            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700"
-                        >
-                            Get Started
-                        </button>
+                                <button
+                                    onClick={() => navigate("/register")}
+                                    className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700"
+                                >
+                                    Get Started
+                                </button>
+                            </>
+                        ) : (
+                            <button
+                                onClick={() => navigate("/dashboard")}
+                                className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white"
+                            >
+                                Dashboard
+                            </button>
+                        )}
                     </div>
                 </div>
             </header>
 
-            {/* Hero */}
+            {/* =====================================================
+                HERO
+            ===================================================== */}
+
             <section className="relative overflow-hidden bg-white">
-                <div className="mx-auto max-w-7xl px-6 pb-20 pt-16 lg:px-8 lg:pb-24 lg:pt-24">
+
+                {/* Background decoration */}
+                <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-indigo-50 blur-3xl" />
+                <div className="pointer-events-none absolute -left-32 bottom-0 h-80 w-80 rounded-full bg-blue-50 blur-3xl" />
+
+                <div className="relative mx-auto max-w-7xl px-6 pb-20 pt-16 lg:px-8 lg:pb-24 lg:pt-24">
+
                     <div className="mx-auto max-w-4xl text-center">
-                        <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-4 py-2 text-sm font-medium text-indigo-700">
+
+                        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-4 py-2 text-sm font-medium text-indigo-700">
                             <span className="h-2 w-2 rounded-full bg-indigo-600" />
-                            Your career starts here
+                            Thousands of opportunities waiting for you
                         </div>
 
                         <h1 className="text-4xl font-bold leading-tight tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
-                            Find a job where your{" "}
+                            Find work that moves your{" "}
                             <span className="text-indigo-600">
-                                potential
-                            </span>{" "}
-                            can grow.
+                                career forward.
+                            </span>
                         </h1>
 
                         <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
-                            Discover opportunities that match your skills,
-                            connect with great companies, and take the next
-                            step in your career with JobBridge.
+                            Discover jobs from trusted companies, apply with
+                            confidence, and build the career you deserve with
+                            JobBridge.
                         </p>
                     </div>
 
-                    {/* Search Box */}
+                    {/* Search */}
                     <div className="mx-auto mt-10 max-w-5xl rounded-2xl border border-slate-200 bg-white p-3 shadow-xl shadow-slate-200/60">
+
                         <div className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
-                            {/* Job search */}
-                            <div className="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3">
+
+                            <div className="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 transition focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100">
+
                                 <Search
                                     size={20}
                                     className="shrink-0 text-slate-400"
                                 />
 
-                                <div className="min-w-0">
+                                <div className="min-w-0 flex-1">
                                     <p className="text-xs font-medium text-slate-400">
-                                        What are you looking for?
+                                        Job title or keyword
                                     </p>
 
                                     <input
                                         type="text"
-                                        placeholder="Job title, skills..."
-                                        className="mt-1 w-full border-none bg-transparent text-sm font-medium text-slate-700 outline-none placeholder:text-slate-400"
+                                        placeholder="e.g. React Developer"
+                                        className="mt-1 w-full bg-transparent text-sm font-medium text-slate-700 outline-none placeholder:text-slate-400"
                                     />
                                 </div>
                             </div>
 
-                            {/* Location */}
-                            <div className="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3">
+                            <div className="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 transition focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100">
+
                                 <MapPin
                                     size={20}
                                     className="shrink-0 text-slate-400"
                                 />
 
-                                <div className="min-w-0">
+                                <div className="min-w-0 flex-1">
                                     <p className="text-xs font-medium text-slate-400">
                                         Location
                                     </p>
 
                                     <input
                                         type="text"
-                                        placeholder="City, state or remote"
-                                        className="mt-1 w-full border-none bg-transparent text-sm font-medium text-slate-700 outline-none placeholder:text-slate-400"
+                                        placeholder="City or Remote"
+                                        className="mt-1 w-full bg-transparent text-sm font-medium text-slate-700 outline-none placeholder:text-slate-400"
                                     />
                                 </div>
                             </div>
 
-                            {/* Search button */}
-                            <button className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-7 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700">
+                            <button
+                                onClick={handleSearch}
+                                className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-7 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700"
+                            >
                                 <Search size={18} />
                                 Search Jobs
                             </button>
                         </div>
                     </div>
 
-                    {/* Popular searches */}
+                    {/* Popular */}
                     <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-sm">
+
                         <span className="mr-1 text-slate-500">
                             Popular:
                         </span>
@@ -244,6 +352,7 @@ const Home = () => {
                         ].map((item) => (
                             <button
                                 key={item}
+                                onClick={handleSearch}
                                 className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
                             >
                                 {item}
@@ -253,43 +362,57 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Categories */}
+            {/* =====================================================
+                CATEGORIES
+            ===================================================== */}
+
             <section
                 id="categories"
-                className="mx-auto max-w-7xl px-6 py-16 lg:px-8"
+                className="mx-auto max-w-7xl px-6 py-20 lg:px-8"
             >
                 <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+
                     <div>
                         <p className="text-sm font-semibold uppercase tracking-wider text-indigo-600">
                             Explore opportunities
                         </p>
 
                         <h2 className="mt-2 text-3xl font-bold text-slate-900">
-                            Popular job categories
+                            Browse jobs by category
                         </h2>
 
                         <p className="mt-2 max-w-xl text-sm text-slate-500">
-                            Explore jobs across different industries and find
-                            an opportunity that fits your career.
+                            Find opportunities across industries and discover
+                            where your skills can make an impact.
                         </p>
                     </div>
 
-                    <button className="flex items-center gap-1 text-sm font-semibold text-indigo-600 hover:text-indigo-700">
-                        View all categories
+                    <button
+                        onClick={() => navigate("/jobs")}
+                        className="flex items-center gap-1 text-sm font-semibold text-indigo-600 hover:text-indigo-700"
+                    >
+                        View all jobs
                         <ArrowRight size={16} />
                     </button>
                 </div>
 
-                <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
                     {categories.map((category) => {
                         const Icon = category.icon;
 
                         return (
-                            <div
+                            <button
                                 key={category.name}
-                                className="group cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 transition duration-200 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-lg hover:shadow-slate-200/50"
+                                onClick={() =>
+                                    navigate(
+                                        `/jobs?category=${encodeURIComponent(category.name)}`
+                                    )
+                                }
+                                className="group w-full rounded-2xl border border-slate-200 bg-white p-5 text-left transition duration-200 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-lg hover:shadow-slate-200/50"
                             >
                                 <div className="flex items-start justify-between">
+
                                     <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
                                         <Icon size={21} />
                                     </div>
@@ -307,19 +430,24 @@ const Home = () => {
                                 <p className="mt-1 text-sm text-slate-500">
                                     {category.jobs}
                                 </p>
-                            </div>
+                            </button>
                         );
                     })}
                 </div>
             </section>
 
-            {/* Featured Jobs */}
+            {/* =====================================================
+                FEATURED JOBS
+            ===================================================== */}
+
             <section
                 id="jobs"
                 className="border-y border-slate-200 bg-white"
             >
-                <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+                <div className="mx-auto max-w-7xl px-6 py-20 lg:px-8">
+
                     <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+
                         <div>
                             <p className="text-sm font-semibold uppercase tracking-wider text-indigo-600">
                                 Latest opportunities
@@ -330,42 +458,65 @@ const Home = () => {
                             </h2>
 
                             <p className="mt-2 text-sm text-slate-500">
-                                Discover some of the latest opportunities from
-                                growing companies.
+                                Explore roles from companies looking for
+                                talented people like you.
                             </p>
                         </div>
 
-                        <button className="flex items-center gap-1 text-sm font-semibold text-indigo-600 hover:text-indigo-700">
+                        <button
+                            onClick={() => navigate("/jobs")}
+                            className="flex items-center gap-1 text-sm font-semibold text-indigo-600 hover:text-indigo-700"
+                        >
                             Browse all jobs
                             <ArrowRight size={16} />
                         </button>
                     </div>
 
-                    <div className="mt-8 grid gap-5 lg:grid-cols-3">
+                    <div className="mt-9 grid gap-5 lg:grid-cols-3">
+
                         {featuredJobs.map((job) => (
                             <div
-                                key={job.title}
-                                className="rounded-2xl border border-slate-200 bg-slate-50 p-6 transition hover:-translate-y-1 hover:bg-white hover:shadow-lg hover:shadow-slate-200/60"
+                                key={job.id}
+                                className="group rounded-2xl border border-slate-200 bg-slate-50 p-6 transition duration-200 hover:-translate-y-1 hover:bg-white hover:shadow-xl hover:shadow-slate-200/60"
                             >
-                                <div className="flex items-start justify-between gap-4">
-                                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white text-indigo-600 shadow-sm">
-                                        <Building2 size={22} />
+
+                                {/* Company */}
+                                <div className="flex items-start justify-between">
+
+                                    <div className="flex items-center gap-3">
+
+                                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white text-indigo-600 shadow-sm">
+                                            <Building2 size={22} />
+                                        </div>
+
+                                        <div>
+                                            <p className="text-xs text-slate-400">
+                                                Company
+                                            </p>
+
+                                            <p className="text-sm font-semibold text-slate-700">
+                                                {job.company}
+                                            </p>
+                                        </div>
                                     </div>
 
-                                    <button className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-500">
+                                    <button
+                                        onClick={() =>
+                                            requireLogin("save")
+                                        }
+                                        className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-500 transition hover:border-indigo-200 hover:text-indigo-600"
+                                    >
                                         Save
                                     </button>
                                 </div>
 
+                                {/* Job */}
                                 <h3 className="mt-6 text-lg font-semibold text-slate-900">
                                     {job.title}
                                 </h3>
 
-                                <p className="mt-1 text-sm font-medium text-slate-600">
-                                    {job.company}
-                                </p>
-
                                 <div className="mt-4 space-y-2 text-sm text-slate-500">
+
                                     <div className="flex items-center gap-2">
                                         <MapPin size={16} />
                                         {job.location}
@@ -377,7 +528,9 @@ const Home = () => {
                                     </div>
                                 </div>
 
+                                {/* Skills */}
                                 <div className="mt-5 flex flex-wrap gap-2">
+
                                     {job.skills.map((skill) => (
                                         <span
                                             key={skill}
@@ -388,21 +541,36 @@ const Home = () => {
                                     ))}
                                 </div>
 
-                                <div className="mt-6 flex items-center justify-between border-t border-slate-200 pt-5">
-                                    <div>
-                                        <p className="text-xs text-slate-400">
-                                            Salary
-                                        </p>
+                                {/* Footer */}
+                                <div className="mt-6 border-t border-slate-200 pt-5">
 
-                                        <p className="mt-1 font-semibold text-slate-800">
-                                            {job.salary}
-                                        </p>
+                                    <div className="flex items-end justify-between">
+
+                                        <div>
+                                            <p className="text-xs text-slate-400">
+                                                Salary
+                                            </p>
+
+                                            <p className="mt-1 font-semibold text-slate-800">
+                                                {job.salary}
+                                            </p>
+
+                                            <p className="mt-1 text-xs text-slate-400">
+                                                Posted {job.posted}
+                                            </p>
+                                        </div>
+
+                                        <button
+                                            onClick={() =>
+                                                requireLogin("apply")
+                                            }
+                                            className="flex items-center gap-1 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                                        >
+                                            View & Apply
+                                            <ArrowRight size={15} />
+                                        </button>
+
                                     </div>
-
-                                    <button className="flex items-center gap-1 text-sm font-semibold text-indigo-600 hover:text-indigo-700">
-                                        View Job
-                                        <ArrowRight size={16} />
-                                    </button>
                                 </div>
                             </div>
                         ))}
@@ -410,34 +578,39 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Why JobBridge */}
+            {/* =====================================================
+                FEATURES
+            ===================================================== */}
+
             <section
                 id="companies"
-                className="mx-auto max-w-7xl px-6 py-16 lg:px-8"
+                className="mx-auto max-w-7xl px-6 py-20 lg:px-8"
             >
                 <div className="mx-auto max-w-2xl text-center">
+
                     <p className="text-sm font-semibold uppercase tracking-wider text-indigo-600">
                         Why JobBridge?
                     </p>
 
                     <h2 className="mt-2 text-3xl font-bold text-slate-900">
-                        Everything you need for your job search
+                        Your career journey, simplified
                     </h2>
 
                     <p className="mt-3 text-sm leading-6 text-slate-500">
-                        JobBridge makes it easier to discover jobs, apply to
-                        opportunities, and manage your entire career journey.
+                        From discovering your next opportunity to tracking your
+                        applications, JobBridge keeps everything in one place.
                     </p>
                 </div>
 
                 <div className="mt-10 grid gap-6 md:grid-cols-3">
+
                     {features.map((feature) => {
                         const Icon = feature.icon;
 
                         return (
                             <div
                                 key={feature.title}
-                                className="rounded-2xl border border-slate-200 bg-white p-7 text-center shadow-sm"
+                                className="rounded-2xl border border-slate-200 bg-white p-7 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-md"
                             >
                                 <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
                                     <Icon size={23} />
@@ -456,29 +629,50 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* CTA */}
-            <section className="px-6 pb-16 lg:px-8">
-                <div className="mx-auto max-w-7xl overflow-hidden rounded-3xl bg-indigo-600 px-8 py-14 text-center shadow-xl shadow-indigo-200">
-                    <h2 className="text-3xl font-bold text-white">
-                        Ready to take the next step?
-                    </h2>
+            {/* =====================================================
+                CTA
+            ===================================================== */}
 
-                    <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-indigo-100">
-                        Create your JobBridge account and start discovering
-                        opportunities that can move your career forward.
-                    </p>
+            {!isLoggedIn && (
+                <section className="px-6 pb-20 lg:px-8">
 
-                    <button className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-50">
-                        Get Started
-                        <ArrowRight size={17} />
-                    </button>
-                </div>
-            </section>
+                    <div className="mx-auto max-w-7xl overflow-hidden rounded-3xl bg-indigo-600 px-8 py-14 text-center shadow-xl shadow-indigo-200">
 
-            {/* Footer */}
+                        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15 text-white">
+                            <BriefcaseBusiness size={27} />
+                        </div>
+
+                        <h2 className="mt-5 text-3xl font-bold text-white">
+                            Your next opportunity is waiting.
+                        </h2>
+
+                        <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-indigo-100">
+                            Create your free JobBridge account and start
+                            applying to jobs that match your skills and
+                            ambitions.
+                        </p>
+
+                        <button
+                            onClick={() => navigate("/register")}
+                            className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-50"
+                        >
+                            Create Free Account
+                            <ArrowRight size={17} />
+                        </button>
+                    </div>
+                </section>
+            )}
+
+            {/* =====================================================
+                FOOTER
+            ===================================================== */}
+
             <footer className="border-t border-slate-200 bg-white">
+
                 <div className="mx-auto flex max-w-7xl flex-col gap-5 px-6 py-8 sm:flex-row sm:items-center sm:justify-between lg:px-8">
+
                     <div className="flex items-center gap-2">
+
                         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white">
                             <BriefcaseBusiness size={17} />
                         </div>
@@ -507,6 +701,64 @@ const Home = () => {
                     </div>
                 </div>
             </footer>
+
+            {/* =====================================================
+                LOGIN / REGISTER MODAL
+            ===================================================== */}
+
+            {showAuthModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4 backdrop-blur-sm">
+
+                    <div className="relative w-full max-w-md rounded-2xl bg-white p-7 shadow-2xl">
+
+                        {/* Close */}
+                        <button
+                            onClick={() => setShowAuthModal(false)}
+                            className="absolute right-4 top-4 rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                        >
+                            <X size={20} />
+                        </button>
+
+                        {/* Icon */}
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                            <LockKeyhole size={22} />
+                        </div>
+
+                        <h2 className="mt-5 text-xl font-bold text-slate-900">
+                            Sign in to continue
+                        </h2>
+
+                        <p className="mt-2 text-sm leading-6 text-slate-500">
+                            {authAction === "apply"
+                                ? "You need an account before you can apply for this job."
+                                : "Create an account or sign in to save jobs and manage your career journey."}
+                        </p>
+
+                        <div className="mt-6 space-y-3">
+
+                            <button
+                                onClick={() => navigate("/login")}
+                                className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                            >
+                                <LogIn size={18} />
+                                Login
+                            </button>
+
+                            <button
+                                onClick={() => navigate("/register")}
+                                className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                            >
+                                <UserPlus size={18} />
+                                Create an Account
+                            </button>
+                        </div>
+
+                        <p className="mt-5 text-center text-xs text-slate-400">
+                            It's free to join JobBridge.
+                        </p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -1,6 +1,8 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import Home from "./pages/Home";
+import HomeJobs from "./pages/HomeJobs";
+import NotFound from "./pages/NotFound";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Applications from "./pages/candidate/Applications";
@@ -25,6 +27,7 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/jobs" element={<HomeJobs />} />
 
         {/* Candidate */}
         <Route path="/candidate" element={<CandidateLayout />}>
@@ -45,6 +48,7 @@ const App = () => {
           <Route path="/recruiter/post-job" element={<PostJob />} />
         </Route>
 
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

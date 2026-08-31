@@ -31,14 +31,16 @@ const PostJob = () => {
     const [skills, setSkills] = useState([]);
     const [skillInput, setSkillInput] = useState("");
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
+    <input
+        type="text"
+        name="name"
+        value={formData.name}
+        onChange={handleChange}
+        placeholder="Enter your full name"
+        className="w-full rounded-xl border border-slate-200 py-3 pl-11 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+    />
 
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-    };
+
 
     const handleAddSkill = () => {
         const skill = skillInput.trim();
@@ -58,17 +60,58 @@ const PostJob = () => {
         );
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Backend integration will be added later.
-        console.log("Job Data:", {
-            ...formData,
-            skills,
-        });
+        setError("");
 
-        alert("Job posting UI is working. Backend will be connected later.");
+        if (formData.password !== formData.confirmPassword) {
+            setError("Passwords do not match");
+            return;
+        }
+
+        if (accountType === "recruiter" && !formData.companyName.trim()) {
+            setError("Company name is required");
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            const payload = {
+                name: formData.name,
+                email: formData.email,
+                phone: formData.phone,
+                password: formData.password,
+                role:
+                    accountType === "candidate"
+                        ? "CANDIDATE"
+                        : "RECRUITER",
+            };
+
+            if (accountType === "recruiter") {
+                payload.companyName = formData.companyName;
+            }
+
+            const response = await registerUser(payload);
+
+            const { token, user } = response.data;
+
+            localStorage.setItem("token", token);
+            localStorage.setItem("user", JSON.stringify(user));
+
+            if (user.role === "CANDIDATE") {
+                navigate("/candidate/dashboard");
+            } else if (user.role === "RECRUITER") {
+                navigate("/recruiter/dashboard");
+            }
+        } catch (error) {
+            setError(error.message);
+        } finally {
+            setLoading(false);
+        }
     };
+
 
     return (
         <div>
