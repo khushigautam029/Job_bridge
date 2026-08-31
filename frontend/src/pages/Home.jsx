@@ -8,8 +8,10 @@ import {
     ShieldCheck,
     Users,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
+    const navigate = useNavigate();
     const categories = [
         {
             name: "Software Development",
@@ -132,12 +134,21 @@ const Home = () => {
                     </nav>
 
                     {/* Auth buttons */}
+                    {/* Auth buttons */}
                     <div className="flex items-center gap-3">
-                        <button className="hidden rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 sm:block">
+                        <button
+                            type="button"
+                            onClick={() => navigate("/login")}
+                            className="hidden rounded-lg px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 sm:block"
+                        >
                             Login
                         </button>
 
-                        <button className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700">
+                        <button
+                            type="button"
+                            onClick={() => navigate("/register")}
+                            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700"
+                        >
                             Get Started
                         </button>
                     </div>
