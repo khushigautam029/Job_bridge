@@ -27,7 +27,6 @@ const getSkills = asyncHandler(
 
 const addSkill = asyncHandler(
     async (req, res) => {
-
         const {
             error,
             value,
@@ -38,7 +37,6 @@ const addSkill = asyncHandler(
                 stripUnknown: true,
             }
         );
-
         if (error) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
@@ -48,13 +46,11 @@ const addSkill = asyncHandler(
                 ),
             });
         }
-
         const skill =
             await addCandidateSkill(
                 req.user.id,
                 value.skillId
             );
-
         res.status(STATUS_CODES.CREATED).json({
             success: true,
             message: MESSAGES.SKILL_ADDED,
@@ -68,19 +64,16 @@ const addSkill = asyncHandler(
 
 const removeSkill = asyncHandler(
     async (req, res) => {
-
         await removeCandidateSkill(
             req.user.id,
             req.params.skillId
         );
-
         res.status(STATUS_CODES.OK).json({
             success: true,
             message: MESSAGES.SKILL_REMOVED,
         });
     }
 );
-
 
 export {
     addSkill, getSkills, removeSkill

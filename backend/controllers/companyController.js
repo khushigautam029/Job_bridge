@@ -24,10 +24,8 @@ const getMyCompanyController = asyncHandler(
     }
 );
 
-
 const updateMyCompanyController = asyncHandler(
     async (req, res) => {
-
         const {
             error,
             value,
@@ -38,7 +36,6 @@ const updateMyCompanyController = asyncHandler(
                 stripUnknown: true,
             }
         );
-
         if (error) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
@@ -48,13 +45,11 @@ const updateMyCompanyController = asyncHandler(
                 ),
             });
         }
-
         const company =
             await updateMyCompany(
                 req.user.id,
                 value
             );
-
         res.status(STATUS_CODES.OK).json({
             success: true,
             message:MESSAGES.COMPANY_UPDATED,
@@ -68,10 +63,8 @@ const updateMyCompanyController = asyncHandler(
 
 const getCompanies = asyncHandler(
     async (req, res) => {
-
         const companies =
             await getAllCompanies();
-
         res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
@@ -81,15 +74,12 @@ const getCompanies = asyncHandler(
     }
 );
 
-
 const getCompany = asyncHandler(
     async (req, res) => {
-
         const company =
             await getCompanyById(
                 req.params.id
             );
-
         res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
@@ -98,7 +88,6 @@ const getCompany = asyncHandler(
         });
     }
 );
-
 
 export {
     getCompanies,

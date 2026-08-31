@@ -4,6 +4,8 @@ import {
     BriefcaseBusiness,
     CalendarDays,
     ChevronDown,
+    ChevronLeft,
+    ChevronRight,
     FileText,
     LayoutDashboard,
     LogOut,
@@ -22,6 +24,7 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 
 const CandidateLayout = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [profileMenuOpen, setProfileMenuOpen] = useState(false);
     const [darkMode, setDarkMode] = useState(false);
 
@@ -68,20 +71,29 @@ const CandidateLayout = () => {
     const handleLogout = () => {
         setProfileMenuOpen(false);
 
-        // Backend integration will be added later.
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
         navigate("/login");
     };
 
     const handleDeleteAccount = () => {
         setProfileMenuOpen(false);
 
-        // Actual delete account functionality will be added later.
-        console.log("Delete account clicked");
+        const confirmed = window.confirm(
+            "Are you sure you want to delete your account?"
+        );
+
+        if (confirmed) {
+            console.log("Delete account clicked");
+        }
     };
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-800">
-            {/* Mobile Overlay */}
+
+            {/* ==================== MOBILE OVERLAY ==================== */}
+
             {sidebarOpen && (
                 <div
                     className="fixed inset-0 z-40 bg-slate-900/40 lg:hidden"
@@ -89,27 +101,57 @@ const CandidateLayout = () => {
                 />
             )}
 
-            {/* ================= SIDEBAR ================= */}
+            {/* ==================== SIDEBAR ==================== */}
+
             <aside
-                className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-slate-200 bg-white transition-transform duration-200 lg:translate-x-0 ${
+                className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-slate-200 bg-white transition-all duration-300
+
+                ${
+                    sidebarCollapsed
+                        ? "w-20"
+                        : "w-64"
+                }
+
+                ${
                     sidebarOpen
                         ? "translate-x-0"
                         : "-translate-x-full"
-                }`}
+                }
+
+                lg:translate-x-0`}
             >
-                {/* Logo */}
-                <div className="flex h-20 items-center justify-between border-b border-slate-200 px-6">
+
+                {/* ==================== LOGO + SIDEBAR TOGGLE ==================== */}
+
+                <div
+                    className={`flex h-20 items-center border-b border-slate-200 ${
+                        sidebarCollapsed
+                            ? "justify-center px-3"
+                            : "justify-between px-6"
+                    }`}
+                >
+
+                    {/* Logo */}
+
                     <div className="flex items-center gap-2">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white">
+
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white">
                             <BriefcaseBusiness size={21} />
                         </div>
 
-                        <span className="text-xl font-bold tracking-tight text-slate-900">
-                            Job<span className="text-indigo-600">Bridge</span>
-                        </span>
+                        {!sidebarCollapsed && (
+                            <span className="text-xl font-bold tracking-tight text-slate-900">
+                                Job
+                                <span className="text-indigo-600">
+                                    Bridge
+                                </span>
+                            </span>
+                        )}
+
                     </div>
 
-                    {/* Close Sidebar */}
+                    {/* Mobile Close */}
+
                     <button
                         type="button"
                         onClick={() => setSidebarOpen(false)}
@@ -117,16 +159,46 @@ const CandidateLayout = () => {
                     >
                         <X size={21} />
                     </button>
+
+                    {/* Desktop Collapse / Expand */}
+
+                    <button
+                        type="button"
+                        onClick={() =>
+                            setSidebarCollapsed(
+                                !sidebarCollapsed
+                            )
+                        }
+                        className="hidden rounded-xl p-2.5 text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 lg:flex"
+                        title={
+                            sidebarCollapsed
+                                ? "Open sidebar"
+                                : "Close sidebar"
+                        }
+                    >
+                        {sidebarCollapsed ? (
+                            <ChevronRight size={21} />
+                        ) : (
+                            <ChevronLeft size={21} />
+                        )}
+                    </button>
+
                 </div>
 
-                {/* Navigation */}
-                <div className="flex-1 overflow-y-auto px-4 py-6">
-                    <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                        Workspace
-                    </p>
+                {/* ==================== NAVIGATION ==================== */}
+
+                <div className="flex-1 overflow-y-auto px-3 py-6">
+
+                    {!sidebarCollapsed && (
+                        <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                            Workspace
+                        </p>
+                    )}
 
                     <nav className="space-y-1">
+
                         {navigation.map((item) => {
+
                             const Icon = item.icon;
 
                             return (
@@ -136,46 +208,73 @@ const CandidateLayout = () => {
                                     onClick={() =>
                                         setSidebarOpen(false)
                                     }
+                                    title={
+                                        sidebarCollapsed
+                                            ? item.title
+                                            : ""
+                                    }
                                     className={({ isActive }) =>
-                                        `flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition ${
+                                        `flex w-full items-center rounded-xl py-3 text-sm font-medium transition ${
+                                            sidebarCollapsed
+                                                ? "justify-center px-3"
+                                                : "gap-3 px-3"
+                                        } ${
                                             isActive
                                                 ? "bg-indigo-50 text-indigo-600"
                                                 : "text-slate-600 hover:bg-slate-50 hover:text-indigo-600"
                                         }`
                                     }
                                 >
+
                                     <Icon size={19} />
 
-                                    <span>{item.title}</span>
-
-                                    {item.notificationCount && (
-                                        <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-indigo-600 px-1.5 text-[10px] font-bold text-white">
-                                            {item.notificationCount}
+                                    {!sidebarCollapsed && (
+                                        <span>
+                                            {item.title}
                                         </span>
                                     )}
+
                                 </NavLink>
                             );
                         })}
+
                     </nav>
                 </div>
+
             </aside>
 
-            {/* ================= MAIN AREA ================= */}
-            <div className="lg:pl-64">
-                {/* ================= NAVBAR ================= */}
+            {/* ==================== MAIN AREA ==================== */}
+
+            <div
+                className={`transition-all duration-300 ${
+                    sidebarCollapsed
+                        ? "lg:pl-20"
+                        : "lg:pl-64"
+                }`}
+            >
+
+                {/* ==================== NAVBAR ==================== */}
+
                 <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
+
                     <div className="flex h-20 items-center justify-between px-5 sm:px-7 lg:px-8">
+
                         {/* Mobile Menu */}
+
                         <button
                             type="button"
-                            onClick={() => setSidebarOpen(true)}
+                            onClick={() =>
+                                setSidebarOpen(true)
+                            }
                             className="rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 lg:hidden"
                         >
                             <Menu size={22} />
                         </button>
 
                         {/* Page Information */}
+
                         <div className="hidden lg:block">
+
                             <p className="text-xs font-medium text-slate-400">
                                 Candidate Portal
                             </p>
@@ -183,32 +282,37 @@ const CandidateLayout = () => {
                             <h1 className="text-lg font-bold text-slate-900">
                                 JobBridge
                             </h1>
+
                         </div>
 
                         {/* Navbar Right Side */}
+
                         <div className="ml-auto flex items-center gap-3">
+
                             {/* Notification */}
+
                             <button
                                 type="button"
                                 onClick={() =>
-                                    navigate("/candidate/notifications")
+                                    navigate(
+                                        "/candidate/notifications"
+                                    )
                                 }
                                 className="relative rounded-xl p-2.5 text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600"
                             >
                                 <Bell size={20} />
 
-                                {/* Notification Dot */}
                                 <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-indigo-600" />
 
-                                {/* Notification Count */}
                                 <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-bold text-white">
                                     3
                                 </span>
                             </button>
 
-                            {/* User Dropdown Wrapper */}
+                            {/* User Dropdown */}
+
                             <div className="relative">
-                                {/* User Button */}
+
                                 <button
                                     type="button"
                                     onClick={() =>
@@ -222,11 +326,13 @@ const CandidateLayout = () => {
                                             : "hover:bg-slate-50"
                                     }`}
                                 >
+
                                     <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
                                         <User size={18} />
                                     </div>
 
                                     <div className="hidden text-left sm:block">
+
                                         <p className="text-sm font-semibold text-slate-800">
                                             Khushi Gautam
                                         </p>
@@ -234,6 +340,7 @@ const CandidateLayout = () => {
                                         <p className="text-xs text-slate-400">
                                             Candidate
                                         </p>
+
                                     </div>
 
                                     <ChevronDown
@@ -244,19 +351,27 @@ const CandidateLayout = () => {
                                                 : ""
                                         }`}
                                     />
+
                                 </button>
 
-                                {/* ================= DROPDOWN ================= */}
+                                {/* ==================== PROFILE DROPDOWN ==================== */}
+
                                 {profileMenuOpen && (
+
                                     <div className="absolute right-0 top-14 z-50 w-72 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-200/60">
+
                                         {/* User Header */}
+
                                         <div className="border-b border-slate-100 p-4">
+
                                             <div className="flex items-center gap-3">
+
                                                 <div className="flex h-11 w-11 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
                                                     <User size={20} />
                                                 </div>
 
                                                 <div className="min-w-0">
+
                                                     <p className="truncate text-sm font-semibold text-slate-900">
                                                         Khushi Gautam
                                                     </p>
@@ -264,12 +379,17 @@ const CandidateLayout = () => {
                                                     <p className="truncate text-xs text-slate-500">
                                                         Candidate
                                                     </p>
+
                                                 </div>
+
                                             </div>
+
                                         </div>
 
                                         {/* Account Options */}
+
                                         <div className="p-2">
+
                                             <button
                                                 type="button"
                                                 onClick={
@@ -282,6 +402,7 @@ const CandidateLayout = () => {
                                                 <span>
                                                     My Profile
                                                 </span>
+
                                             </button>
 
                                             <button
@@ -296,13 +417,19 @@ const CandidateLayout = () => {
                                                 <span>
                                                     Settings
                                                 </span>
+
                                             </button>
+
                                         </div>
 
                                         {/* Appearance */}
+
                                         <div className="border-y border-slate-100 px-4 py-3">
+
                                             <div className="flex items-center justify-between">
+
                                                 <div className="flex items-center gap-3">
+
                                                     {darkMode ? (
                                                         <Moon
                                                             size={18}
@@ -316,6 +443,7 @@ const CandidateLayout = () => {
                                                     )}
 
                                                     <div>
+
                                                         <p className="text-sm font-medium text-slate-700">
                                                             Appearance
                                                         </p>
@@ -325,10 +453,13 @@ const CandidateLayout = () => {
                                                                 ? "Dark mode"
                                                                 : "Light mode"}
                                                         </p>
+
                                                     </div>
+
                                                 </div>
 
-                                                {/* Toggle */}
+                                                {/* Theme Toggle */}
+
                                                 <button
                                                     type="button"
                                                     onClick={() =>
@@ -343,6 +474,7 @@ const CandidateLayout = () => {
                                                             : "bg-slate-300"
                                                     }`}
                                                 >
+
                                                     <span
                                                         className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
                                                             darkMode
@@ -350,20 +482,30 @@ const CandidateLayout = () => {
                                                                 : "translate-x-0.5"
                                                         }`}
                                                     />
+
                                                 </button>
+
                                             </div>
+
                                         </div>
 
                                         {/* Logout & Delete */}
+
                                         <div className="p-2">
+
                                             <button
                                                 type="button"
-                                                onClick={handleLogout}
+                                                onClick={
+                                                    handleLogout
+                                                }
                                                 className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-red-600"
                                             >
                                                 <LogOut size={18} />
 
-                                                <span>Logout</span>
+                                                <span>
+                                                    Logout
+                                                </span>
+
                                             </button>
 
                                             <button
@@ -378,20 +520,30 @@ const CandidateLayout = () => {
                                                 <span>
                                                     Delete Account
                                                 </span>
+
                                             </button>
+
                                         </div>
+
                                     </div>
                                 )}
+
                             </div>
+
                         </div>
+
                     </div>
+
                 </header>
 
-                {/* Dynamic Page Content */}
+                {/* ==================== PAGE CONTENT ==================== */}
+
                 <main className="p-5 sm:p-7 lg:p-8">
                     <Outlet />
                 </main>
+
             </div>
+
         </div>
     );
 };

@@ -1,5 +1,3 @@
-import asyncHandler from "../utils/asyncHandler.js";
-
 import {
     createJob,
     deleteJob,
@@ -7,18 +5,15 @@ import {
     getJobById,
     updateJob,
 } from "../services/jobService.js";
-
+import asyncHandler from "../utils/asyncHandler.js";
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
-
 import {
     createJobSchema,
     updateJobSchema,
 } from "../validation/jobValidation.js";
 
-
 // CREATE JOB
 const create = asyncHandler(async (req, res) => {
-
     const { error, value } =
         createJobSchema.validate(
             req.body,
@@ -27,9 +22,7 @@ const create = asyncHandler(async (req, res) => {
                 stripUnknown: true,
             }
         );
-
     if (error) {
-
         return res.status(
             STATUS_CODES.BAD_REQUEST
         ).json({
@@ -40,14 +33,10 @@ const create = asyncHandler(async (req, res) => {
             ),
         });
     }
-
-
     const job = await createJob(
         req.user.id,
         value
     );
-
-
     return res.status(
         STATUS_CODES.CREATED
     ).json({
@@ -61,11 +50,8 @@ const create = asyncHandler(async (req, res) => {
 
 // GET ALL JOBS
 const getAll = asyncHandler(async (req, res) => {
-
     const result =
         await getAllJobs(req.query);
-
-
     return res.status(
         STATUS_CODES.OK
     ).json({
@@ -77,11 +63,9 @@ const getAll = asyncHandler(async (req, res) => {
 
 // GET JOB BY ID
 const getOne = asyncHandler(async (req, res) => {
-
     const job = await getJobById(
         req.params.id
     );
-
     return res.status(
         STATUS_CODES.OK
     ).json({

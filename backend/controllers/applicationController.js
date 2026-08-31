@@ -15,7 +15,6 @@ import {
 
 const apply = asyncHandler(
     async (req, res) => {
-
         const { error, value } =
             createApplicationSchema.validate(
                 req.body,
@@ -24,7 +23,6 @@ const apply = asyncHandler(
                     stripUnknown: true,
                 }
             );
-
 
         if (error) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
@@ -36,14 +34,12 @@ const apply = asyncHandler(
             });
         }
 
-
         const application =
             await applyForJob(
                 req.user.id,
                 req.params.jobId,
                 value
             );
-
 
         res.status(STATUS_CODES.CREATED).json({
             success: true,
@@ -57,13 +53,10 @@ const apply = asyncHandler(
 
 const getMine = asyncHandler(
     async (req, res) => {
-
         const applications =
             await getMyApplications(
                 req.user.id
             );
-
-
         res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
@@ -73,20 +66,14 @@ const getMine = asyncHandler(
     }
 );
 
-
-/*
-    Candidate / Recruiter → One application
-*/
+// Candidate / Recruiter → One application
 const getOne = asyncHandler(
     async (req, res) => {
-
         const application =
             await getApplicationById(
                 req.user.id,
                 req.params.id
             );
-
-
         res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
@@ -96,19 +83,13 @@ const getOne = asyncHandler(
     }
 );
 
-
-/*
-    Candidate → Withdraw
-*/
+// Candidate → Withdraw
 const withdraw = asyncHandler(
     async (req, res) => {
-
         await withdrawApplication(
             req.user.id,
             req.params.id
         );
-
-
         res.status(STATUS_CODES.OK).json({
             success: true,
             message: MESSAGES.APPLICATION_WITHDRAWN ,
@@ -118,14 +99,11 @@ const withdraw = asyncHandler(
 
 const getForJob = asyncHandler(
     async (req, res) => {
-
         const applications =
             await getJobApplications(
                 req.user.id,
                 req.params.jobId
             );
-
-
         res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
@@ -135,13 +113,9 @@ const getForJob = asyncHandler(
     }
 );
 
-
-/*
-    Recruiter → Update status
-*/
+// Recruiter → Update status
 const updateStatus = asyncHandler(
     async (req, res) => {
-
         const { error, value } =
             updateApplicationStatusSchema.validate(
                 req.body,
@@ -150,8 +124,6 @@ const updateStatus = asyncHandler(
                     stripUnknown: true,
                 }
             );
-
-
         if (error) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
@@ -161,16 +133,12 @@ const updateStatus = asyncHandler(
                 ),
             });
         }
-
-
         const application =
             await updateApplicationStatus(
                 req.user.id,
                 req.params.id,
                 value.status
             );
-
-
         res.status(STATUS_CODES.OK).json({
             success: true,
             message: MESSAGES.APPLICATION_STATUS_UPDATED,
@@ -180,7 +148,6 @@ const updateStatus = asyncHandler(
         });
     }
 );
-
 
 export {
     apply, getForJob, getMine,

@@ -28,57 +28,20 @@ const App = () => {
 
         {/* Candidate */}
         <Route path="/candidate" element={<CandidateLayout />}>
-          <Route
-            path="dashboard"
-            element={<CandidateDashboard />}
-          />
-
-          <Route
-            path="jobs"
-            element={<FindJobs />}
-          />
-
-          <Route
-            path="applications"
-            element={<Applications />}
-          />
-
-          <Route
-            path="saved-jobs"
-            element={<SavedJobs />}
-          />
-
-          <Route
-            path="interviews"
-            element={<Interviews />}
-          />
+          <Route path="dashboard" element={<CandidateDashboard />}/>
+          <Route path="jobs" element={<FindJobs />}/>
+          <Route path="applications" element={<Applications />}/>
+          <Route path="saved-jobs" element={<SavedJobs />}/>
+          <Route path="interviews" element={<Interviews />}/>
         </Route>
 
         {/* Recruiter */}
         <Route path="/recruiter" element={<RecruiterLayout />}>
-
-          <Route
-            path="dashboard"
-            element={<RecruiterDashboard />}
-          />
-          <Route
-            path="/recruiter/jobs"
-            element={<Jobs />}
-          />
-          <Route
-            path="/recruiter/applications"
-            element={<RecruiterApplications />}
-          />
-
-          <Route
-            path="/recruiter/candidates"
-            element={<Candidates />}
-          />
-
-          <Route
-            path="/recruiter/interviews"
-            element={<RecruiterInterviews />}
-          />
+          <Route path="dashboard" element={<RecruiterDashboard />}/>
+          <Route path="/recruiter/jobs" element={<Jobs />}/>
+          <Route path="/recruiter/applications" element={<RecruiterApplications />}/>
+          <Route path="/recruiter/candidates" element={<Candidates />}/>
+          <Route path="/recruiter/interviews" element={<RecruiterInterviews />}/>
           <Route path="/recruiter/post-job" element={<PostJob />} />
         </Route>
 

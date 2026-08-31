@@ -1,5 +1,3 @@
-import asyncHandler from "../utils/asyncHandler.js";
-
 import {
     cancelInterview,
     getInterviewById,
@@ -8,13 +6,13 @@ import {
     updateInterview,
     updateInterviewStatus,
 } from "../services/interviewService.js";
+import asyncHandler from "../utils/asyncHandler.js";
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 import {
     createInterviewSchema,
     updateInterviewSchema,
     updateInterviewStatusSchema,
 } from "../validation/interviewValidation.js";
-
 
 const schedule = asyncHandler(
     async (req, res) => {
@@ -67,20 +65,14 @@ const getMine = asyncHandler(
     }
 );
 
-
-/*
-    Candidate / Recruiter → One interview
-*/
+// Candidate / Recruiter → One interview
 const getOne = asyncHandler(
     async (req, res) => {
-
         const interview =
             await getInterviewById(
                 req.user.id,
                 req.params.id
             );
-
-
         res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
@@ -91,12 +83,9 @@ const getOne = asyncHandler(
 );
 
 
-/*
-    Recruiter → Update interview
-*/
+// Recruiter → Update interview
 const update = asyncHandler(
     async (req, res) => {
-
         const { error, value } =
             updateInterviewSchema.validate(
                 req.body,
@@ -105,8 +94,6 @@ const update = asyncHandler(
                     stripUnknown: true,
                 }
             );
-
-
         if (error) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
@@ -117,16 +104,12 @@ const update = asyncHandler(
                 ),
             });
         }
-
-
         const interview =
             await updateInterview(
                 req.user.id,
                 req.params.id,
                 value
             );
-
-
         res.status(STATUS_CODES.OK).json({
             success: true,
             message:MESSAGES.INTERVIEW_UPDATED,
@@ -138,12 +121,9 @@ const update = asyncHandler(
 );
 
 
-/*
-    Recruiter → Update status
-*/
+//  Recruiter → Update status
 const updateStatus = asyncHandler(
     async (req, res) => {
-
         const { error, value } =
             updateInterviewStatusSchema.validate(
                 req.body,
@@ -152,8 +132,6 @@ const updateStatus = asyncHandler(
                     stripUnknown: true,
                 }
             );
-
-
         if (error) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
@@ -164,16 +142,12 @@ const updateStatus = asyncHandler(
                 ),
             });
         }
-
-
         const interview =
             await updateInterviewStatus(
                 req.user.id,
                 req.params.id,
                 value.status
             );
-
-
         res.status(STATUS_CODES.OK).json({
             success: true,
             message:MESSAGES.INTERVIEW_STATUS_UPDATED,
@@ -185,18 +159,13 @@ const updateStatus = asyncHandler(
 );
 
 
-/*
-    Recruiter → Cancel interview
-*/
+// Recruiter → Cancel interview
 const cancel = asyncHandler(
     async (req, res) => {
-
         await cancelInterview(
             req.user.id,
             req.params.id
         );
-
-
         res.status(STATUS_CODES.OK).json({
             success: true,
             message:
@@ -204,7 +173,6 @@ const cancel = asyncHandler(
         });
     }
 );
-
 
 export {
     cancel, getMine,

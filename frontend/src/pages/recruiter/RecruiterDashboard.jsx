@@ -3,8 +3,7 @@ import {
     BriefcaseBusiness,
     CalendarDays,
     FileText,
-    Plus,
-    Users,
+    Users
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -187,17 +186,6 @@ const RecruiterDashboard = () => {
                             Here's an overview of your hiring activity.
                         </p>
                     </div>
-
-                    {/* Post Job */}
-
-                    <button
-                        type="button"
-                        onClick={handlePostJob}
-                        className="flex w-fit items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
-                    >
-                        <Plus size={17} />
-                        Post a Job
-                    </button>
                 </section>
 
                 {/* ==================== STATISTICS ==================== */}

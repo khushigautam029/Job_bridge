@@ -7,17 +7,33 @@ import {
     Search,
     Trash2,
     Users,
+    X,
 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Jobs = () => {
+    const navigate = useNavigate();
+
+    // =========================
+    // FILTER STATES
+    // =========================
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("All");
     const [categoryFilter, setCategoryFilter] = useState("All");
-    const navigate = useNavigate();
 
-    const jobs = [
+    // =========================
+    // MODAL STATES
+    // =========================
+    const [selectedJob, setSelectedJob] = useState(null);
+    const [showApplications, setShowApplications] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+    // =========================
+    // JOB DATA
+    // =========================
+    const [jobs, setJobs] = useState([
         {
             id: 1,
             title: "Senior React Developer",
@@ -96,24 +112,136 @@ const Jobs = () => {
                 "Help us grow our brand through digital marketing and creative campaigns.",
             skills: ["Marketing", "SEO", "Social Media"],
         },
-    ];
+    ]);
 
-    const filteredJobs = jobs.filter((job) => {
-        const matchesSearch =
-            job.title.toLowerCase().includes(search.toLowerCase()) ||
-            job.category.toLowerCase().includes(search.toLowerCase()) ||
-            job.location.toLowerCase().includes(search.toLowerCase());
+    // =========================
+    // APPLICATION DATA
+    // =========================
+    const applications = {
+        1: [
+            {
+                id: 101,
+                name: "Rahul Sharma",
+                email: "rahul@example.com",
+                experience: "4 Years",
+                status: "Shortlisted",
+            },
+            {
+                id: 102,
+                name: "Aman Verma",
+                email: "aman@example.com",
+                experience: "3 Years",
+                status: "Interview",
+            },
+            {
+                id: 103,
+                name: "Vikas Kumar",
+                email: "vikas@example.com",
+                experience: "5 Years",
+                status: "Under Review",
+            },
+        ],
 
-        const matchesStatus =
-            statusFilter === "All" || job.status === statusFilter;
+        2: [
+            {
+                id: 201,
+                name: "Priya Singh",
+                email: "priya@example.com",
+                experience: "3 Years",
+                status: "Under Review",
+            },
+            {
+                id: 202,
+                name: "Rohit Mehta",
+                email: "rohit@example.com",
+                experience: "4 Years",
+                status: "Shortlisted",
+            },
+        ],
 
-        const matchesCategory =
-            categoryFilter === "All" ||
-            job.category === categoryFilter;
+        3: [
+            {
+                id: 301,
+                name: "Sneha Kapoor",
+                email: "sneha@example.com",
+                experience: "2 Years",
+                status: "Applied",
+            },
+            {
+                id: 302,
+                name: "Anjali Sharma",
+                email: "anjali@example.com",
+                experience: "3 Years",
+                status: "Shortlisted",
+            },
+        ],
 
-        return matchesSearch && matchesStatus && matchesCategory;
-    });
+        4: [
+            {
+                id: 401,
+                name: "Karan Malhotra",
+                email: "karan@example.com",
+                experience: "2 Years",
+                status: "Applied",
+            },
+        ],
 
+        5: [
+            {
+                id: 501,
+                name: "Neha Gupta",
+                email: "neha@example.com",
+                experience: "3 Years",
+                status: "Under Review",
+            },
+        ],
+
+        6: [
+            {
+                id: 601,
+                name: "Arjun Kapoor",
+                email: "arjun@example.com",
+                experience: "2 Years",
+                status: "Applied",
+            },
+        ],
+    };
+
+    // =========================
+    // FILTER JOBS
+    // =========================
+    const filteredJobs = useMemo(() => {
+        const searchValue = search.toLowerCase().trim();
+
+        return jobs.filter((job) => {
+            const matchesSearch =
+                job.title.toLowerCase().includes(searchValue) ||
+                job.category.toLowerCase().includes(searchValue) ||
+                job.location.toLowerCase().includes(searchValue) ||
+                job.type.toLowerCase().includes(searchValue) ||
+                job.skills.some((skill) =>
+                    skill.toLowerCase().includes(searchValue)
+                );
+
+            const matchesStatus =
+                statusFilter === "All" ||
+                job.status === statusFilter;
+
+            const matchesCategory =
+                categoryFilter === "All" ||
+                job.category === categoryFilter;
+
+            return (
+                matchesSearch &&
+                matchesStatus &&
+                matchesCategory
+            );
+        });
+    }, [jobs, search, statusFilter, categoryFilter]);
+
+    // =========================
+    // STATUS CLASSES
+    // =========================
     const getStatusClasses = (status) => {
         if (status === "Active") {
             return "bg-green-50 text-green-600";
@@ -122,9 +250,93 @@ const Jobs = () => {
         return "bg-slate-100 text-slate-500";
     };
 
+    const getApplicationStatusClasses = (status) => {
+        if (status === "Shortlisted") {
+            return "bg-green-50 text-green-600";
+        }
+
+        if (status === "Interview") {
+            return "bg-indigo-50 text-indigo-600";
+        }
+
+        if (status === "Under Review") {
+            return "bg-amber-50 text-amber-600";
+        }
+
+        return "bg-slate-100 text-slate-500";
+    };
+
+    // =========================
+    // VIEW APPLICATIONS
+    // =========================
+    const handleViewApplications = (job) => {
+        setSelectedJob(job);
+        setShowApplications(true);
+    };
+
+    // =========================
+    // EDIT JOB
+    // =========================
+    const handleEdit = (job) => {
+        setSelectedJob({ ...job });
+        setShowEditModal(true);
+    };
+
+    const handleEditChange = (e) => {
+        const { name, value } = e.target;
+
+        setSelectedJob((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+    const handleSaveEdit = () => {
+        setJobs((prevJobs) =>
+            prevJobs.map((job) =>
+                job.id === selectedJob.id
+                    ? selectedJob
+                    : job
+            )
+        );
+
+        setShowEditModal(false);
+        setSelectedJob(null);
+    };
+
+    // =========================
+    // DELETE JOB
+    // =========================
+    const handleDelete = (job) => {
+        setSelectedJob(job);
+        setShowDeleteModal(true);
+    };
+
+    const confirmDelete = () => {
+        setJobs((prevJobs) =>
+            prevJobs.filter(
+                (job) => job.id !== selectedJob.id
+            )
+        );
+
+        setShowDeleteModal(false);
+        setSelectedJob(null);
+    };
+
+    // =========================
+    // CLEAR FILTERS
+    // =========================
+    const clearFilters = () => {
+        setSearch("");
+        setStatusFilter("All");
+        setCategoryFilter("All");
+    };
+
     return (
         <div>
-            {/* Page Header */}
+            {/* =========================
+                PAGE HEADER
+            ========================= */}
             <section className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
                 <div>
                     <p className="text-sm font-medium text-indigo-600">
@@ -142,7 +354,9 @@ const Jobs = () => {
 
                 <button
                     type="button"
-                    onClick={() => navigate("/recruiter/post-job")}
+                    onClick={() =>
+                        navigate("/recruiter/post-job")
+                    }
                     className="flex w-fit items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
                 >
                     <Plus size={18} />
@@ -150,7 +364,9 @@ const Jobs = () => {
                 </button>
             </section>
 
-            {/* Filters */}
+            {/* =========================
+                FILTERS
+            ========================= */}
             <section className="mt-7 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="grid gap-4 md:grid-cols-[1fr_auto_auto]">
                     {/* Search */}
@@ -163,8 +379,10 @@ const Jobs = () => {
                         <input
                             type="text"
                             value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Search jobs..."
+                            onChange={(e) =>
+                                setSearch(e.target.value)
+                            }
+                            placeholder="Search jobs, skills, location..."
                             className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
                         />
                     </div>
@@ -172,12 +390,22 @@ const Jobs = () => {
                     {/* Status */}
                     <select
                         value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value)}
+                        onChange={(e) =>
+                            setStatusFilter(e.target.value)
+                        }
                         className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
                     >
-                        <option value="All">All Status</option>
-                        <option value="Active">Active</option>
-                        <option value="Closed">Closed</option>
+                        <option value="All">
+                            All Status
+                        </option>
+
+                        <option value="Active">
+                            Active
+                        </option>
+
+                        <option value="Closed">
+                            Closed
+                        </option>
                     </select>
 
                     {/* Category */}
@@ -188,18 +416,40 @@ const Jobs = () => {
                         }
                         className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
                     >
-                        <option value="All">All Categories</option>
-                        <option value="Development">Development</option>
-                        <option value="Design">Design</option>
+                        <option value="All">
+                            All Categories
+                        </option>
+
+                        <option value="Development">
+                            Development
+                        </option>
+
+                        <option value="Design">
+                            Design
+                        </option>
+
                         <option value="Human Resources">
                             Human Resources
                         </option>
-                        <option value="Marketing">Marketing</option>
+
+                        <option value="Marketing">
+                            Marketing
+                        </option>
+
+                        <option value="Sales">
+                            Sales
+                        </option>
+
+                        <option value="Finance">
+                            Finance
+                        </option>
                     </select>
                 </div>
             </section>
 
-            {/* Results Header */}
+            {/* =========================
+                RESULTS HEADER
+            ========================= */}
             <div className="mt-7 flex items-center justify-between">
                 <div>
                     <h2 className="text-lg font-semibold text-slate-900">
@@ -208,12 +458,17 @@ const Jobs = () => {
 
                     <p className="mt-1 text-xs text-slate-400">
                         {filteredJobs.length}{" "}
-                        {filteredJobs.length === 1 ? "job" : "jobs"} found
+                        {filteredJobs.length === 1
+                            ? "job"
+                            : "jobs"}{" "}
+                        found
                     </p>
                 </div>
             </div>
 
-            {/* Job Cards */}
+            {/* =========================
+                JOB CARDS
+            ========================= */}
             {filteredJobs.length > 0 ? (
                 <section className="mt-5 grid gap-5 lg:grid-cols-2">
                     {filteredJobs.map((job) => (
@@ -225,7 +480,9 @@ const Jobs = () => {
                             <div className="flex items-start justify-between gap-4">
                                 <div className="flex items-start gap-4">
                                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                                        <BriefcaseBusiness size={21} />
+                                        <BriefcaseBusiness
+                                            size={21}
+                                        />
                                     </div>
 
                                     <div>
@@ -304,6 +561,11 @@ const Jobs = () => {
                             <div className="mt-6 flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row">
                                 <button
                                     type="button"
+                                    onClick={() =>
+                                        handleViewApplications(
+                                            job
+                                        )
+                                    }
                                     className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-indigo-700"
                                 >
                                     <Users size={15} />
@@ -312,6 +574,9 @@ const Jobs = () => {
 
                                 <button
                                     type="button"
+                                    onClick={() =>
+                                        handleEdit(job)
+                                    }
                                     className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
                                 >
                                     <Edit size={15} />
@@ -320,6 +585,9 @@ const Jobs = () => {
 
                                 <button
                                     type="button"
+                                    onClick={() =>
+                                        handleDelete(job)
+                                    }
                                     className="flex items-center justify-center gap-2 rounded-xl border border-red-100 px-4 py-2.5 text-xs font-semibold text-red-500 transition hover:bg-red-50"
                                 >
                                     <Trash2 size={15} />
@@ -341,21 +609,389 @@ const Jobs = () => {
                     </h3>
 
                     <p className="mx-auto mt-2 max-w-md text-sm text-slate-400">
-                        We couldn't find any jobs matching your search or
-                        selected filters.
+                        We couldn't find any jobs matching your
+                        search or selected filters.
                     </p>
 
                     <button
                         type="button"
-                        onClick={() => {
-                            setSearch("");
-                            setStatusFilter("All");
-                            setCategoryFilter("All");
-                        }}
+                        onClick={clearFilters}
                         className="mt-5 text-sm font-semibold text-indigo-600 hover:text-indigo-700"
                     >
                         Clear filters
                     </button>
+                </div>
+            )}
+
+            {/* =====================================================
+                VIEW APPLICATIONS MODAL
+            ====================================================== */}
+            {showApplications && selectedJob && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4">
+                    <div className="max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+                        {/* Modal Header */}
+                        <div className="flex items-start justify-between border-b border-slate-200 px-6 py-5">
+                            <div>
+                                <p className="text-xs font-medium text-indigo-600">
+                                    Applications
+                                </p>
+
+                                <h2 className="mt-1 text-xl font-bold text-slate-900">
+                                    {selectedJob.title}
+                                </h2>
+
+                                <p className="mt-1 text-sm text-slate-500">
+                                    {selectedJob.applications} candidates
+                                    applied for this position.
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setShowApplications(false);
+                                    setSelectedJob(null);
+                                }}
+                                className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {/* Applications List */}
+                        <div className="max-h-[65vh] overflow-y-auto p-6">
+                            {applications[selectedJob.id]?.length > 0 ? (
+                                <div className="space-y-4">
+                                    {applications[
+                                        selectedJob.id
+                                    ].map((application) => (
+                                        <div
+                                            key={application.id}
+                                            className="rounded-2xl border border-slate-200 p-5"
+                                        >
+                                            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-50 font-semibold text-indigo-600">
+                                                        {application.name
+                                                            .split(" ")
+                                                            .map(
+                                                                (name) =>
+                                                                    name[0]
+                                                            )
+                                                            .join("")}
+                                                    </div>
+
+                                                    <div>
+                                                        <h3 className="font-semibold text-slate-900">
+                                                            {
+                                                                application.name
+                                                            }
+                                                        </h3>
+
+                                                        <p className="mt-1 text-xs text-slate-500">
+                                                            {
+                                                                application.email
+                                                            }
+                                                        </p>
+
+                                                        <p className="mt-1 text-xs text-slate-400">
+                                                            {
+                                                                application.experience
+                                                            }{" "}
+                                                            experience
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <span
+                                                    className={`w-fit rounded-full px-3 py-1.5 text-xs font-semibold ${getApplicationStatusClasses(
+                                                        application.status
+                                                    )}`}
+                                                >
+                                                    {
+                                                        application.status
+                                                    }
+                                                </span>
+                                            </div>
+
+                                            <div className="mt-4 flex flex-wrap gap-2">
+                                                <button
+                                                    type="button"
+                                                    className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
+                                                >
+                                                    View Profile
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-indigo-700"
+                                                >
+                                                    Update Status
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="py-12 text-center">
+                                    <Users
+                                        size={35}
+                                        className="mx-auto text-slate-300"
+                                    />
+
+                                    <h3 className="mt-4 font-semibold text-slate-800">
+                                        No applications yet
+                                    </h3>
+
+                                    <p className="mt-2 text-sm text-slate-400">
+                                        No candidates have applied for
+                                        this job yet.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* =====================================================
+                EDIT JOB MODAL
+            ====================================================== */}
+            {showEditModal && selectedJob && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4">
+                    <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
+                        {/* Header */}
+                        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
+                            <div>
+                                <p className="text-xs font-medium text-indigo-600">
+                                    Hiring Management
+                                </p>
+
+                                <h2 className="mt-1 text-xl font-bold text-slate-900">
+                                    Edit Job
+                                </h2>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setShowEditModal(false);
+                                    setSelectedJob(null);
+                                }}
+                                className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {/* Form */}
+                        <div className="space-y-5 p-6">
+                            {/* Title */}
+                            <div>
+                                <label className="mb-2 block text-sm font-medium text-slate-700">
+                                    Job Title
+                                </label>
+
+                                <input
+                                    type="text"
+                                    name="title"
+                                    value={selectedJob.title}
+                                    onChange={handleEditChange}
+                                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                />
+                            </div>
+
+                            {/* Category + Type */}
+                            <div className="grid gap-5 sm:grid-cols-2">
+                                <div>
+                                    <label className="mb-2 block text-sm font-medium text-slate-700">
+                                        Category
+                                    </label>
+
+                                    <select
+                                        name="category"
+                                        value={selectedJob.category}
+                                        onChange={handleEditChange}
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                    >
+                                        <option value="Development">
+                                            Development
+                                        </option>
+
+                                        <option value="Design">
+                                            Design
+                                        </option>
+
+                                        <option value="Human Resources">
+                                            Human Resources
+                                        </option>
+
+                                        <option value="Marketing">
+                                            Marketing
+                                        </option>
+
+                                        <option value="Sales">
+                                            Sales
+                                        </option>
+
+                                        <option value="Finance">
+                                            Finance
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="mb-2 block text-sm font-medium text-slate-700">
+                                        Status
+                                    </label>
+
+                                    <select
+                                        name="status"
+                                        value={selectedJob.status}
+                                        onChange={handleEditChange}
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                    >
+                                        <option value="Active">
+                                            Active
+                                        </option>
+
+                                        <option value="Closed">
+                                            Closed
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* Location + Type */}
+                            <div className="grid gap-5 sm:grid-cols-2">
+                                <div>
+                                    <label className="mb-2 block text-sm font-medium text-slate-700">
+                                        Location
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        name="location"
+                                        value={selectedJob.location}
+                                        onChange={handleEditChange}
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="mb-2 block text-sm font-medium text-slate-700">
+                                        Job Type
+                                    </label>
+
+                                    <select
+                                        name="type"
+                                        value={selectedJob.type}
+                                        onChange={handleEditChange}
+                                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                    >
+                                        <option value="Full Time">
+                                            Full Time
+                                        </option>
+
+                                        <option value="Part Time">
+                                            Part Time
+                                        </option>
+
+                                        <option value="Contract">
+                                            Contract
+                                        </option>
+
+                                        <option value="Internship">
+                                            Internship
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* Description */}
+                            <div>
+                                <label className="mb-2 block text-sm font-medium text-slate-700">
+                                    Description
+                                </label>
+
+                                <textarea
+                                    name="description"
+                                    value={selectedJob.description}
+                                    onChange={handleEditChange}
+                                    rows={5}
+                                    className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                />
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowEditModal(false);
+                                        setSelectedJob(null);
+                                    }}
+                                    className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                                >
+                                    Cancel
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={handleSaveEdit}
+                                    className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                                >
+                                    Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* =====================================================
+                DELETE CONFIRMATION MODAL
+            ====================================================== */}
+            {showDeleteModal && selectedJob && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4">
+                    <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-500">
+                            <Trash2 size={21} />
+                        </div>
+
+                        <h2 className="mt-5 text-lg font-bold text-slate-900">
+                            Delete this job?
+                        </h2>
+
+                        <p className="mt-2 text-sm leading-6 text-slate-500">
+                            Are you sure you want to delete{" "}
+                            <span className="font-semibold text-slate-700">
+                                {selectedJob.title}
+                            </span>
+                            ? This action cannot be undone.
+                        </p>
+
+                        <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setShowDeleteModal(false);
+                                    setSelectedJob(null);
+                                }}
+                                className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={confirmDelete}
+                                className="rounded-xl bg-red-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-600"
+                            >
+                                Delete Job
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
