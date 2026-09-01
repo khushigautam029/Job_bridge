@@ -2,6 +2,7 @@ import {
     BriefcaseBusiness,
     CalendarDays,
     Edit,
+    Eye,
     MapPin,
     Plus,
     Search,
@@ -10,29 +11,31 @@ import {
     X,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import {
+    useNavigate,
+    useSearchParams,
+} from "react-router-dom";
 
 const Jobs = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
 
-    // =========================
-    // FILTER STATES
-    // =========================
+   
+    const selectedCategory = searchParams.get("category");
+
+  
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("All");
-    const [categoryFilter, setCategoryFilter] = useState("All");
 
-    // =========================
-    // MODAL STATES
-    // =========================
+    // If category exists in URL, use it.
+    // Otherwise show all categories.
+    const [categoryFilter, setCategoryFilter] = useState(
+        selectedCategory || "All"
+    );
     const [selectedJob, setSelectedJob] = useState(null);
     const [showApplications, setShowApplications] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-    // =========================
-    // JOB DATA
-    // =========================
     const [jobs, setJobs] = useState([
         {
             id: 1,
@@ -40,12 +43,36 @@ const Jobs = () => {
             category: "Development",
             location: "Delhi, India",
             type: "Full Time",
+            workMode: "Hybrid",
             applications: 32,
             postedDate: "Aug 27, 2026",
             status: "Active",
+            salary: "₹8L - ₹14L",
+            experience: "3 - 5 Years",
+            deadline: "Sep 30, 2026",
             description:
                 "Looking for an experienced React developer to build scalable and modern web applications.",
-            skills: ["React", "JavaScript", "Tailwind CSS"],
+            responsibilities: [
+                "Build and maintain modern React applications.",
+                "Develop reusable and scalable UI components.",
+                "Collaborate with designers and backend developers.",
+                "Improve application performance and user experience.",
+                "Write clean, maintainable and well-tested code.",
+            ],
+            requirements: [
+                "3+ years of experience with React.",
+                "Strong knowledge of JavaScript and TypeScript.",
+                "Experience working with REST APIs.",
+                "Good understanding of responsive design.",
+                "Experience with Git and modern development workflows.",
+            ],
+            skills: [
+                "React",
+                "JavaScript",
+                "TypeScript",
+                "Node.js",
+                "REST API",
+            ],
         },
         {
             id: 2,
@@ -53,12 +80,33 @@ const Jobs = () => {
             category: "Development",
             location: "Bangalore, India",
             type: "Full Time",
+            workMode: "Onsite",
             applications: 24,
             postedDate: "Aug 25, 2026",
             status: "Active",
+            salary: "₹7L - ₹12L",
+            experience: "2 - 4 Years",
+            deadline: "Sep 25, 2026",
             description:
                 "We are looking for a backend developer experienced in Node.js, APIs and database development.",
-            skills: ["Node.js", "Express", "MySQL"],
+            responsibilities: [
+                "Build REST APIs using Node.js and Express.",
+                "Design and optimize database queries.",
+                "Implement authentication and authorization.",
+                "Work closely with frontend developers.",
+            ],
+            requirements: [
+                "2+ years of Node.js experience.",
+                "Experience with Express.js.",
+                "Strong knowledge of MySQL.",
+                "Understanding of REST API architecture.",
+            ],
+            skills: [
+                "Node.js",
+                "Express",
+                "MySQL",
+                "Sequelize",
+            ],
         },
         {
             id: 3,
@@ -66,12 +114,33 @@ const Jobs = () => {
             category: "Design",
             location: "Remote",
             type: "Full Time",
+            workMode: "Remote",
             applications: 18,
             postedDate: "Aug 22, 2026",
             status: "Active",
+            salary: "₹6L - ₹10L",
+            experience: "1 - 3 Years",
+            deadline: "Sep 20, 2026",
             description:
                 "Join our design team and create intuitive and engaging experiences for our users.",
-            skills: ["Figma", "UI Design", "UX Research"],
+            responsibilities: [
+                "Create user-friendly interface designs.",
+                "Develop wireframes and prototypes.",
+                "Collaborate with product and development teams.",
+                "Conduct user research and usability testing.",
+            ],
+            requirements: [
+                "1+ years of UI/UX experience.",
+                "Strong knowledge of Figma.",
+                "Understanding of user-centered design.",
+                "Good communication skills.",
+            ],
+            skills: [
+                "Figma",
+                "UI Design",
+                "UX Research",
+                "Prototyping",
+            ],
         },
         {
             id: 4,
@@ -79,12 +148,31 @@ const Jobs = () => {
             category: "Development",
             location: "Delhi, India",
             type: "Part Time",
+            workMode: "Hybrid",
             applications: 15,
             postedDate: "Aug 18, 2026",
             status: "Closed",
+            salary: "₹5L - ₹9L",
+            experience: "1 - 3 Years",
+            deadline: "Sep 10, 2026",
             description:
                 "Looking for a frontend developer who can build responsive and user-friendly interfaces.",
-            skills: ["React", "HTML", "CSS"],
+            responsibilities: [
+                "Build responsive frontend interfaces.",
+                "Convert designs into reusable components.",
+                "Work with frontend APIs.",
+            ],
+            requirements: [
+                "Experience with React.",
+                "Strong HTML and CSS knowledge.",
+                "Understanding of responsive design.",
+            ],
+            skills: [
+                "React",
+                "HTML",
+                "CSS",
+                "JavaScript",
+            ],
         },
         {
             id: 5,
@@ -92,12 +180,31 @@ const Jobs = () => {
             category: "Human Resources",
             location: "Gurgaon, India",
             type: "Full Time",
+            workMode: "Onsite",
             applications: 11,
             postedDate: "Aug 15, 2026",
             status: "Active",
+            salary: "₹4L - ₹7L",
+            experience: "2 - 4 Years",
+            deadline: "Sep 18, 2026",
             description:
                 "Responsible for recruitment, employee relations and supporting HR operations.",
-            skills: ["Recruitment", "Communication", "HR"],
+            responsibilities: [
+                "Manage recruitment activities.",
+                "Coordinate interviews.",
+                "Maintain employee records.",
+                "Support HR operations.",
+            ],
+            requirements: [
+                "Experience in recruitment.",
+                "Strong communication skills.",
+                "Good understanding of HR processes.",
+            ],
+            skills: [
+                "Recruitment",
+                "Communication",
+                "HR",
+            ],
         },
         {
             id: 6,
@@ -105,18 +212,33 @@ const Jobs = () => {
             category: "Marketing",
             location: "Mumbai, India",
             type: "Full Time",
+            workMode: "Hybrid",
             applications: 9,
             postedDate: "Aug 10, 2026",
             status: "Closed",
+            salary: "₹5L - ₹8L",
+            experience: "1 - 3 Years",
+            deadline: "Sep 5, 2026",
             description:
                 "Help us grow our brand through digital marketing and creative campaigns.",
-            skills: ["Marketing", "SEO", "Social Media"],
+            responsibilities: [
+                "Plan and execute marketing campaigns.",
+                "Manage social media activities.",
+                "Track campaign performance.",
+                "Work with the creative team.",
+            ],
+            requirements: [
+                "Experience with digital marketing.",
+                "Knowledge of SEO.",
+                "Strong communication skills.",
+            ],
+            skills: [
+                "Marketing",
+                "SEO",
+                "Social Media",
+            ],
         },
     ]);
-
-    // =========================
-    // APPLICATION DATA
-    // =========================
     const applications = {
         1: [
             {
@@ -206,10 +328,6 @@ const Jobs = () => {
             },
         ],
     };
-
-    // =========================
-    // FILTER JOBS
-    // =========================
     const filteredJobs = useMemo(() => {
         const searchValue = search.toLowerCase().trim();
 
@@ -237,11 +355,13 @@ const Jobs = () => {
                 matchesCategory
             );
         });
-    }, [jobs, search, statusFilter, categoryFilter]);
+    }, [
+        jobs,
+        search,
+        statusFilter,
+        categoryFilter,
+    ]);
 
-    // =========================
-    // STATUS CLASSES
-    // =========================
     const getStatusClasses = (status) => {
         if (status === "Active") {
             return "bg-green-50 text-green-600";
@@ -265,23 +385,19 @@ const Jobs = () => {
 
         return "bg-slate-100 text-slate-500";
     };
-
-    // =========================
-    // VIEW APPLICATIONS
-    // =========================
+    const handleViewJob = (job) => {
+        navigate(`/recruiter/jobs/${job.id}`, {
+            state: { job },
+        });
+    };
     const handleViewApplications = (job) => {
         setSelectedJob(job);
         setShowApplications(true);
     };
-
-    // =========================
-    // EDIT JOB
-    // =========================
     const handleEdit = (job) => {
         setSelectedJob({ ...job });
         setShowEditModal(true);
     };
-
     const handleEditChange = (e) => {
         const { name, value } = e.target;
 
@@ -303,10 +419,6 @@ const Jobs = () => {
         setShowEditModal(false);
         setSelectedJob(null);
     };
-
-    // =========================
-    // DELETE JOB
-    // =========================
     const handleDelete = (job) => {
         setSelectedJob(job);
         setShowDeleteModal(true);
@@ -322,14 +434,13 @@ const Jobs = () => {
         setShowDeleteModal(false);
         setSelectedJob(null);
     };
-
-    // =========================
-    // CLEAR FILTERS
-    // =========================
     const clearFilters = () => {
         setSearch("");
         setStatusFilter("All");
         setCategoryFilter("All");
+
+        // Remove category from URL also
+        navigate("/recruiter/jobs");
     };
 
     return (
@@ -363,6 +474,31 @@ const Jobs = () => {
                     Post a Job
                 </button>
             </section>
+
+            {/* =========================
+                ACTIVE CATEGORY
+            ========================= */}
+            {selectedCategory && (
+                <div className="mt-5 flex items-center justify-between rounded-xl border border-indigo-100 bg-indigo-50 px-4 py-3">
+                    <div>
+                        <p className="text-xs font-medium text-indigo-500">
+                            Showing jobs in category
+                        </p>
+
+                        <p className="mt-0.5 text-sm font-semibold text-indigo-700">
+                            {selectedCategory}
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={clearFilters}
+                        className="text-xs font-semibold text-indigo-600 hover:text-indigo-700"
+                    >
+                        Clear
+                    </button>
+                </div>
+            )}
 
             {/* =========================
                 FILTERS
@@ -411,9 +547,21 @@ const Jobs = () => {
                     {/* Category */}
                     <select
                         value={categoryFilter}
-                        onChange={(e) =>
-                            setCategoryFilter(e.target.value)
-                        }
+                        onChange={(e) => {
+                            const value = e.target.value;
+
+                            setCategoryFilter(value);
+
+                            if (value === "All") {
+                                navigate("/recruiter/jobs");
+                            } else {
+                                navigate(
+                                    `/recruiter/jobs?category=${encodeURIComponent(
+                                        value
+                                    )}`
+                                );
+                            }
+                        }}
                         className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
                     >
                         <option value="All">
@@ -453,7 +601,9 @@ const Jobs = () => {
             <div className="mt-7 flex items-center justify-between">
                 <div>
                     <h2 className="text-lg font-semibold text-slate-900">
-                        Your Job Postings
+                        {categoryFilter !== "All"
+                            ? `${categoryFilter} Jobs`
+                            : "Your Job Postings"}
                     </h2>
 
                     <p className="mt-1 text-xs text-slate-400">
@@ -558,18 +708,27 @@ const Jobs = () => {
                             </div>
 
                             {/* Actions */}
-                            <div className="mt-6 flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row">
+                            <div className="mt-6 grid gap-3 border-t border-slate-100 pt-5 sm:grid-cols-2">
                                 <button
                                     type="button"
                                     onClick={() =>
-                                        handleViewApplications(
-                                            job
-                                        )
+                                        handleViewJob(job)
                                     }
-                                    className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-indigo-700"
+                                    className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-indigo-700"
+                                >
+                                    <Eye size={15} />
+                                    View Job
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        handleViewApplications(job)
+                                    }
+                                    className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
                                 >
                                     <Users size={15} />
-                                    View Applications
+                                    Applications
                                 </button>
 
                                 <button
@@ -598,7 +757,6 @@ const Jobs = () => {
                     ))}
                 </section>
             ) : (
-                /* Empty State */
                 <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
                     <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-slate-400">
                         <BriefcaseBusiness size={25} />
@@ -629,7 +787,6 @@ const Jobs = () => {
             {showApplications && selectedJob && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4">
                     <div className="max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-2xl">
-                        {/* Modal Header */}
                         <div className="flex items-start justify-between border-b border-slate-200 px-6 py-5">
                             <div>
                                 <p className="text-xs font-medium text-indigo-600">
@@ -658,7 +815,6 @@ const Jobs = () => {
                             </button>
                         </div>
 
-                        {/* Applications List */}
                         <div className="max-h-[65vh] overflow-y-auto p-6">
                             {applications[selectedJob.id]?.length > 0 ? (
                                 <div className="space-y-4">
@@ -760,7 +916,6 @@ const Jobs = () => {
             {showEditModal && selectedJob && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4">
                     <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-                        {/* Header */}
                         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
                             <div>
                                 <p className="text-xs font-medium text-indigo-600">
@@ -784,9 +939,7 @@ const Jobs = () => {
                             </button>
                         </div>
 
-                        {/* Form */}
                         <div className="space-y-5 p-6">
-                            {/* Title */}
                             <div>
                                 <label className="mb-2 block text-sm font-medium text-slate-700">
                                     Job Title
@@ -801,7 +954,6 @@ const Jobs = () => {
                                 />
                             </div>
 
-                            {/* Category + Type */}
                             <div className="grid gap-5 sm:grid-cols-2">
                                 <div>
                                     <label className="mb-2 block text-sm font-medium text-slate-700">
@@ -862,7 +1014,6 @@ const Jobs = () => {
                                 </div>
                             </div>
 
-                            {/* Location + Type */}
                             <div className="grid gap-5 sm:grid-cols-2">
                                 <div>
                                     <label className="mb-2 block text-sm font-medium text-slate-700">
@@ -908,7 +1059,34 @@ const Jobs = () => {
                                 </div>
                             </div>
 
-                            {/* Description */}
+                            <div>
+                                <label className="mb-2 block text-sm font-medium text-slate-700">
+                                    Work Mode
+                                </label>
+
+                                <select
+                                    name="workMode"
+                                    value={
+                                        selectedJob.workMode ||
+                                        "Hybrid"
+                                    }
+                                    onChange={handleEditChange}
+                                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                >
+                                    <option value="Remote">
+                                        Remote
+                                    </option>
+
+                                    <option value="Hybrid">
+                                        Hybrid
+                                    </option>
+
+                                    <option value="Onsite">
+                                        Onsite
+                                    </option>
+                                </select>
+                            </div>
+
                             <div>
                                 <label className="mb-2 block text-sm font-medium text-slate-700">
                                     Description
@@ -923,7 +1101,6 @@ const Jobs = () => {
                                 />
                             </div>
 
-                            {/* Actions */}
                             <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
                                 <button
                                     type="button"

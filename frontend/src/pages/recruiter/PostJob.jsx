@@ -14,7 +14,6 @@ import { useNavigate } from "react-router-dom";
 
 const PostJob = () => {
     const navigate = useNavigate();
-
     const [formData, setFormData] = useState({
         title: "",
         category: "",
@@ -27,33 +26,41 @@ const PostJob = () => {
         description: "",
         requirements: "",
     });
-
     const [skills, setSkills] = useState([]);
     const [skillInput, setSkillInput] = useState("");
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
+    const [loading, setLoading] = useState(false);
+    const handleChange = (e) => {
+        const { name, value } = e.target;
 
-    <input
-        type="text"
-        name="name"
-        value={formData.name}
-        onChange={handleChange}
-        placeholder="Enter your full name"
-        className="w-full rounded-xl border border-slate-200 py-3 pl-11 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-    />
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
 
-
+        // Remove error when user starts changing fields
+        if (error) {
+            setError("");
+        }
+    };
 
     const handleAddSkill = () => {
         const skill = skillInput.trim();
 
         if (!skill) return;
 
-        if (!skills.includes(skill)) {
+        const skillExists = skills.some(
+            (existingSkill) =>
+                existingSkill.toLowerCase() === skill.toLowerCase()
+        );
+
+        if (!skillExists) {
             setSkills((prev) => [...prev, skill]);
         }
 
         setSkillInput("");
     };
-
     const handleRemoveSkill = (skillToRemove) => {
         setSkills((prev) =>
             prev.filter((skill) => skill !== skillToRemove)
@@ -62,60 +69,122 @@ const PostJob = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         setError("");
-
-        if (formData.password !== formData.confirmPassword) {
-            setError("Passwords do not match");
+        setSuccess("");
+        if (!formData.title.trim()) {
+            setError("Job title is required.");
             return;
         }
 
-        if (accountType === "recruiter" && !formData.companyName.trim()) {
-            setError("Company name is required");
+        if (!formData.category) {
+            setError("Please select a job category.");
+            return;
+        }
+
+        if (!formData.type) {
+            setError("Please select a job type.");
+            return;
+        }
+
+        if (!formData.workMode) {
+            setError("Please select a work mode.");
+            return;
+        }
+
+        if (!formData.location.trim()) {
+            setError("Location is required.");
+            return;
+        }
+
+        if (!formData.experience) {
+            setError("Please select the required experience.");
+            return;
+        }
+
+        if (!formData.salary.trim()) {
+            setError("Salary is required.");
+            return;
+        }
+
+        if (!formData.deadline) {
+            setError("Application deadline is required.");
+            return;
+        }
+
+        if (!formData.description.trim()) {
+            setError("Job description is required.");
+            return;
+        }
+
+        if (!formData.requirements.trim()) {
+            setError("Job requirements are required.");
+            return;
+        }
+
+        if (skills.length === 0) {
+            setError("Please add at least one required skill.");
             return;
         }
 
         try {
             setLoading(true);
 
-            const payload = {
-                name: formData.name,
-                email: formData.email,
-                phone: formData.phone,
-                password: formData.password,
-                role:
-                    accountType === "candidate"
-                        ? "CANDIDATE"
-                        : "RECRUITER",
+            /*
+             * For now this creates the job locally.
+             *
+             * Once your backend API is ready, this is where we will
+             * replace the local logic with the POST /jobs API call.
+             */
+
+            const newJob = {
+                id: Date.now(),
+                title: formData.title,
+                category: formData.category,
+                location: formData.location,
+                type: formData.type,
+                workMode: formData.workMode,
+                experience: formData.experience,
+                salary: formData.salary,
+                deadline: formData.deadline,
+                description: formData.description,
+                requirements: formData.requirements,
+                skills,
+                applications: 0,
+                postedDate: new Date().toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "2-digit",
+                    year: "numeric",
+                }),
+                status: "Active",
             };
 
-            if (accountType === "recruiter") {
-                payload.companyName = formData.companyName;
-            }
+            console.log("Job to be posted:", newJob);
 
-            const response = await registerUser(payload);
+            setSuccess("Job posted successfully!");
 
-            const { token, user } = response.data;
-
-            localStorage.setItem("token", token);
-            localStorage.setItem("user", JSON.stringify(user));
-
-            if (user.role === "CANDIDATE") {
-                navigate("/candidate/dashboard");
-            } else if (user.role === "RECRUITER") {
-                navigate("/recruiter/dashboard");
-            }
-        } catch (error) {
-            setError(error.message);
+            /*
+             * Small delay so the success message can be seen.
+             */
+            setTimeout(() => {
+                navigate("/recruiter/jobs", {
+                    state: {
+                        newJob,
+                    },
+                });
+            }, 700);
+        } catch (err) {
+            console.error("Post job error:", err);
+            setError("Something went wrong while posting the job.");
         } finally {
             setLoading(false);
         }
     };
 
-
     return (
         <div>
-            {/* Page Header */}
+            {/* =========================
+                PAGE HEADER
+            ========================= */}
             <section className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-start gap-3">
                     <button
@@ -143,9 +212,31 @@ const PostJob = () => {
                 </div>
             </section>
 
-            {/* Form */}
+            {/* =========================
+                ERROR MESSAGE
+            ========================= */}
+            {error && (
+                <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
+                    {error}
+                </div>
+            )}
+
+            {/* =========================
+                SUCCESS MESSAGE
+            ========================= */}
+            {success && (
+                <div className="mt-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-600">
+                    {success}
+                </div>
+            )}
+
+            {/* =========================
+                FORM
+            ========================= */}
             <form onSubmit={handleSubmit} className="mt-7">
-                {/* Basic Information */}
+                {/* =========================
+                    BASIC INFORMATION
+                ========================= */}
                 <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
                     <div className="border-b border-slate-200 px-6 py-5">
                         <div className="flex items-center gap-3">
@@ -198,21 +289,27 @@ const PostJob = () => {
                                     <option value="">
                                         Select category
                                     </option>
+
                                     <option value="Development">
                                         Development
                                     </option>
+
                                     <option value="Design">
                                         Design
                                     </option>
+
                                     <option value="Human Resources">
                                         Human Resources
                                     </option>
+
                                     <option value="Marketing">
                                         Marketing
                                     </option>
+
                                     <option value="Sales">
                                         Sales
                                     </option>
+
                                     <option value="Finance">
                                         Finance
                                     </option>
@@ -241,15 +338,19 @@ const PostJob = () => {
                                     <option value="">
                                         Select job type
                                     </option>
+
                                     <option value="Full Time">
                                         Full Time
                                     </option>
+
                                     <option value="Part Time">
                                         Part Time
                                     </option>
+
                                     <option value="Contract">
                                         Contract
                                     </option>
+
                                     <option value="Internship">
                                         Internship
                                     </option>
@@ -278,12 +379,15 @@ const PostJob = () => {
                                     <option value="">
                                         Select work mode
                                     </option>
+
                                     <option value="On-site">
                                         On-site
                                     </option>
+
                                     <option value="Remote">
                                         Remote
                                     </option>
+
                                     <option value="Hybrid">
                                         Hybrid
                                     </option>
@@ -335,21 +439,27 @@ const PostJob = () => {
                                     <option value="">
                                         Select experience
                                     </option>
+
                                     <option value="Fresher">
                                         Fresher
                                     </option>
+
                                     <option value="0-1 Years">
                                         0-1 Years
                                     </option>
+
                                     <option value="1-2 Years">
                                         1-2 Years
                                     </option>
+
                                     <option value="2-4 Years">
                                         2-4 Years
                                     </option>
+
                                     <option value="4-6 Years">
                                         4-6 Years
                                     </option>
+
                                     <option value="6+ Years">
                                         6+ Years
                                     </option>
@@ -402,7 +512,9 @@ const PostJob = () => {
                     </div>
                 </section>
 
-                {/* Job Description */}
+                {/* =========================
+                    JOB DESCRIPTION
+                ========================= */}
                 <section className="mt-6 rounded-2xl border border-slate-200 bg-white shadow-sm">
                     <div className="border-b border-slate-200 px-6 py-5">
                         <div className="flex items-center gap-3">
@@ -458,7 +570,9 @@ const PostJob = () => {
                     </div>
                 </section>
 
-                {/* Skills */}
+                {/* =========================
+                    SKILLS
+                ========================= */}
                 <section className="mt-6 rounded-2xl border border-slate-200 bg-white shadow-sm">
                     <div className="border-b border-slate-200 px-6 py-5">
                         <h2 className="font-semibold text-slate-900">
@@ -524,7 +638,9 @@ const PostJob = () => {
                     </div>
                 </section>
 
-                {/* Actions */}
+                {/* =========================
+                    ACTIONS
+                ========================= */}
                 <section className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                     <button
                         type="button"
@@ -537,10 +653,12 @@ const PostJob = () => {
 
                     <button
                         type="submit"
-                        className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                        disabled={loading}
+                        className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                         <Save size={17} />
-                        Post Job
+
+                        {loading ? "Posting..." : "Post Job"}
                     </button>
                 </section>
             </form>

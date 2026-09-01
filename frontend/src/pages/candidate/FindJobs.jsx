@@ -7,6 +7,7 @@ import {
     SlidersHorizontal,
 } from "lucide-react";
 import { useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const FindJobs = () => {
     const [search, setSearch] = useState("");
@@ -14,11 +15,17 @@ const FindJobs = () => {
     const [jobType, setJobType] = useState("All");
     const [experience, setExperience] = useState("All");
 
+    const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+
+    const selectedCategory = searchParams.get("category");
+
     const jobs = [
         {
             id: 1,
             title: "Senior React Developer",
             company: "TechNova Solutions",
+            category: "Software Development",
             location: "Delhi, India",
             type: "Full Time",
             experience: "3-5 Years",
@@ -30,6 +37,7 @@ const FindJobs = () => {
             id: 2,
             title: "Backend Developer",
             company: "CloudCore Technologies",
+            category: "Software Development",
             location: "Bangalore, India",
             type: "Full Time",
             experience: "2-4 Years",
@@ -41,6 +49,7 @@ const FindJobs = () => {
             id: 3,
             title: "Frontend Developer",
             company: "Pixel Technologies",
+            category: "Software Development",
             location: "Remote",
             type: "Full Time",
             experience: "1-3 Years",
@@ -52,6 +61,7 @@ const FindJobs = () => {
             id: 4,
             title: "Full Stack Developer",
             company: "Innovate Labs",
+            category: "Software Development",
             location: "Gurgaon, India",
             type: "Full Time",
             experience: "3-5 Years",
@@ -63,6 +73,7 @@ const FindJobs = () => {
             id: 5,
             title: "UI/UX Designer",
             company: "Creative Labs",
+            category: "Designing",
             location: "Remote",
             type: "Part Time",
             experience: "1-3 Years",
@@ -74,6 +85,7 @@ const FindJobs = () => {
             id: 6,
             title: "Software Engineer",
             company: "NextGen Technologies",
+            category: "Software Development",
             location: "Noida, India",
             type: "Full Time",
             experience: "2-4 Years",
@@ -84,6 +96,11 @@ const FindJobs = () => {
     ];
 
     const filteredJobs = jobs.filter((job) => {
+        const matchesCategory =
+            !selectedCategory ||
+            job.category?.toLowerCase() ===
+                selectedCategory.toLowerCase();
+
         const matchesSearch =
             job.title
                 .toLowerCase()
@@ -92,7 +109,9 @@ const FindJobs = () => {
                 .toLowerCase()
                 .includes(search.toLowerCase()) ||
             job.skills.some((skill) =>
-                skill.toLowerCase().includes(search.toLowerCase())
+                skill
+                    .toLowerCase()
+                    .includes(search.toLowerCase())
             );
 
         const matchesLocation =
@@ -109,6 +128,7 @@ const FindJobs = () => {
             job.experience === experience;
 
         return (
+            matchesCategory &&
             matchesSearch &&
             matchesLocation &&
             matchesType &&
@@ -121,15 +141,21 @@ const FindJobs = () => {
             {/* Page Heading */}
             <div>
                 <p className="text-sm font-semibold uppercase tracking-wider text-indigo-600">
-                    Opportunities
+                    {selectedCategory
+                        ? `${selectedCategory} Jobs`
+                        : "Opportunities"}
                 </p>
 
                 <h2 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">
-                    Find Jobs
+                    {selectedCategory
+                        ? selectedCategory
+                        : "Find Jobs"}
                 </h2>
 
                 <p className="mt-2 text-sm text-slate-500">
-                    Discover jobs that match your skills and career goals.
+                    {selectedCategory
+                        ? `Explore ${selectedCategory.toLowerCase()} jobs that match your skills and career goals.`
+                        : "Discover jobs that match your skills and career goals."}
                 </p>
             </div>
 
@@ -181,9 +207,15 @@ const FindJobs = () => {
                             }
                             className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-3 pr-10 text-sm text-slate-600 outline-none focus:border-indigo-400"
                         >
-                            <option value="All">All Job Types</option>
-                            <option value="Full Time">Full Time</option>
-                            <option value="Part Time">Part Time</option>
+                            <option value="All">
+                                All Job Types
+                            </option>
+                            <option value="Full Time">
+                                Full Time
+                            </option>
+                            <option value="Part Time">
+                                Part Time
+                            </option>
                             <option value="Internship">
                                 Internship
                             </option>
@@ -239,7 +271,9 @@ const FindJobs = () => {
             <div className="mt-7 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                 <div>
                     <h3 className="font-semibold text-slate-900">
-                        Available Jobs
+                        {selectedCategory
+                            ? `${selectedCategory} Jobs`
+                            : "Available Jobs"}
                     </h3>
 
                     <p className="mt-1 text-xs text-slate-400">
@@ -272,9 +306,15 @@ const FindJobs = () => {
                                     </div>
 
                                     <div>
-                                        <h4 className="text-lg font-semibold text-slate-900">
-                                            {job.title}
-                                        </h4>
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <h4 className="text-lg font-semibold text-slate-900">
+                                                {job.title}
+                                            </h4>
+
+                                            <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-600">
+                                                {job.category}
+                                            </span>
+                                        </div>
 
                                         <p className="mt-1 text-sm font-medium text-slate-600">
                                             {job.company}
@@ -326,6 +366,11 @@ const FindJobs = () => {
 
                                     <button
                                         type="button"
+                                        onClick={() =>
+                                            navigate(
+                                                `/candidate/jobs/${job.id}`
+                                            )
+                                        }
                                         className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
                                     >
                                         View Job
@@ -345,8 +390,22 @@ const FindJobs = () => {
                         </h3>
 
                         <p className="mt-1 text-sm text-slate-500">
-                            Try changing your search or filters.
+                            {selectedCategory
+                                ? `There are currently no jobs available in ${selectedCategory}.`
+                                : "Try changing your search or filters."}
                         </p>
+
+                        {selectedCategory && (
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    navigate("/candidate/jobs")
+                                }
+                                className="mt-5 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                            >
+                                View All Jobs
+                            </button>
+                        )}
                     </div>
                 )}
             </div>

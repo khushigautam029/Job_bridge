@@ -19,19 +19,11 @@ import jobsData from "./data/jobsData";
 const HomeJobs = () => {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
-
     const category = searchParams.get("category");
-
     const [search, setSearch] = useState("");
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [authAction, setAuthAction] = useState("");
-
     const isLoggedIn = Boolean(localStorage.getItem("token"));
-
-    // --------------------------------------------------
-    // Filter Jobs
-    // --------------------------------------------------
-
     const filteredJobs = useMemo(() => {
         return jobsData.filter((job) => {
             const matchesCategory = category
@@ -53,10 +45,6 @@ const HomeJobs = () => {
         });
     }, [category, search]);
 
-    // --------------------------------------------------
-    // Authentication
-    // --------------------------------------------------
-
     const requireLogin = (action) => {
         if (!isLoggedIn) {
             setAuthAction(action);
@@ -65,9 +53,6 @@ const HomeJobs = () => {
         }
 
         if (action === "apply") {
-            // Later this can navigate to:
-            // /jobs/:jobId/apply
-
             console.log("User can apply");
         }
 

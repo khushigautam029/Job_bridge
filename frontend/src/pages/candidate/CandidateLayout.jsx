@@ -58,6 +58,15 @@ const CandidateLayout = () => {
     ];
 
     // =====================================================
+    // CLOSE MENUS
+    // =====================================================
+
+    const closeMenus = () => {
+        setMobileMenuOpen(false);
+        setProfileMenuOpen(false);
+    };
+
+    // =====================================================
     // LOGOUT
     // =====================================================
 
@@ -65,7 +74,7 @@ const CandidateLayout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
 
-        setProfileMenuOpen(false);
+        closeMenus();
 
         navigate("/login");
     };
@@ -75,7 +84,7 @@ const CandidateLayout = () => {
     // =====================================================
 
     const handleProfileClick = () => {
-        setProfileMenuOpen(false);
+        closeMenus();
 
         navigate("/candidate/profile");
     };
@@ -85,39 +94,28 @@ const CandidateLayout = () => {
     // =====================================================
 
     const handleSettingsClick = () => {
-        setProfileMenuOpen(false);
+        closeMenus();
 
         navigate("/candidate/settings");
-    };
-
-    // =====================================================
-    // NAVIGATION HANDLER
-    // =====================================================
-
-    const handleNavigation = (path) => {
-        navigate(path);
-
-        setMobileMenuOpen(false);
-        setProfileMenuOpen(false);
     };
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-800">
 
-            {/* =====================================================
+            {/* =========================================================
                 NAVBAR
-            ====================================================== */}
+            ========================================================= */}
 
             <header className="sticky top-0 z-50 border-b border-slate-200 bg-white">
 
-                <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-7 lg:px-8">
+                <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-5 sm:px-7 lg:px-10">
 
                     {/* ================= LOGO ================= */}
 
                     <button
                         type="button"
                         onClick={() => navigate("/candidate/jobs")}
-                        className="flex items-center gap-2"
+                        className="flex items-center gap-2.5"
                     >
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm">
                             <BriefcaseBusiness size={21} />
@@ -131,7 +129,9 @@ const CandidateLayout = () => {
                         </span>
                     </button>
 
-                    {/* ================= DESKTOP NAVIGATION ================= */}
+                    {/* =================================================
+                        DESKTOP NAVIGATION
+                    ================================================= */}
 
                     <nav className="hidden items-center gap-1 lg:flex">
 
@@ -142,6 +142,10 @@ const CandidateLayout = () => {
                                 <NavLink
                                     key={item.title}
                                     to={item.path}
+                                    end={
+                                        item.path ===
+                                        "/candidate/jobs"
+                                    }
                                     className={({ isActive }) =>
                                         `flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition ${
                                             isActive
@@ -159,28 +163,29 @@ const CandidateLayout = () => {
 
                     </nav>
 
-                    {/* ================= RIGHT SIDE ================= */}
+                    {/* =================================================
+                        RIGHT SIDE
+                    ================================================= */}
 
-                    <div className="flex items-center gap-2 sm:gap-3">
+                    <div className="flex items-center gap-2">
 
                         {/* ================= NOTIFICATIONS ================= */}
 
                         <button
                             type="button"
                             onClick={() =>
-                                navigate("/candidate/notifications")
+                                navigate(
+                                    "/candidate/notifications"
+                                )
                             }
-                            className="relative rounded-xl p-2.5 text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600"
+                            className="relative rounded-lg p-2.5 text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600"
+                            title="Notifications"
                         >
                             <Bell size={20} />
 
-                            {/* Notification Dot */}
-
-                            <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-indigo-600" />
-
                             {/* Notification Count */}
 
-                            <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-bold text-white">
+                            <span className="absolute right-1.5 top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-indigo-600 px-1 text-[9px] font-bold text-white">
                                 3
                             </span>
                         </button>
@@ -193,10 +198,10 @@ const CandidateLayout = () => {
                                 type="button"
                                 onClick={() =>
                                     setProfileMenuOpen(
-                                        (previous) => !previous
+                                        (prev) => !prev
                                     )
                                 }
-                                className={`flex items-center gap-2 rounded-xl px-2 py-1.5 transition ${
+                                className={`flex items-center gap-2.5 rounded-xl px-2 py-1.5 transition ${
                                     profileMenuOpen
                                         ? "bg-slate-100"
                                         : "hover:bg-slate-50"
@@ -211,9 +216,9 @@ const CandidateLayout = () => {
 
                                 {/* User Information */}
 
-                                <div className="hidden text-left sm:block">
+                                <div className="hidden text-left md:block">
 
-                                    <p className="max-w-32 truncate text-sm font-semibold text-slate-800">
+                                    <p className="max-w-[130px] truncate text-sm font-semibold text-slate-800">
                                         {userName}
                                     </p>
 
@@ -229,7 +234,7 @@ const CandidateLayout = () => {
 
                                 <ChevronDown
                                     size={16}
-                                    className={`hidden text-slate-400 transition-transform sm:block ${
+                                    className={`hidden text-slate-400 transition-transform md:block ${
                                         profileMenuOpen
                                             ? "rotate-180"
                                             : ""
@@ -240,19 +245,20 @@ const CandidateLayout = () => {
 
                             {/* =================================================
                                 PROFILE DROPDOWN
-                            ================================================== */}
+                            ================================================= */}
 
                             {profileMenuOpen && (
-                                <div className="absolute right-0 top-14 z-50 w-64 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-200/60">
 
-                                    {/* ================= USER INFORMATION ================= */}
+                                <div className="absolute right-0 top-12 z-50 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg shadow-slate-200/70">
 
-                                    <div className="border-b border-slate-100 p-4">
+                                    {/* ================= USER INFO ================= */}
+
+                                    <div className="border-b border-slate-100 px-4 py-3.5">
 
                                         <div className="flex items-center gap-3">
 
-                                            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
-                                                <User size={20} />
+                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
+                                                <User size={18} />
                                             </div>
 
                                             <div className="min-w-0">
@@ -261,7 +267,7 @@ const CandidateLayout = () => {
                                                     {userName}
                                                 </p>
 
-                                                <p className="text-xs text-slate-500">
+                                                <p className="truncate text-xs text-slate-500">
                                                     Candidate
                                                 </p>
 
@@ -271,16 +277,18 @@ const CandidateLayout = () => {
 
                                     </div>
 
-                                    {/* ================= ACCOUNT OPTIONS ================= */}
+                                    {/* ================= OPTIONS ================= */}
 
-                                    <div className="p-2">
+                                    <div className="p-1.5">
 
                                         {/* My Profile */}
 
                                         <button
                                             type="button"
-                                            onClick={handleProfileClick}
-                                            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
+                                            onClick={
+                                                handleProfileClick
+                                            }
+                                            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
                                         >
                                             <UserCircle size={18} />
 
@@ -291,8 +299,10 @@ const CandidateLayout = () => {
 
                                         <button
                                             type="button"
-                                            onClick={handleSettingsClick}
-                                            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
+                                            onClick={
+                                                handleSettingsClick
+                                            }
+                                            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
                                         >
                                             <Settings size={18} />
 
@@ -303,12 +313,12 @@ const CandidateLayout = () => {
 
                                     {/* ================= LOGOUT ================= */}
 
-                                    <div className="border-t border-slate-100 p-2">
+                                    <div className="border-t border-slate-100 p-1.5">
 
                                         <button
                                             type="button"
                                             onClick={handleLogout}
-                                            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-red-50 hover:text-red-600"
+                                            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-50"
                                         >
                                             <LogOut size={18} />
 
@@ -318,25 +328,26 @@ const CandidateLayout = () => {
                                     </div>
 
                                 </div>
+
                             )}
 
                         </div>
 
-                        {/* ================= MOBILE MENU BUTTON ================= */}
+                        {/* ================= MOBILE MENU ================= */}
 
                         <button
                             type="button"
                             onClick={() =>
                                 setMobileMenuOpen(
-                                    (previous) => !previous
+                                    (prev) => !prev
                                 )
                             }
-                            className="rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 lg:hidden"
+                            className="rounded-lg p-2.5 text-slate-600 transition hover:bg-slate-100 lg:hidden"
                         >
                             {mobileMenuOpen ? (
-                                <X size={22} />
+                                <X size={21} />
                             ) : (
-                                <Menu size={22} />
+                                <Menu size={21} />
                             )}
                         </button>
 
@@ -344,60 +355,75 @@ const CandidateLayout = () => {
 
                 </div>
 
-                {/* =====================================================
+                {/* =========================================================
                     MOBILE NAVIGATION
-                ====================================================== */}
+                ========================================================= */}
 
                 {mobileMenuOpen && (
-                    <div className="border-t border-slate-200 bg-white lg:hidden">
 
-                        <nav className="mx-auto max-w-7xl px-5 py-4 sm:px-7">
+                    <div className="border-t border-slate-100 bg-white lg:hidden">
+
+                        <nav className="mx-auto max-w-[1440px] px-5 py-3 sm:px-7 lg:px-10">
 
                             <div className="space-y-1">
 
                                 {navigation.map((item) => {
+
                                     const Icon = item.icon;
 
                                     return (
                                         <NavLink
                                             key={item.title}
                                             to={item.path}
+                                            end={
+                                                item.path ===
+                                                "/candidate/jobs"
+                                            }
                                             onClick={() =>
-                                                setMobileMenuOpen(false)
+                                                setMobileMenuOpen(
+                                                    false
+                                                )
                                             }
                                             className={({ isActive }) =>
-                                                `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium ${
+                                                `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium ${
                                                     isActive
                                                         ? "bg-indigo-50 text-indigo-600"
                                                         : "text-slate-600 hover:bg-slate-50"
                                                 }`
                                             }
                                         >
+
                                             <Icon size={18} />
 
                                             {item.title}
+
                                         </NavLink>
                                     );
+
                                 })}
 
-                                {/* ================= MOBILE NOTIFICATIONS ================= */}
+                                {/* ================= NOTIFICATIONS ================= */}
 
                                 <NavLink
                                     to="/candidate/notifications"
                                     onClick={() =>
-                                        setMobileMenuOpen(false)
+                                        setMobileMenuOpen(
+                                            false
+                                        )
                                     }
                                     className={({ isActive }) =>
-                                        `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium ${
+                                        `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium ${
                                             isActive
                                                 ? "bg-indigo-50 text-indigo-600"
                                                 : "text-slate-600 hover:bg-slate-50"
                                         }`
                                     }
                                 >
+
                                     <Bell size={18} />
 
                                     Notifications
+
                                 </NavLink>
 
                             </div>
@@ -405,17 +431,20 @@ const CandidateLayout = () => {
                         </nav>
 
                     </div>
+
                 )}
 
             </header>
 
-            {/* =====================================================
-                PAGE CONTENT
-            ====================================================== */}
+            {/* =========================================================
+                MAIN CONTENT
+            ========================================================= */}
 
-            <main className="mx-auto max-w-7xl px-5 py-8 sm:px-7 lg:px-8">
+            <main className="mx-auto max-w-[1440px] px-5 py-6 sm:px-7 lg:px-10">
 
-                <Outlet />
+                <section>
+                    <Outlet />
+                </section>
 
             </main>
 
