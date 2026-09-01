@@ -70,7 +70,7 @@ const Login = () => {
             );
 
             if (user.role === "CANDIDATE") {
-                navigate("/candidate/dashboard");
+                navigate("/candidate/jobs");
                 return;
             }
 

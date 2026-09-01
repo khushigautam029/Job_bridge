@@ -3,16 +3,11 @@ import {
     BriefcaseBusiness,
     CalendarDays,
     ChevronDown,
-    ChevronLeft,
-    ChevronRight,
     FileText,
     LayoutDashboard,
     LogOut,
     Menu,
-    Moon,
     Settings,
-    Sun,
-    Trash2,
     User,
     UserCircle,
     Users,
@@ -22,16 +17,57 @@ import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 
 const RecruiterLayout = () => {
-    const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-    const [profileOpen, setProfileOpen] = useState(false);
-    const [darkMode, setDarkMode] = useState(false);
-
     const navigate = useNavigate();
 
-    const navigation = [
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+
+    const storedUser = JSON.parse(localStorage.getItem("user") || "null");
+
+    const userName = storedUser?.name || "Recruiter";
+    const userEmail = storedUser?.email || "";
+
+    /*
+     * ============================
+     * MAIN NAVIGATION
+     * ============================
+     *
+     * These links are visible in the
+     * main JobBridge navbar.
+     */
+
+    const mainNavigation = [
         {
-            title: "Dashboard",
+            title: "Find Jobs",
+            icon: BriefcaseBusiness,
+            path: "/jobs",
+        },
+        {
+            title: "Companies",
+            icon: BriefcaseBusiness,
+            path: "/companies",
+        },
+        {
+            title: "Jobs",
+            icon: BriefcaseBusiness,
+            path: "/recruiter/jobs",
+        },
+        {
+            title: "Applications",
+            icon: FileText,
+            path: "/recruiter/applications",
+        },
+    ];
+
+    /*
+     * ============================
+     * RECRUITER DASHBOARD NAVIGATION
+     * ============================
+     */
+
+    const dashboardNavigation = [
+        {
+            title: "Overview",
             icon: LayoutDashboard,
             path: "/recruiter/dashboard",
         },
@@ -57,128 +93,376 @@ const RecruiterLayout = () => {
         },
     ];
 
+    /*
+     * ============================
+     * CLOSE MENUS
+     * ============================
+     */
+
+    const closeMenus = () => {
+        setMobileMenuOpen(false);
+        setProfileMenuOpen(false);
+    };
+
+    /*
+     * ============================
+     * LOGOUT
+     * ============================
+     */
+
     const handleLogout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
 
+        closeMenus();
+
         navigate("/login");
     };
 
-    const handleDeleteAccount = () => {
-        const confirmed = window.confirm(
-            "Are you sure you want to delete your account?"
-        );
+    /*
+     * ============================
+     * PROFILE
+     * ============================
+     */
 
-        if (confirmed) {
-            console.log("Delete account clicked");
-        }
+    const handleProfile = () => {
+        closeMenus();
+        navigate("/recruiter/profile");
+    };
+
+    /*
+     * ============================
+     * SETTINGS
+     * ============================
+     */
+
+    const handleSettings = () => {
+        closeMenus();
+        navigate("/recruiter/settings");
     };
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-800">
 
-            {/* ==================== MOBILE OVERLAY ==================== */}
+            {/* =========================================================
+                NAVBAR
+            ========================================================= */}
 
-            {sidebarOpen && (
-                <div
-                    className="fixed inset-0 z-40 bg-slate-900/40 lg:hidden"
-                    onClick={() => setSidebarOpen(false)}
-                />
-            )}
+            <header className="sticky top-0 z-50 border-b border-slate-200 bg-white">
 
-            {/* ==================== SIDEBAR ==================== */}
+                <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-5 sm:px-7 lg:px-10">
 
-            <aside
-                className={`fixed inset-y-0 left-0 z-50 flex flex-col border-r border-slate-200 bg-white transition-all duration-300 ${
-                    sidebarCollapsed
-                        ? "w-20"
-                        : "w-64"
-                } ${
-                    sidebarOpen
-                        ? "translate-x-0"
-                        : "-translate-x-full"
-                } lg:translate-x-0`}
-            >
+                    {/* ================= LOGO ================= */}
 
-                {/* ==================== SIDEBAR HEADER ==================== */}
-
-                <div
-                    className={`flex h-20 items-center border-b border-slate-200 ${
-                        sidebarCollapsed
-                            ? "justify-center px-3"
-                            : "justify-between px-5"
-                    }`}
-                >
-
-                    {/* Logo + Name */}
-
-                    <div className="flex items-center gap-2">
-
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white">
+                    <button
+                        type="button"
+                        onClick={() => navigate("/")}
+                        className="flex items-center gap-2.5"
+                    >
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm">
                             <BriefcaseBusiness size={21} />
                         </div>
 
-                        {!sidebarCollapsed && (
-                            <span className="text-xl font-bold tracking-tight text-slate-900">
-                                Job
-                                <span className="text-indigo-600">
-                                    Bridge
-                                </span>
+                        <span className="text-xl font-bold tracking-tight text-slate-900">
+                            Job
+                            <span className="text-indigo-600">
+                                Bridge
                             </span>
-                        )}
+                        </span>
+                    </button>
+
+                    {/* =================================================
+                        DESKTOP NAVIGATION
+                    ================================================= */}
+
+                    <nav className="hidden items-center gap-1 lg:flex">
+
+                        {mainNavigation.map((item) => {
+                            const Icon = item.icon;
+
+                            return (
+                                <NavLink
+                                    key={item.title}
+                                    to={item.path}
+                                    className={({ isActive }) =>
+                                        `flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition ${
+                                            isActive
+                                                ? "bg-indigo-50 text-indigo-600"
+                                                : "text-slate-600 hover:bg-slate-50 hover:text-indigo-600"
+                                        }`
+                                    }
+                                >
+                                    <Icon size={17} />
+
+                                    {item.title}
+                                </NavLink>
+                            );
+                        })}
+
+                    </nav>
+
+                    {/* =================================================
+                        RIGHT SIDE
+                    ================================================= */}
+
+                    <div className="flex items-center gap-2">
+
+                        {/* ================= NOTIFICATIONS ================= */}
+
+                        <button
+                            type="button"
+                            onClick={() =>
+                                navigate(
+                                    "/recruiter/notifications"
+                                )
+                            }
+                            className="relative rounded-lg p-2.5 text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600"
+                            title="Notifications"
+                        >
+                            <Bell size={20} />
+
+                            <span className="absolute right-1.5 top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-indigo-600 px-1 text-[9px] font-bold text-white">
+                                3
+                            </span>
+                        </button>
+
+                        {/* ================= PROFILE ================= */}
+
+                        <div className="relative">
+
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    setProfileMenuOpen(
+                                        (prev) => !prev
+                                    )
+                                }
+                                className={`flex items-center gap-2.5 rounded-xl px-2 py-1.5 transition ${
+                                    profileMenuOpen
+                                        ? "bg-slate-100"
+                                        : "hover:bg-slate-50"
+                                }`}
+                            >
+
+                                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
+                                    <User size={18} />
+                                </div>
+
+                                <div className="hidden text-left md:block">
+
+                                    <p className="max-w-[130px] truncate text-sm font-semibold text-slate-800">
+                                        {userName}
+                                    </p>
+
+                                    <p className="text-xs text-slate-400">
+                                        Recruiter
+                                    </p>
+
+                                </div>
+
+                                <ChevronDown
+                                    size={16}
+                                    className={`hidden text-slate-400 transition-transform md:block ${
+                                        profileMenuOpen
+                                            ? "rotate-180"
+                                            : ""
+                                    }`}
+                                />
+
+                            </button>
+
+                            {/* =================================================
+                                PROFILE DROPDOWN
+                            ================================================= */}
+
+                            {profileMenuOpen && (
+
+                                <div className="absolute right-0 top-12 z-50 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg shadow-slate-200/70">
+
+                                    {/* ================= USER INFO ================= */}
+
+                                    <div className="border-b border-slate-100 px-4 py-3.5">
+
+                                        <div className="flex items-center gap-3">
+
+                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
+                                                <User size={18} />
+                                            </div>
+
+                                            <div className="min-w-0">
+
+                                                <p className="truncate text-sm font-semibold text-slate-900">
+                                                    {userName}
+                                                </p>
+
+                                                <p className="truncate text-xs text-slate-500">
+                                                    {userEmail}
+                                                </p>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                    {/* ================= OPTIONS ================= */}
+
+                                    <div className="p-1.5">
+
+                                        {/* Profile */}
+
+                                        <button
+                                            type="button"
+                                            onClick={handleProfile}
+                                            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
+                                        >
+                                            <UserCircle size={18} />
+
+                                            My Profile
+                                        </button>
+
+                                        {/* Settings */}
+
+                                        <button
+                                            type="button"
+                                            onClick={handleSettings}
+                                            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
+                                        >
+                                            <Settings size={18} />
+
+                                            Settings
+                                        </button>
+
+                                    </div>
+
+                                    {/* ================= LOGOUT ================= */}
+
+                                    <div className="border-t border-slate-100 p-1.5">
+
+                                        <button
+                                            type="button"
+                                            onClick={handleLogout}
+                                            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-50"
+                                        >
+                                            <LogOut size={18} />
+
+                                            Logout
+                                        </button>
+
+                                    </div>
+
+                                </div>
+
+                            )}
+
+                        </div>
+
+                        {/* ================= MOBILE MENU ================= */}
+
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setMobileMenuOpen(
+                                    (prev) => !prev
+                                )
+                            }
+                            className="rounded-lg p-2.5 text-slate-600 transition hover:bg-slate-100 lg:hidden"
+                        >
+                            {mobileMenuOpen ? (
+                                <X size={21} />
+                            ) : (
+                                <Menu size={21} />
+                            )}
+                        </button>
 
                     </div>
 
-                    {/* ==================== DESKTOP COLLAPSE ARROW ==================== */}
+                </div>
 
-                    <button
-                        type="button"
-                        onClick={() =>
-                            setSidebarCollapsed(
-                                !sidebarCollapsed
-                            )
-                        }
-                        className="hidden rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 lg:block"
-                        title={
-                            sidebarCollapsed
-                                ? "Expand sidebar"
-                                : "Collapse sidebar"
-                        }
-                    >
-                        {sidebarCollapsed ? (
-                            <ChevronRight size={20} />
-                        ) : (
-                            <ChevronLeft size={20} />
-                        )}
-                    </button>
+                {/* =========================================================
+                    MOBILE NAVIGATION
+                ========================================================= */}
 
-                    {/* ==================== MOBILE CLOSE ==================== */}
+                {mobileMenuOpen && (
 
-                    <button
-                        type="button"
-                        onClick={() =>
-                            setSidebarOpen(false)
-                        }
-                        className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 lg:hidden"
-                    >
-                        <X size={21} />
-                    </button>
+                    <div className="border-t border-slate-100 bg-white lg:hidden">
+
+                        <nav className="mx-auto max-w-[1440px] px-5 py-3">
+
+                            {mainNavigation.map((item) => {
+
+                                const Icon = item.icon;
+
+                                return (
+                                    <NavLink
+                                        key={item.title}
+                                        to={item.path}
+                                        onClick={() =>
+                                            setMobileMenuOpen(
+                                                false
+                                            )
+                                        }
+                                        className={({ isActive }) =>
+                                            `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium ${
+                                                isActive
+                                                    ? "bg-indigo-50 text-indigo-600"
+                                                    : "text-slate-600 hover:bg-slate-50"
+                                            }`
+                                        }
+                                    >
+
+                                        <Icon size={18} />
+
+                                        {item.title}
+
+                                    </NavLink>
+                                );
+
+                            })}
+
+                        </nav>
+
+                    </div>
+
+                )}
+
+            </header>
+
+            {/* =========================================================
+                MAIN CONTENT
+            ========================================================= */}
+
+            <main className="mx-auto max-w-[1440px] px-5 py-6 sm:px-7 lg:px-10">
+
+                {/* =====================================================
+                    DASHBOARD HEADER
+                ===================================================== */}
+
+                <div className="mb-5">
+
+                    <p className="text-sm font-medium text-indigo-600">
+                        Recruiter Portal
+                    </p>
+
+                    <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                        Dashboard
+                    </h1>
+
+                    <p className="mt-1 text-sm text-slate-500">
+                        Manage your jobs, candidates and hiring process.
+                    </p>
 
                 </div>
 
-                {/* ==================== NAVIGATION ==================== */}
+                {/* =====================================================
+                    DASHBOARD NAVIGATION
+                ===================================================== */}
 
-                <div className="flex-1 overflow-y-auto px-3 py-6">
+                <div className="mb-6 border-b border-slate-200">
 
-                    {!sidebarCollapsed && (
-                        <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                            Hiring
-                        </p>
-                    )}
+                    <nav className="flex gap-1 overflow-x-auto">
 
-                    <nav className="space-y-1">
-
-                        {navigation.map((item) => {
+                        {dashboardNavigation.map((item) => {
 
                             const Icon = item.icon;
 
@@ -186,303 +470,41 @@ const RecruiterLayout = () => {
                                 <NavLink
                                     key={item.title}
                                     to={item.path}
-                                    onClick={() =>
-                                        setSidebarOpen(false)
-                                    }
-                                    title={
-                                        sidebarCollapsed
-                                            ? item.title
-                                            : ""
+                                    end={
+                                        item.path ===
+                                        "/recruiter/dashboard"
                                     }
                                     className={({ isActive }) =>
-                                        `flex w-full items-center rounded-xl py-3 text-sm font-medium transition ${
-                                            sidebarCollapsed
-                                                ? "justify-center px-3"
-                                                : "gap-3 px-3"
-                                        } ${
+                                        `flex shrink-0 items-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold transition ${
                                             isActive
-                                                ? "bg-indigo-50 text-indigo-600"
-                                                : "text-slate-600 hover:bg-slate-50 hover:text-indigo-600"
+                                                ? "border-indigo-600 text-indigo-600"
+                                                : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-800"
                                         }`
                                     }
                                 >
 
-                                    <Icon size={19} />
+                                    <Icon size={17} />
 
-                                    {!sidebarCollapsed && (
-                                        <span>
-                                            {item.title}
-                                        </span>
-                                    )}
+                                    {item.title}
 
                                 </NavLink>
                             );
+
                         })}
 
                     </nav>
 
                 </div>
 
-            </aside>
+                {/* =====================================================
+                    PAGE CONTENT
+                ===================================================== */}
 
-            {/* ==================== MAIN AREA ==================== */}
-
-            <div
-                className={`transition-all duration-300 ${
-                    sidebarCollapsed
-                        ? "lg:pl-20"
-                        : "lg:pl-64"
-                }`}
-            >
-
-                {/* ==================== NAVBAR ==================== */}
-
-                <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
-
-                    <div className="flex h-20 items-center justify-between px-5 sm:px-7 lg:px-8">
-
-                        {/* Mobile Menu */}
-
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setSidebarOpen(true)
-                            }
-                            className="rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 lg:hidden"
-                        >
-                            <Menu size={22} />
-                        </button>
-
-                        {/* Right Side */}
-
-                        <div className="ml-auto flex items-center gap-3">
-
-                            {/* Notification */}
-
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    navigate(
-                                        "/recruiter/notifications"
-                                    )
-                                }
-                                className="relative rounded-xl p-2.5 text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600"
-                            >
-                                <Bell size={20} />
-
-                                <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-indigo-600" />
-                            </button>
-
-                            {/* Profile Dropdown */}
-
-                            <div className="relative">
-
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        setProfileOpen(
-                                            !profileOpen
-                                        )
-                                    }
-                                    className="flex items-center gap-3 rounded-xl px-2 py-1.5 transition hover:bg-slate-50"
-                                >
-
-                                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
-                                        <User size={18} />
-                                    </div>
-
-                                    <div className="hidden text-left sm:block">
-
-                                        <p className="text-sm font-semibold text-slate-800">
-                                            Khushi Gautam
-                                        </p>
-
-                                        <p className="text-xs text-slate-400">
-                                            Recruiter
-                                        </p>
-
-                                    </div>
-
-                                    <ChevronDown
-                                        size={16}
-                                        className={`hidden text-slate-400 transition sm:block ${
-                                            profileOpen
-                                                ? "rotate-180"
-                                                : ""
-                                        }`}
-                                    />
-
-                                </button>
-
-                                {/* ==================== PROFILE DROPDOWN ==================== */}
-
-                                {profileOpen && (
-                                    <div className="absolute right-0 top-14 z-50 w-64 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
-
-                                        {/* User Information */}
-
-                                        <div className="border-b border-slate-100 px-4 py-4">
-
-                                            <div className="flex items-center gap-3">
-
-                                                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
-                                                    <User size={20} />
-                                                </div>
-
-                                                <div>
-
-                                                    <p className="text-sm font-semibold text-slate-800">
-                                                        Khushi Gautam
-                                                    </p>
-
-                                                    <p className="text-xs text-slate-400">
-                                                        Recruiter
-                                                    </p>
-
-                                                </div>
-
-                                            </div>
-
-                                        </div>
-
-                                        {/* Profile / Settings */}
-
-                                        <div className="p-2">
-
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    navigate(
-                                                        "/recruiter/profile"
-                                                    );
-                                                    setProfileOpen(
-                                                        false
-                                                    );
-                                                }}
-                                                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
-                                            >
-                                                <UserCircle
-                                                    size={18}
-                                                />
-                                                My Profile
-                                            </button>
-
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    console.log(
-                                                        "Settings clicked"
-                                                    );
-                                                    setProfileOpen(
-                                                        false
-                                                    );
-                                                }}
-                                                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
-                                            >
-                                                <Settings
-                                                    size={18}
-                                                />
-                                                Settings
-                                            </button>
-
-                                            {/* Theme */}
-
-                                            <div className="flex items-center justify-between rounded-xl px-3 py-2.5">
-
-                                                <div className="flex items-center gap-3">
-
-                                                    {darkMode ? (
-                                                        <Moon
-                                                            size={18}
-                                                            className="text-slate-500"
-                                                        />
-                                                    ) : (
-                                                        <Sun
-                                                            size={18}
-                                                            className="text-slate-500"
-                                                        />
-                                                    )}
-
-                                                    <span className="text-sm font-medium text-slate-600">
-                                                        {darkMode
-                                                            ? "Dark Mode"
-                                                            : "Light Mode"}
-                                                    </span>
-
-                                                </div>
-
-                                                <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                        setDarkMode(
-                                                            !darkMode
-                                                        )
-                                                    }
-                                                    className={`relative h-6 w-11 rounded-full transition ${
-                                                        darkMode
-                                                            ? "bg-indigo-600"
-                                                            : "bg-slate-300"
-                                                    }`}
-                                                >
-
-                                                    <span
-                                                        className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow-sm transition ${
-                                                            darkMode
-                                                                ? "left-6"
-                                                                : "left-1"
-                                                        }`}
-                                                    />
-
-                                                </button>
-
-                                            </div>
-
-                                        </div>
-
-                                        {/* Logout / Delete */}
-
-                                        <div className="border-t border-slate-100 p-2">
-
-                                            <button
-                                                type="button"
-                                                onClick={handleLogout}
-                                                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-red-600"
-                                            >
-                                                <LogOut size={18} />
-                                                Logout
-                                            </button>
-
-                                            <button
-                                                type="button"
-                                                onClick={
-                                                    handleDeleteAccount
-                                                }
-                                                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-50"
-                                            >
-                                                <Trash2 size={18} />
-                                                Delete Account
-                                            </button>
-
-                                        </div>
-
-                                    </div>
-                                )}
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </header>
-
-                {/* ==================== PAGE CONTENT ==================== */}
-
-                <main className="p-5 sm:p-7 lg:p-8">
+                <section>
                     <Outlet />
-                </main>
+                </section>
 
-            </div>
+            </main>
 
         </div>
     );

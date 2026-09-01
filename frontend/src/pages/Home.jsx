@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 
 const Home = () => {
     const navigate = useNavigate();
+    const user = JSON.parse(localStorage.getItem("user"));
 
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [authAction, setAuthAction] = useState("");
@@ -239,7 +240,13 @@ const Home = () => {
                             </>
                         ) : (
                             <button
-                                onClick={() => navigate("/dashboard")}
+                                onClick={() =>
+                                    navigate(
+                                        user?.role === "RECRUITER"
+                                            ? "/recruiter/dashboard"
+                                            : "/candidate/jobs"
+                                    )
+                                }
                                 className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white"
                             >
                                 Dashboard

@@ -6,7 +6,6 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Applications from "./pages/candidate/Applications";
-import CandidateDashboard from "./pages/candidate/CandidateDashboard";
 import CandidateLayout from "./pages/candidate/CandidateLayout";
 import FindJobs from "./pages/candidate/FindJobs";
 import Interviews from "./pages/candidate/Interviews";
@@ -31,7 +30,7 @@ const App = () => {
 
         {/* Candidate */}
         <Route path="/candidate" element={<CandidateLayout />}>
-          <Route path="dashboard" element={<CandidateDashboard />}/>
+          {/* <Route path="dashboard" element={<CandidateDashboard />}/> */}
           <Route path="jobs" element={<FindJobs />}/>
           <Route path="applications" element={<Applications />}/>
           <Route path="saved-jobs" element={<SavedJobs />}/>
