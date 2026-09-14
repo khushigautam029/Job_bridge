@@ -789,18 +789,10 @@ const Home = () => {
                 </div>
             </header>
 
-            {/* =================================================
-                HERO
-            ================================================= */}
-
             <section className="relative overflow-hidden bg-white">
-
                 <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-indigo-50 blur-3xl" />
-
                 <div className="pointer-events-none absolute -left-32 bottom-0 h-80 w-80 rounded-full bg-blue-50 blur-3xl" />
-
                 <div className="relative mx-auto max-w-[1440px] px-5 pb-20 pt-16 sm:px-7 lg:px-10 lg:pb-24 lg:pt-24">
-
                     <div className="mx-auto max-w-4xl text-center">
 
                         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-4 py-2 text-sm font-medium text-indigo-700">
@@ -958,10 +950,6 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* =================================================
-                CATEGORIES
-            ================================================= */}
-
             <section
                 id="categories"
                 className="mx-auto max-w-[1440px] px-5 py-20 sm:px-7 lg:px-10"
@@ -1044,11 +1032,6 @@ const Home = () => {
 
                 </div>
             </section>
-
-            {/* =================================================
-                FEATURED JOBS
-            ================================================= */}
-
             <section
                 id="jobs"
                 className="border-y border-slate-200 bg-white"
@@ -1223,10 +1206,6 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* =================================================
-                FEATURES
-            ================================================= */}
-
             <section
                 id="features"
                 className="mx-auto max-w-[1440px] px-5 py-20 sm:px-7 lg:px-10"
@@ -1286,10 +1265,6 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* =================================================
-                CTA
-            ================================================= */}
-
             {!isLoggedIn && (
                 <section className="px-5 pb-20 sm:px-7 lg:px-10">
 
@@ -1324,10 +1299,6 @@ const Home = () => {
                     </div>
                 </section>
             )}
-
-            {/* =================================================
-                FOOTER
-            ================================================= */}
 
             <footer className="border-t border-slate-200 bg-white">
 
@@ -1408,10 +1379,6 @@ const Home = () => {
                     </div>
                 </div>
             </footer>
-
-            {/* =================================================
-                LOGIN / REGISTER MODAL
-            ================================================= */}
 
             {showAuthModal && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/50 px-4 backdrop-blur-sm">

@@ -80,11 +80,6 @@ const Login = () => {
 
     return (
         <div className="min-h-screen bg-slate-50">
-
-            {/* =================================================
-                HEADER
-            ================================================= */}
-
             <header className="border-b border-slate-200 bg-white">
                 <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 sm:px-7 lg:px-8">
 
@@ -121,21 +116,11 @@ const Login = () => {
                     </button>
                 </div>
             </header>
-
-            {/* =================================================
-                LOGIN CONTENT
-            ================================================= */}
-
             <main className="flex min-h-[calc(100vh-64px)] items-center justify-center px-5 py-8">
-
                 <div className="w-full max-w-md">
-
                     {/* CARD */}
-
                     <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/50 sm:p-8">
-
                         {/* ICON */}
-
                         <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
                             <LockKeyhole size={21} />
                         </div>

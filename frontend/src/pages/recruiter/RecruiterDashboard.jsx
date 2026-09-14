@@ -169,9 +169,6 @@ const RecruiterDashboard = () => {
     return (
         <div className="min-h-screen bg-slate-50 text-slate-800">
             <main className="p-3 sm:p-7 lg:p-1">
-
-                {/* ==================== HEADER ==================== */}
-
                 <section className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
                     <div>
                         <p className="text-sm font-medium text-indigo-600">
@@ -187,9 +184,6 @@ const RecruiterDashboard = () => {
                         </p>
                     </div>
                 </section>
-
-                {/* ==================== STATISTICS ==================== */}
-
                 <section className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                     {stats.map((stat) => {
                         const Icon = stat.icon;
@@ -223,12 +217,7 @@ const RecruiterDashboard = () => {
                     })}
                 </section>
 
-                {/* ==================== APPLICATIONS + INTERVIEWS ==================== */}
-
                 <section className="mt-7 grid gap-6 xl:grid-cols-[1.5fr_1fr]">
-
-                    {/* ==================== RECENT APPLICATIONS ==================== */}
-
                     <div className="rounded-2xl border border-slate-200 bg-white">
 
                         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
@@ -313,8 +302,6 @@ const RecruiterDashboard = () => {
                         </div>
                     </div>
 
-                    {/* ==================== UPCOMING INTERVIEWS ==================== */}
-
                     <div className="rounded-2xl border border-slate-200 bg-white">
 
                         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
@@ -390,8 +377,6 @@ const RecruiterDashboard = () => {
                     </div>
 
                 </section>
-
-                {/* ==================== ACTIVE JOBS ==================== */}
 
                 <section className="mt-7 rounded-2xl border border-slate-200 bg-white">
 

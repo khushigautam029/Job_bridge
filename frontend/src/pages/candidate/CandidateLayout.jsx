@@ -57,18 +57,10 @@ const CandidateLayout = () => {
         },
     ];
 
-    // =====================================================
-    // CLOSE MENUS
-    // =====================================================
-
     const closeMenus = () => {
         setMobileMenuOpen(false);
         setProfileMenuOpen(false);
     };
-
-    // =====================================================
-    // LOGOUT
-    // =====================================================
 
     const handleLogout = () => {
         localStorage.removeItem("token");
@@ -79,19 +71,12 @@ const CandidateLayout = () => {
         navigate("/login");
     };
 
-    // =====================================================
-    // PROFILE
-    // =====================================================
 
     const handleProfileClick = () => {
         closeMenus();
 
         navigate("/candidate/profile");
     };
-
-    // =====================================================
-    // SETTINGS
-    // =====================================================
 
     const handleSettingsClick = () => {
         closeMenus();
@@ -102,16 +87,9 @@ const CandidateLayout = () => {
     return (
         <div className="min-h-screen bg-slate-50 text-slate-800">
 
-            {/* =========================================================
-                NAVBAR
-            ========================================================= */}
-
             <header className="sticky top-0 z-50 border-b border-slate-200 bg-white">
 
                 <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-5 sm:px-7 lg:px-10">
-
-                    {/* ================= LOGO ================= */}
-
                     <button
                         type="button"
                         onClick={() => navigate("/candidate/jobs")}
@@ -128,11 +106,6 @@ const CandidateLayout = () => {
                             </span>
                         </span>
                     </button>
-
-                    {/* =================================================
-                        DESKTOP NAVIGATION
-                    ================================================= */}
-
                     <nav className="hidden items-center gap-1 lg:flex">
 
                         {navigation.map((item) => {
@@ -163,14 +136,7 @@ const CandidateLayout = () => {
 
                     </nav>
 
-                    {/* =================================================
-                        RIGHT SIDE
-                    ================================================= */}
-
                     <div className="flex items-center gap-2">
-
-                        {/* ================= NOTIFICATIONS ================= */}
-
                         <button
                             type="button"
                             onClick={() =>
@@ -189,8 +155,6 @@ const CandidateLayout = () => {
                                 3
                             </span>
                         </button>
-
-                        {/* ================= PROFILE ================= */}
 
                         <div className="relative">
 
@@ -243,30 +207,18 @@ const CandidateLayout = () => {
 
                             </button>
 
-                            {/* =================================================
-                                PROFILE DROPDOWN
-                            ================================================= */}
-
                             {profileMenuOpen && (
 
                                 <div className="absolute right-0 top-12 z-50 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg shadow-slate-200/70">
-
-                                    {/* ================= USER INFO ================= */}
-
                                     <div className="border-b border-slate-100 px-4 py-3.5">
-
                                         <div className="flex items-center gap-3">
-
                                             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
                                                 <User size={18} />
                                             </div>
-
                                             <div className="min-w-0">
-
                                                 <p className="truncate text-sm font-semibold text-slate-900">
                                                     {userName}
                                                 </p>
-
                                                 <p className="truncate text-xs text-slate-500">
                                                     Candidate
                                                 </p>
@@ -276,8 +228,6 @@ const CandidateLayout = () => {
                                         </div>
 
                                     </div>
-
-                                    {/* ================= OPTIONS ================= */}
 
                                     <div className="p-1.5">
 
@@ -310,9 +260,6 @@ const CandidateLayout = () => {
                                         </button>
 
                                     </div>
-
-                                    {/* ================= LOGOUT ================= */}
-
                                     <div className="border-t border-slate-100 p-1.5">
 
                                         <button
@@ -333,8 +280,6 @@ const CandidateLayout = () => {
 
                         </div>
 
-                        {/* ================= MOBILE MENU ================= */}
-
                         <button
                             type="button"
                             onClick={() =>
@@ -350,14 +295,8 @@ const CandidateLayout = () => {
                                 <Menu size={21} />
                             )}
                         </button>
-
                     </div>
-
                 </div>
-
-                {/* =========================================================
-                    MOBILE NAVIGATION
-                ========================================================= */}
 
                 {mobileMenuOpen && (
 
@@ -402,8 +341,6 @@ const CandidateLayout = () => {
 
                                 })}
 
-                                {/* ================= NOTIFICATIONS ================= */}
-
                                 <NavLink
                                     to="/candidate/notifications"
                                     onClick={() =>
@@ -419,26 +356,14 @@ const CandidateLayout = () => {
                                         }`
                                     }
                                 >
-
                                     <Bell size={18} />
-
                                     Notifications
-
                                 </NavLink>
-
                             </div>
-
                         </nav>
-
                     </div>
-
                 )}
-
             </header>
-
-            {/* =========================================================
-                MAIN CONTENT
-            ========================================================= */}
 
             <main className="mx-auto max-w-[1440px] px-5 py-6 sm:px-7 lg:px-10">
 

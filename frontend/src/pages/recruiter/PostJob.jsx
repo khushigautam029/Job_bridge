@@ -182,9 +182,6 @@ const PostJob = () => {
 
     return (
         <div>
-            {/* =========================
-                PAGE HEADER
-            ========================= */}
             <section className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-start gap-3">
                     <button
@@ -211,32 +208,19 @@ const PostJob = () => {
                     </div>
                 </div>
             </section>
-
-            {/* =========================
-                ERROR MESSAGE
-            ========================= */}
             {error && (
                 <div className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
                     {error}
                 </div>
             )}
 
-            {/* =========================
-                SUCCESS MESSAGE
-            ========================= */}
             {success && (
                 <div className="mt-5 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-600">
                     {success}
                 </div>
             )}
 
-            {/* =========================
-                FORM
-            ========================= */}
             <form onSubmit={handleSubmit} className="mt-7">
-                {/* =========================
-                    BASIC INFORMATION
-                ========================= */}
                 <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
                     <div className="border-b border-slate-200 px-6 py-5">
                         <div className="flex items-center gap-3">
@@ -511,10 +495,6 @@ const PostJob = () => {
                         </div>
                     </div>
                 </section>
-
-                {/* =========================
-                    JOB DESCRIPTION
-                ========================= */}
                 <section className="mt-6 rounded-2xl border border-slate-200 bg-white shadow-sm">
                     <div className="border-b border-slate-200 px-6 py-5">
                         <div className="flex items-center gap-3">
@@ -570,9 +550,6 @@ const PostJob = () => {
                     </div>
                 </section>
 
-                {/* =========================
-                    SKILLS
-                ========================= */}
                 <section className="mt-6 rounded-2xl border border-slate-200 bg-white shadow-sm">
                     <div className="border-b border-slate-200 px-6 py-5">
                         <h2 className="font-semibold text-slate-900">
@@ -638,9 +615,6 @@ const PostJob = () => {
                     </div>
                 </section>
 
-                {/* =========================
-                    ACTIONS
-                ========================= */}
                 <section className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                     <button
                         type="button"

@@ -318,10 +318,6 @@ const RecruiterJobDetails = () => {
 
     return (
         <div>
-            {/* =====================================================
-                PAGE HEADER
-            ====================================================== */}
-
             <section>
                 {/* Back Button */}
 
@@ -474,15 +470,7 @@ const RecruiterJobDetails = () => {
                 </div>
             </section>
 
-            {/* =====================================================
-                MAIN CONTENT
-            ====================================================== */}
-
             <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_340px]">
-                {/* =================================================
-                    LEFT CONTENT
-                ================================================== */}
-
                 <div className="space-y-6">
                     {/* Job Description */}
 
@@ -587,11 +575,6 @@ const RecruiterJobDetails = () => {
                         </section>
                     )}
                 </div>
-
-                {/* =================================================
-                    RIGHT SIDEBAR
-                ================================================== */}
-
                 <aside className="space-y-5">
                     {/* Application Management */}
 

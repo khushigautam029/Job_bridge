@@ -65,15 +65,8 @@ const HomeJobs = () => {
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-800">
-
-            {/* =====================================================
-                HEADER
-            ===================================================== */}
-
             <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
-
                 <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
-
                     <button
                         onClick={() => navigate("/")}
                         className="flex items-center gap-2"
@@ -81,7 +74,6 @@ const HomeJobs = () => {
                         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-white">
                             <BriefcaseBusiness size={19} />
                         </div>
-
                         <span className="text-xl font-bold tracking-tight text-slate-900">
                             Job<span className="text-indigo-600">
                                 Bridge
@@ -90,7 +82,6 @@ const HomeJobs = () => {
                     </button>
 
                     <div className="flex items-center gap-3">
-
                         {!isLoggedIn ? (
                             <>
                                 <button
@@ -121,10 +112,6 @@ const HomeJobs = () => {
                     </div>
                 </div>
             </header>
-
-            {/* =====================================================
-                PAGE HEADER
-            ===================================================== */}
 
             <section className="border-b border-slate-200 bg-white">
 
@@ -175,15 +162,8 @@ const HomeJobs = () => {
                     </div>
                 </div>
             </section>
-
-            {/* =====================================================
-                SEARCH
-            ===================================================== */}
-
             <section className="mx-auto max-w-7xl px-6 pt-8 lg:px-8">
-
                 <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-
                     <div className="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3">
 
                         <Search
@@ -204,10 +184,6 @@ const HomeJobs = () => {
                     </div>
                 </div>
             </section>
-
-            {/* =====================================================
-                JOB LIST
-            ===================================================== */}
 
             <main className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
 
@@ -359,11 +335,7 @@ const HomeJobs = () => {
                     </div>
                 )}
             </main>
-
-            {/* =====================================================
-                AUTH MODAL
-            ===================================================== */}
-
+            
             {showAuthModal && (
 
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4 backdrop-blur-sm">

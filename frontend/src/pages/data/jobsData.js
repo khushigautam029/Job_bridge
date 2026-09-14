@@ -1,8 +1,4 @@
 const jobsData = [
-    // =========================================================
-    // SOFTWARE DEVELOPMENT
-    // =========================================================
-
     {
         id: 1,
         title: "Senior React Developer",
@@ -62,11 +58,6 @@ const jobsData = [
         description:
             "Great opportunity for developers starting their professional software development career.",
     },
-
-    // =========================================================
-    // DESIGN
-    // =========================================================
-
     {
         id: 5,
         title: "UI/UX Designer",
@@ -81,7 +72,6 @@ const jobsData = [
         description:
             "Design intuitive and engaging digital experiences for web and mobile products.",
     },
-
     {
         id: 6,
         title: "Product Designer",
@@ -96,7 +86,6 @@ const jobsData = [
         description:
             "Create user-centered product experiences and scalable design systems.",
     },
-
     {
         id: 7,
         title: "Graphic Designer",
@@ -111,11 +100,6 @@ const jobsData = [
         description:
             "Create creative visual content for digital marketing campaigns and brand communication.",
     },
-
-    // =========================================================
-    // MARKETING
-    // =========================================================
-
     {
         id: 8,
         title: "Digital Marketing Executive",
@@ -160,11 +144,6 @@ const jobsData = [
         description:
             "Lead content strategies that drive engagement, traffic, and business growth.",
     },
-
-    // =========================================================
-    // FINANCE
-    // =========================================================
-
     {
         id: 11,
         title: "Financial Analyst",
@@ -194,11 +173,6 @@ const jobsData = [
         description:
             "Manage financial records, accounts, and day-to-day accounting activities.",
     },
-
-    // =========================================================
-    // HUMAN RESOURCES
-    // =========================================================
-
     {
         id: 13,
         title: "HR Executive",
@@ -228,11 +202,6 @@ const jobsData = [
         description:
             "Identify, attract, and hire talented professionals for growing teams.",
     },
-
-    // =========================================================
-    // SALES
-    // =========================================================
-
     {
         id: 15,
         title: "Sales Executive",

@@ -445,9 +445,6 @@ const Jobs = () => {
 
     return (
         <div>
-            {/* =========================
-                PAGE HEADER
-            ========================= */}
             <section className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
                 <div>
                     <p className="text-sm font-medium text-indigo-600">
@@ -475,9 +472,6 @@ const Jobs = () => {
                 </button>
             </section>
 
-            {/* =========================
-                ACTIVE CATEGORY
-            ========================= */}
             {selectedCategory && (
                 <div className="mt-5 flex items-center justify-between rounded-xl border border-indigo-100 bg-indigo-50 px-4 py-3">
                     <div>
@@ -500,9 +494,6 @@ const Jobs = () => {
                 </div>
             )}
 
-            {/* =========================
-                FILTERS
-            ========================= */}
             <section className="mt-7 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="grid gap-4 md:grid-cols-[1fr_auto_auto]">
                     {/* Search */}
@@ -595,9 +586,6 @@ const Jobs = () => {
                 </div>
             </section>
 
-            {/* =========================
-                RESULTS HEADER
-            ========================= */}
             <div className="mt-7 flex items-center justify-between">
                 <div>
                     <h2 className="text-lg font-semibold text-slate-900">
@@ -616,9 +604,6 @@ const Jobs = () => {
                 </div>
             </div>
 
-            {/* =========================
-                JOB CARDS
-            ========================= */}
             {filteredJobs.length > 0 ? (
                 <section className="mt-5 grid gap-5 lg:grid-cols-2">
                     {filteredJobs.map((job) => (
@@ -781,9 +766,6 @@ const Jobs = () => {
                 </div>
             )}
 
-            {/* =====================================================
-                VIEW APPLICATIONS MODAL
-            ====================================================== */}
             {showApplications && selectedJob && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4">
                     <div className="max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-2xl">
@@ -910,9 +892,6 @@ const Jobs = () => {
                 </div>
             )}
 
-            {/* =====================================================
-                EDIT JOB MODAL
-            ====================================================== */}
             {showEditModal && selectedJob && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4">
                     <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
@@ -1126,9 +1105,6 @@ const Jobs = () => {
                 </div>
             )}
 
-            {/* =====================================================
-                DELETE CONFIRMATION MODAL
-            ====================================================== */}
             {showDeleteModal && selectedJob && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4">
                     <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">

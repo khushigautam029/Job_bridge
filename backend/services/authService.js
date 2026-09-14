@@ -18,21 +18,17 @@ const registerUser = async ({
     companyName,
 }) => {
     const normalizedEmail = email.trim().toLowerCase();
-
     const existingUser = await User.findOne({
         where: {
             email: normalizedEmail,
         },
     });
-
     if (existingUser) {
         const error = new Error("Email is already registered");
         error.statusCode = STATUS_CODES.CONFLICT;
         throw error;
     }
-
     const hashedPassword = await bcrypt.hash(password, 12);
-
     const user = await User.create({
         name: name.trim(),
         email: normalizedEmail,
@@ -40,24 +36,20 @@ const registerUser = async ({
         phone: phone || null,
         role,
     });
-
     if (role === "CANDIDATE") {
         await CandidateProfile.create({
             userId: user.id,
         });
     }
-
     if (role === "RECRUITER") {
         const company = await Company.create({
             name: companyName.trim(),
         });
-
         await RecruiterProfile.create({
             userId: user.id,
             companyId: company.id,
         });
     }
-
     return user;
 };
 
