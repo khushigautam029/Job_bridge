@@ -9,6 +9,7 @@ import asyncHandler from "../utils/asyncHandler.js";
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 import {
     createJobSchema,
+    searchJobSchema,
     updateJobSchema,
 } from "../validation/jobValidation.js";
 
@@ -49,17 +50,41 @@ const create = asyncHandler(async (req, res) => {
 });
 
 // GET ALL JOBS
-const getAll = asyncHandler(async (req, res) => {
-    const result =
-        await getAllJobs(req.query);
-    return res.status(
-        STATUS_CODES.OK
-    ).json({
-        success: true,
-        message: MESSAGES.JOB_FETCHED,
-        data: result,
-    });
-});
+const getAll = asyncHandler(
+    async (req, res) => {
+        const {
+            error,
+            value,
+        } = searchJobSchema.validate(
+            req.query,
+            {
+                abortEarly: false,
+                stripUnknown: true,
+                convert: true,
+            }
+        );
+        if (error) {
+            return res.status(
+                STATUS_CODES.BAD_REQUEST
+            ).json({
+                success: false,
+                message: "Validation failed",
+                errors: error.details.map(
+                    (detail) => detail.message
+                ),
+            });
+        }
+        const result =
+            await getAllJobs(value);
+        res.status(
+            STATUS_CODES.OK
+        ).json({
+            success: true,
+            message: "Jobs fetched successfully",
+            data: result,
+        });
+    }
+);
 
 // GET JOB BY ID
 const getOne = asyncHandler(async (req, res) => {

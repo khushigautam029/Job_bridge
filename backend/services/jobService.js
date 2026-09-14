@@ -15,17 +15,13 @@ const getRecruiterProfile = async (userId) => {
                 userId,
             },
         });
-
     if (!recruiterProfile) {
         const error = new Error(
             "Recruiter profile not found"
         );
-
         error.statusCode = STATUS_CODES.NOT_FOUND;
-
         throw error;
     }
-
     return recruiterProfile;
 };
 
@@ -46,17 +42,15 @@ const createJob = async (
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
-
     const job = await Job.create({
         recruiterId: recruiterProfile.id,
         companyId: recruiterProfile.companyId,
         ...data,
     });
-
     return getJobById(job.id);
 };
 
-const getAllJobs = async (query) => {
+const getAllJobs = async (filters = {}) => {
     const {
         search,
         location,
@@ -67,26 +61,17 @@ const getAllJobs = async (query) => {
         maxSalary,
         experienceMin,
         experienceMax,
-        page = 1,
-        limit = 10,
         sortBy = "createdAt",
         order = "DESC",
-    } = query;
-    const currentPage =
-        Math.max(Number(page), 1);
-    const pageLimit =
-        Math.min(
-            Math.max(Number(limit), 1),
-            100
-        );
-    const offset =
-        (currentPage - 1) * pageLimit;
+        page = 1,
+        limit = 10,
+    } = filters;
     const where = {
         status: "OPEN",
     };
-
+    // Search by title, description,
+    // requirements or responsibilities
     if (search) {
-
         where[Op.or] = [
             {
                 title: {
@@ -98,62 +83,59 @@ const getAllJobs = async (query) => {
                     [Op.like]: `%${search}%`,
                 },
             },
+            {
+                requirements: {
+                    [Op.like]: `%${search}%`,
+                },
+            },
+            {
+                responsibilities: {
+                    [Op.like]: `%${search}%`,
+                },
+            },
         ];
     }
+    // Location filter
     if (location) {
-
         where.location = {
             [Op.like]: `%${location}%`,
         };
     }
+    // Category filter
     if (categoryId) {
-
-        where.categoryId =
-            Number(categoryId);
+        where.categoryId = categoryId;
     }
+    // Job type filter
     if (jobType) {
         where.jobType = jobType;
     }
+    // Work mode filter
     if (workMode) {
         where.workMode = workMode;
     }
-    if (minSalary) {
+    // Salary filters
+    if (minSalary !== undefined) {
         where.maxSalary = {
-            [Op.gte]: Number(minSalary),
+            [Op.gte]: minSalary,
         };
     }
-    if (maxSalary) {
+    if (maxSalary !== undefined) {
         where.minSalary = {
-            [Op.lte]: Number(maxSalary),
+            [Op.lte]: maxSalary,
         };
     }
-    if (experienceMin) {
+    // Experience filters
+    if (experienceMin !== undefined) {
         where.experienceMax = {
-            [Op.gte]: Number(experienceMin),
+            [Op.gte]: experienceMin,
         };
     }
-    if (experienceMax) {
-
+    if (experienceMax !== undefined) {
         where.experienceMin = {
-            [Op.lte]: Number(experienceMax),
+            [Op.lte]: experienceMax,
         };
     }
-    const allowedSortFields = [
-        "createdAt",
-        "title",
-        "minSalary",
-        "maxSalary",
-        "applicationDeadline",
-    ];
-
-    const safeSortBy =
-        allowedSortFields.includes(sortBy)
-            ? sortBy
-            : "createdAt";
-    const safeOrder =
-        order.toUpperCase() === "ASC"
-            ? "ASC"
-            : "DESC";
+    const offset = (page - 1) * limit;
     const { count, rows } =
         await Job.findAndCountAll({
             where,
@@ -179,29 +161,25 @@ const getAllJobs = async (query) => {
                 },
             ],
             order: [
-                [
-                    safeSortBy,
-                    safeOrder,
-                ],
+                [sortBy, order],
             ],
-            limit: pageLimit,
+            limit,
             offset,
+            distinct: true,
         });
-    const totalPages =
-        Math.ceil(
-            count / pageLimit
-        );
     return {
         jobs: rows,
         pagination: {
+            currentPage: page,
+            totalPages: Math.ceil(
+                count / limit
+            ),
             totalJobs: count,
-            currentPage,
-            totalPages,
-            limit: pageLimit,
+            jobsPerPage: limit,
             hasNextPage:
-                currentPage < totalPages,
+                page < Math.ceil(count / limit),
             hasPreviousPage:
-                currentPage > 1,
+                page > 1,
         },
     };
 };

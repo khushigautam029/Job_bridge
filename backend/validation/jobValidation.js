@@ -8,30 +8,30 @@ const createJobSchema = Joi.object({
 
     title: Joi.string()
         .trim()
-        .min(3)
         .max(150)
         .required(),
 
     description: Joi.string()
         .trim()
-        .min(10)
         .required(),
 
     requirements: Joi.string()
         .trim()
-        .allow("")
-        .optional(),
+        .max(10000)
+        .optional()
+        .allow(null, ""),
 
     responsibilities: Joi.string()
         .trim()
-        .allow("")
-        .optional(),
+        .max(10000)
+        .optional()
+        .allow(null, ""),
 
     location: Joi.string()
         .trim()
         .max(150)
-        .allow("")
-        .optional(),
+        .optional()
+        .allow(null, ""),
 
     jobType: Joi.string()
         .valid(
@@ -52,28 +52,30 @@ const createJobSchema = Joi.object({
         .required(),
 
     minSalary: Joi.number()
-        .min(0)
-        .optional(),
+        .positive()
+        .optional()
+        .allow(null),
 
     maxSalary: Joi.number()
-        .min(0)
-        .optional(),
+        .positive()
+        .optional()
+        .allow(null),
 
     experienceMin: Joi.number()
         .min(0)
-        .max(99.9)
-        .precision(1)
-        .default(0),
+        .max(99)
+        .optional(),
 
     experienceMax: Joi.number()
         .min(0)
-        .max(99.9)
-        .precision(1)
-        .optional(),
+        .max(99)
+        .optional()
+        .allow(null),
 
     applicationDeadline: Joi.date()
         .iso()
-        .optional(),
+        .optional()
+        .allow(null),
 
     status: Joi.string()
         .valid(
@@ -81,7 +83,7 @@ const createJobSchema = Joi.object({
             "OPEN",
             "CLOSED"
         )
-        .default("DRAFT"),
+        .optional(),
 });
 
 
@@ -93,29 +95,104 @@ const updateJobSchema = Joi.object({
 
     title: Joi.string()
         .trim()
-        .min(3)
         .max(150)
         .optional(),
 
     description: Joi.string()
         .trim()
-        .min(10)
         .optional(),
 
     requirements: Joi.string()
         .trim()
-        .allow("")
-        .optional(),
+        .max(10000)
+        .optional()
+        .allow(null, ""),
 
     responsibilities: Joi.string()
         .trim()
-        .allow("")
-        .optional(),
+        .max(10000)
+        .optional()
+        .allow(null, ""),
 
     location: Joi.string()
         .trim()
         .max(150)
-        .allow("")
+        .optional()
+        .allow(null, ""),
+
+    jobType: Joi.string()
+        .valid(
+            "FULL_TIME",
+            "PART_TIME",
+            "INTERNSHIP",
+            "CONTRACT",
+            "FREELANCE"
+        )
+        .optional(),
+
+    workMode: Joi.string()
+        .valid(
+            "REMOTE",
+            "ONSITE",
+            "HYBRID"
+        )
+        .optional(),
+
+    minSalary: Joi.number()
+        .positive()
+        .optional()
+        .allow(null),
+
+    maxSalary: Joi.number()
+        .positive()
+        .optional()
+        .allow(null),
+
+    experienceMin: Joi.number()
+        .min(0)
+        .max(99)
+        .optional(),
+
+    experienceMax: Joi.number()
+        .min(0)
+        .max(99)
+        .optional()
+        .allow(null),
+
+    applicationDeadline: Joi.date()
+        .iso()
+        .optional()
+        .allow(null),
+
+    status: Joi.string()
+        .valid(
+            "DRAFT",
+            "OPEN",
+            "CLOSED"
+        )
+        .optional(),
+});
+
+
+/*
+    Job search / filtering / pagination
+*/
+const searchJobSchema = Joi.object({
+    search: Joi.string()
+        .trim()
+        .max(100)
+        .optional()
+        .allow(""),
+
+    location: Joi.string()
+        .trim()
+        .max(150)
+        .optional()
+        .allow(""),
+
+    categoryId: Joi.number()
+        .integer()
+        .positive()
         .optional(),
 
     jobType: Joi.string()
@@ -146,31 +223,39 @@ const updateJobSchema = Joi.object({
 
     experienceMin: Joi.number()
         .min(0)
-        .max(99.9)
-        .precision(1)
         .optional(),
 
     experienceMax: Joi.number()
         .min(0)
-        .max(99.9)
-        .precision(1)
         .optional(),
 
-    applicationDeadline: Joi.date()
-        .iso()
-        .optional(),
-
-    status: Joi.string()
+    sortBy: Joi.string()
         .valid(
-            "DRAFT",
-            "OPEN",
-            "CLOSED"
+            "createdAt",
+            "title",
+            "minSalary",
+            "maxSalary",
+            "applicationDeadline"
         )
-        .optional(),
-}).min(1);
+        .default("createdAt"),
+
+    order: Joi.string()
+        .valid("ASC", "DESC")
+        .default("DESC"),
+
+    page: Joi.number()
+        .integer()
+        .min(1)
+        .default(1),
+
+    limit: Joi.number()
+        .integer()
+        .min(1)
+        .max(50)
+        .default(10),
+});
 
 
 export {
-    createJobSchema,
-    updateJobSchema
+    createJobSchema, searchJobSchema, updateJobSchema
 };
