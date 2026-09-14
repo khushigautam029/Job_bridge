@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import HomeJobs from "./pages/HomeJobs";
 import NotFound from "./pages/NotFound";
+import Notification from "./pages/Notification";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Applications from "./pages/candidate/Applications";
@@ -37,6 +38,7 @@ const App = () => {
           <Route path="applications" element={<Applications />} />
           <Route path="saved-jobs" element={<SavedJobs />} />
           <Route path="interviews" element={<Interviews />} />
+          <Route path="/candidate/notifications" element={<Notification />} />
         </Route>
 
         {/* Recruiter */}
@@ -48,6 +50,7 @@ const App = () => {
           <Route path="/recruiter/jobs/:jobId" element={<RecruiterJobDetails />}/>
           <Route path="/recruiter/interviews" element={<RecruiterInterviews />} />
           <Route path="/recruiter/post-job" element={<PostJob />} />
+          <Route path="/recruiter/notifications" element={<Notification />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />
