@@ -75,6 +75,7 @@ app.use("/api", interviewRoutes);
 app.use("/api/notifications", notificationRoutes);
 // Dashboard
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/uploads", express.static("uploads"));
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
