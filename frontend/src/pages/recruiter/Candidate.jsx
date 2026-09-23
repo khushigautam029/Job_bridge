@@ -679,10 +679,7 @@ const Candidates = () => {
                 )}
             </section>
 
-            {/* =====================================================
-                VIEW PROFILE MODAL
-            ====================================================== */}
-
+                {/* VIEW PROFILE MODAL */}
             {profileModalOpen && selectedCandidate && (
                 <div
                     className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm"
@@ -998,10 +995,7 @@ const Candidates = () => {
                 </div>
             )}
 
-            {/* =====================================================
-                CONTACT CANDIDATE MODAL
-            ====================================================== */}
-
+                {/* CONTACT CANDIDATE MODAL */}
             {contactModalOpen && selectedCandidate && (
                 <div
                     className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm"
