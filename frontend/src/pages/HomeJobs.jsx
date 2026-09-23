@@ -30,17 +30,14 @@ const HomeJobs = () => {
 
     const isLoggedIn = Boolean(localStorage.getItem("token"));
 
-    // =====================================================
     // FILTER JOBS
-    // =====================================================
-
     const filteredJobs = useMemo(() => {
         const searchValue = search.trim().toLowerCase();
 
         return jobsData.filter((job) => {
             const matchesCategory = category
                 ? job.category?.toLowerCase() ===
-                  category.toLowerCase()
+                category.toLowerCase()
                 : true;
 
             const matchesSearch =
@@ -62,10 +59,7 @@ const HomeJobs = () => {
         });
     }, [category, search]);
 
-    // =====================================================
     // AUTH CHECK
-    // =====================================================
-
     const requireLogin = (action, jobId = null) => {
         if (!isLoggedIn) {
             setAuthAction(action);
@@ -83,10 +77,7 @@ const HomeJobs = () => {
         }
     };
 
-    // =====================================================
     // SAVE / UNSAVE JOB
-    // =====================================================
-
     const toggleSaveJob = (jobId) => {
         setSavedJobs((current) => {
             if (current.includes(jobId)) {
@@ -97,37 +88,25 @@ const HomeJobs = () => {
         });
     };
 
-    // =====================================================
     // CLEAR SEARCH
-    // =====================================================
-
     const clearSearch = () => {
         setSearch("");
     };
 
-    // =====================================================
     // CLOSE AUTH MODAL
-    // =====================================================
-
     const closeAuthModal = () => {
         setShowAuthModal(false);
         setAuthAction("");
     };
 
-    // =====================================================
     // GO TO ALL JOBS
-    // =====================================================
-
     const browseAllJobs = () => {
         navigate("/jobs");
     };
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-800">
-            {/* =====================================================
-                HEADER
-            ===================================================== */}
-
+                {/* HEADER */}
             <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
                 <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
                     {/* Logo */}
@@ -187,10 +166,7 @@ const HomeJobs = () => {
                 </div>
             </header>
 
-            {/* =====================================================
-                PAGE INTRO
-            ===================================================== */}
-
+                {/* PAGE INTRO */}
             <section className="border-b border-slate-200 bg-white">
                 <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
                     {/* Back */}
@@ -240,10 +216,7 @@ const HomeJobs = () => {
                 </div>
             </section>
 
-            {/* =====================================================
-                SEARCH
-            ===================================================== */}
-
+            {/* SEARCH */}
             <section className="mx-auto max-w-7xl px-6 pt-8 lg:px-8">
                 <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
                     <div className="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 transition focus-within:border-indigo-300 focus-within:ring-2 focus-within:ring-indigo-50">
@@ -277,16 +250,10 @@ const HomeJobs = () => {
                 </div>
             </section>
 
-            {/* =====================================================
-                JOB LIST
-            ===================================================== */}
-
+                {/* JOB LIST */}
             <main className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
                 {filteredJobs.length === 0 ? (
-                    /* =================================================
-                       EMPTY STATE
-                    ================================================= */
-
+                    /* EMPTY STATE*/
                     <div className="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center">
                         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
                             <Search size={25} />
@@ -333,10 +300,7 @@ const HomeJobs = () => {
                                     key={job.id}
                                     className="group rounded-2xl border border-slate-200 bg-white p-6 transition hover:border-indigo-200 hover:shadow-lg hover:shadow-slate-200/50"
                                 >
-                                    {/* =================================================
-                                        TOP CONTENT
-                                    ================================================= */}
-
+                                    {/* TOP CONTENT */}
                                     <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
                                         {/* Job Information */}
 
@@ -382,10 +346,7 @@ const HomeJobs = () => {
                                             </div>
                                         </div>
 
-                                        {/* =================================================
-                                            ACTIONS
-                                        ================================================= */}
-
+                                            {/* ACTIONS */}
                                         <div className="flex shrink-0 gap-2">
                                             <button
                                                 type="button"
@@ -424,10 +385,7 @@ const HomeJobs = () => {
                                         </div>
                                     </div>
 
-                                    {/* =================================================
-                                        BOTTOM CONTENT
-                                    ================================================= */}
-
+                                    {/* BOTTOM CONTENT */}
                                     <div className="mt-6 border-t border-slate-100 pt-5">
                                         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                                             {/* Skills */}
@@ -474,10 +432,7 @@ const HomeJobs = () => {
                 )}
             </main>
 
-            {/* =====================================================
-                LOGIN REQUIRED MODAL
-            ===================================================== */}
-
+                {/* LOGIN REQUIRED MODAL */}
             {showAuthModal && (
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4 backdrop-blur-sm"
