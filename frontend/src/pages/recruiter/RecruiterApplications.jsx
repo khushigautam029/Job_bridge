@@ -29,9 +29,7 @@ const RecruiterApplications = () => {
     const [modalType, setModalType] = useState(null);
 
     /*
-    |--------------------------------------------------------------------------
     | Applications
-    |--------------------------------------------------------------------------
     | UI data for now.
     | Later this data will come from the backend API.
     */
@@ -175,9 +173,7 @@ const RecruiterApplications = () => {
     ]);
 
     /*
-    |--------------------------------------------------------------------------
     | Filter Applications
-    |--------------------------------------------------------------------------
     */
     const filteredApplications = useMemo(() => {
         const searchValue = search.trim().toLowerCase();
@@ -217,9 +213,7 @@ const RecruiterApplications = () => {
     }, [applications, search, statusFilter, jobFilter]);
 
     /*
-    |--------------------------------------------------------------------------
     | Status
-    |--------------------------------------------------------------------------
     */
     const getStatusClasses = (status) => {
         switch (status) {
@@ -240,11 +234,7 @@ const RecruiterApplications = () => {
         }
     };
 
-    /*
-    |--------------------------------------------------------------------------
-    | Initials
-    |--------------------------------------------------------------------------
-    */
+    /* Initials    */
     const getInitials = (name) => {
         return name
             .split(" ")
@@ -252,11 +242,7 @@ const RecruiterApplications = () => {
             .join("");
     };
 
-    /*
-    |--------------------------------------------------------------------------
-    | Summary Counts
-    |--------------------------------------------------------------------------
-    */
+    /* Summary Counts */
     const totalApplications = applications.length;
 
     const newApplications = applications.filter(
@@ -271,11 +257,7 @@ const RecruiterApplications = () => {
         (application) => application.status === "Interview"
     ).length;
 
-    /*
-    |--------------------------------------------------------------------------
-    | Clear Filters
-    |--------------------------------------------------------------------------
-    */
+    /* Clear Filters */
     const clearFilters = () => {
         setSearch("");
         setStatusFilter("All");
@@ -283,9 +265,7 @@ const RecruiterApplications = () => {
     };
 
     /*
-    |--------------------------------------------------------------------------
-    | Open Candidate Modal
-    |--------------------------------------------------------------------------
+    Open Candidate Modal
     */
     const openCandidateModal = (application) => {
         setSelectedCandidate(application);
@@ -293,9 +273,7 @@ const RecruiterApplications = () => {
     };
 
     /*
-    |--------------------------------------------------------------------------
     | Open Manage Modal
-    |--------------------------------------------------------------------------
     */
     const openManageModal = (application) => {
         setSelectedCandidate(application);
@@ -303,9 +281,7 @@ const RecruiterApplications = () => {
     };
 
     /*
-    |--------------------------------------------------------------------------
     | Close Modal
-    |--------------------------------------------------------------------------
     */
     const closeModal = () => {
         setSelectedCandidate(null);
@@ -313,9 +289,7 @@ const RecruiterApplications = () => {
     };
 
     /*
-    |--------------------------------------------------------------------------
     | Update Application Status
-    |--------------------------------------------------------------------------
     */
     const updateApplicationStatus = (applicationId, newStatus) => {
         setApplications((prevApplications) =>
@@ -339,11 +313,7 @@ const RecruiterApplications = () => {
         );
     };
 
-    /*
-    |--------------------------------------------------------------------------
-    | Resume
-    |--------------------------------------------------------------------------
-    */
+    /* Resume */
     const handleViewResume = (application) => {
         if (!application.resume) {
             alert("Resume is not available.");
@@ -355,10 +325,7 @@ const RecruiterApplications = () => {
 
     return (
         <div>
-            {/* ========================================================= */}
             {/* PAGE HEADER */}
-            {/* ========================================================= */}
-
             <section className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
                 <div>
                     <p className="text-sm font-medium text-indigo-600">
@@ -391,10 +358,7 @@ const RecruiterApplications = () => {
                 </div>
             </section>
 
-            {/* ========================================================= */}
             {/* SUMMARY CARDS */}
-            {/* ========================================================= */}
-
             <section className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 {/* Total */}
                 <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -489,10 +453,7 @@ const RecruiterApplications = () => {
                 </div>
             </section>
 
-            {/* ========================================================= */}
             {/* FILTERS */}
-            {/* ========================================================= */}
-
             <section className="mt-7 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="grid gap-4 lg:grid-cols-[1fr_auto_auto]">
                     {/* Search */}
@@ -571,10 +532,7 @@ const RecruiterApplications = () => {
                 </div>
             </section>
 
-            {/* ========================================================= */}
             {/* RESULTS */}
-            {/* ========================================================= */}
-
             <section className="mt-7">
                 <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
                     <div>
@@ -604,10 +562,7 @@ const RecruiterApplications = () => {
                     )}
                 </div>
 
-                {/* ===================================================== */}
                 {/* APPLICATION LIST */}
-                {/* ===================================================== */}
-
                 {filteredApplications.length > 0 ? (
                     <div className="mt-5 space-y-4">
                         {filteredApplications.map((application) => (
@@ -722,10 +677,7 @@ const RecruiterApplications = () => {
                                     </div>
                                 </div>
 
-                                {/* ================================================= */}
                                 {/* ACTIONS */}
-                                {/* ================================================= */}
-
                                 <div className="mt-5 flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
                                     {/* Resume */}
                                     <button
@@ -798,10 +750,7 @@ const RecruiterApplications = () => {
                 )}
             </section>
 
-            {/* ========================================================= */}
             {/* MODALS */}
-            {/* ========================================================= */}
-
             {selectedCandidate && modalType && (
                 <div
                     className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm"
@@ -834,10 +783,7 @@ const RecruiterApplications = () => {
                             </button>
                         </div>
 
-                        {/* ================================================= */}
                         {/* CANDIDATE DETAILS */}
-                        {/* ================================================= */}
-
                         {modalType === "candidate" && (
                             <div className="p-6">
                                 {/* Candidate Header */}
@@ -1015,10 +961,7 @@ const RecruiterApplications = () => {
                             </div>
                         )}
 
-                        {/* ================================================= */}
                         {/* MANAGE APPLICATION */}
-                        {/* ================================================= */}
-
                         {modalType === "manage" && (
                             <div className="p-6">
                                 {/* Candidate */}

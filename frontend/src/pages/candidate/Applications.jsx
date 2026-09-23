@@ -302,7 +302,7 @@ const Applications = () => {
 
     return (
         <div>
-            {/* ==================== PAGE HEADER ==================== */}
+            {/*PAGE HEADER*/}
             <section>
                 <p className="text-sm font-semibold uppercase tracking-wider text-indigo-600">
                     Career Activity

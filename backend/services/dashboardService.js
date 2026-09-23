@@ -14,11 +14,8 @@ import { STATUS_CODES } from "../utils/setConstants.js";
 
 
 /*
-    ================================
     CANDIDATE DASHBOARD
-    ================================
 */
-
 const getCandidateDashboard = async (userId) => {
 
     const candidate = await CandidateProfile.findOne({
@@ -123,7 +120,6 @@ const getCandidateDashboard = async (userId) => {
     /*
         Recent applications
     */
-
     const recentApplications =
         await Application.findAll({
 
@@ -153,21 +149,17 @@ const getCandidateDashboard = async (userId) => {
             limit: 5,
         });
 
-
     /*
         Upcoming interviews
-
         We first get applications
         belonging to this candidate.
     */
 
     const candidateApplications =
         await Application.findAll({
-
             where: {
                 candidateId: candidate.id,
             },
-
             attributes: ["id"],
         });
 
@@ -179,8 +171,6 @@ const getCandidateDashboard = async (userId) => {
 
 
     let upcomingInterviews = [];
-
-
     if (applicationIds.length > 0) {
 
         upcomingInterviews =
@@ -258,12 +248,7 @@ const getCandidateDashboard = async (userId) => {
 };
 
 
-/*
-    ================================
-    RECRUITER DASHBOARD
-    ================================
-*/
-
+/*    RECRUITER DASHBOARD   */
 const getRecruiterDashboard = async (userId) => {
 
     const recruiter =

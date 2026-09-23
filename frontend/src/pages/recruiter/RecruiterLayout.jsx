@@ -31,10 +31,7 @@ const RecruiterLayout = () => {
     const userName = storedUser?.name || "Recruiter";
     const userEmail = storedUser?.email || "";
 
-    // =====================================================
     // NOTIFICATIONS
-    // =====================================================
-
     const notifications = [
         {
             id: 1,
@@ -78,10 +75,7 @@ const RecruiterLayout = () => {
         },
     ];
 
-    // =====================================================
     // CLOSE NOTIFICATION WHEN CLICKING OUTSIDE
-    // =====================================================
-
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (
@@ -102,10 +96,7 @@ const RecruiterLayout = () => {
         };
     }, []);
 
-    // =====================================================
     // NAVIGATION
-    // =====================================================
-
     const navigation = [
         {
             title: "Jobs",
@@ -129,20 +120,14 @@ const RecruiterLayout = () => {
         },
     ];
 
-    // =====================================================
     // CLOSE MENUS
-    // =====================================================
-
     const closeMenus = () => {
         setMobileMenuOpen(false);
         setProfileMenuOpen(false);
         setNotificationOpen(false);
     };
 
-    // =====================================================
     // LOGOUT
-    // =====================================================
-
     const handleLogout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
@@ -152,20 +137,14 @@ const RecruiterLayout = () => {
         navigate("/login");
     };
 
-    // =====================================================
     // PROFILE
-    // =====================================================
-
     const handleProfile = () => {
         closeMenus();
 
         navigate("/recruiter/profile");
     };
 
-    // =====================================================
     // SETTINGS
-    // =====================================================
-
     const handleSettings = () => {
         closeMenus();
 
@@ -176,10 +155,7 @@ const RecruiterLayout = () => {
         <div className="min-h-screen bg-slate-50 text-slate-800">
             <header className="sticky top-0 z-50 border-b border-slate-200 bg-white">
                 <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-5 sm:px-7 lg:px-10">
-                    {/* =====================================================
-                        LOGO
-                    ===================================================== */}
-
+                    {/* LOGO */}
                     <button
                         type="button"
                         onClick={() => navigate("/recruiter/jobs")}
@@ -197,10 +173,7 @@ const RecruiterLayout = () => {
                         </span>
                     </button>
 
-                    {/* =====================================================
-                        DESKTOP NAVIGATION
-                    ===================================================== */}
-
+                    {/* DESKTOP NAVIGATION */}
                     <nav className="hidden items-center gap-1 lg:flex">
                         {navigation.map((item) => {
                             const Icon = item.icon;
@@ -229,15 +202,9 @@ const RecruiterLayout = () => {
                         })}
                     </nav>
 
-                    {/* =====================================================
-                        RIGHT SIDE
-                    ===================================================== */}
-
+                    {/* RIGHT SIDE */}
                     <div className="flex items-center gap-2">
-                        {/* =================================================
-                            NOTIFICATIONS
-                        ================================================= */}
-
+                        {/* NOTIFICATIONS */}
                         <div
                             ref={notificationRef}
                             className="relative"
@@ -264,10 +231,7 @@ const RecruiterLayout = () => {
                                 <span className="absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-indigo-600" />
                             </button>
 
-                            {/* =================================================
-                                NOTIFICATION DROPDOWN
-                            ================================================= */}
-
+                            {/* NOTIFICATION DROPDOWN */}
                             {notificationOpen && (
                                 <div className="absolute right-0 top-12 z-50 w-[360px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-200/60">
                                     {/* Header */}
@@ -344,10 +308,7 @@ const RecruiterLayout = () => {
                             )}
                         </div>
 
-                        {/* =================================================
-                            PROFILE MENU
-                        ================================================= */}
-
+                        {/* PROFILE MENU */}
                         <div className="relative">
                             <button
                                 type="button"
@@ -363,13 +324,11 @@ const RecruiterLayout = () => {
                                 }`}
                             >
                                 {/* Profile Avatar */}
-
                                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
                                     <User size={18} />
                                 </div>
 
                                 {/* User Information */}
-
                                 <div className="hidden text-left md:block">
                                     <p className="max-w-[130px] truncate text-sm font-semibold text-slate-800">
                                         {userName}
@@ -392,10 +351,7 @@ const RecruiterLayout = () => {
                                 />
                             </button>
 
-                            {/* =================================================
-                                PROFILE DROPDOWN
-                            ================================================= */}
-
+                                {/* PROFILE DROPDOWN */}
                             {profileMenuOpen && (
                                 <div className="absolute right-0 top-12 z-50 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg shadow-slate-200/70">
                                     {/* User Info */}
@@ -463,10 +419,7 @@ const RecruiterLayout = () => {
                             )}
                         </div>
 
-                        {/* =================================================
-                            MOBILE MENU BUTTON
-                        ================================================= */}
-
+                        {/* MOBILE MENU BUTTON */}
                         <button
                             type="button"
                             onClick={() =>
@@ -486,10 +439,7 @@ const RecruiterLayout = () => {
                     </div>
                 </div>
 
-                {/* =====================================================
-                    MOBILE NAVIGATION
-                ===================================================== */}
-
+                {/* MOBILE NAVIGATION */}
                 {mobileMenuOpen && (
                     <div className="border-t border-slate-100 bg-white lg:hidden">
                         <nav className="mx-auto max-w-[1440px] px-5 py-3">
@@ -529,11 +479,8 @@ const RecruiterLayout = () => {
                     </div>
                 )}
             </header>
-
-            {/* =========================================================
-                PAGE CONTENT
-            ========================================================= */}
-
+            
+            {/* PAGE CONTENT */}
             <main className="mx-auto max-w-[1440px] px-5 py-6 sm:px-7 lg:px-10">
                 <section>
                     <Outlet />

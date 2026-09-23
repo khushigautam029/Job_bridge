@@ -106,7 +106,7 @@ const RecruiterDashboard = () => {
         },
     ];
 
-    // ==================== NAVIGATION ====================
+    //  NAVIGATION 
 
     const handlePostJob = () => {
         navigate("/recruiter/jobs/post");
