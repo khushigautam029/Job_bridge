@@ -32,10 +32,7 @@ const CandidateLayout = () => {
     const userName = storedUser?.name || "Candidate";
     const userRole = storedUser?.role || "CANDIDATE";
 
-    // =====================================================
     // NOTIFICATIONS
-    // =====================================================
-
     const notifications = [
         {
             id: 1,
@@ -79,10 +76,7 @@ const CandidateLayout = () => {
         },
     ];
 
-    // =====================================================
     // CLOSE NOTIFICATION WHEN CLICKING OUTSIDE
-    // =====================================================
-
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (
@@ -103,10 +97,7 @@ const CandidateLayout = () => {
         };
     }, []);
 
-    // =====================================================
     // CANDIDATE NAVIGATION
-    // =====================================================
-
     const navigation = [
         {
             title: "Find Jobs",
@@ -130,20 +121,14 @@ const CandidateLayout = () => {
         },
     ];
 
-    // =====================================================
     // CLOSE MENUS
-    // =====================================================
-
     const closeMenus = () => {
         setMobileMenuOpen(false);
         setProfileMenuOpen(false);
         setNotificationOpen(false);
     };
 
-    // =====================================================
     // LOGOUT
-    // =====================================================
-
     const handleLogout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
@@ -153,20 +138,14 @@ const CandidateLayout = () => {
         navigate("/login");
     };
 
-    // =====================================================
     // PROFILE
-    // =====================================================
-
     const handleProfileClick = () => {
         closeMenus();
 
         navigate("/candidate/profile");
     };
 
-    // =====================================================
     // SETTINGS
-    // =====================================================
-
     const handleSettingsClick = () => {
         closeMenus();
 
@@ -176,18 +155,10 @@ const CandidateLayout = () => {
     return (
         <div className="min-h-screen bg-slate-50 text-slate-800">
 
-            {/* =====================================================
-                HEADER
-            ===================================================== */}
-
+                {/* HEADER */}
             <header className="sticky top-0 z-50 border-b border-slate-200 bg-white">
-
                 <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-5 sm:px-7 lg:px-10">
-
-                    {/* =================================================
-                        LOGO
-                    ================================================= */}
-
+                        {/* LOGO */}
                     <button
                         type="button"
                         onClick={() => navigate("/candidate/jobs")}
@@ -204,16 +175,10 @@ const CandidateLayout = () => {
                             </span>
                         </span>
                     </button>
-
-                    {/* =================================================
-                        DESKTOP NAVIGATION
-                    ================================================= */}
-
+                        {/* DESKTOP NAVIGATION */}
                     <nav className="hidden items-center gap-1 lg:flex">
-
                         {navigation.map((item) => {
                             const Icon = item.icon;
-
                             return (
                                 <NavLink
                                     key={item.title}
@@ -238,17 +203,9 @@ const CandidateLayout = () => {
                         })}
 
                     </nav>
-
-                    {/* =================================================
-                        RIGHT SIDE
-                    ================================================= */}
-
+                        {/* RIGHT SIDE */}
                     <div className="flex items-center gap-2">
-
-                        {/* =================================================
-                            NOTIFICATIONS
-                        ================================================= */}
-
+                            {/* NOTIFICATIONS */}
                         <div
                             ref={notificationRef}
                             className="relative"
@@ -276,10 +233,7 @@ const CandidateLayout = () => {
                                 <span className="absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-indigo-600" />
                             </button>
 
-                            {/* =================================================
-                                NOTIFICATION DROPDOWN
-                            ================================================= */}
-
+                            {/* NOTIFICATION DROPDOWN */}
                             {notificationOpen && (
                                 <div className="absolute right-0 top-12 z-50 w-[360px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-200/60">
 
@@ -367,10 +321,7 @@ const CandidateLayout = () => {
 
                         </div>
 
-                        {/* =================================================
-                            PROFILE
-                        ================================================= */}
-
+                        {/* PROFILE */}
                         <div className="relative">
 
                             <button
@@ -422,10 +373,7 @@ const CandidateLayout = () => {
 
                             </button>
 
-                            {/* =================================================
-                                PROFILE DROPDOWN
-                            ================================================= */}
-
+                                {/* PROFILE DROPDOWN */}
                             {profileMenuOpen && (
 
                                 <div className="absolute right-0 top-12 z-50 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg shadow-slate-200/70">
@@ -511,11 +459,7 @@ const CandidateLayout = () => {
                             )}
 
                         </div>
-
-                        {/* =================================================
-                            MOBILE MENU BUTTON
-                        ================================================= */}
-
+                            {/* MOBILE MENU BUTTON */}
                         <button
                             type="button"
                             onClick={() =>
@@ -537,10 +481,7 @@ const CandidateLayout = () => {
 
                 </div>
 
-                {/* =====================================================
-                    MOBILE MENU
-                ===================================================== */}
-
+                {/* MOBILE MENU */}
                 {mobileMenuOpen && (
 
                     <div className="border-t border-slate-100 bg-white lg:hidden">
@@ -594,10 +535,7 @@ const CandidateLayout = () => {
 
             </header>
 
-            {/* =====================================================
-                PAGE CONTENT
-            ===================================================== */}
-
+                {/* PAGE CONTENT */}
             <main className="mx-auto max-w-[1440px] px-5 py-6 sm:px-7 lg:px-10">
 
                 <section>
