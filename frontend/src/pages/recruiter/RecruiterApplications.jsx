@@ -13,14 +13,19 @@ import {
     Users,
     X
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import {
+    getJobApplications,
+    getRecruiterApplications,
+    updateApplicationStatus as updateApplicationStatusRequest,
+} from "../../services/projectService";
 
 const RecruiterApplications = () => {
     const { jobId } = useParams();
     const navigate = useNavigate();
 
-    const currentJobId = Number(jobId);
+    const currentJobId = jobId ? Number(jobId) : null;
 
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("All");
@@ -280,12 +285,76 @@ const RecruiterApplications = () => {
                 "Designer experienced in creating user-focused interfaces and collaborating with product teams.",
         },
     ]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        let active = true;
+        const request = currentJobId
+            ? getJobApplications(currentJobId)
+            : getRecruiterApplications();
+
+        request
+            .then((items) => {
+                if (!active) return;
+                const statusLabels = {
+                    APPLIED: "Applied",
+                    UNDER_REVIEW: "Under Review",
+                    SHORTLISTED: "Shortlisted",
+                    INTERVIEW: "Interview",
+                    SELECTED: "Selected",
+                    REJECTED: "Rejected",
+                };
+                setApplications(items.map((item) => {
+                    const candidate = item.candidate || {};
+                    const job = item.job || {};
+                    const status = statusLabels[item.status] || item.status;
+                    return {
+                        ...item,
+                        jobId: item.jobId || job.id,
+                        candidate: candidate.user?.name || "Candidate",
+                        email: candidate.user?.email || "",
+                        phone: candidate.user?.phone || "",
+                        jobTitle: job.title || "Job",
+                        location: candidate.location || job.location || "",
+                        experience: candidate.experienceYears
+                            ? `${candidate.experienceYears} Years`
+                            : "Not specified",
+                        status,
+                        appliedDate: item.appliedAt
+                            ? new Date(item.appliedAt).toLocaleDateString()
+                            : "",
+                        skills: (candidate.skills || []).map((skill) => skill.name),
+                        resume: item.resume || "",
+                        education: "",
+                        summary: candidate.bio || "",
+                    };
+                }));
+                setError("");
+            })
+            .catch((loadError) => {
+                if (active) {
+                    setApplications([]);
+                    setError(
+                        loadError.response?.data?.message ||
+                        "Unable to load applications."
+                    );
+                }
+            })
+            .finally(() => {
+                if (active) setLoading(false);
+            });
+
+        return () => {
+            active = false;
+        };
+    }, [currentJobId]);
 
     // Applications For Current Job
     const jobApplications = useMemo(() => {
         return applications.filter(
             (application) =>
-                application.jobId === currentJobId
+                !currentJobId || application.jobId === currentJobId
         );
     }, [applications, currentJobId]);
 
@@ -411,10 +480,32 @@ const RecruiterApplications = () => {
     };
 
     /* Update Application Status */
-    const updateApplicationStatus = (
+    const updateApplicationStatus = async (
         applicationId,
         newStatus
     ) => {
+        const statusValues = {
+            "Under Review": "UNDER_REVIEW",
+            Shortlisted: "SHORTLISTED",
+            Interview: "INTERVIEW",
+            Selected: "SELECTED",
+            Rejected: "REJECTED",
+        };
+
+        try {
+            await updateApplicationStatusRequest(
+                applicationId,
+                statusValues[newStatus]
+            );
+            setError("");
+        } catch (statusError) {
+            setError(
+                statusError.response?.data?.message ||
+                "Unable to update the application status."
+            );
+            return;
+        }
+
         setApplications(
             (prevApplications) =>
                 prevApplications.map(
@@ -462,6 +553,16 @@ const RecruiterApplications = () => {
     /* Page  */
     return (
         <div>
+            {loading && (
+                <p className="py-8 text-center text-sm text-slate-500">
+                    Loading applications...
+                </p>
+            )}
+            {error && (
+                <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                    {error}
+                </div>
+            )}
             {/* PAGE HEADER */}
             <section className="flex flex-col justify-between gap-5 md:flex-row md:items-end">
                 <div>

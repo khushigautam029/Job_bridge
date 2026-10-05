@@ -9,8 +9,13 @@ import {
     Save,
     X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+    createJob,
+    getJobCategories,
+    getSkills,
+} from "../../services/projectService";
 
 const PostJob = () => {
     const navigate = useNavigate();
@@ -27,10 +32,26 @@ const PostJob = () => {
         requirements: "",
     });
     const [skills, setSkills] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [skillCatalog, setSkillCatalog] = useState([]);
     const [skillInput, setSkillInput] = useState("");
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        Promise.all([getJobCategories(), getSkills()])
+            .then(([jobCategories, availableSkills]) => {
+                setCategories(jobCategories);
+                setSkillCatalog(availableSkills);
+            })
+            .catch((loadError) => {
+                setError(
+                    loadError.response?.data?.message ||
+                    "Unable to load job categories and skills."
+                );
+            });
+    }, []);
     const handleChange = (e) => {
         const { name, value } = e.target;
 
@@ -129,52 +150,63 @@ const PostJob = () => {
         try {
             setLoading(true);
 
-            /*
-             * For now this creates the job locally.
-             *
-             * Once your backend API is ready, this is where we will
-             * replace the local logic with the POST /jobs API call.
-             */
+            const matchedSkills = skills.map((name) =>
+                skillCatalog.find(
+                    (skill) =>
+                        skill.name.toLowerCase() === name.toLowerCase()
+                )
+            );
+            if (matchedSkills.some((skill) => !skill)) {
+                throw new Error(
+                    "One or more skills are not in the available skills catalog."
+                );
+            }
 
-            const newJob = {
-                id: Date.now(),
-                title: formData.title,
-                category: formData.category,
-                location: formData.location,
-                type: formData.type,
-                workMode: formData.workMode,
-                experience: formData.experience,
-                salary: formData.salary,
-                deadline: formData.deadline,
-                description: formData.description,
-                requirements: formData.requirements,
-                skills,
-                applications: 0,
-                postedDate: new Date().toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "2-digit",
-                    year: "numeric",
-                }),
-                status: "Active",
-            };
+            const salaryAmounts = [...formData.salary.matchAll(/(\d+(?:\.\d+)?)\s*([LK]?)/gi)];
+            const salaryMultiplier = /lpa|lakh|L/i.test(formData.salary)
+                ? 100000
+                : /k/i.test(formData.salary)
+                    ? 1000
+                    : 1;
+            const amounts = salaryAmounts.map((match) =>
+                Number(match[1]) * salaryMultiplier
+            );
+            const experienceValues = formData.experience.match(/\d+/g)?.map(Number) || [];
+            const jobType = formData.type.toUpperCase().replaceAll(" ", "_");
+            const workMode = formData.workMode
+                .toUpperCase()
+                .replaceAll("-", "")
+                .replaceAll(" ", "_");
 
-            console.log("Job to be posted:", newJob);
+            await createJob({
+                categoryId: Number(formData.category),
+                skillIds: matchedSkills.map((skill) => skill.id),
+                title: formData.title.trim(),
+                description: formData.description.trim(),
+                requirements: formData.requirements.trim(),
+                jobType,
+                workMode,
+                location: formData.location.trim(),
+                minSalary: amounts[0] || undefined,
+                maxSalary: amounts[1] || amounts[0] || undefined,
+                experienceMin: experienceValues[0] || 0,
+                experienceMax: formData.experience.includes("+")
+                    ? null
+                    : experienceValues[1] || experienceValues[0],
+                applicationDeadline: formData.deadline,
+                status: "OPEN",
+            });
 
             setSuccess("Job posted successfully!");
-
-            /*
-             * Small delay so the success message can be seen.
-             */
             setTimeout(() => {
-                navigate("/recruiter/jobs", {
-                    state: {
-                        newJob,
-                    },
-                });
+                navigate("/recruiter/jobs");
             }, 700);
         } catch (err) {
-            console.error("Post job error:", err);
-            setError("Something went wrong while posting the job.");
+            setError(
+                err.response?.data?.message ||
+                err.message ||
+                "Something went wrong while posting the job."
+            );
         } finally {
             setLoading(false);
         }
@@ -274,29 +306,14 @@ const PostJob = () => {
                                         Select category
                                     </option>
 
-                                    <option value="Development">
-                                        Development
-                                    </option>
-
-                                    <option value="Design">
-                                        Design
-                                    </option>
-
-                                    <option value="Human Resources">
-                                        Human Resources
-                                    </option>
-
-                                    <option value="Marketing">
-                                        Marketing
-                                    </option>
-
-                                    <option value="Sales">
-                                        Sales
-                                    </option>
-
-                                    <option value="Finance">
-                                        Finance
-                                    </option>
+                                    {categories.map((category) => (
+                                        <option
+                                            key={category.id}
+                                            value={category.id}
+                                        >
+                                            {category.name}
+                                        </option>
+                                    ))}
                                 </select>
 
                                 <ChevronDown

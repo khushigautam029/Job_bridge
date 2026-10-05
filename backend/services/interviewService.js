@@ -2,6 +2,7 @@ import {
     Application,
     ApplicationStatusHistory,
     CandidateProfile,
+    Company,
     Interview,
     Job,
     RecruiterProfile,
@@ -241,8 +242,20 @@ const getMyInterviews = async (
                         {
                             model: Job,
                             as: "job",
+                            include: [
+                                {
+                                    model: Company,
+                                    as: "company",
+                                    attributes: ["id", "name", "location"],
+                                },
+                            ],
                         },
                     ],
+                },
+                {
+                    model: User,
+                    as: "scheduler",
+                    attributes: ["id", "name", "email"],
                 },
             ],
 
@@ -253,6 +266,63 @@ const getMyInterviews = async (
 
 
     return interviews;
+};
+
+const getRecruiterInterviews = async (userId) => {
+    const recruiter =
+        await RecruiterProfile.findOne({
+            where: {
+                userId,
+            },
+        });
+
+    if (!recruiter) {
+        const error = new Error("Recruiter profile not found");
+        error.statusCode = STATUS_CODES.NOT_FOUND;
+        throw error;
+    }
+
+    return Interview.findAll({
+        include: [
+            {
+                model: Application,
+                as: "application",
+                include: [
+                    {
+                        model: Job,
+                        as: "job",
+                        where: {
+                            recruiterId: recruiter.id,
+                        },
+                        include: [
+                            {
+                                model: Company,
+                                as: "company",
+                                attributes: ["id", "name", "location"],
+                            },
+                        ],
+                    },
+                    {
+                        model: CandidateProfile,
+                        as: "candidate",
+                        include: [
+                            {
+                                model: User,
+                                as: "user",
+                                attributes: ["id", "name", "email", "phone"],
+                            },
+                        ],
+                    },
+                ],
+            },
+            {
+                model: User,
+                as: "scheduler",
+                attributes: ["id", "name", "email"],
+            },
+        ],
+        order: [["scheduledAt", "ASC"]],
+    });
 };
 
 
@@ -562,25 +632,6 @@ const cancelInterview = async (
     userId,
     interviewId
 ) => {
-
-    const recruiter =
-        await RecruiterProfile.findOne({
-            where: {
-                userId,
-            },
-        });
-
-
-    if (!recruiter) {
-        const error = new Error(
-            "Recruiter profile not found"
-        );
-
-        error.statusCode = STATUS_CODES.NOT_FOUND;
-        throw error;
-    }
-
-
     const interview =
         await Interview.findByPk(
             interviewId,
@@ -594,6 +645,10 @@ const cancelInterview = async (
                             {
                                 model: Job,
                                 as: "job",
+                            },
+                            {
+                                model: CandidateProfile,
+                                as: "candidate",
                             },
                         ],
                     },
@@ -612,10 +667,19 @@ const cancelInterview = async (
     }
 
 
-    if (
-        interview.application.job.recruiterId !==
-        recruiter.id
-    ) {
+    const candidateOwnsInterview =
+        interview.application.candidate.userId === userId;
+    const recruiter =
+        await RecruiterProfile.findOne({
+            where: {
+                userId,
+            },
+        });
+    const recruiterOwnsInterview =
+        recruiter &&
+        interview.application.job.recruiterId === recruiter.id;
+
+    if (!candidateOwnsInterview && !recruiterOwnsInterview) {
 
         const error = new Error(
             "You are not authorized to cancel this interview"
@@ -636,6 +700,6 @@ const cancelInterview = async (
 
 
 export {
-    cancelInterview, getInterviewById, getMyInterviews, scheduleInterview, updateInterview,
+    cancelInterview, getInterviewById, getMyInterviews, getRecruiterInterviews, scheduleInterview, updateInterview,
     updateInterviewStatus
 };

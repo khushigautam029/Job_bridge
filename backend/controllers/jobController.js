@@ -66,25 +66,6 @@ const getAll = asyncHandler(
             }
         );
 
-        const getCategories = asyncHandler(async (req, res) => {
-            const categories = await getJobCategories();
-            return res.status(STATUS_CODES.OK).json({
-                success: true,
-                data: {
-                    categories,
-                },
-            });
-        });
-
-        const getMine = asyncHandler(async (req, res) => {
-            const jobs = await getRecruiterJobs(req.user.id);
-            return res.status(STATUS_CODES.OK).json({
-                success: true,
-                data: {
-                    jobs,
-                },
-            });
-        });
         if (error) {
             return res.status(
                 STATUS_CODES.BAD_REQUEST
@@ -107,6 +88,26 @@ const getAll = asyncHandler(
         });
     }
 );
+
+const getCategories = asyncHandler(async (req, res) => {
+    const categories = await getJobCategories();
+    return res.status(STATUS_CODES.OK).json({
+        success: true,
+        data: {
+            categories,
+        },
+    });
+});
+
+const getMine = asyncHandler(async (req, res) => {
+    const jobs = await getRecruiterJobs(req.user.id);
+    return res.status(STATUS_CODES.OK).json({
+        success: true,
+        data: {
+            jobs,
+        },
+    });
+});
 
 // GET JOB BY ID
 const getOne = asyncHandler(async (req, res) => {

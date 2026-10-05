@@ -1,11 +1,13 @@
 import { Op } from "sequelize";
 import {
+    Application,
     Company,
     Job,
     JobCategory,
     RecruiterProfile,
     Skill,
 } from "../models/index.js";
+import sequelize from "../config/database.js";
 import { STATUS_CODES } from "../utils/setConstants.js";
 
 const getRecruiterProfile = async (userId) => {
@@ -42,11 +44,23 @@ const createJob = async (
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
-    const job = await Job.create({
-        recruiterId: recruiterProfile.id,
-        companyId: recruiterProfile.companyId,
-        ...data,
-    });
+    const { skillIds = [], ...jobData } = data;
+    const transaction = await sequelize.transaction();
+    let job;
+    try {
+        job = await Job.create({
+            recruiterId: recruiterProfile.id,
+            companyId: recruiterProfile.companyId,
+            ...jobData,
+        }, { transaction });
+        if (skillIds.length > 0) {
+            await job.setSkills(skillIds, { transaction });
+        }
+        await transaction.commit();
+    } catch (error) {
+        await transaction.rollback();
+        throw error;
+    }
     return getJobById(job.id);
 };
 
@@ -191,43 +205,49 @@ const getAllJobs = async (filters = {}) => {
         },
     };
 
-    const getJobCategories = async () => {
-        return JobCategory.findAll({
-            attributes: ["id", "name"],
-            order: [["name", "ASC"]],
-        });
-    };
+};
 
-    const getRecruiterJobs = async (userId) => {
-        const recruiterProfile =
-            await getRecruiterProfile(userId);
+const getJobCategories = async () =>
+    JobCategory.findAll({
+        attributes: ["id", "name"],
+        order: [["name", "ASC"]],
+    });
 
-        return Job.findAll({
-            where: {
-                recruiterId: recruiterProfile.id,
+const getRecruiterJobs = async (userId) => {
+    const recruiterProfile =
+        await getRecruiterProfile(userId);
+
+    return Job.findAll({
+        where: {
+            recruiterId: recruiterProfile.id,
+        },
+        include: [
+            {
+                model: Company,
+                as: "company",
             },
-            include: [
-                {
-                    model: Company,
-                    as: "company",
+            {
+                model: JobCategory,
+                as: "category",
+                attributes: ["id", "name"],
+            },
+            {
+                model: Skill,
+                as: "skills",
+                attributes: ["id", "name"],
+                through: {
+                    attributes: [],
                 },
-                {
-                    model: JobCategory,
-                    as: "category",
-                    attributes: ["id", "name"],
-                },
-                {
-                    model: Skill,
-                    as: "skills",
-                    attributes: ["id", "name"],
-                    through: {
-                        attributes: [],
-                    },
-                },
-            ],
-            order: [["createdAt", "DESC"]],
-        });
-    };
+            },
+            {
+                model: Application,
+                as: "applications",
+                attributes: ["id"],
+                separate: true,
+            },
+        ],
+        order: [["createdAt", "DESC"]],
+    });
 };
 
 const getJobById = async (
@@ -338,7 +358,11 @@ const updateJob = async (
         }
     }
 
-    await job.update(data);
+    const { skillIds, ...jobData } = data;
+    await job.update(jobData);
+    if (skillIds) {
+        await job.setSkills(skillIds);
+    }
     return getJobById(job.id);
 };
 

@@ -12,14 +12,15 @@ import {
     Video,
     XCircle,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getRecruiterInterviews } from "../../services/projectService";
 
 const RecruiterInterviews = () => {
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("All");
     const [typeFilter, setTypeFilter] = useState("All");
 
-    const interviews = [
+    const sampleInterviews = [
         {
             id: 1,
             candidate: "Aman Verma",
@@ -110,6 +111,70 @@ const RecruiterInterviews = () => {
         },
     ];
 
+    const [interviews, setInterviews] = useState(sampleInterviews);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        let active = true;
+        getRecruiterInterviews()
+            .then((items) => {
+                if (!active) return;
+                const statusLabels = {
+                    SCHEDULED: "Scheduled",
+                    COMPLETED: "Completed",
+                    CANCELLED: "Cancelled",
+                    RESCHEDULED: "Scheduled",
+                };
+                setInterviews(items.map((interview) => {
+                    const job = interview.application?.job || {};
+                    const candidate = interview.application?.candidate || {};
+                    const scheduledAt = new Date(interview.scheduledAt);
+                    return {
+                        ...interview,
+                        candidate: candidate.user?.name || "Candidate",
+                        email: candidate.user?.email || "",
+                        position: job.title || "Job",
+                        date: scheduledAt.toLocaleDateString(undefined, {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                        }),
+                        time: scheduledAt.toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                        }),
+                        type: interview.interviewType === "ONLINE"
+                            ? "Video"
+                            : interview.interviewType === "PHONE"
+                                ? "Phone"
+                                : "In-person",
+                        status: statusLabels[interview.status] || interview.status,
+                        location: interview.meetingLink ||
+                            interview.location ||
+                            "Phone Call",
+                    };
+                }));
+                setError("");
+            })
+            .catch((loadError) => {
+                if (active) {
+                    setInterviews([]);
+                    setError(
+                        loadError.response?.data?.message ||
+                        "Unable to load recruiter interviews."
+                    );
+                }
+            })
+            .finally(() => {
+                if (active) setLoading(false);
+            });
+
+        return () => {
+            active = false;
+        };
+    }, []);
+
     const filteredInterviews = interviews.filter((interview) => {
         const searchValue = search.toLowerCase();
 
@@ -177,8 +242,21 @@ const RecruiterInterviews = () => {
         }
     };
 
+    if (loading) {
+        return (
+            <p className="py-10 text-center text-sm text-slate-500">
+                Loading interviews...
+            </p>
+        );
+    }
+
     return (
         <div>
+            {error && (
+                <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                    {error}
+                </div>
+            )}
             {/* Page Header */}
             <section className="flex flex-col justify-between gap-5 md:flex-row md:items-center">
                 <div>
@@ -621,4 +699,3 @@ const RecruiterInterviews = () => {
 };
 
 export default RecruiterInterviews;
-

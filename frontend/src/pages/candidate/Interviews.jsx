@@ -12,7 +12,11 @@ import {
     X,
     XCircle,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import {
+    cancelInterview as cancelInterviewRequest,
+    getInterviews,
+} from "../../services/projectService";
 
 const Interviews = () => {
     const [interviews, setInterviews] = useState([
@@ -105,6 +109,74 @@ const Interviews = () => {
     const [showJoinModal, setShowJoinModal] = useState(false);
     const [meetingInterview, setMeetingInterview] = useState(null);
     const [copied, setCopied] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        let active = true;
+        getInterviews()
+            .then((items) => {
+                if (!active) return;
+                setInterviews(items.map((interview) => {
+                    const job = interview.application?.job || {};
+                    const scheduledAt = new Date(interview.scheduledAt);
+                    const endTime = new Date(
+                        scheduledAt.getTime() + 45 * 60 * 1000
+                    );
+                    const statusLabels = {
+                        SCHEDULED: "Upcoming",
+                        COMPLETED: "Completed",
+                        CANCELLED: "Cancelled",
+                        RESCHEDULED: "Upcoming",
+                    };
+                    return {
+                        ...interview,
+                        position: job.title || "Interview",
+                        company: job.company?.name || "Company",
+                        date: scheduledAt.toLocaleDateString(undefined, {
+                            month: "long",
+                            day: "numeric",
+                            year: "numeric",
+                        }),
+                        time: `${scheduledAt.toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                        })} - ${endTime.toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                        })}`,
+                        type: interview.interviewType === "ONLINE"
+                            ? "Online Interview"
+                            : `${interview.interviewType} Interview`,
+                        mode: interview.interviewType,
+                        location: interview.location || "Online",
+                        interviewer: interview.scheduler?.name || "Recruiter",
+                        email: interview.scheduler?.email || "",
+                        meetingLink: interview.meetingLink || "",
+                        status: statusLabels[interview.status] || interview.status,
+                        duration: "45 minutes",
+                        notes: interview.notes || "",
+                    };
+                }));
+                setError("");
+            })
+            .catch((loadError) => {
+                if (active) {
+                    setInterviews([]);
+                    setError(
+                        loadError.response?.data?.message ||
+                        "Unable to load your interviews."
+                    );
+                }
+            })
+            .finally(() => {
+                if (active) setLoading(false);
+            });
+
+        return () => {
+            active = false;
+        };
+    }, []);
 
     const upcomingInterviews = interviews.filter(
         (interview) => interview.status === "Upcoming"
@@ -153,43 +225,29 @@ const Interviews = () => {
         return result;
     }, [interviews, search, statusFilter, sortBy]);
 
-    const cancelInterview = (id) => {
+    const cancelInterview = async (id) => {
         const confirmed = window.confirm(
             "Are you sure you want to cancel this interview?"
         );
 
         if (!confirmed) return;
 
-        setInterviews((current) =>
-            current.map((interview) =>
-                interview.id === id
-                    ? {
-                          ...interview,
-                          status: "Cancelled",
-                      }
-                    : interview
-            )
-        );
-
-        if (selectedInterview?.id === id) {
-            setSelectedInterview((current) =>
-                current
-                    ? {
-                          ...current,
-                          status: "Cancelled",
-                      }
-                    : null
+        try {
+            await cancelInterviewRequest(id);
+        } catch (cancelError) {
+            setError(
+                cancelError.response?.data?.message ||
+                "Unable to cancel this interview."
             );
+            return;
         }
-    };
 
-    const completeInterview = (id) => {
         setInterviews((current) =>
             current.map((interview) =>
                 interview.id === id
                     ? {
                           ...interview,
-                          status: "Completed",
+                          status: "Cancelled",
                       }
                     : interview
             )
@@ -200,7 +258,7 @@ const Interviews = () => {
                 current
                     ? {
                           ...current,
-                          status: "Completed",
+                          status: "Cancelled",
                       }
                     : null
             );
@@ -885,20 +943,6 @@ const Interviews = () => {
                                 )}
                             </div>
 
-                            {/* Demo completion action */}
-                            {selectedInterview.status === "Upcoming" && (
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        completeInterview(
-                                            selectedInterview.id
-                                        )
-                                    }
-                                    className="mt-3 w-full rounded-xl border border-green-200 px-4 py-2.5 text-sm font-semibold text-green-600 transition hover:bg-green-50"
-                                >
-                                    Mark as Completed
-                                </button>
-                            )}
                         </div>
                     </div>
                 </div>
@@ -916,6 +960,16 @@ const Interviews = () => {
                     >
                         <div className="flex items-start justify-between">
                             <div>
+                                {loading && (
+                                    <p className="py-8 text-center text-sm text-slate-500">
+                                        Loading interviews...
+                                    </p>
+                                )}
+                                {error && (
+                                    <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                                        {error}
+                                    </div>
+                                )}
                                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
                                     <Video size={22} />
                                 </div>

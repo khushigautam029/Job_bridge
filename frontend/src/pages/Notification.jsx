@@ -10,6 +10,12 @@ import {
     X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import {
+    deleteNotification as deleteNotificationRequest,
+    getNotifications,
+    markAllNotificationsRead,
+    markNotificationRead,
+} from "../services/projectService";
 
 const candidateNotifications = [
     {
@@ -67,6 +73,8 @@ const recruiterNotifications = [
 
 const NotificationDropdown = ({ role = "CANDIDATE" }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
 
     const [notifications, setNotifications] = useState(
         role === "RECRUITER"
@@ -80,6 +88,32 @@ const NotificationDropdown = ({ role = "CANDIDATE" }) => {
     ).length;
 
     useEffect(() => {
+        let active = true;
+        getNotifications()
+            .then((items) => {
+                if (active) {
+                    setNotifications(items.map((item) => ({
+                        ...item,
+                        read: item.isRead,
+                        time: item.createdAt
+                            ? new Date(item.createdAt).toLocaleString()
+                            : "",
+                    })));
+                }
+            })
+            .catch((loadError) => {
+                if (active) {
+                    setNotifications([]);
+                    setError(
+                        loadError.response?.data?.message ||
+                        "Unable to load notifications."
+                    );
+                }
+            })
+            .finally(() => {
+                if (active) setLoading(false);
+            });
+
         const handleOutsideClick = (event) => {
             if (
                 dropdownRef.current &&
@@ -95,6 +129,7 @@ const NotificationDropdown = ({ role = "CANDIDATE" }) => {
         );
 
         return () => {
+            active = false;
             document.removeEventListener(
                 "mousedown",
                 handleOutsideClick
@@ -102,7 +137,17 @@ const NotificationDropdown = ({ role = "CANDIDATE" }) => {
         };
     }, []);
 
-    const markAsRead = (id) => {
+    const markAsRead = async (id) => {
+        try {
+            await markNotificationRead(id);
+            setError("");
+        } catch (requestError) {
+            setError(
+                requestError.response?.data?.message ||
+                "Unable to mark this notification as read."
+            );
+            return;
+        }
         setNotifications((prev) =>
             prev.map((notification) =>
                 notification.id === id
@@ -115,7 +160,17 @@ const NotificationDropdown = ({ role = "CANDIDATE" }) => {
         );
     };
 
-    const markAllAsRead = () => {
+    const markAllAsRead = async () => {
+        try {
+            await markAllNotificationsRead();
+            setError("");
+        } catch (requestError) {
+            setError(
+                requestError.response?.data?.message ||
+                "Unable to mark notifications as read."
+            );
+            return;
+        }
         setNotifications((prev) =>
             prev.map((notification) => ({
                 ...notification,
@@ -124,23 +179,22 @@ const NotificationDropdown = ({ role = "CANDIDATE" }) => {
         );
     };
 
-    const deleteNotification = (id) => {
+    const deleteNotification = async (id) => {
+        try {
+            await deleteNotificationRequest(id);
+            setError("");
+        } catch (requestError) {
+            setError(
+                requestError.response?.data?.message ||
+                "Unable to delete this notification."
+            );
+            return;
+        }
         setNotifications((prev) =>
             prev.filter(
                 (notification) => notification.id !== id
             )
         );
-    };
-
-    const addNotification = (notification) => {
-        setNotifications((prev) => [
-            {
-                id: Date.now(),
-                read: false,
-                ...notification,
-            },
-            ...prev,
-        ]);
     };
 
     const getNotificationIcon = (type) => {

@@ -10,11 +10,40 @@ import {
     Users,
     X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
     useNavigate,
     useSearchParams,
 } from "react-router-dom";
+import {
+    deleteJob as deleteJobRequest,
+    formatJobCard,
+    getJobApplications,
+    getJobCategories,
+    getMyJobs,
+    updateJob,
+} from "../../services/projectService";
+
+const formatRecruiterJob = (job) => ({
+    ...formatJobCard(job),
+    categoryId: job.categoryId,
+    applications: job.applications?.length || 0,
+    postedDate: job.createdAt
+        ? new Date(job.createdAt).toLocaleDateString()
+        : "",
+    status: job.status === "OPEN"
+        ? "Active"
+        : job.status === "CLOSED"
+            ? "Closed"
+            : "Draft",
+    deadline: job.applicationDeadline || "",
+    responsibilities: job.responsibilities
+        ? job.responsibilities.split("\n").filter(Boolean)
+        : [],
+    requirements: job.requirements
+        ? job.requirements.split("\n").filter(Boolean)
+        : [],
+});
 
 const Jobs = () => {
     const navigate = useNavigate();
@@ -239,6 +268,36 @@ const Jobs = () => {
             ],
         },
     ]);
+    const [categories, setCategories] = useState([]);
+    const [remoteApplications, setRemoteApplications] = useState({});
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        let active = true;
+        Promise.all([getMyJobs(), getJobCategories()])
+            .then(([myJobs, jobCategories]) => {
+                if (!active) return;
+                setJobs(myJobs.map(formatRecruiterJob));
+                setCategories(jobCategories);
+            })
+            .catch((loadError) => {
+                if (active) {
+                    setJobs([]);
+                    setError(
+                        loadError.response?.data?.message ||
+                        "Unable to load your job postings."
+                    );
+                }
+            })
+            .finally(() => {
+                if (active) setLoading(false);
+            });
+
+        return () => {
+            active = false;
+        };
+    }, []);
     const applications = {
         1: [
             {
@@ -385,14 +444,45 @@ const Jobs = () => {
 
         return "bg-slate-100 text-slate-500";
     };
+
+    const selectedApplications = selectedJob
+        ? remoteApplications[selectedJob.id] ??
+          applications[selectedJob.id] ??
+          []
+        : [];
+
     const handleViewJob = (job) => {
         navigate(`/recruiter/jobs/${job.id}`, {
             state: { job },
         });
     };
-    const handleViewApplications = (job) => {
+    const handleViewApplications = async (job) => {
         setSelectedJob(job);
         setShowApplications(true);
+        try {
+            const result = await getJobApplications(job.id);
+            setRemoteApplications((current) => ({
+                ...current,
+                [job.id]: result.map((application) => ({
+                    id: application.id,
+                    name: application.candidate?.user?.name || "Candidate",
+                    email: application.candidate?.user?.email || "",
+                    experience: application.candidate?.experienceYears
+                        ? `${application.candidate.experienceYears} Years`
+                        : "Not specified",
+                    status: (application.status || "APPLIED")
+                        .replaceAll("_", " ")
+                        .toLowerCase()
+                        .replace(/\b\w/g, (letter) => letter.toUpperCase()),
+                })),
+            }));
+            setError("");
+        } catch (loadError) {
+            setError(
+                loadError.response?.data?.message ||
+                "Unable to load applications for this job."
+            );
+        }
     };
     const handleEdit = (job) => {
         setSelectedJob({ ...job });
@@ -407,24 +497,54 @@ const Jobs = () => {
         }));
     };
 
-    const handleSaveEdit = () => {
-        setJobs((prevJobs) =>
-            prevJobs.map((job) =>
-                job.id === selectedJob.id
-                    ? selectedJob
-                    : job
-            )
+    const handleSaveEdit = async () => {
+        const category = categories.find(
+            (item) => item.name === selectedJob.category
         );
-
-        setShowEditModal(false);
-        setSelectedJob(null);
+        try {
+            const response = await updateJob(selectedJob.id, {
+                title: selectedJob.title,
+                categoryId: category?.id || selectedJob.categoryId,
+                location: selectedJob.location,
+                jobType: selectedJob.type.toUpperCase().replaceAll(" ", "_"),
+                workMode: selectedJob.workMode.toUpperCase().replaceAll(" ", "_"),
+                status: selectedJob.status === "Active" ? "OPEN" : "CLOSED",
+                description: Array.isArray(selectedJob.description)
+                    ? selectedJob.description.join("\n")
+                    : selectedJob.description,
+            });
+            const updatedJob = formatRecruiterJob(response.job);
+            setJobs((prevJobs) =>
+                prevJobs.map((job) =>
+                    job.id === updatedJob.id ? updatedJob : job
+                )
+            );
+            setError("");
+            setShowEditModal(false);
+            setSelectedJob(null);
+        } catch (updateError) {
+            setError(
+                updateError.response?.data?.message ||
+                "Unable to update this job."
+            );
+        }
     };
     const handleDelete = (job) => {
         setSelectedJob(job);
         setShowDeleteModal(true);
     };
 
-    const confirmDelete = () => {
+    const confirmDelete = async () => {
+        try {
+            await deleteJobRequest(selectedJob.id);
+        } catch (deleteError) {
+            setError(
+                deleteError.response?.data?.message ||
+                "Unable to delete this job."
+            );
+            return;
+        }
+
         setJobs((prevJobs) =>
             prevJobs.filter(
                 (job) => job.id !== selectedJob.id
@@ -445,6 +565,11 @@ const Jobs = () => {
 
     return (
         <div>
+            {error && (
+                <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                    {error}
+                </div>
+            )}
             <section className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
                 <div>
                     <p className="text-sm font-medium text-indigo-600">
@@ -558,30 +683,14 @@ const Jobs = () => {
                         <option value="All">
                             All Categories
                         </option>
-
-                        <option value="Development">
-                            Development
-                        </option>
-
-                        <option value="Design">
-                            Design
-                        </option>
-
-                        <option value="Human Resources">
-                            Human Resources
-                        </option>
-
-                        <option value="Marketing">
-                            Marketing
-                        </option>
-
-                        <option value="Sales">
-                            Sales
-                        </option>
-
-                        <option value="Finance">
-                            Finance
-                        </option>
+                        {categories.map((category) => (
+                            <option
+                                key={category.id}
+                                value={category.name}
+                            >
+                                {category.name}
+                            </option>
+                        ))}
                     </select>
                 </div>
             </section>
@@ -604,7 +713,11 @@ const Jobs = () => {
                 </div>
             </div>
 
-            {filteredJobs.length > 0 ? (
+            {loading ? (
+                <p className="mt-8 text-center text-sm text-slate-500">
+                    Loading your job postings...
+                </p>
+            ) : filteredJobs.length > 0 ? (
                 <section className="mt-5 grid gap-5 lg:grid-cols-2">
                     {filteredJobs.map((job) => (
                         <div
@@ -798,11 +911,9 @@ const Jobs = () => {
                         </div>
 
                         <div className="max-h-[65vh] overflow-y-auto p-6">
-                            {applications[selectedJob.id]?.length > 0 ? (
+                            {selectedApplications.length > 0 ? (
                                 <div className="space-y-4">
-                                    {applications[
-                                        selectedJob.id
-                                    ].map((application) => (
+                                    {selectedApplications.map((application) => (
                                         <div
                                             key={application.id}
                                             className="rounded-2xl border border-slate-200 p-5"
@@ -945,29 +1056,14 @@ const Jobs = () => {
                                         onChange={handleEditChange}
                                         className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
                                     >
-                                        <option value="Development">
-                                            Development
-                                        </option>
-
-                                        <option value="Design">
-                                            Design
-                                        </option>
-
-                                        <option value="Human Resources">
-                                            Human Resources
-                                        </option>
-
-                                        <option value="Marketing">
-                                            Marketing
-                                        </option>
-
-                                        <option value="Sales">
-                                            Sales
-                                        </option>
-
-                                        <option value="Finance">
-                                            Finance
-                                        </option>
+                                        {categories.map((category) => (
+                                            <option
+                                                key={category.id}
+                                                value={category.name}
+                                            >
+                                                {category.name}
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
 

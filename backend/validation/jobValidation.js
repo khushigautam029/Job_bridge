@@ -6,6 +6,11 @@ const createJobSchema = Joi.object({
         .positive()
         .required(),
 
+    skillIds: Joi.array()
+        .items(Joi.number().integer().positive())
+        .unique()
+        .optional(),
+
     title: Joi.string()
         .trim()
         .max(150)
@@ -91,6 +96,11 @@ const updateJobSchema = Joi.object({
     categoryId: Joi.number()
         .integer()
         .positive()
+        .optional(),
+
+    skillIds: Joi.array()
+        .items(Joi.number().integer().positive())
+        .unique()
         .optional(),
 
     title: Joi.string()

@@ -2,6 +2,7 @@ import {
     cancelInterview,
     getInterviewById,
     getMyInterviews,
+    getRecruiterInterviews,
     scheduleInterview,
     updateInterview,
     updateInterviewStatus,
@@ -64,6 +65,17 @@ const getMine = asyncHandler(
         });
     }
 );
+
+const getRecruiterMine = asyncHandler(async (req, res) => {
+    const interviews =
+        await getRecruiterInterviews(req.user.id);
+    return res.status(STATUS_CODES.OK).json({
+        success: true,
+        data: {
+            interviews,
+        },
+    });
+});
 
 // Candidate / Recruiter → One interview
 const getOne = asyncHandler(
@@ -175,7 +187,7 @@ const cancel = asyncHandler(
 );
 
 export {
-    cancel, getMine,
+    cancel, getMine, getRecruiterMine,
     getOne, schedule, update,
     updateStatus
 };

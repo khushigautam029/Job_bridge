@@ -49,6 +49,9 @@ export const getMyJobs = async () =>
 export const getJobCategories = async () =>
     (await apiClient.get("/jobs/categories")).data.data.categories;
 
+export const getSkills = async () =>
+    (await apiClient.get("/skills")).data.data.skills;
+
 export const createJob = async (job) =>
     getData(await apiClient.post("/jobs", job));
 
@@ -100,6 +103,9 @@ export const isJobSaved = async (jobId) =>
 export const getInterviews = async () =>
     (await apiClient.get("/interviews/my-interviews")).data.data.interviews;
 
+export const getRecruiterInterviews = async () =>
+    (await apiClient.get("/interviews/recruiter")).data.data.interviews;
+
 export const scheduleInterview = async (applicationId, interview) =>
     getData(await apiClient.post(
         `/applications/${applicationId}/interviews`,
@@ -116,7 +122,7 @@ export const cancelInterview = async (interviewId) =>
     apiClient.delete(`/interviews/${interviewId}`);
 
 export const getNotifications = async () =>
-    getData(await apiClient.get("/notifications"));
+    (await apiClient.get("/notifications")).data.data.notifications;
 
 export const getUnreadNotificationCount = async () =>
     (await apiClient.get("/notifications/unread-count")).data.data.unreadCount;

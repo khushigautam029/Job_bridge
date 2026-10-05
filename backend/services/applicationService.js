@@ -508,6 +508,13 @@ const getRecruiterApplications = async (userId) => {
                 where: {
                     recruiterId: recruiter.id,
                 },
+                include: [
+                    {
+                        model: Company,
+                        as: "company",
+                        attributes: ["id", "name", "location", "logo"],
+                    },
+                ],
             },
             {
                 model: CandidateProfile,
@@ -522,6 +529,14 @@ const getRecruiterApplications = async (userId) => {
                             "email",
                             "phone",
                         ],
+                    },
+                    {
+                        model: Skill,
+                        as: "skills",
+                        attributes: ["id", "name"],
+                        through: {
+                            attributes: [],
+                        },
                     },
                 ],
             },

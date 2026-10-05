@@ -9,6 +9,12 @@ import {
     User,
 } from "lucide-react";
 import { useState } from "react";
+import { useEffect } from "react";
+import {
+    changePassword,
+    getCurrentUser,
+    updateCurrentUser,
+} from "../../services/projectService";
 
 const CandidateSettings = () => {
     const [activeSection, setActiveSection] = useState("account");
@@ -39,6 +45,33 @@ const CandidateSettings = () => {
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [error, setError] = useState("");
+    const [message, setMessage] = useState("");
+
+    useEffect(() => {
+        let active = true;
+        getCurrentUser()
+            .then(({ user }) => {
+                if (active) {
+                    setAccountSettings({
+                        email: user.email || "",
+                        phone: user.phone || "",
+                    });
+                }
+            })
+            .catch((loadError) => {
+                if (active) {
+                    setError(
+                        loadError.response?.data?.message ||
+                        "Unable to load account settings."
+                    );
+                }
+            });
+
+        return () => {
+            active = false;
+        };
+    }, []);
 
     const handleAccountChange = (e) => {
         const { name, value } = e.target;
@@ -72,13 +105,25 @@ const CandidateSettings = () => {
         }));
     };
 
-    const handleAccountSave = (e) => {
+    const handleAccountSave = async (e) => {
         e.preventDefault();
 
-        alert("Account settings saved successfully.");
+        try {
+            await updateCurrentUser({
+                phone: accountSettings.phone,
+            });
+            setError("");
+            setMessage("Account settings saved successfully.");
+        } catch (saveError) {
+            setMessage("");
+            setError(
+                saveError.response?.data?.message ||
+                "Unable to save account settings."
+            );
+        }
     };
 
-    const handlePasswordSave = (e) => {
+    const handlePasswordSave = async (e) => {
         e.preventDefault();
 
         if (passwordData.newPassword !== passwordData.confirmPassword) {
@@ -86,13 +131,25 @@ const CandidateSettings = () => {
             return;
         }
 
-        alert("Password updated successfully.");
-
-        setPasswordData({
-            currentPassword: "",
-            newPassword: "",
-            confirmPassword: "",
-        });
+        try {
+            await changePassword({
+                currentPassword: passwordData.currentPassword,
+                newPassword: passwordData.newPassword,
+            });
+            setError("");
+            setMessage("Password updated successfully.");
+            setPasswordData({
+                currentPassword: "",
+                newPassword: "",
+                confirmPassword: "",
+            });
+        } catch (saveError) {
+            setMessage("");
+            setError(
+                saveError.response?.data?.message ||
+                "Unable to update your password."
+            );
+        }
     };
 
     const handleNotificationSave = () => {
@@ -128,6 +185,13 @@ const CandidateSettings = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 px-4 py-6 md:px-8">
+            {(error || message) && (
+                <div className={`mx-auto mb-4 max-w-6xl rounded-lg p-3 text-sm ${
+                    error ? "bg-red-50 text-red-700" : "bg-green-50 text-green-700"
+                }`}>
+                    {error || message}
+                </div>
+            )}
             <div className="mx-auto max-w-6xl">
                 {/* Header */}
                 <div className="mb-8">
@@ -209,8 +273,7 @@ const CandidateSettings = () => {
                                                 type="email"
                                                 name="email"
                                                 value={accountSettings.email}
-                                                onChange={handleAccountChange}
-                                                placeholder="Enter your email"
+                                                readOnly
                                                 className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                                             />
                                         </div>
