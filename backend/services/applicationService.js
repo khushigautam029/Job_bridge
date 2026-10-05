@@ -655,6 +655,11 @@ const updateApplicationStatus = async (
 
 
 export {
-    applyForJob, getApplicationById, getJobApplications, getMyApplications, updateApplicationStatus, withdrawApplication
-    getRecruiterApplications, updateApplicationStatus, withdrawApplication
+    applyForJob,
+    getApplicationById,
+    getJobApplications,
+    getMyApplications,
+    getRecruiterApplications,
+    updateApplicationStatus,
+    withdrawApplication,
 };

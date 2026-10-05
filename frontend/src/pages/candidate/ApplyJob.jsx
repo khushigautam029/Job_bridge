@@ -29,7 +29,7 @@ const getStoredUser = () => {
             sessionStorage.getItem("user");
 
         return storedUser ? JSON.parse(storedUser) : {};
-    } catch (error) {
+    } catch {
         return {};
     }
 };
@@ -99,7 +99,7 @@ const ApplyJob = () => {
         return () => {
             active = false;
         };
-    }, [jobId]);
+    }, [jobId, user?.email, user?.name, user?.phone]);
 
     const handleResumeChange = (event) => {
         const file = event.target.files?.[0];

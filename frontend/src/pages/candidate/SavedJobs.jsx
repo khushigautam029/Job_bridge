@@ -261,6 +261,14 @@ const SavedJobs = () => {
         setDeletedJob(null);
     };
 
+    if (loading) {
+        return (
+            <p className="py-10 text-center text-sm text-slate-500">
+                Loading saved jobs...
+            </p>
+        );
+    }
+
     return (
         <div className="relative">
             {error && (
@@ -459,11 +467,7 @@ const SavedJobs = () => {
                 )}
 
                 {/* Saved Jobs Grid */}
-                {loading ? (
-                    <p className="py-10 text-center text-sm text-slate-500">
-                        Loading saved jobs...
-                    </p>
-                ) : filteredJobs.length > 0 && (
+                {filteredJobs.length > 0 && (
                     <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                         {filteredJobs.map((job) => (
                             <div

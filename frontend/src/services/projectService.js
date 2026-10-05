@@ -20,8 +20,10 @@ export const formatJobCard = (job) => {
 
     return {
         ...job,
+        title: job.title || "",
         company: job.company?.name || "Company",
         category: job.category?.name || "",
+        location: job.location || "",
         type: (job.jobType || "").replaceAll("_", " ")
             .toLowerCase()
             .replace(/\b\w/g, (letter) => letter.toUpperCase()),
@@ -41,10 +43,10 @@ export const getJobs = async (filters = {}) =>
     getData(await apiClient.get("/jobs", { params: filters }));
 
 export const getJob = async (jobId) =>
-    getData(await apiClient.get(`/jobs/${jobId}`));
+    getData(await apiClient.get(`/jobs/${jobId}`)).job;
 
 export const getMyJobs = async () =>
-    getData(await apiClient.get("/jobs/my"));
+    getData(await apiClient.get("/jobs/my")).jobs;
 
 export const getJobCategories = async () =>
     (await apiClient.get("/jobs/categories")).data.data.categories;

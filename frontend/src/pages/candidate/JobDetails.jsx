@@ -26,18 +26,14 @@ const JobDetails = () => {
     const { jobId } = useParams();
 
     const [job, setJob] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loadedJobId, setLoadedJobId] = useState(null);
+    const loading = loadedJobId !== jobId;
     const [error, setError] = useState("");
     const [isSaved, setIsSaved] = useState(false);
     const [isApplied, setIsApplied] = useState(false);
 
     useEffect(() => {
         let active = true;
-        setLoading(true);
-        setError("");
-        setIsSaved(false);
-        setIsApplied(false);
-
         getJob(jobId)
             .then((selectedJob) => {
                 if (!active) return;
@@ -64,7 +60,7 @@ const JobDetails = () => {
                 }
             })
             .finally(() => {
-                if (active) setLoading(false);
+                if (active) setLoadedJobId(jobId);
             });
 
         if (localStorage.getItem("token") || sessionStorage.getItem("token")) {

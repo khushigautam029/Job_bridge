@@ -551,13 +551,16 @@ const RecruiterApplications = () => {
     };
 
     /* Page  */
+    if (loading) {
+        return (
+            <p className="py-10 text-center text-sm text-slate-500">
+                Loading applications...
+            </p>
+        );
+    }
+
     return (
         <div>
-            {loading && (
-                <p className="py-8 text-center text-sm text-slate-500">
-                    Loading applications...
-                </p>
-            )}
             {error && (
                 <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
                     {error}

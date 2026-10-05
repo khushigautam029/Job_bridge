@@ -135,7 +135,7 @@ const NotificationDropdown = ({ role = "CANDIDATE" }) => {
                 handleOutsideClick
             );
         };
-    }, []);
+    }, [role]);
 
     const markAsRead = async (id) => {
         try {
@@ -256,7 +256,7 @@ const NotificationDropdown = ({ role = "CANDIDATE" }) => {
                 <Bell size={20} />
 
                 {/* Dynamic unread badge */}
-                {unreadCount > 0 && (
+                {!loading && unreadCount > 0 && (
                     <span
                         className="
                             absolute
@@ -341,7 +341,15 @@ const NotificationDropdown = ({ role = "CANDIDATE" }) => {
 
                     {/* Notifications */}
                     <div className="max-h-[420px] overflow-y-auto">
-                        {notifications.length > 0 ? (
+                        {loading ? (
+                            <p className="px-4 py-8 text-center text-sm text-slate-500">
+                                Loading notifications...
+                            </p>
+                        ) : error ? (
+                            <p className="px-4 py-8 text-center text-sm text-red-600">
+                                {error}
+                            </p>
+                        ) : notifications.length > 0 ? (
                             notifications.map(
                                 (notification) => (
                                     <div

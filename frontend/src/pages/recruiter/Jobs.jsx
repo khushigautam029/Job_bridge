@@ -563,6 +563,14 @@ const Jobs = () => {
         navigate("/recruiter/jobs");
     };
 
+    if (loading) {
+        return (
+            <p className="py-10 text-center text-sm text-slate-500">
+                Loading your job postings...
+            </p>
+        );
+    }
+
     return (
         <div>
             {error && (
@@ -713,11 +721,7 @@ const Jobs = () => {
                 </div>
             </div>
 
-            {loading ? (
-                <p className="mt-8 text-center text-sm text-slate-500">
-                    Loading your job postings...
-                </p>
-            ) : filteredJobs.length > 0 ? (
+            {filteredJobs.length > 0 ? (
                 <section className="mt-5 grid gap-5 lg:grid-cols-2">
                     {filteredJobs.map((job) => (
                         <div

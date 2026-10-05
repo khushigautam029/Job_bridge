@@ -302,7 +302,7 @@ const Applications = () => {
         return applications.filter(
             (application) => application.status === filterStatus
         );
-    }, [filterStatus]);
+    }, [applications, filterStatus]);
 
     const totalApplications = applications.length;
 
@@ -379,13 +379,16 @@ const Applications = () => {
         return timeline;
     };
 
+    if (loading) {
+        return (
+            <p className="py-10 text-center text-sm text-slate-500">
+                Loading applications...
+            </p>
+        );
+    }
+
     return (
         <div>
-            {loading && (
-                <p className="py-10 text-center text-sm text-slate-500">
-                    Loading applications...
-                </p>
-            )}
             {error && (
                 <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
                     {error}
@@ -564,9 +567,8 @@ const Applications = () => {
                                         <div className="flex items-center gap-3">
                                             <div
                                                 className={`flex h-9 w-9 items-center justify-center rounded-lg ${
-                                                    statusStyles[
-                                                        application.status
-                                                    ].icon
+                                                    statusStyles[application.status]?.icon ||
+                                                    statusStyles.Applied.icon
                                                 }`}
                                             >
                                                 <StatusIcon size={17} />
@@ -575,9 +577,8 @@ const Applications = () => {
                                             <div>
                                                 <span
                                                     className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                                                        statusStyles[
-                                                            application.status
-                                                        ].badge
+                                                        statusStyles[application.status]?.badge ||
+                                                        statusStyles.Applied.badge
                                                     }`}
                                                 >
                                                     {application.status}
@@ -720,9 +721,8 @@ const Applications = () => {
                                     <div className="mt-2 flex items-center gap-3">
                                         <span
                                             className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                                                statusStyles[
-                                                    selectedApplication.status
-                                                ].badge
+                                                statusStyles[selectedApplication.status]?.badge ||
+                                                statusStyles.Applied.badge
                                             }`}
                                         >
                                             {selectedApplication.status}

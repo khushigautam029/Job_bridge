@@ -301,8 +301,21 @@ const Interviews = () => {
         return "bg-indigo-50 text-indigo-600";
     };
 
+    if (loading) {
+        return (
+            <p className="py-10 text-center text-sm text-slate-500">
+                Loading interviews...
+            </p>
+        );
+    }
+
     return (
         <div>
+            {error && (
+                <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                    {error}
+                </div>
+            )}
             {/* Page Header */}
             <section>
                 <p className="text-sm font-semibold uppercase tracking-wider text-indigo-600">
@@ -960,16 +973,6 @@ const Interviews = () => {
                     >
                         <div className="flex items-start justify-between">
                             <div>
-                                {loading && (
-                                    <p className="py-8 text-center text-sm text-slate-500">
-                                        Loading interviews...
-                                    </p>
-                                )}
-                                {error && (
-                                    <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
-                                        {error}
-                                    </div>
-                                )}
                                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
                                     <Video size={22} />
                                 </div>
