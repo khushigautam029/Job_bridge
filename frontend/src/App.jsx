@@ -7,6 +7,7 @@ import Notification from "./pages/Notification";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import Applications from "./pages/candidate/Applications";
+import ApplyJob from "./pages/candidate/ApplyJob";
 import CandidateLayout from "./pages/candidate/CandidateLayout";
 import CandidateProfile from "./pages/candidate/CandidateProfile";
 import CandidateSettings from "./pages/candidate/CandidateSettings";
@@ -45,6 +46,7 @@ const App = () => {
           <Route path="/candidate/notifications" element={<Notification />} />
           <Route path="/candidate/profile" element={<CandidateProfile />}/>
           <Route path="/candidate/settings" element={<CandidateSettings />} />
+          <Route path="/candidate/jobs/:jobId/apply" element={<ApplyJob />}/>
         </Route>
 
         {/* Recruiter */}

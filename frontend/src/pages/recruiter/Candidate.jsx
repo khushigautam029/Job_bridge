@@ -302,7 +302,7 @@ const Candidates = () => {
 
     return (
         <div>
-            {/* ================= PAGE HEADER ================= */}
+            {/* PAGE HEADER */}
 
             <section className="flex flex-col justify-between gap-5 md:flex-row md:items-center">
                 <div>
@@ -337,7 +337,7 @@ const Candidates = () => {
                 </div>
             </section>
 
-            {/* ================= FILTERS ================= */}
+            {/* FILTERS */}
 
             <section className="mt-7 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="grid gap-4 lg:grid-cols-[1fr_auto_auto]">
@@ -425,7 +425,7 @@ const Candidates = () => {
                 </div>
             </section>
 
-            {/* ================= RESULTS ================= */}
+            {/* RESULTS */}
 
             <section className="mt-7">
                 <div>

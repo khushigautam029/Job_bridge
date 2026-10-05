@@ -15,10 +15,7 @@ const getAuthConfig = () => {
 };
 
 
-// =========================
 // CANDIDATE
-// =========================
-
 export const getCandidateProfile = async () => {
 
     const response = await axios.get(
@@ -70,11 +67,7 @@ export const uploadCandidateResume = async (
     return response.data;
 };
 
-
-// =========================
 // RECRUITER
-// =========================
-
 export const getRecruiterProfile = async () => {
 
     const response = await axios.get(

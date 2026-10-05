@@ -281,7 +281,7 @@ const JobDetails = () => {
     };
 
     const handleApply = () => {
-        setIsApplied(true);
+        navigate(`/candidate/jobs/${job.id}/apply`);
     };
 
     if (loading) {
@@ -417,11 +417,10 @@ const JobDetails = () => {
                         <button
                             type="button"
                             onClick={handleSaveJob}
-                            className={`flex shrink-0 items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold transition ${
-                                isSaved
+                            className={`flex shrink-0 items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold transition ${isSaved
                                     ? "border-indigo-200 bg-indigo-50 text-indigo-600"
                                     : "border-slate-200 text-slate-600 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
-                            }`}
+                                }`}
                         >
                             {isSaved ? (
                                 <BookmarkCheck size={17} />

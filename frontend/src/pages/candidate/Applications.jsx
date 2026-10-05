@@ -317,7 +317,7 @@ const Applications = () => {
                 </p>
             </section>
 
-            {/* ==================== APPLICATION SUMMARY ==================== */}
+            {/* APPLICATION SUMMARY */}
             <section className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 {/* Total */}
                 <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -396,7 +396,7 @@ const Applications = () => {
                 </div>
             </section>
 
-            {/* ==================== APPLICATIONS ==================== */}
+            {/*  APPLICATIONS */}
             <section className="mt-7 rounded-2xl border border-slate-200 bg-white">
                 {/* Header */}
                 <div className="flex flex-col gap-4 border-b border-slate-200 px-6 py-5 lg:flex-row lg:items-center lg:justify-between">
@@ -544,7 +544,7 @@ const Applications = () => {
                 )}
             </section>
 
-            {/* ==================== FIND MORE JOBS ==================== */}
+            {/* FIND MORE JOBS */}
             <section className="mt-7 rounded-2xl border border-indigo-100 bg-indigo-50 p-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
@@ -569,7 +569,7 @@ const Applications = () => {
                 </div>
             </section>
 
-            {/* ==================== APPLICATION DETAILS MODAL ==================== */}
+            {/* APPLICATION DETAILS MODAL */}
             {selectedApplication && (
                 <div
                     className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm"
