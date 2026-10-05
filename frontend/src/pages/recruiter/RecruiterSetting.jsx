@@ -1,0 +1,545 @@
+import {
+    Bell,
+    Eye,
+    EyeOff,
+    Lock,
+    Mail,
+    Save,
+    Shield,
+    User,
+} from "lucide-react";
+import { useState } from "react";
+
+const RecruiterSetting = () => {
+    const [activeSection, setActiveSection] = useState("account");
+
+    const [accountSettings, setAccountSettings] = useState({
+        email: "",
+        phone: "",
+    });
+
+    const [notificationSettings, setNotificationSettings] = useState({
+        applicationAlerts: true,
+        interviewUpdates: true,
+        newCandidateAlerts: true,
+        emailNotifications: true,
+    });
+
+    const [privacySettings, setPrivacySettings] = useState({
+        profileVisibility: true,
+        companyVisibility: true,
+    });
+
+    const [passwordData, setPasswordData] = useState({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+    });
+
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    const handleAccountChange = (e) => {
+        const { name, value } = e.target;
+
+        setAccountSettings((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+    const handlePasswordChange = (e) => {
+        const { name, value } = e.target;
+
+        setPasswordData((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
+
+    const handleNotificationChange = (name) => {
+        setNotificationSettings((prev) => ({
+            ...prev,
+            [name]: !prev[name],
+        }));
+    };
+
+    const handlePrivacyChange = (name) => {
+        setPrivacySettings((prev) => ({
+            ...prev,
+            [name]: !prev[name],
+        }));
+    };
+
+    const handleAccountSave = (e) => {
+        e.preventDefault();
+
+        alert("Account settings saved successfully.");
+    };
+
+    const handlePasswordSave = (e) => {
+        e.preventDefault();
+
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            alert("New password and confirm password do not match.");
+            return;
+        }
+
+        alert("Password updated successfully.");
+
+        setPasswordData({
+            currentPassword: "",
+            newPassword: "",
+            confirmPassword: "",
+        });
+    };
+
+    const handleNotificationSave = () => {
+        alert("Notification settings saved successfully.");
+    };
+
+    const handlePrivacySave = () => {
+        alert("Privacy settings saved successfully.");
+    };
+
+    const sections = [
+        {
+            id: "account",
+            label: "Account",
+            icon: User,
+        },
+        {
+            id: "notifications",
+            label: "Notifications",
+            icon: Bell,
+        },
+        {
+            id: "privacy",
+            label: "Privacy",
+            icon: Shield,
+        },
+        {
+            id: "password",
+            label: "Password & Security",
+            icon: Lock,
+        },
+    ];
+
+    return (
+        <div className="min-h-screen bg-gray-50 px-4 py-6 md:px-8">
+            <div className="mx-auto max-w-6xl">
+                {/* Header */}
+                <div className="mb-8">
+                    <h1 className="text-2xl font-bold text-gray-900">
+                        Settings
+                    </h1>
+
+                    <p className="mt-1 text-sm text-gray-500">
+                        Manage your account, notifications and privacy settings.
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+                    {/* Sidebar */}
+                    <div className="rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
+                        {sections.map((section) => {
+                            const Icon = section.icon;
+
+                            return (
+                                <button
+                                    key={section.id}
+                                    onClick={() =>
+                                        setActiveSection(section.id)
+                                    }
+                                    className={`mb-1 flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left text-sm font-medium transition ${
+                                        activeSection === section.id
+                                            ? "bg-blue-50 text-blue-600"
+                                            : "text-gray-600 hover:bg-gray-50"
+                                    }`}
+                                >
+                                    <Icon size={18} />
+
+                                    <span>{section.label}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Content */}
+                    <div className="md:col-span-3">
+                        {/* Account */}
+                        {activeSection === "account" && (
+                            <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+                                <div className="border-b border-gray-200 p-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="rounded-lg bg-blue-50 p-2 text-blue-600">
+                                            <User size={20} />
+                                        </div>
+
+                                        <div>
+                                            <h2 className="font-semibold text-gray-900">
+                                                Account Settings
+                                            </h2>
+
+                                            <p className="text-sm text-gray-500">
+                                                Manage your recruiter account
+                                                information.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <form
+                                    onSubmit={handleAccountSave}
+                                    className="space-y-6 p-6"
+                                >
+                                    <div>
+                                        <label className="mb-2 block text-sm font-medium text-gray-700">
+                                            Email Address
+                                        </label>
+
+                                        <div className="relative">
+                                            <Mail
+                                                size={18}
+                                                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                                            />
+
+                                            <input
+                                                type="email"
+                                                name="email"
+                                                value={accountSettings.email}
+                                                onChange={handleAccountChange}
+                                                placeholder="Enter your email"
+                                                className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="mb-2 block text-sm font-medium text-gray-700">
+                                            Phone Number
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            name="phone"
+                                            value={accountSettings.phone}
+                                            onChange={handleAccountChange}
+                                            placeholder="Enter your phone number"
+                                            className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                        />
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
+                                    >
+                                        <Save size={17} />
+                                        Save Changes
+                                    </button>
+                                </form>
+                            </div>
+                        )}
+
+                        {/* Notifications */}
+                        {activeSection === "notifications" && (
+                            <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+                                <div className="border-b border-gray-200 p-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="rounded-lg bg-blue-50 p-2 text-blue-600">
+                                            <Bell size={20} />
+                                        </div>
+
+                                        <div>
+                                            <h2 className="font-semibold text-gray-900">
+                                                Notification Settings
+                                            </h2>
+
+                                            <p className="text-sm text-gray-500">
+                                                Choose which recruiter
+                                                notifications you want to
+                                                receive.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="divide-y divide-gray-100">
+                                    <SettingToggle
+                                        title="Application Alerts"
+                                        description="Receive notifications when candidates apply to your jobs."
+                                        enabled={
+                                            notificationSettings.applicationAlerts
+                                        }
+                                        onChange={() =>
+                                            handleNotificationChange(
+                                                "applicationAlerts"
+                                            )
+                                        }
+                                    />
+
+                                    <SettingToggle
+                                        title="Interview Updates"
+                                        description="Receive updates and reminders about scheduled interviews."
+                                        enabled={
+                                            notificationSettings.interviewUpdates
+                                        }
+                                        onChange={() =>
+                                            handleNotificationChange(
+                                                "interviewUpdates"
+                                            )
+                                        }
+                                    />
+
+                                    <SettingToggle
+                                        title="New Candidate Alerts"
+                                        description="Receive notifications about new candidates for your job postings."
+                                        enabled={
+                                            notificationSettings.newCandidateAlerts
+                                        }
+                                        onChange={() =>
+                                            handleNotificationChange(
+                                                "newCandidateAlerts"
+                                            )
+                                        }
+                                    />
+
+                                    <SettingToggle
+                                        title="Email Notifications"
+                                        description="Receive important JobBridge recruiter updates through email."
+                                        enabled={
+                                            notificationSettings.emailNotifications
+                                        }
+                                        onChange={() =>
+                                            handleNotificationChange(
+                                                "emailNotifications"
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                <div className="border-t border-gray-200 p-6">
+                                    <button
+                                        onClick={handleNotificationSave}
+                                        className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
+                                    >
+                                        <Save size={17} />
+                                        Save Preferences
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Privacy */}
+                        {activeSection === "privacy" && (
+                            <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+                                <div className="border-b border-gray-200 p-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="rounded-lg bg-blue-50 p-2 text-blue-600">
+                                            <Shield size={20} />
+                                        </div>
+
+                                        <div>
+                                            <h2 className="font-semibold text-gray-900">
+                                                Privacy Settings
+                                            </h2>
+
+                                            <p className="text-sm text-gray-500">
+                                                Control your recruiter and
+                                                company visibility.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="divide-y divide-gray-100">
+                                    <SettingToggle
+                                        title="Recruiter Profile Visibility"
+                                        description="Allow candidates to view your recruiter profile."
+                                        enabled={
+                                            privacySettings.profileVisibility
+                                        }
+                                        onChange={() =>
+                                            handlePrivacyChange(
+                                                "profileVisibility"
+                                            )
+                                        }
+                                    />
+
+                                    <SettingToggle
+                                        title="Company Visibility"
+                                        description="Allow candidates to view your company information."
+                                        enabled={
+                                            privacySettings.companyVisibility
+                                        }
+                                        onChange={() =>
+                                            handlePrivacyChange(
+                                                "companyVisibility"
+                                            )
+                                        }
+                                    />
+                                </div>
+
+                                <div className="border-t border-gray-200 p-6">
+                                    <button
+                                        onClick={handlePrivacySave}
+                                        className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
+                                    >
+                                        <Save size={17} />
+                                        Save Privacy Settings
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Password */}
+                        {activeSection === "password" && (
+                            <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
+                                <div className="border-b border-gray-200 p-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="rounded-lg bg-blue-50 p-2 text-blue-600">
+                                            <Lock size={20} />
+                                        </div>
+
+                                        <div>
+                                            <h2 className="font-semibold text-gray-900">
+                                                Password & Security
+                                            </h2>
+
+                                            <p className="text-sm text-gray-500">
+                                                Keep your recruiter account
+                                                secure.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <form
+                                    onSubmit={handlePasswordSave}
+                                    className="space-y-5 p-6"
+                                >
+                                    <PasswordInput
+                                        label="Current Password"
+                                        name="currentPassword"
+                                        value={
+                                            passwordData.currentPassword
+                                        }
+                                        onChange={handlePasswordChange}
+                                        show={showCurrentPassword}
+                                        setShow={setShowCurrentPassword}
+                                    />
+
+                                    <PasswordInput
+                                        label="New Password"
+                                        name="newPassword"
+                                        value={passwordData.newPassword}
+                                        onChange={handlePasswordChange}
+                                        show={showNewPassword}
+                                        setShow={setShowNewPassword}
+                                    />
+
+                                    <PasswordInput
+                                        label="Confirm New Password"
+                                        name="confirmPassword"
+                                        value={
+                                            passwordData.confirmPassword
+                                        }
+                                        onChange={handlePasswordChange}
+                                        show={showConfirmPassword}
+                                        setShow={setShowConfirmPassword}
+                                    />
+
+                                    <button
+                                        type="submit"
+                                        className="flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
+                                    >
+                                        <Save size={17} />
+                                        Update Password
+                                    </button>
+                                </form>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const SettingToggle = ({
+    title,
+    description,
+    enabled,
+    onChange,
+}) => {
+    return (
+        <div className="flex items-center justify-between gap-4 p-6">
+            <div>
+                <h3 className="text-sm font-medium text-gray-900">
+                    {title}
+                </h3>
+
+                <p className="mt-1 max-w-xl text-sm text-gray-500">
+                    {description}
+                </p>
+            </div>
+
+            <button
+                type="button"
+                onClick={onChange}
+                className={`relative h-6 w-11 flex-shrink-0 rounded-full transition ${
+                    enabled ? "bg-blue-600" : "bg-gray-300"
+                }`}
+            >
+                <span
+                    className={`absolute top-1 h-4 w-4 rounded-full bg-white shadow transition ${
+                        enabled ? "left-6" : "left-1"
+                    }`}
+                />
+            </button>
+        </div>
+    );
+};
+
+const PasswordInput = ({
+    label,
+    name,
+    value,
+    onChange,
+    show,
+    setShow,
+}) => {
+    return (
+        <div>
+            <label className="mb-2 block text-sm font-medium text-gray-700">
+                {label}
+            </label>
+
+            <div className="relative">
+                <input
+                    type={show ? "text" : "password"}
+                    name={name}
+                    value={value}
+                    onChange={onChange}
+                    placeholder={`Enter ${label.toLowerCase()}`}
+                    className="w-full rounded-lg border border-gray-300 px-4 py-2.5 pr-11 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+
+                <button
+                    type="button"
+                    onClick={() => setShow(!show)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                    {show ? (
+                        <EyeOff size={18} />
+                    ) : (
+                        <Eye size={18} />
+                    )}
+                </button>
+            </div>
+        </div>
+    );
+};
+
+export default RecruiterSetting;

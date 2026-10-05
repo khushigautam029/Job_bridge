@@ -9,6 +9,7 @@ import Register from "./pages/auth/Register";
 import Applications from "./pages/candidate/Applications";
 import CandidateLayout from "./pages/candidate/CandidateLayout";
 import CandidateProfile from "./pages/candidate/CandidateProfile";
+import CandidateSettings from "./pages/candidate/CandidateSettings";
 import FindJobs from "./pages/candidate/FindJobs";
 import Interviews from "./pages/candidate/Interviews";
 import JobDetails from "./pages/candidate/JobDetails";
@@ -21,6 +22,7 @@ import RecruiterInterviews from "./pages/recruiter/RecruiterInterviews";
 import RecruiterJobDetails from "./pages/recruiter/RecruiterJobDetails";
 import RecruiterLayout from "./pages/recruiter/RecruiterLayout";
 import RecruiterProfile from "./pages/recruiter/RecruiterProfile";
+import RecruiterSetting from "./pages/recruiter/RecruiterSetting";
 
 const App = () => {
   return (
@@ -42,6 +44,7 @@ const App = () => {
           <Route path="interviews" element={<Interviews />} />
           <Route path="/candidate/notifications" element={<Notification />} />
           <Route path="/candidate/profile" element={<CandidateProfile />}/>
+          <Route path="/candidate/settings" element={<CandidateSettings />} />
         </Route>
 
         {/* Recruiter */}
@@ -56,6 +59,7 @@ const App = () => {
           <Route path="/recruiter/notifications" element={<Notification />} />
           <Route path="/recruiter/jobs/:jobId/applications" element={<RecruiterApplications />}/>
           <Route path="/recruiter/profile" element={<RecruiterProfile />}/>
+          <Route path="/recruiter/settings" element={<RecruiterSetting />} />
         </Route>
 
         <Route path="*" element={<NotFound />} />
