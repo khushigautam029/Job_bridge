@@ -159,6 +159,14 @@ const getAllJobs = async (filters = {}) => {
                         "name",
                     ],
                 },
+                {
+                    model: Skill,
+                    as: "skills",
+                    attributes: ["id", "name"],
+                    through: {
+                        attributes: [],
+                    },
+                },
             ],
             order: [
                 [sortBy, order],
@@ -181,6 +189,44 @@ const getAllJobs = async (filters = {}) => {
             hasPreviousPage:
                 page > 1,
         },
+    };
+
+    const getJobCategories = async () => {
+        return JobCategory.findAll({
+            attributes: ["id", "name"],
+            order: [["name", "ASC"]],
+        });
+    };
+
+    const getRecruiterJobs = async (userId) => {
+        const recruiterProfile =
+            await getRecruiterProfile(userId);
+
+        return Job.findAll({
+            where: {
+                recruiterId: recruiterProfile.id,
+            },
+            include: [
+                {
+                    model: Company,
+                    as: "company",
+                },
+                {
+                    model: JobCategory,
+                    as: "category",
+                    attributes: ["id", "name"],
+                },
+                {
+                    model: Skill,
+                    as: "skills",
+                    attributes: ["id", "name"],
+                    through: {
+                        attributes: [],
+                    },
+                },
+            ],
+            order: [["createdAt", "DESC"]],
+        });
     };
 };
 
@@ -331,6 +377,8 @@ export {
     createJob,
     deleteJob,
     getAllJobs,
+    getJobCategories,
     getJobById,
+    getRecruiterJobs,
     updateJob
 };

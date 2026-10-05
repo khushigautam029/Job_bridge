@@ -13,127 +13,13 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-
-const jobs = [
-    {
-        id: 1,
-        title: "Senior React Developer",
-
-        company: {
-            id: 1,
-            name: "TechNova Solutions",
-            location: "Delhi, India",
-            description:
-                "TechNova Solutions is a technology company building modern digital products and scalable software solutions.",
-            website: "https://technova.example.com",
-        },
-
-        category: {
-            id: 1,
-            name: "Software Development",
-        },
-
-        location: "Delhi, India",
-        jobType: "FULL_TIME",
-        workMode: "HYBRID",
-
-        minSalary: 800000,
-        maxSalary: 1400000,
-
-        experienceMin: 3,
-        experienceMax: 5,
-
-        applicationDeadline: "2026-09-30",
-        createdAt: "2026-08-29",
-
-        description:
-            "We are looking for an experienced React Developer to join our engineering team and help us build modern, scalable and user-friendly web applications.",
-
-        responsibilities: [
-            "Build and maintain modern React applications.",
-            "Develop reusable and scalable UI components.",
-            "Collaborate with designers and backend developers.",
-            "Improve application performance and user experience.",
-            "Write clean, maintainable and well-tested code.",
-        ],
-
-        requirements: [
-            "3+ years of experience with React.",
-            "Strong knowledge of JavaScript and TypeScript.",
-            "Experience working with REST APIs.",
-            "Good understanding of responsive design.",
-            "Experience with Git and modern development workflows.",
-        ],
-
-        skills: [
-            "React",
-            "JavaScript",
-            "TypeScript",
-            "Node.js",
-            "REST API",
-        ],
-
-        applicants: 42,
-    },
-
-    {
-        id: 2,
-        title: "Backend Developer",
-
-        company: {
-            id: 2,
-            name: "CloudCore Technologies",
-            location: "Bangalore, India",
-            description:
-                "CloudCore Technologies builds cloud-based platforms and enterprise software solutions.",
-            website: "https://cloudcore.example.com",
-        },
-
-        category: {
-            id: 2,
-            name: "Backend Development",
-        },
-
-        location: "Bangalore, India",
-        jobType: "FULL_TIME",
-        workMode: "ONSITE",
-
-        minSalary: 700000,
-        maxSalary: 1200000,
-
-        experienceMin: 2,
-        experienceMax: 4,
-
-        applicationDeadline: "2026-09-25",
-        createdAt: "2026-08-28",
-
-        description:
-            "We are looking for a Backend Developer to develop reliable APIs and scalable server-side applications.",
-
-        responsibilities: [
-            "Build REST APIs using Node.js and Express.",
-            "Design and optimize database queries.",
-            "Implement authentication and authorization.",
-            "Work closely with frontend developers.",
-        ],
-
-        requirements: [
-            "2+ years of Node.js experience.",
-            "Experience with Express.js.",
-            "Strong knowledge of MySQL.",
-            "Understanding of REST API architecture.",
-        ],
-
-        skills: [
-            "Node.js",
-            "Express",
-            "MySQL",
-            "Sequelize",
-        ],
-
-        applicants: 28,
-    },
-];
+import {
+    getApplications,
+    getJob,
+    isJobSaved,
+    saveJob,
+    unsaveJob,
+} from "../../services/projectService";
 
 const JobDetails = () => {
     const navigate = useNavigate();
@@ -146,28 +32,113 @@ const JobDetails = () => {
     const [isApplied, setIsApplied] = useState(false);
 
     useEffect(() => {
+        let active = true;
         setLoading(true);
         setError("");
         setIsSaved(false);
         setIsApplied(false);
 
-        const selectedJob = jobs.find(
-            (item) => item.id === Number(jobId)
-        );
+        getJob(jobId)
+            .then((selectedJob) => {
+                if (!active) return;
+                setJob({
+                    ...selectedJob,
+                    responsibilities: selectedJob.responsibilities
+                        ? selectedJob.responsibilities.split("\n").filter(Boolean)
+                        : [],
+                    requirements: selectedJob.requirements
+                        ? selectedJob.requirements.split("\n").filter(Boolean)
+                        : [],
+                    skills: (selectedJob.skills || []).map((skill) =>
+                        typeof skill === "string" ? skill : skill.name
+                    ),
+                });
+            })
+            .catch((loadError) => {
+                if (active) {
+                    setJob(null);
+                    setError(
+                        loadError.response?.data?.message ||
+                        "This job could not be found."
+                    );
+                }
+            })
+            .finally(() => {
+                if (active) setLoading(false);
+            });
 
-        const timer = setTimeout(() => {
-            if (selectedJob) {
-                setJob(selectedJob);
-            } else {
-                setJob(null);
-                setError("This job could not be found.");
-            }
+        if (localStorage.getItem("token") || sessionStorage.getItem("token")) {
+            isJobSaved(jobId)
+                .then((saved) => {
+                    if (active) setIsSaved(saved);
+                })
+                .catch((loadError) => {
+                    if (active) {
+                        setError(
+                            loadError.response?.data?.message ||
+                            "Unable to check whether this job is saved."
+                        );
+                    }
+                });
 
-            setLoading(false);
-        }, 400);
+            getApplications()
+                .then((applications) => {
+                    if (active) {
+                        setIsApplied(
+                            applications.some(
+                                (application) =>
+                                    String(application.jobId) === String(jobId) &&
+                                    application.status !== "WITHDRAWN"
+                            )
+                        );
+                    }
+                })
+                .catch((loadError) => {
+                    if (active) {
+                        setError(
+                            loadError.response?.data?.message ||
+                            "Unable to load your applications."
+                        );
+                    }
+                });
+        }
 
-        return () => clearTimeout(timer);
+        return () => {
+            active = false;
+        };
     }, [jobId]);
+
+    const isAuthenticated = Boolean(
+        localStorage.getItem("token") ||
+        sessionStorage.getItem("token")
+    );
+
+    const saveError = (message) => {
+        setError(message);
+    };
+
+    const toggleSavedJob = async () => {
+        if (!isAuthenticated) {
+            navigate("/login");
+            return;
+        }
+
+        try {
+            if (isSaved) {
+                await unsaveJob(job.id);
+                setIsSaved(false);
+            } else {
+                await saveJob(job.id);
+                setIsSaved(true);
+            }
+            setError("");
+        } catch (requestError) {
+            saveError(
+                requestError.response?.data?.message ||
+                "Unable to update saved jobs."
+            );
+        }
+    };
 
     const formatText = (value) => {
         if (!value) return "Not specified";
@@ -276,11 +247,11 @@ const JobDetails = () => {
             ));
     };
 
-    const handleSaveJob = () => {
-        setIsSaved((previous) => !previous);
-    };
-
     const handleApply = () => {
+        if (!isAuthenticated) {
+            navigate("/login");
+            return;
+        }
         navigate(`/candidate/jobs/${job.id}/apply`);
     };
 
@@ -416,7 +387,7 @@ const JobDetails = () => {
                         {/* Save */}
                         <button
                             type="button"
-                            onClick={handleSaveJob}
+                            onClick={toggleSavedJob}
                             className={`flex shrink-0 items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold transition ${isSaved
                                     ? "border-indigo-200 bg-indigo-50 text-indigo-600"
                                     : "border-slate-200 text-slate-600 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"

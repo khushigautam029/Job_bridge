@@ -11,37 +11,16 @@ import {
     Upload,
     User,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-
-const jobs = [
-    {
-        id: 1,
-        title: "Senior React Developer",
-        company: "TechNova Solutions",
-        location: "Delhi, India",
-        category: "Software Development",
-        employmentType: "FULL_TIME",
-        workMode: "HYBRID",
-        minSalary: 800000,
-        maxSalary: 1400000,
-        experience: "3-5 years",
-        deadline: "2026-09-30",
-    },
-    {
-        id: 2,
-        title: "Backend Developer",
-        company: "CloudCore Technologies",
-        location: "Bangalore, India",
-        category: "Backend Development",
-        employmentType: "FULL_TIME",
-        workMode: "ONSITE",
-        minSalary: 700000,
-        maxSalary: 1200000,
-        experience: "2-4 years",
-        deadline: "2026-09-25",
-    },
-];
+import {
+    getCandidateProfile,
+    uploadCandidateResume,
+} from "../../services/profileService";
+import {
+    applyForJob,
+    getJob,
+} from "../../services/projectService";
 
 const getStoredUser = () => {
     try {
@@ -59,19 +38,68 @@ const ApplyJob = () => {
     const { jobId } = useParams();
     const navigate = useNavigate();
 
-    const selectedJob = jobs.find((job) => job.id === Number(jobId));
-
     const user = getStoredUser();
+    const [selectedJob, setSelectedJob] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [submitting, setSubmitting] = useState(false);
 
     const [candidateName, setCandidateName] = useState(user?.name || "");
     const [email, setEmail] = useState(user?.email || "");
     const [phone, setPhone] = useState(user?.phone || "");
+    const [existingResume, setExistingResume] = useState("");
 
     const [resume, setResume] = useState(null);
     const [coverLetter, setCoverLetter] = useState("");
 
     const [error, setError] = useState("");
     const [submitted, setSubmitted] = useState(false);
+
+    useEffect(() => {
+        let active = true;
+
+        Promise.all([
+            getJob(jobId),
+            getCandidateProfile(),
+        ])
+            .then(([job, profileResponse]) => {
+                if (!active) return;
+                const candidate = profileResponse.data.candidate;
+                setSelectedJob({
+                    ...job,
+                    company: job.company?.name || "Company",
+                    employmentType: (job.jobType || "")
+                        .replaceAll("_", " ")
+                        .toLowerCase()
+                        .replace(/\b\w/g, (letter) => letter.toUpperCase()),
+                    workMode: (job.workMode || "")
+                        .replaceAll("_", " ")
+                        .toLowerCase()
+                        .replace(/\b\w/g, (letter) => letter.toUpperCase()),
+                    experience: job.experienceMax
+                        ? `${job.experienceMin || 0}-${job.experienceMax} years`
+                        : `${job.experienceMin || 0}+ years`,
+                });
+                setCandidateName(candidate.user?.name || user?.name || "");
+                setEmail(candidate.user?.email || user?.email || "");
+                setPhone(candidate.user?.phone || user?.phone || "");
+                setExistingResume(candidate.resume || "");
+            })
+            .catch((loadError) => {
+                if (active) {
+                    setError(
+                        loadError.response?.data?.message ||
+                        "Unable to load this job or your profile."
+                    );
+                }
+            })
+            .finally(() => {
+                if (active) setLoading(false);
+            });
+
+        return () => {
+            active = false;
+        };
+    }, [jobId]);
 
     const handleResumeChange = (event) => {
         const file = event.target.files?.[0];
@@ -112,7 +140,7 @@ const ApplyJob = () => {
         setResume(file);
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
 
         setError("");
@@ -132,15 +160,43 @@ const ApplyJob = () => {
             return;
         }
 
-        if (!resume) {
+        if (!resume && !existingResume) {
             setError("Please upload your resume before applying.");
             return;
         }
 
-        // Frontend-only for now.
-        // Backend API integration will be added later.
-        setSubmitted(true);
+        try {
+            setSubmitting(true);
+            let resumePath = existingResume;
+            if (resume) {
+                const response = await uploadCandidateResume(resume);
+                resumePath =
+                    response.data.data?.candidate?.resume ||
+                    response.data.candidate?.resume;
+            }
+
+            await applyForJob(jobId, {
+                resume: resumePath,
+                coverLetter,
+            });
+            setSubmitted(true);
+        } catch (submitError) {
+            setError(
+                submitError.response?.data?.message ||
+                "Unable to submit your application."
+            );
+        } finally {
+            setSubmitting(false);
+        }
     };
+
+    if (loading) {
+        return (
+            <div className="flex min-h-screen items-center justify-center text-sm text-gray-500">
+                Loading job...
+            </div>
+        );
+    }
 
     if (!selectedJob) {
         return (
@@ -490,10 +546,11 @@ const ApplyJob = () => {
 
                             <button
                                 type="submit"
+                                disabled={submitting}
                                 className="flex-1 sm:flex-none px-7 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2"
                             >
                                 <Send size={18} />
-                                Submit Application
+                                {submitting ? "Submitting..." : "Submit Application"}
                             </button>
                         </div>
                     </div>

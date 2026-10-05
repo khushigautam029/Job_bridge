@@ -48,6 +48,10 @@ const scheduleInterview = async (
                         model: Job,
                         as: "job",
                     },
+                    {
+                        model: CandidateProfile,
+                        as: "candidate",
+                    },
                 ],
             }
         );
@@ -167,9 +171,9 @@ const scheduleInterview = async (
         });
 
     await createNotification({
-        userId: CandidateProfile.userId,
+        userId: application.candidate.userId,
         title: "Interview Scheduled",
-        message: `Your interview for "${Job.title}" has been scheduled.`,
+        message: `Your interview for "${application.job.title}" has been scheduled.`,
         type: "INTERVIEW",
     });
 

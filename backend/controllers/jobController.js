@@ -2,7 +2,9 @@ import {
     createJob,
     deleteJob,
     getAllJobs,
+    getJobCategories,
     getJobById,
+    getRecruiterJobs,
     updateJob,
 } from "../services/jobService.js";
 import asyncHandler from "../utils/asyncHandler.js";
@@ -63,6 +65,26 @@ const getAll = asyncHandler(
                 convert: true,
             }
         );
+
+        const getCategories = asyncHandler(async (req, res) => {
+            const categories = await getJobCategories();
+            return res.status(STATUS_CODES.OK).json({
+                success: true,
+                data: {
+                    categories,
+                },
+            });
+        });
+
+        const getMine = asyncHandler(async (req, res) => {
+            const jobs = await getRecruiterJobs(req.user.id);
+            return res.status(STATUS_CODES.OK).json({
+                success: true,
+                data: {
+                    jobs,
+                },
+            });
+        });
         if (error) {
             return res.status(
                 STATUS_CODES.BAD_REQUEST
@@ -155,6 +177,8 @@ const remove = asyncHandler(async (req, res) => {
 
 export {
     create,
+    getCategories,
     getAll,
+    getMine,
     getOne, remove, update
 };

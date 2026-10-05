@@ -2,8 +2,11 @@ import {
     Application,
     ApplicationStatusHistory,
     CandidateProfile,
+    Company,
     Job,
+    JobCategory,
     RecruiterProfile,
+    Skill,
     User,
 } from "../models/index.js";
 import createNotification from "../utils/createNotification.js";
@@ -190,6 +193,31 @@ const getMyApplications = async (
                         "minSalary",
                         "maxSalary",
                         "status",
+                        "description",
+                        "requirements",
+                        "experienceMin",
+                        "experienceMax",
+                        "applicationDeadline",
+                    ],
+                    include: [
+                        {
+                            model: Company,
+                            as: "company",
+                            attributes: ["id", "name", "location", "logo"],
+                        },
+                        {
+                            model: JobCategory,
+                            as: "category",
+                            attributes: ["id", "name"],
+                        },
+                        {
+                            model: Skill,
+                            as: "skills",
+                            attributes: ["id", "name"],
+                            through: {
+                                attributes: [],
+                            },
+                        },
                     ],
                 },
             ],
@@ -456,6 +484,52 @@ const getJobApplications = async (
     return applications;
 };
 
+const getRecruiterApplications = async (userId) => {
+    const recruiter =
+        await RecruiterProfile.findOne({
+            where: {
+                userId,
+            },
+        });
+
+    if (!recruiter) {
+        const error = new Error(
+            "Recruiter profile not found"
+        );
+        error.statusCode = STATUS_CODES.NOT_FOUND;
+        throw error;
+    }
+
+    return Application.findAll({
+        include: [
+            {
+                model: Job,
+                as: "job",
+                where: {
+                    recruiterId: recruiter.id,
+                },
+            },
+            {
+                model: CandidateProfile,
+                as: "candidate",
+                include: [
+                    {
+                        model: User,
+                        as: "user",
+                        attributes: [
+                            "id",
+                            "name",
+                            "email",
+                            "phone",
+                        ],
+                    },
+                ],
+            },
+        ],
+        order: [["appliedAt", "DESC"]],
+    });
+};
+
 
 /*
     Recruiter changes application status
@@ -567,4 +641,5 @@ const updateApplicationStatus = async (
 
 export {
     applyForJob, getApplicationById, getJobApplications, getMyApplications, updateApplicationStatus, withdrawApplication
+    getRecruiterApplications, updateApplicationStatus, withdrawApplication
 };

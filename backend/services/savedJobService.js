@@ -1,7 +1,10 @@
 import {
+    Company,
     CandidateProfile,
     Job,
+    JobCategory,
     SavedJob,
+    Skill,
 } from "../models/index.js";
 import { STATUS_CODES } from "../utils/setConstants.js";
 
@@ -126,6 +129,31 @@ const getMySavedJobs = async (
                 {
                     model: Job,
                     as: "job",
+                    include: [
+                        {
+                            model: Company,
+                            as: "company",
+                            attributes: [
+                                "id",
+                                "name",
+                                "logo",
+                                "location",
+                            ],
+                        },
+                        {
+                            model: JobCategory,
+                            as: "category",
+                            attributes: ["id", "name"],
+                        },
+                        {
+                            model: Skill,
+                            as: "skills",
+                            attributes: ["id", "name"],
+                            through: {
+                                attributes: [],
+                            },
+                        },
+                    ],
                 },
             ],
 

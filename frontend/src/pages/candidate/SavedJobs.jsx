@@ -10,9 +10,17 @@ import {
     Trash2,
     X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+    formatJobCard,
+    getSavedJobs,
+    saveJob,
+    unsaveJob,
+} from "../../services/projectService";
 
 const SavedJobs = () => {
+    const navigate = useNavigate();
     const [savedJobs, setSavedJobs] = useState([
         {
             id: 1,
@@ -116,6 +124,42 @@ const SavedJobs = () => {
     const [search, setSearch] = useState("");
     const [sortBy, setSortBy] = useState("recent");
     const [deletedJob, setDeletedJob] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        let active = true;
+        getSavedJobs()
+            .then((saved) => {
+                if (!active) return;
+                setSavedJobs(
+                    saved.map((entry) => ({
+                        ...formatJobCard(entry.job),
+                        savedDate: entry.createdAt
+                            ? new Date(entry.createdAt).toLocaleDateString()
+                            : "",
+                        description: entry.job.description || "",
+                        applied: false,
+                    }))
+                );
+            })
+            .catch((loadError) => {
+                if (active) {
+                    setSavedJobs([]);
+                    setError(
+                        loadError.response?.data?.message ||
+                        "Unable to load saved jobs."
+                    );
+                }
+            })
+            .finally(() => {
+                if (active) setLoading(false);
+            });
+
+        return () => {
+            active = false;
+        };
+    }, []);
 
     const filteredJobs = useMemo(() => {
         let jobs = savedJobs.filter((job) => {
@@ -164,7 +208,18 @@ const SavedJobs = () => {
         (job) => job.type === "Full Time"
     ).length;
 
-    const removeJob = (job) => {
+    const removeJob = async (job) => {
+        try {
+            await unsaveJob(job.id);
+            setError("");
+        } catch (removeError) {
+            setError(
+                removeError.response?.data?.message ||
+                "Unable to remove this saved job."
+            );
+            return;
+        }
+
         setSavedJobs((current) =>
             current.filter((item) => item.id !== job.id)
         );
@@ -180,8 +235,18 @@ const SavedJobs = () => {
         }, 4000);
     };
 
-    const undoDelete = () => {
+    const undoDelete = async () => {
         if (!deletedJob) return;
+
+        try {
+            await saveJob(deletedJob.id);
+        } catch (saveError) {
+            setError(
+                saveError.response?.data?.message ||
+                "Unable to restore this saved job."
+            );
+            return;
+        }
 
         setSavedJobs((current) => {
             const alreadyExists = current.some(
@@ -196,30 +261,13 @@ const SavedJobs = () => {
         setDeletedJob(null);
     };
 
-    const applyForJob = (jobId) => {
-        setSavedJobs((current) =>
-            current.map((job) =>
-                job.id === jobId
-                    ? {
-                        ...job,
-                        applied: true,
-                    }
-                    : job
-            )
-        );
-
-        setSelectedJob((current) =>
-            current
-                ? {
-                    ...current,
-                    applied: true,
-                }
-                : current
-        );
-    };
-
     return (
         <div className="relative">
+            {error && (
+                <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                    {error}
+                </div>
+            )}
             {/* Page Header */}
             <section>
                 <p className="text-sm font-semibold uppercase tracking-wider text-indigo-600">
@@ -382,7 +430,7 @@ const SavedJobs = () => {
                 )}
 
                 {/* Completely Empty State */}
-                {savedJobs.length === 0 && (
+                {!loading && savedJobs.length === 0 && (
                     <div className="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
                         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50 text-indigo-500">
                             <Bookmark size={28} />
@@ -411,7 +459,11 @@ const SavedJobs = () => {
                 )}
 
                 {/* Saved Jobs Grid */}
-                {filteredJobs.length > 0 && (
+                {loading ? (
+                    <p className="py-10 text-center text-sm text-slate-500">
+                        Loading saved jobs...
+                    </p>
+                ) : filteredJobs.length > 0 && (
                     <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
                         {filteredJobs.map((job) => (
                             <div
@@ -440,12 +492,6 @@ const SavedJobs = () => {
                                         <h4 className="text-lg font-semibold text-slate-900">
                                             {job.title}
                                         </h4>
-
-                                        {job.applied && (
-                                            <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-600">
-                                                Applied
-                                            </span>
-                                        )}
                                     </div>
 
                                     <p className="mt-1 text-sm font-medium text-slate-600">
@@ -741,9 +787,10 @@ const SavedJobs = () => {
                                 ) : (
                                     <button
                                         type="button"
-                                        onClick={() =>
-                                            applyForJob(selectedJob.id)
-                                        }
+                                        onClick={() => {
+                                            setSelectedJob(null);
+                                            navigate(`/candidate/jobs/${selectedJob.id}/apply`);
+                                        }}
                                         className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
                                     >
                                         Apply Now

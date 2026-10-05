@@ -1,26 +1,11 @@
-import axios from "axios";
-
-const API_URL = import.meta.env.VITE_API_URL;
-
-const getAuthConfig = () => {
-    const token =
-        localStorage.getItem("token") ||
-        sessionStorage.getItem("token");
-
-    return {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    };
-};
+import apiClient from "./apiClient";
 
 
 // CANDIDATE
 export const getCandidateProfile = async () => {
 
-    const response = await axios.get(
-        `${API_URL}/api/candidates/profile`,
-        getAuthConfig()
+    const response = await apiClient.get(
+        "/candidates/profile"
     );
 
     return response.data;
@@ -31,10 +16,9 @@ export const updateCandidateProfile = async (
     profileData
 ) => {
 
-    const response = await axios.put(
-        `${API_URL}/api/candidates/profile`,
-        profileData,
-        getAuthConfig()
+    const response = await apiClient.put(
+        "/candidates/profile",
+        profileData
     );
 
     return response.data;
@@ -52,13 +36,11 @@ export const uploadCandidateResume = async (
         file
     );
 
-    const response = await axios.post(
-        `${API_URL}/api/candidates/profile/resume`,
+    const response = await apiClient.post(
+        "/candidates/profile/resume",
         formData,
         {
-            ...getAuthConfig(),
             headers: {
-                ...getAuthConfig().headers,
                 "Content-Type": "multipart/form-data",
             },
         }
@@ -70,9 +52,8 @@ export const uploadCandidateResume = async (
 // RECRUITER
 export const getRecruiterProfile = async () => {
 
-    const response = await axios.get(
-        `${API_URL}/api/recruiters/profile`,
-        getAuthConfig()
+    const response = await apiClient.get(
+        "/recruiters/profile"
     );
 
     return response.data;
@@ -83,10 +64,9 @@ export const updateRecruiterProfile = async (
     profileData
 ) => {
 
-    const response = await axios.put(
-        `${API_URL}/api/recruiters/profile`,
-        profileData,
-        getAuthConfig()
+    const response = await apiClient.put(
+        "/recruiters/profile",
+        profileData
     );
 
     return response.data;
@@ -95,9 +75,8 @@ export const updateRecruiterProfile = async (
 
 export const getMyCompany = async () => {
 
-    const response = await axios.get(
-        `${API_URL}/api/companies/my`,
-        getAuthConfig()
+    const response = await apiClient.get(
+        "/companies/my"
     );
 
     return response.data;
@@ -108,10 +87,9 @@ export const updateMyCompany = async (
     companyData
 ) => {
 
-    const response = await axios.put(
-        `${API_URL}/api/companies/my`,
-        companyData,
-        getAuthConfig()
+    const response = await apiClient.put(
+        "/companies/my",
+        companyData
     );
 
     return response.data;

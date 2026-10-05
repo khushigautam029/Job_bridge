@@ -3,6 +3,7 @@ import {
     getApplicationById,
     getJobApplications,
     getMyApplications,
+    getRecruiterApplications,
     updateApplicationStatus,
     withdrawApplication,
 } from "../services/applicationService.js";
@@ -104,6 +105,17 @@ const getForJob = asyncHandler(
                 req.user.id,
                 req.params.jobId
             );
+
+            const getForRecruiter = asyncHandler(async (req, res) => {
+                const applications =
+                    await getRecruiterApplications(req.user.id);
+                return res.status(STATUS_CODES.OK).json({
+                    success: true,
+                    data: {
+                        applications,
+                    },
+                });
+            });
         res.status(STATUS_CODES.OK).json({
             success: true,
             data: {
@@ -150,6 +162,6 @@ const updateStatus = asyncHandler(
 );
 
 export {
-    apply, getForJob, getMine,
+    apply, getForJob, getForRecruiter, getMine,
     getOne, updateStatus, withdraw
 };

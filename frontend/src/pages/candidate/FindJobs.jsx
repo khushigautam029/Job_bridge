@@ -6,94 +6,73 @@ import {
     Search,
     SlidersHorizontal,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import {
+    formatJobCard,
+    getJobs,
+    getSavedJobs,
+    saveJob,
+    unsaveJob,
+} from "../../services/projectService";
 
 const FindJobs = () => {
     const [search, setSearch] = useState("");
     const [location, setLocation] = useState("");
     const [jobType, setJobType] = useState("All");
     const [experience, setExperience] = useState("All");
+    const [jobs, setJobs] = useState([]);
+    const [savedJobs, setSavedJobs] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
 
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
 
     const selectedCategory = searchParams.get("category");
 
-    const jobs = [
-        {
-            id: 1,
-            title: "Senior React Developer",
-            company: "TechNova Solutions",
-            category: "Software Development",
-            location: "Delhi, India",
-            type: "Full Time",
-            experience: "3-5 Years",
-            salary: "₹8L - ₹14L",
-            posted: "2 days ago",
-            skills: ["React", "JavaScript", "Node.js"],
-        },
-        {
-            id: 2,
-            title: "Backend Developer",
-            company: "CloudCore Technologies",
-            category: "Software Development",
-            location: "Bangalore, India",
-            type: "Full Time",
-            experience: "2-4 Years",
-            salary: "₹7L - ₹12L",
-            posted: "3 days ago",
-            skills: ["Node.js", "Express", "MySQL"],
-        },
-        {
-            id: 3,
-            title: "Frontend Developer",
-            company: "Pixel Technologies",
-            category: "Software Development",
-            location: "Remote",
-            type: "Full Time",
-            experience: "1-3 Years",
-            salary: "₹6L - ₹10L",
-            posted: "4 days ago",
-            skills: ["React", "Tailwind CSS", "JavaScript"],
-        },
-        {
-            id: 4,
-            title: "Full Stack Developer",
-            company: "Innovate Labs",
-            category: "Software Development",
-            location: "Gurgaon, India",
-            type: "Full Time",
-            experience: "3-5 Years",
-            salary: "₹9L - ₹15L",
-            posted: "5 days ago",
-            skills: ["MERN", "MongoDB", "Node.js"],
-        },
-        {
-            id: 5,
-            title: "UI/UX Designer",
-            company: "Creative Labs",
-            category: "Designing",
-            location: "Remote",
-            type: "Part Time",
-            experience: "1-3 Years",
-            salary: "₹5L - ₹9L",
-            posted: "1 week ago",
-            skills: ["Figma", "UI Design", "UX"],
-        },
-        {
-            id: 6,
-            title: "Software Engineer",
-            company: "NextGen Technologies",
-            category: "Software Development",
-            location: "Noida, India",
-            type: "Full Time",
-            experience: "2-4 Years",
-            salary: "₹8L - ₹13L",
-            posted: "1 week ago",
-            skills: ["Java", "Spring Boot", "MySQL"],
-        },
-    ];
+    useEffect(() => {
+        let active = true;
+
+        getJobs({ limit: 50 })
+            .then((result) => {
+                if (active) {
+                    setJobs((result.jobs || []).map(formatJobCard));
+                }
+            })
+            .catch((loadError) => {
+                if (active) {
+                    setError(
+                        loadError.response?.data?.message ||
+                        "Unable to load jobs. Please try again."
+                    );
+                }
+            })
+            .finally(() => {
+                if (active) setLoading(false);
+            });
+
+        if (localStorage.getItem("token") || sessionStorage.getItem("token")) {
+            getSavedJobs()
+                .then((saved) => {
+                    if (active) {
+                        setSavedJobs(saved.map((entry) => entry.jobId));
+                    }
+                })
+                .catch((loadError) => {
+                    if (active) {
+                        setError(
+                            loadError.response?.data?.message ||
+                            "Unable to load saved jobs."
+                        );
+                    }
+                });
+        }
+
+        return () => {
+            active = false;
+        };
+    }, []);
 
     const filteredJobs = jobs.filter((job) => {
         const matchesCategory =
@@ -124,8 +103,7 @@ const FindJobs = () => {
             jobType === "All" || job.type === jobType;
 
         const matchesExperience =
-            experience === "All" ||
-            job.experience === experience;
+            experience === "All" || job.experience === experience;
 
         return (
             matchesCategory &&
@@ -136,8 +114,38 @@ const FindJobs = () => {
         );
     });
 
+    const toggleSavedJob = async (jobId) => {
+        if (!(localStorage.getItem("token") || sessionStorage.getItem("token"))) {
+            navigate("/login");
+            return;
+        }
+
+        try {
+            setError("");
+            if (savedJobs.includes(jobId)) {
+                await unsaveJob(jobId);
+                setSavedJobs((current) =>
+                    current.filter((id) => id !== jobId)
+                );
+            } else {
+                await saveJob(jobId);
+                setSavedJobs((current) => [...current, jobId]);
+            }
+        } catch (saveError) {
+            setError(
+                saveError.response?.data?.message ||
+                "Unable to update saved jobs."
+            );
+        }
+    };
+
     return (
         <div>
+            {error && (
+                <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                    {error}
+                </div>
+            )}
             {/* Page Heading */}
             <div>
                 <p className="text-sm font-semibold uppercase tracking-wider text-indigo-600">
@@ -290,7 +298,11 @@ const FindJobs = () => {
 
             {/* Job List */}
             <div className="mt-5 grid gap-4">
-                {filteredJobs.length > 0 ? (
+                {loading ? (
+                    <p className="py-10 text-center text-sm text-slate-500">
+                        Loading jobs...
+                    </p>
+                ) : filteredJobs.length > 0 ? (
                     filteredJobs.map((job) => (
                         <div
                             key={job.id}
@@ -340,7 +352,13 @@ const FindJobs = () => {
                                 {/* Save */}
                                 <button
                                     type="button"
-                                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-400 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
+                                    onClick={() => toggleSavedJob(job.id)}
+                                    aria-label={savedJobs.includes(job.id) ? "Remove saved job" : "Save job"}
+                                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition ${
+                                        savedJobs.includes(job.id)
+                                            ? "border-indigo-200 bg-indigo-50 text-indigo-600"
+                                            : "border-slate-200 text-slate-400 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
+                                    }`}
                                 >
                                     <Bookmark size={18} />
                                 </button>

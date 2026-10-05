@@ -12,10 +12,16 @@ import {
     X,
 } from "lucide-react";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-import jobsData from "./data/jobsData";
+import {
+    formatJobCard,
+    getJobs,
+    getSavedJobs,
+    saveJob as saveJobRequest,
+    unsaveJob,
+} from "../services/projectService";
 
 const HomeJobs = () => {
     const navigate = useNavigate();
@@ -27,14 +33,62 @@ const HomeJobs = () => {
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [authAction, setAuthAction] = useState("");
     const [savedJobs, setSavedJobs] = useState([]);
+    const [jobs, setJobs] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
 
-    const isLoggedIn = Boolean(localStorage.getItem("token"));
+    const isLoggedIn = Boolean(
+        localStorage.getItem("token") ||
+        sessionStorage.getItem("token")
+    );
+
+    useEffect(() => {
+        let active = true;
+        getJobs({ limit: 50 })
+            .then((result) => {
+                if (active) {
+                    setJobs((result.jobs || []).map(formatJobCard));
+                }
+            })
+            .catch((loadError) => {
+                if (active) {
+                    setError(
+                        loadError.response?.data?.message ||
+                        "Unable to load jobs. Please try again."
+                    );
+                }
+            })
+            .finally(() => {
+                if (active) setLoading(false);
+            });
+
+        if (isLoggedIn) {
+            getSavedJobs()
+                .then((saved) => {
+                    if (active) {
+                        setSavedJobs(saved.map((entry) => entry.jobId));
+                    }
+                })
+                .catch((loadError) => {
+                    if (active) {
+                        setError(
+                            loadError.response?.data?.message ||
+                            "Unable to load your saved jobs."
+                        );
+                    }
+                });
+        }
+
+        return () => {
+            active = false;
+        };
+    }, [isLoggedIn]);
 
     // FILTER JOBS
     const filteredJobs = useMemo(() => {
         const searchValue = search.trim().toLowerCase();
 
-        return jobsData.filter((job) => {
+        return jobs.filter((job) => {
             const matchesCategory = category
                 ? job.category?.toLowerCase() ===
                 category.toLowerCase()
@@ -57,7 +111,7 @@ const HomeJobs = () => {
 
             return matchesCategory && matchesSearch;
         });
-    }, [category, search]);
+    }, [category, jobs, search]);
 
     // AUTH CHECK
     const requireLogin = (action, jobId = null) => {
@@ -78,14 +132,24 @@ const HomeJobs = () => {
     };
 
     // SAVE / UNSAVE JOB
-    const toggleSaveJob = (jobId) => {
-        setSavedJobs((current) => {
-            if (current.includes(jobId)) {
-                return current.filter((id) => id !== jobId);
+    const toggleSaveJob = async (jobId) => {
+        try {
+            setError("");
+            if (savedJobs.includes(jobId)) {
+                await unsaveJob(jobId);
+                setSavedJobs((current) =>
+                    current.filter((id) => id !== jobId)
+                );
+            } else {
+                await saveJobRequest(jobId);
+                setSavedJobs((current) => [...current, jobId]);
             }
-
-            return [...current, jobId];
-        });
+        } catch (saveError) {
+            setError(
+                saveError.response?.data?.message ||
+                "Unable to update saved jobs."
+            );
+        }
     };
 
     // CLEAR SEARCH
@@ -106,6 +170,11 @@ const HomeJobs = () => {
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-800">
+            {error && (
+                <div className="mx-auto max-w-7xl px-6 pt-4 text-sm text-red-600 lg:px-8">
+                    {error}
+                </div>
+            )}
                 {/* HEADER */}
             <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
                 <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
@@ -252,7 +321,11 @@ const HomeJobs = () => {
 
                 {/* JOB LIST */}
             <main className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
-                {filteredJobs.length === 0 ? (
+                {loading ? (
+                    <p className="py-10 text-center text-sm text-slate-500">
+                        Loading jobs...
+                    </p>
+                ) : filteredJobs.length === 0 ? (
                     /* EMPTY STATE*/
                     <div className="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center">
                         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-slate-100 text-slate-400">

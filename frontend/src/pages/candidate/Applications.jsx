@@ -11,8 +11,9 @@ import {
     X,
     XCircle,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getApplications } from "../../services/projectService";
 
 const Applications = () => {
     const navigate = useNavigate();
@@ -20,7 +21,7 @@ const Applications = () => {
     const [selectedApplication, setSelectedApplication] = useState(null);
     const [filterStatus, setFilterStatus] = useState("All Applications");
 
-    const applications = [
+    const initialApplications = [
         {
             id: 1,
             position: "Senior React Developer",
@@ -189,6 +190,84 @@ const Applications = () => {
         },
     ];
 
+    const [applications, setApplications] = useState(initialApplications);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        let active = true;
+        getApplications()
+            .then((items) => {
+                if (!active) return;
+                const statusLabels = {
+                    APPLIED: "Applied",
+                    UNDER_REVIEW: "Under Review",
+                    SHORTLISTED: "Shortlisted",
+                    INTERVIEW: "Interview",
+                    SELECTED: "Selected",
+                    REJECTED: "Rejected",
+                    WITHDRAWN: "Withdrawn",
+                };
+                setApplications(items.map((item) => {
+                    const job = item.job || {};
+                    const status = statusLabels[item.status] || item.status;
+                    return {
+                        ...item,
+                        position: job.title || "Job",
+                        company: job.company?.name || "Company",
+                        location: job.location || "",
+                        type: (job.jobType || "").replaceAll("_", " "),
+                        appliedDate: item.appliedAt
+                            ? new Date(item.appliedAt).toLocaleDateString()
+                            : "",
+                        status,
+                        statusText: status,
+                        statusIcon: status === "Interview"
+                            ? CalendarDays
+                            : status === "Rejected"
+                                ? XCircle
+                                : status === "Under Review"
+                                    ? Clock3
+                                    : CheckCircle2,
+                        salary: job.minSalary && job.maxSalary
+                            ? `₹${Number(job.minSalary).toLocaleString("en-IN")} - ₹${Number(job.maxSalary).toLocaleString("en-IN")}`
+                            : "Not specified",
+                        experience: job.experienceMax
+                            ? `${job.experienceMin || 0} - ${job.experienceMax} Years`
+                            : "Not specified",
+                        workMode: (job.workMode || "").replaceAll("_", " "),
+                        jobDescription: job.description || "",
+                        skills: (job.skills || []).map((skill) => skill.name),
+                        resumeUrl: item.resume || "",
+                        resumeName: item.resume?.split(/[\\/]/).pop() || "Resume",
+                        coverLetter: item.coverLetter || "",
+                        recruiter: "",
+                        recruiterEmail: "",
+                        nextStep: status === "Rejected"
+                            ? "The company has decided not to move forward."
+                            : "You will be notified when there is an update.",
+                    };
+                }));
+                setError("");
+            })
+            .catch((loadError) => {
+                if (active) {
+                    setApplications([]);
+                    setError(
+                        loadError.response?.data?.message ||
+                        "Unable to load your applications."
+                    );
+                }
+            })
+            .finally(() => {
+                if (active) setLoading(false);
+            });
+
+        return () => {
+            active = false;
+        };
+    }, []);
+
     const statusStyles = {
         Applied: {
             badge: "bg-indigo-50 text-indigo-600",
@@ -302,6 +381,16 @@ const Applications = () => {
 
     return (
         <div>
+            {loading && (
+                <p className="py-10 text-center text-sm text-slate-500">
+                    Loading applications...
+                </p>
+            )}
+            {error && (
+                <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+                    {error}
+                </div>
+            )}
             {/*PAGE HEADER*/}
             <section>
                 <p className="text-sm font-semibold uppercase tracking-wider text-indigo-600">
