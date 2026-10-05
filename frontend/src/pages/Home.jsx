@@ -31,8 +31,8 @@ const Home = () => {
 
     const storedUser = JSON.parse(
         localStorage.getItem("user") ||
-            sessionStorage.getItem("user") ||
-            "null"
+        sessionStorage.getItem("user") ||
+        "null"
     );
 
     const storedToken =
@@ -143,12 +143,29 @@ const Home = () => {
             return;
         }
 
-        if (jobId) {
-            navigate(`${getJobsRoute()}/${jobId}`);
+        // Recruiter can view jobs but cannot apply
+        if (userRole === "RECRUITER") {
+            if (jobId) {
+                navigate(`/recruiter/jobs/${jobId}`);
+            } else {
+                navigate("/recruiter/jobs");
+            }
             return;
         }
 
-        navigate(getJobsRoute());
+        // Admin should not apply
+        if (userRole === "ADMIN") {
+            navigate("/admin/dashboard");
+            return;
+        }
+
+        // Candidate
+        if (jobId) {
+            navigate(`/candidate/jobs/${jobId}`);
+            return;
+        }
+
+        navigate("/candidate/jobs");
     };
 
     // =====================================================
@@ -585,60 +602,60 @@ const Home = () => {
 
                             {userRole ===
                                 "RECRUITER" && (
-                                <>
-                                    <button
-                                        type="button"
-                                        onClick={
-                                            handleJobsNavigation
-                                        }
-                                        className="flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
-                                    >
-                                        <BriefcaseBusiness
-                                            size={17}
-                                        />
-                                        Jobs
-                                    </button>
+                                    <>
+                                        <button
+                                            type="button"
+                                            onClick={
+                                                handleJobsNavigation
+                                            }
+                                            className="flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
+                                        >
+                                            <BriefcaseBusiness
+                                                size={17}
+                                            />
+                                            Jobs
+                                        </button>
 
-                                    <button
-                                        type="button"
-                                        onClick={
-                                            handleApplicationsNavigation
-                                        }
-                                        className="flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
-                                    >
-                                        <FileText
-                                            size={17}
-                                        />
-                                        Applications
-                                    </button>
+                                        <button
+                                            type="button"
+                                            onClick={
+                                                handleApplicationsNavigation
+                                            }
+                                            className="flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
+                                        >
+                                            <FileText
+                                                size={17}
+                                            />
+                                            Applications
+                                        </button>
 
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            navigate(
-                                                "/recruiter/candidates"
-                                            )
-                                        }
-                                        className="flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
-                                    >
-                                        <Users size={17} />
-                                        Candidates
-                                    </button>
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                navigate(
+                                                    "/recruiter/candidates"
+                                                )
+                                            }
+                                            className="flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
+                                        >
+                                            <Users size={17} />
+                                            Candidates
+                                        </button>
 
-                                    <button
-                                        type="button"
-                                        onClick={
-                                            handleInterviewsNavigation
-                                        }
-                                        className="flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
-                                    >
-                                        <CalendarDays
-                                            size={17}
-                                        />
-                                        Interviews
-                                    </button>
-                                </>
-                            )}
+                                        <button
+                                            type="button"
+                                            onClick={
+                                                handleInterviewsNavigation
+                                            }
+                                            className="flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
+                                        >
+                                            <CalendarDays
+                                                size={17}
+                                            />
+                                            Interviews
+                                        </button>
+                                    </>
+                                )}
                         </nav>
                     )}
 
@@ -670,11 +687,10 @@ const Home = () => {
                                             !previous
                                     )
                                 }
-                                className={`flex items-center gap-2.5 rounded-xl px-2 py-1.5 transition ${
-                                    profileMenuOpen
-                                        ? "bg-slate-100"
-                                        : "hover:bg-slate-50"
-                                }`}
+                                className={`flex items-center gap-2.5 rounded-xl px-2 py-1.5 transition ${profileMenuOpen
+                                    ? "bg-slate-100"
+                                    : "hover:bg-slate-50"
+                                    }`}
                             >
                                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
                                     <User size={18} />
@@ -690,23 +706,22 @@ const Home = () => {
                                     <p className="text-xs text-slate-400">
                                         {isLoggedIn
                                             ? userRole ===
-                                              "RECRUITER"
+                                                "RECRUITER"
                                                 ? "Recruiter"
                                                 : userRole ===
-                                                  "ADMIN"
-                                                ? "Administrator"
-                                                : "Candidate"
+                                                    "ADMIN"
+                                                    ? "Administrator"
+                                                    : "Candidate"
                                             : "Login / Register"}
                                     </p>
                                 </div>
 
                                 <ChevronDown
                                     size={16}
-                                    className={`hidden text-slate-400 transition-transform sm:block ${
-                                        profileMenuOpen
-                                            ? "rotate-180"
-                                            : ""
-                                    }`}
+                                    className={`hidden text-slate-400 transition-transform sm:block ${profileMenuOpen
+                                        ? "rotate-180"
+                                        : ""
+                                        }`}
                                 />
                             </button>
 
@@ -1211,10 +1226,11 @@ const Home = () => {
                                             }
                                             className="flex items-center gap-1 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700"
                                         >
-                                            View & Apply
-                                            <ArrowRight
-                                                size={15}
-                                            />
+                                            {userRole === "RECRUITER"
+                                                ? "View Job"
+                                                : "View & Apply"}
+
+                                            <ArrowRight size={15} />
                                         </button>
                                     </div>
                                 </div>
@@ -1422,12 +1438,12 @@ const Home = () => {
                             {authAction === "apply"
                                 ? "You need an account before you can apply for this job."
                                 : authAction === "save"
-                                ? "Sign in to save jobs and access them later from your Saved Jobs."
-                                : authAction === "category"
-                                ? "Sign in to browse jobs by category and discover opportunities that match your skills."
-                                : authAction === "featured"
-                                ? "Sign in to view job details and apply for available positions."
-                                : "Create an account or sign in to explore jobs and manage your career journey."}
+                                    ? "Sign in to save jobs and access them later from your Saved Jobs."
+                                    : authAction === "category"
+                                        ? "Sign in to browse jobs by category and discover opportunities that match your skills."
+                                        : authAction === "featured"
+                                            ? "Sign in to view job details and apply for available positions."
+                                            : "Create an account or sign in to explore jobs and manage your career journey."}
                         </p>
 
                         <div className="mt-6 space-y-3">
