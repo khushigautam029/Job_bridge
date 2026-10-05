@@ -75,21 +75,10 @@ const NotificationDropdown = ({ role = "CANDIDATE" }) => {
     );
 
     const dropdownRef = useRef(null);
-
-    /*
-     * IMPORTANT:
-     * unreadCount is calculated from notifications.
-     *
-     * This means the number automatically changes whenever
-     * notifications are added, read, or deleted.
-     */
     const unreadCount = notifications.filter(
         (notification) => !notification.read
     ).length;
 
-    /*
-     * Close dropdown when clicking outside
-     */
     useEffect(() => {
         const handleOutsideClick = (event) => {
             if (
@@ -113,30 +102,19 @@ const NotificationDropdown = ({ role = "CANDIDATE" }) => {
         };
     }, []);
 
-    /*
-     * Mark one notification as read
-     *
-     * Because notifications state changes,
-     * unreadCount automatically decreases by 1.
-     */
     const markAsRead = (id) => {
         setNotifications((prev) =>
             prev.map((notification) =>
                 notification.id === id
                     ? {
-                          ...notification,
-                          read: true,
-                      }
+                        ...notification,
+                        read: true,
+                    }
                     : notification
             )
         );
     };
 
-    /*
-     * Mark all notifications as read
-     *
-     * unreadCount automatically becomes 0.
-     */
     const markAllAsRead = () => {
         setNotifications((prev) =>
             prev.map((notification) => ({
@@ -146,15 +124,6 @@ const NotificationDropdown = ({ role = "CANDIDATE" }) => {
         );
     };
 
-    /*
-     * Delete notification
-     *
-     * If the deleted notification was unread,
-     * unreadCount automatically decreases.
-     *
-     * If it was already read,
-     * unreadCount remains unchanged.
-     */
     const deleteNotification = (id) => {
         setNotifications((prev) =>
             prev.filter(
@@ -163,11 +132,6 @@ const NotificationDropdown = ({ role = "CANDIDATE" }) => {
         );
     };
 
-    /*
-     * Add a new notification.
-     *
-     * This function can later be replaced by API/socket data.
-     */
     const addNotification = (notification) => {
         setNotifications((prev) => [
             {
@@ -292,11 +256,10 @@ const NotificationDropdown = ({ role = "CANDIDATE" }) => {
 
                             <p className="mt-0.5 text-xs text-slate-500">
                                 {unreadCount > 0
-                                    ? `${unreadCount} unread notification${
-                                          unreadCount > 1
-                                              ? "s"
-                                              : ""
-                                      }`
+                                    ? `${unreadCount} unread notification${unreadCount > 1
+                                        ? "s"
+                                        : ""
+                                    }`
                                     : "You're all caught up"}
                             </p>
                         </div>
@@ -347,10 +310,9 @@ const NotificationDropdown = ({ role = "CANDIDATE" }) => {
                                             transition
                                             hover:bg-slate-50
 
-                                            ${
-                                                !notification.read
-                                                    ? "bg-indigo-50/40"
-                                                    : "bg-white"
+                                            ${!notification.read
+                                                ? "bg-indigo-50/40"
+                                                : "bg-white"
                                             }
                                         `}
                                     >
@@ -370,8 +332,8 @@ const NotificationDropdown = ({ role = "CANDIDATE" }) => {
                                                 justify-center
                                                 rounded-xl
                                                 ${getIconStyle(
-                                                    notification.type
-                                                )}
+                                                notification.type
+                                            )}
                                             `}
                                         >
                                             {getNotificationIcon(
@@ -385,10 +347,9 @@ const NotificationDropdown = ({ role = "CANDIDATE" }) => {
                                                 <h4
                                                     className={`
                                                         text-sm
-                                                        ${
-                                                            !notification.read
-                                                                ? "font-bold text-slate-900"
-                                                                : "font-medium text-slate-700"
+                                                        ${!notification.read
+                                                            ? "font-bold text-slate-900"
+                                                            : "font-medium text-slate-700"
                                                         }
                                                     `}
                                                 >

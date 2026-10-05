@@ -52,28 +52,56 @@ const updateCandidateProfile = async (
     userId,
     data
 ) => {
-
     const candidateProfile =
         await CandidateProfile.findOne({
             where: {
                 userId,
             },
         });
-
     if (!candidateProfile) {
-
         const error = new Error(
             "Candidate profile not found"
         );
-
         error.statusCode =
             STATUS_CODES.NOT_FOUND;
-
         throw error;
     }
 
-    await candidateProfile.update(data);
+    const user = await User.findByPk(userId);
+    if (!user) {
+        const error = new Error(
+            "User not found"
+        );
+        error.statusCode =
+            STATUS_CODES.NOT_FOUND;
+        throw error;
+    }
 
+    // Fields belonging to users table
+    await user.update({
+        name: data.name ?? user.name,
+        phone: data.phone ?? user.phone,
+    });
+
+    // Fields belonging to candidate_profiles table
+    const candidateData = {
+        location: data.location,
+        bio: data.bio,
+        profileImage: data.profileImage,
+        linkedinUrl: data.linkedinUrl,
+        githubUrl: data.githubUrl,
+        portfolioUrl: data.portfolioUrl,
+        experienceYears: data.experienceYears,
+    };
+
+    // Remove undefined values
+    Object.keys(candidateData).forEach((key) => {
+        if (candidateData[key] === undefined) {
+            delete candidateData[key];
+        }
+    });
+
+    await candidateProfile.update(candidateData);
     return getCandidateProfile(userId);
 };
 

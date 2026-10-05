@@ -2,6 +2,19 @@ import Joi from "joi";
 import { MESSAGES } from "../utils/setConstants.js";
 
 const updateCandidateProfileSchema = Joi.object({
+
+    name: Joi.string()
+        .trim()
+        .min(2)
+        .max(100)
+        .optional(),
+
+    phone: Joi.string()
+        .trim()
+        .max(15)
+        .allow("")
+        .optional(),
+
     location: Joi.string()
         .trim()
         .max(150)
@@ -61,6 +74,7 @@ const updateCandidateProfileSchema = Joi.object({
         .max(99.9)
         .precision(1)
         .optional(),
+
 }).min(1);
 
 export {
