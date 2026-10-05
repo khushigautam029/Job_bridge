@@ -68,10 +68,7 @@ const Home = () => {
     const [successMessage, setSuccessMessage] =
         useState("");
 
-    // =====================================================
     // SUCCESS MESSAGE
-    // =====================================================
-
     useEffect(() => {
         const message = sessionStorage.getItem(
             "authSuccessMessage"
@@ -92,10 +89,7 @@ const Home = () => {
         }
     }, []);
 
-    // =====================================================
     // ROUTES
-    // =====================================================
-
     const getJobsRoute = () => {
         if (userRole === "RECRUITER") {
             return "/recruiter/jobs";
@@ -132,10 +126,7 @@ const Home = () => {
         return "/candidate/interviews";
     };
 
-    // =====================================================
     // LOGIN REQUIREMENT
-    // =====================================================
-
     const requireLogin = (action, jobId = null) => {
         if (!isLoggedIn) {
             setAuthAction(action);
@@ -168,10 +159,7 @@ const Home = () => {
         navigate("/candidate/jobs");
     };
 
-    // =====================================================
     // NAVIGATION HANDLERS
-    // =====================================================
-
     const handleJobsNavigation = () => {
         if (!isLoggedIn) {
             setAuthAction("jobs");
@@ -202,10 +190,7 @@ const Home = () => {
         navigate(getInterviewsRoute());
     };
 
-    // =====================================================
     // CATEGORY
-    // =====================================================
-
     const handleCategoryClick = (category) => {
         if (!isLoggedIn) {
             setAuthAction("category");
@@ -225,10 +210,7 @@ const Home = () => {
         );
     };
 
-    // =====================================================
     // FEATURED JOB
-    // =====================================================
-
     const handleFeaturedJobClick = (jobId) => {
         if (!isLoggedIn) {
             setAuthAction("featured");
@@ -246,10 +228,7 @@ const Home = () => {
         );
     };
 
-    // =====================================================
     // SEARCH
-    // =====================================================
-
     const handleSearch = () => {
         if (!isLoggedIn) {
             setAuthAction("jobs");
@@ -287,10 +266,7 @@ const Home = () => {
         );
     };
 
-    // =====================================================
     // POPULAR SEARCH
-    // =====================================================
-
     const handlePopularSearch = (keyword) => {
         if (!isLoggedIn) {
             setAuthAction("jobs");
@@ -310,10 +286,7 @@ const Home = () => {
         );
     };
 
-    // =====================================================
     // PROFILE
-    // =====================================================
-
     const handleProfileClick = () => {
         setProfileMenuOpen(false);
 
@@ -330,10 +303,7 @@ const Home = () => {
         navigate("/candidate/profile");
     };
 
-    // =====================================================
     // SETTINGS
-    // =====================================================
-
     const handleSettingsClick = () => {
         setProfileMenuOpen(false);
 
@@ -350,10 +320,7 @@ const Home = () => {
         navigate("/candidate/settings");
     };
 
-    // =====================================================
     // LOGOUT
-    // =====================================================
-
     const handleLogout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
@@ -367,10 +334,7 @@ const Home = () => {
         window.location.reload();
     };
 
-    // =====================================================
     // CATEGORIES
-    // =====================================================
-
     const categories = [
         {
             name: "Software Development",
@@ -404,10 +368,7 @@ const Home = () => {
         },
     ];
 
-    // =====================================================
     // FEATURED JOBS
-    // =====================================================
-
     const featuredJobs = [
         {
             id: 1,
@@ -453,10 +414,7 @@ const Home = () => {
         },
     ];
 
-    // =====================================================
     // FEATURES
-    // =====================================================
-
     const features = [
         {
             icon: Search,
@@ -480,10 +438,7 @@ const Home = () => {
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-800">
-            {/* =====================================================
-                SUCCESS MESSAGE
-            ===================================================== */}
-
+                {/* SUCCESS MESSAGE */}
             {successMessage && (
                 <div className="fixed left-1/2 top-5 z-[100] -translate-x-1/2 px-4">
                     <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-white px-5 py-3 shadow-xl shadow-slate-200/70">
@@ -508,10 +463,7 @@ const Home = () => {
                 </div>
             )}
 
-            {/* =====================================================
-                HEADER
-            ===================================================== */}
-
+                {/* HEADER */}
             <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
                 <div className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-5 sm:px-7 lg:px-10">
                     {/* LOGO */}
@@ -533,10 +485,7 @@ const Home = () => {
                         </span>
                     </button>
 
-                    {/* =================================================
-                        DESKTOP NAVIGATION
-                    ================================================= */}
-
+                        {/* DESKTOP NAVIGATION */}
                     {isLoggedIn && (
                         <nav className="hidden items-center gap-1 lg:flex">
                             {/* CANDIDATE */}
@@ -659,25 +608,15 @@ const Home = () => {
                         </nav>
                     )}
 
-                    {/* =================================================
-                        RIGHT SIDE
-                    ================================================= */}
-
+                    {/* RIGHT SIDE */}
                     <div className="flex items-center gap-2">
-                        {/* =================================================
-                            NOTIFICATION DROPDOWN
-                        ================================================= */}
-
+                            {/* NOTIFICATION DROPDOWN */}
                         {isLoggedIn && (
                             <NotificationDropdown
                                 role={userRole}
                             />
                         )}
-
-                        {/* =================================================
-                            PROFILE
-                        ================================================= */}
-
+                            {/* PROFILE */}
                         <div className="relative">
                             <button
                                 type="button"
@@ -725,14 +664,10 @@ const Home = () => {
                                 />
                             </button>
 
-                            {/* =================================================
-                                PROFILE DROPDOWN
-                            ================================================= */}
-
+                                {/* PROFILE DROPDOWN */}
                             {profileMenuOpen && (
                                 <div className="absolute right-0 top-12 z-50 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg shadow-slate-200/70">
                                     {/* LOGGED OUT */}
-
                                     {!isLoggedIn && (
                                         <>
                                             <div className="border-b border-slate-100 px-4 py-4">
@@ -856,10 +791,7 @@ const Home = () => {
                 </div>
             </header>
 
-            {/* =====================================================
-                HERO
-            ===================================================== */}
-
+                {/* HERO */}
             <section className="relative overflow-hidden bg-white">
                 <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-indigo-50 blur-3xl" />
 
@@ -888,14 +820,10 @@ const Home = () => {
                         </p>
                     </div>
 
-                    {/* =================================================
-                        SEARCH
-                    ================================================= */}
-
+                        {/* SEARCH */}
                     <div className="mx-auto mt-10 max-w-5xl rounded-2xl border border-slate-200 bg-white p-3 shadow-xl shadow-slate-200/60">
                         <div className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
                             {/* KEYWORD */}
-
                             <div className="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3 transition focus-within:border-indigo-400 focus-within:ring-2 focus-within:ring-indigo-100">
                                 <Search
                                     size={20}
@@ -984,7 +912,6 @@ const Home = () => {
                     </div>
 
                     {/* POPULAR SEARCHES */}
-
                     <div className="mt-5 flex flex-wrap items-center justify-center gap-2 text-sm">
                         <span className="mr-1 text-slate-500">
                             Popular:
@@ -1013,10 +940,7 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* =====================================================
-                CATEGORIES
-            ===================================================== */}
-
+                {/* CATEGORIES */}
             <section
                 id="categories"
                 className="mx-auto max-w-[1440px] px-5 py-20 sm:px-7 lg:px-10"
@@ -1087,10 +1011,7 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* =====================================================
-                FEATURED JOBS
-            ===================================================== */}
-
+                {/* FEATURED JOBS */}
             <section
                 id="jobs"
                 className="border-y border-slate-200 bg-white"
@@ -1240,10 +1161,7 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* =====================================================
-                FEATURES
-            ===================================================== */}
-
+                {/* FEATURES */}
             <section
                 id="features"
                 className="mx-auto max-w-[1440px] px-5 py-20 sm:px-7 lg:px-10"
@@ -1296,10 +1214,7 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* =====================================================
-                CTA
-            ===================================================== */}
-
+                {/* CTA */}
             {!isLoggedIn && (
                 <section className="px-5 pb-20 sm:px-7 lg:px-10">
                     <div className="mx-auto max-w-[1440px] overflow-hidden rounded-3xl bg-indigo-600 px-8 py-14 text-center shadow-xl shadow-indigo-200">
@@ -1331,10 +1246,7 @@ const Home = () => {
                 </section>
             )}
 
-            {/* =====================================================
-                FOOTER
-            ===================================================== */}
-
+                {/* FOOTER */}
             <footer className="border-t border-slate-200 bg-white">
                 <div className="mx-auto flex max-w-[1440px] flex-col gap-5 px-5 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-7 lg:px-10">
                     <div className="flex items-center gap-2">
@@ -1409,10 +1321,7 @@ const Home = () => {
                 </div>
             </footer>
 
-            {/* =====================================================
-                AUTH MODAL
-            ===================================================== */}
-
+                {/* AUTH MODAL */}
             {showAuthModal && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/50 px-4 backdrop-blur-sm">
                     <div className="relative w-full max-w-md rounded-2xl bg-white p-7 shadow-2xl">
