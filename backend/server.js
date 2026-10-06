@@ -9,11 +9,12 @@ const PORT = process.env.PORT || 5000;
 const startServer = async () => {
     try {
         await sequelize.authenticate();
+        console.log("---------------------------------------------");
         console.log("MySQL database connected successfully");
         await sequelize.sync();
-        console.log("Database tables synchronized successfully");
         app.listen(PORT, () => {
             console.log(`JobBridge server running on port ${PORT}`);
+            console.log("---------------------------------------------");
         });
     } catch (error) {
         console.error("Unable to start server:", error.message);

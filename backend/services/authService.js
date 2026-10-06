@@ -1,12 +1,10 @@
 import bcrypt from "bcryptjs";
-
 import {
     CandidateProfile,
     Company,
     RecruiterProfile,
     User,
 } from "../models/index.js";
-
 import { STATUS_CODES } from "../utils/setConstants.js";
 
 const registerUser = async ({
@@ -55,7 +53,6 @@ const registerUser = async ({
 
 const loginUser = async ({ email, password }) => {
     const normalizedEmail = email.trim().toLowerCase();
-
     const user = await User.findOne({
         where: {
             email: normalizedEmail,
