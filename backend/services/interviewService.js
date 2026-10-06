@@ -81,9 +81,6 @@ const scheduleInterview = async (
         throw error;
     }
 
-
-    // Only shortlisted/interview candidates
-    // should normally get an interview
     if (
         ![
             "SHORTLISTED",

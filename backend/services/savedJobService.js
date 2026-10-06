@@ -1,6 +1,6 @@
 import {
-    Company,
     CandidateProfile,
+    Company,
     Job,
     JobCategory,
     SavedJob,
@@ -18,8 +18,7 @@ const saveJob = async (
 ) => {
 
     // Find candidate profile
-    const candidate =
-        await CandidateProfile.findOne({
+    const candidate = await CandidateProfile.findOne({
             where: {
                 userId,
             },

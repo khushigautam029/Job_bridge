@@ -16,6 +16,12 @@ const Company = sequelize.define(
             unique: true,
         },
 
+        companyType: {
+            type: DataTypes.ENUM("DIRECT", "CONSULTANCY"),
+            allowNull: false,
+            defaultValue: "DIRECT",
+        },
+
         description: {
             type: DataTypes.TEXT,
             allowNull: true,
