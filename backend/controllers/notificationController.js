@@ -7,7 +7,13 @@ import {
     markAsRead,
 } from "../services/notificationService.js";
 import asyncHandler from "../utils/asyncHandler.js";
-import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
+import {
+    sendSuccess,
+} from "../utils/responseHandler.js";
+import {
+    MESSAGES,
+    STATUS_CODES,
+} from "../utils/setConstants.js";
 
 // GET /api/notifications
 const getNotifications = asyncHandler(
@@ -16,12 +22,15 @@ const getNotifications = asyncHandler(
             await getMyNotifications(
                 req.user.id
             );
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            data: {
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.NOTIFICATIONS_FETCHED,
+            {
                 notifications,
-            },
-        });
+            }
+        );
     }
 );
 
@@ -32,12 +41,15 @@ const unreadCount = asyncHandler(
             await getUnreadCount(
                 req.user.id
             );
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            data: {
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.UNREAD_COUNT_FETCHED,
+            {
                 unreadCount: count,
-            },
-        });
+            }
+        );
     }
 );
 
@@ -49,13 +61,15 @@ const markRead = asyncHandler(
                 req.user.id,
                 req.params.id
             );
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            message:MESSAGES.NOTIFICATIONS_MARKED_READ,
-            data: {
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.NOTIFICATIONS_MARKED_READ,
+            {
                 notification,
-            },
-        });
+            }
+        );
     }
 );
 
@@ -65,10 +79,12 @@ const markAllRead = asyncHandler(
         await markAllAsRead(
             req.user.id
         );
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            message:MESSAGES.NOTIFICATIONS_ALL_MARKED_READ,
-        });
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.NOTIFICATIONS_ALL_MARKED_READ
+        );
     }
 );
 
@@ -79,10 +95,12 @@ const removeNotification = asyncHandler(
             req.user.id,
             req.params.id
         );
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            message:MESSAGES.NOTIFICATIONS_DELETED,
-        });
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.NOTIFICATIONS_DELETED
+        );
     }
 );
 
@@ -93,13 +111,20 @@ const removeAllNotifications =
             await deleteAllNotifications(
                 req.user.id
             );
-            res.status(STATUS_CODES.OK).json({
-                success: true,
-                message:MESSAGES.NOTIFICATIONS_ALL_DELETED,
-        });
-    }
-);
+
+            return sendSuccess(
+                res,
+                STATUS_CODES.OK,
+                MESSAGES.NOTIFICATIONS_ALL_DELETED
+            );
+        }
+    );
 
 export {
-    getNotifications, markAllRead, markRead, removeAllNotifications, removeNotification, unreadCount
+    getNotifications,
+    markAllRead,
+    markRead,
+    removeAllNotifications,
+    removeNotification,
+    unreadCount
 };

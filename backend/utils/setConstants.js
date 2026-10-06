@@ -124,6 +124,8 @@ export const MESSAGES = {
     NOTIFICATIONS_DELETED: "Notification deleted successfully",
     NOTIFICATIONS_ALL_DELETED: "All notifications deleted successfully",
     NOTIFICATIONS_NOT_FOUND: "Notification not found",
+    NOTIFICATIONS_FETCHED: "Notifications fetched successfully",
+    UNREAD_COUNT_FETCHED: "Unread notification count fetched successfully",
 
     JOB_CATEGORY_CREATED: "Job category created successfully",
     JOB_CATEGORY_FETCHED: "Job categories fetched successfully",
@@ -150,4 +152,9 @@ export const MESSAGES = {
 
     CANDIDATE_DASHBOARD_FETCHED: "Candidate dashboard fetched successfully",
     RECRUITER_DASHBOARD_FETCHED: "Recruiter dashboard fetched successfully",
+    SAVED_JOBS_FETCHED: "Saved jobs fetched successfully",
+    JOB_SAVED_STATUS_FETCHED: "Job saved status fetched successfully",
+    SKILLS_FETCHED: "Skills fetched successfully",
+    SKILL_FETCHED: "Skill fetched successfully",
+
 };
