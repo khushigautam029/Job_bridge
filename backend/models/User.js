@@ -35,6 +35,7 @@ const User = sequelize.define(
         phone: {
             type: DataTypes.STRING(15),
             allowNull: true,
+            unique: true,
         },
         role: {
             type: DataTypes.ENUM(

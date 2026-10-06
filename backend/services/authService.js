@@ -1,12 +1,13 @@
-import bcrypt from "bcryptjs";
-
 import {
     CandidateProfile,
     Company,
     RecruiterProfile,
     User,
 } from "../models/index.js";
-
+import {
+    comparePassword,
+    hashPassword,
+} from "../utils/password.js";
 import { STATUS_CODES } from "../utils/setConstants.js";
 
 const registerUser = async ({
@@ -18,21 +19,25 @@ const registerUser = async ({
     companyName,
     companyType,
 }) => {
-    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedEmail =
+        email.trim().toLowerCase();
 
-    const existingUser = await User.findOne({
-        where: {
-            email: normalizedEmail,
-        },
-    });
+    const existingUser =
+        await User.findOne({
+            where: {
+                email: normalizedEmail,
+            },
+        });
 
     if (existingUser) {
-        const error = new Error("Email is already registered");
+        const error = new Error(
+            "Email is already registered"
+        );
         error.statusCode = STATUS_CODES.CONFLICT;
         throw error;
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const hashedPassword = await hashPassword(password);
 
     const user = await User.create({
         name: name.trim(),
@@ -53,44 +58,51 @@ const registerUser = async ({
             name: companyName.trim(),
             companyType,
         });
-
         await RecruiterProfile.create({
             userId: user.id,
             companyId: company.id,
         });
     }
-
     return user;
 };
 
-const loginUser = async ({ email, password }) => {
+const loginUser = async ({
+    email,
+    password,
+}) => {
     const normalizedEmail = email.trim().toLowerCase();
-
     const user = await User.findOne({
-        where: {
-            email: normalizedEmail,
-        },
-    });
+            where: {
+                email: normalizedEmail,
+            },
+        });
 
     if (!user) {
-        const error = new Error("Invalid email or password");
+        const error = new Error(
+            "Invalid email or password"
+        );
         error.statusCode = STATUS_CODES.UNAUTHORIZED;
         throw error;
     }
 
     if (!user.isActive) {
-        const error = new Error("Your account is inactive");
+        const error = new Error(
+            "Your account is inactive"
+        );
         error.statusCode = STATUS_CODES.FORBIDDEN;
         throw error;
     }
 
-    const isPasswordValid = await bcrypt.compare(
-        password,
-        user.password
-    );
+    const isPasswordValid =
+        await comparePassword(
+            password,
+            user.password
+        );
 
     if (!isPasswordValid) {
-        const error = new Error("Invalid email or password");
+        const error = new Error(
+            "Invalid email or password"
+        );
         error.statusCode = STATUS_CODES.UNAUTHORIZED;
         throw error;
     }
@@ -102,3 +114,4 @@ export {
     loginUser,
     registerUser
 };
+

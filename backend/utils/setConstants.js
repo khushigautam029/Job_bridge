@@ -34,6 +34,7 @@ export const MESSAGES = {
     ACCOUNT_INACTIVE: "Your account is inactive",
     INVALID_CREDENTIALS: "Invalid email or password",
     EMAIL_ALREADY_REGISTERED: "Email is already registered",
+    PHONE_ALREADY_REGISTERED:"Phone number is already registered",
     PASSWORD_CHANGED: "Password changed successfully",
     EMAIL_REQUIRED: "Email is required",
     PROVIDE_A_VALID_EMAIL: "Please provide a valid email",
