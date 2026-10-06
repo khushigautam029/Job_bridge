@@ -12,155 +12,53 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-
-const jobs = [
-    {
-        id: 1,
-        title: "Senior React Developer",
-
-        company: {
-            id: 1,
-            name: "TechNova Solutions",
-            location: "Delhi, India",
-            description:
-                "TechNova Solutions is a technology company building modern digital products and scalable software solutions.",
-            website: "https://technova.example.com",
-        },
-
-        category: {
-            id: 1,
-            name: "Software Development",
-        },
-
-        location: "Delhi, India",
-        jobType: "FULL_TIME",
-        workMode: "HYBRID",
-
-        minSalary: 800000,
-        maxSalary: 1400000,
-
-        experienceMin: 3,
-        experienceMax: 5,
-
-        applicationDeadline: "2026-09-30",
-        createdAt: "2026-08-29",
-
-        description:
-            "We are looking for an experienced React Developer to join our engineering team and help us build modern, scalable and user-friendly web applications.",
-
-        responsibilities: [
-            "Build and maintain modern React applications.",
-            "Develop reusable and scalable UI components.",
-            "Collaborate with designers and backend developers.",
-            "Improve application performance and user experience.",
-            "Write clean, maintainable and well-tested code.",
-        ],
-
-        requirements: [
-            "3+ years of experience with React.",
-            "Strong knowledge of JavaScript and TypeScript.",
-            "Experience working with REST APIs.",
-            "Good understanding of responsive design.",
-            "Experience with Git and modern development workflows.",
-        ],
-
-        skills: [
-            "React",
-            "JavaScript",
-            "TypeScript",
-            "Node.js",
-            "REST API",
-        ],
-
-        applicants: 42,
-    },
-
-    {
-        id: 2,
-        title: "Backend Developer",
-
-        company: {
-            id: 2,
-            name: "CloudCore Technologies",
-            location: "Bangalore, India",
-            description:
-                "CloudCore Technologies builds cloud-based platforms and enterprise software solutions.",
-            website: "https://cloudcore.example.com",
-        },
-
-        category: {
-            id: 2,
-            name: "Backend Development",
-        },
-
-        location: "Bangalore, India",
-        jobType: "FULL_TIME",
-        workMode: "ONSITE",
-
-        minSalary: 700000,
-        maxSalary: 1200000,
-
-        experienceMin: 2,
-        experienceMax: 4,
-
-        applicationDeadline: "2026-09-25",
-        createdAt: "2026-08-28",
-
-        description:
-            "We are looking for a Backend Developer to develop reliable APIs and scalable server-side applications.",
-
-        responsibilities: [
-            "Build REST APIs using Node.js and Express.",
-            "Design and optimize database queries.",
-            "Implement authentication and authorization.",
-            "Work closely with frontend developers.",
-        ],
-
-        requirements: [
-            "2+ years of Node.js experience.",
-            "Experience with Express.js.",
-            "Strong knowledge of MySQL.",
-            "Understanding of REST API architecture.",
-        ],
-
-        skills: [
-            "Node.js",
-            "Express",
-            "MySQL",
-            "Sequelize",
-        ],
-
-        applicants: 28,
-    },
-];
+import {
+    getJob,
+    getJobApplications,
+} from "../../services/projectService";
 
 const RecruiterJobDetails = () => {
     const navigate = useNavigate();
     const { jobId } = useParams();
 
     const [job, setJob] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [loadedJobId, setLoadedJobId] = useState(null);
     const [error, setError] = useState("");
+    const loading = loadedJobId !== jobId;
 
     useEffect(() => {
-        setLoading(true);
-        setError("");
+        let active = true;
 
-        const selectedJob = jobs.find(
-            (item) => item.id === Number(jobId)
-        );
+        Promise.all([
+            getJob(jobId),
+            getJobApplications(jobId),
+        ])
+            .then(([jobDetails, applications]) => {
+                if (active) {
+                    setError("");
+                    setJob({
+                        ...jobDetails,
+                        applicants: applications.length,
+                    });
+                }
+            })
+            .catch((loadError) => {
+                if (active) {
+                    setError(
+                        loadError.response?.data?.message ||
+                        "Unable to load this job."
+                    );
+                }
+            })
+            .finally(() => {
+                if (active) {
+                    setLoadedJobId(jobId);
+                }
+            });
 
-        const timer = setTimeout(() => {
-            if (selectedJob) {
-                setJob(selectedJob);
-            } else {
-                setError("This job could not be found.");
-            }
-
-            setLoading(false);
-        }, 400);
-
-        return () => clearTimeout(timer);
+        return () => {
+            active = false;
+        };
     }, [jobId]);
 
     const formatJobType = (type) => {
@@ -260,7 +158,9 @@ const RecruiterJobDetails = () => {
     };
 
     const handleEditJob = () => {
-        navigate(`/recruiter/jobs/${jobId}/edit`);
+        navigate("/recruiter/jobs", {
+            state: { editJobId: Number(jobId) },
+        });
     };
 
     const handleBack = () => {
@@ -312,9 +212,15 @@ const RecruiterJobDetails = () => {
         );
     }
 
-    const responsibilities = job.responsibilities || [];
-    const requirements = job.requirements || [];
-    const skills = job.skills || [];
+    const responsibilities = Array.isArray(job.responsibilities)
+        ? job.responsibilities
+        : (job.responsibilities || "").split(/\r?\n/).filter(Boolean);
+    const requirements = Array.isArray(job.requirements)
+        ? job.requirements
+        : (job.requirements || "").split(/\r?\n/).filter(Boolean);
+    const skills = (job.skills || []).map((skill) =>
+        typeof skill === "string" ? skill : skill.name
+    );
 
     return (
         <div>

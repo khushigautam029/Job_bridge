@@ -152,11 +152,13 @@ const CandidateSettings = () => {
     };
 
     const handleNotificationSave = () => {
-        alert("Notification settings saved successfully.");
+        setMessage("");
+        setError("Notification preferences cannot be saved because the backend does not support them yet.");
     };
 
     const handlePrivacySave = () => {
-        alert("Privacy settings saved successfully.");
+        setMessage("");
+        setError("Privacy preferences cannot be saved because the backend does not support them yet.");
     };
 
     const sections = [

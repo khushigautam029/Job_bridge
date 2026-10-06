@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
+    useLocation,
     useNavigate,
     useSearchParams,
 } from "react-router-dom";
@@ -47,6 +48,7 @@ const formatRecruiterJob = (job) => ({
 
 const Jobs = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [searchParams] = useSearchParams();
 
    
@@ -298,6 +300,24 @@ const Jobs = () => {
             active = false;
         };
     }, []);
+
+    useEffect(() => {
+        const editJobId = location.state?.editJobId;
+        if (loading || !editJobId) return;
+
+        const selected = jobs.find(
+            (job) => job.id === Number(editJobId)
+        );
+        if (selected) {
+            setSelectedJob({ ...selected });
+            setShowEditModal(true);
+        }
+        navigate(location.pathname, {
+            replace: true,
+            state: null,
+        });
+    }, [jobs, loading, location.pathname, location.state, navigate]);
+
     const applications = {
         1: [
             {

@@ -13,7 +13,8 @@ import {
     Users,
     X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getRecruiterApplications } from "../../services/projectService";
 
 const Candidates = () => {
     const [search, setSearch] = useState("");
@@ -22,229 +23,55 @@ const Candidates = () => {
     const [selectedCandidate, setSelectedCandidate] = useState(null);
     const [profileModalOpen, setProfileModalOpen] = useState(false);
     const [contactModalOpen, setContactModalOpen] = useState(false);
-    const candidates = [
-        {
-            id: 1,
-            name: "Rahul Sharma",
-            email: "rahul.sharma@example.com",
-            phone: "+91 98765 43210",
-            title: "Senior React Developer",
-            location: "Delhi, India",
-            experience: "5 Years",
-            company: "TechNova Solutions",
-            education: "B.Tech in Computer Science",
-            university: "Delhi University",
-            skills: [
-                "React",
-                "JavaScript",
-                "Node.js",
-                "TypeScript",
-                "Redux",
-                "Tailwind CSS",
-            ],
-            summary:
-                "Experienced frontend developer specializing in React-based applications, scalable UI systems and modern JavaScript development.",
-            linkedin:
-                "https://www.linkedin.com/in/rahul-sharma",
-            github:
-                "https://github.com/rahulsharma",
-            resume:
-                "https://example.com/resumes/rahul-sharma.pdf",
-        },
-        {
-            id: 2,
-            name: "Priya Singh",
-            email: "priya.singh@example.com",
-            phone: "+91 98765 12345",
-            title: "Backend Developer",
-            location: "Bangalore, India",
-            experience: "4 Years",
-            company: "CloudStack Technologies",
-            education: "B.Tech in Information Technology",
-            university: "Bangalore University",
-            skills: [
-                "Node.js",
-                "Express",
-                "MySQL",
-                "REST API",
-                "Sequelize",
-                "Docker",
-            ],
-            summary:
-                "Backend developer focused on building secure REST APIs, database architecture and scalable server-side applications.",
-            linkedin:
-                "https://www.linkedin.com/in/priya-singh",
-            github:
-                "https://github.com/priyasingh",
-            resume:
-                "https://example.com/resumes/priya-singh.pdf",
-        },
+    const [candidates, setCandidates] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
 
-        {
-            id: 3,
-            name: "Aman Verma",
-            email: "aman.verma@example.com",
-            phone: "+91 98111 22334",
-            title: "Full Stack Developer",
-            location: "Delhi, India",
-            experience: "3 Years",
-            company: "CodeCraft Labs",
-            education: "BCA",
-            university: "Indraprastha University",
-            skills: [
-                "React",
-                "Node.js",
-                "MongoDB",
-                "Express",
-                "JavaScript",
-                "Git",
-            ],
-            summary:
-                "Full stack developer experienced in developing complete web applications using React, Node.js and modern backend technologies.",
-            linkedin:
-                "https://www.linkedin.com/in/aman-verma",
-            github:
-                "https://github.com/amanverma",
-            resume:
-                "https://example.com/resumes/aman-verma.pdf",
-        },
+    useEffect(() => {
+        let active = true;
+        getRecruiterApplications()
+            .then((applications) => {
+                const uniqueCandidates = new Map();
+                applications.forEach((application) => {
+                    const profile = application.candidate;
+                    if (!profile || uniqueCandidates.has(profile.id)) return;
 
-        {
-            id: 4,
-            name: "Sneha Kapoor",
-            email: "sneha.kapoor@example.com",
-            phone: "+91 98989 77665",
-            title: "UI/UX Designer",
-            location: "Remote",
-            experience: "2 Years",
-            company: "DesignHub Studio",
-            education: "B.Des in Communication Design",
-            university: "National Institute of Design",
-            skills: [
-                "Figma",
-                "UI Design",
-                "UX Research",
-                "Prototyping",
-                "Wireframing",
-            ],
-            summary:
-                "Creative UI/UX designer focused on creating intuitive digital experiences, design systems and user-centered interfaces.",
-            linkedin:
-                "https://www.linkedin.com/in/sneha-kapoor",
-            github: null,
-            resume:
-                "https://example.com/resumes/sneha-kapoor.pdf",
-        },
-        {
-            id: 5,
-            name: "Arjun Mehta",
-            email: "arjun.mehta@example.com",
-            phone: "+91 97654 33221",
-            title: "Frontend Developer",
-            location: "Gurgaon, India",
-            experience: "4 Years",
-            company: "WebWorks India",
-            education: "B.Tech in Computer Science",
-            university: "MDU Rohtak",
-            skills: [
-                "React",
-                "TypeScript",
-                "Redux",
-                "Tailwind CSS",
-                "JavaScript",
-            ],
-            summary:
-                "Frontend developer experienced in building responsive and high-performance web applications with React and TypeScript.",
-            linkedin:
-                "https://www.linkedin.com/in/arjun-mehta",
-            github:
-                "https://github.com/arjunmehta",
-            resume:
-                "https://example.com/resumes/arjun-mehta.pdf",
-        },
-        {
-            id: 6,
-            name: "Neha Gupta",
-            email: "neha.gupta@example.com",
-            phone: "+91 99887 66554",
-            title: "Backend Developer",
-            location: "Noida, India",
-            experience: "5 Years",
-            company: "DataCore Systems",
-            education: "MCA",
-            university: "Amity University",
-            skills: [
-                "Node.js",
-                "PostgreSQL",
-                "REST API",
-                "Docker",
-                "AWS",
-            ],
-            summary:
-                "Backend engineer specializing in API development, relational databases, cloud deployment and distributed systems.",
-            linkedin:
-                "https://www.linkedin.com/in/neha-gupta",
-            github:
-                "https://github.com/nehagupta",
-            resume:
-                "https://example.com/resumes/neha-gupta.pdf",
-        },
+                    uniqueCandidates.set(profile.id, {
+                        id: profile.id,
+                        name: profile.user?.name || "Candidate",
+                        email: profile.user?.email || "",
+                        phone: profile.user?.phone || "",
+                        title: "Applicant",
+                        location: profile.location || "Not specified",
+                        experience: `${Number(profile.experienceYears || 0)} Years`,
+                        company: "Not provided",
+                        education: "Not provided",
+                        university: "",
+                        skills: (profile.skills || []).map((skill) => skill.name),
+                        summary: profile.bio || "No professional summary provided.",
+                        linkedin: profile.linkedinUrl,
+                        github: profile.githubUrl,
+                        resume: application.resume || profile.resume,
+                    });
+                });
+                if (active) setCandidates([...uniqueCandidates.values()]);
+            })
+            .catch((loadError) => {
+                if (active) {
+                    setError(
+                        loadError.response?.data?.message ||
+                        "Unable to load candidates."
+                    );
+                }
+            })
+            .finally(() => {
+                if (active) setLoading(false);
+            });
 
-        {
-            id: 7,
-            name: "Rohit Malhotra",
-            email: "rohit.malhotra@example.com",
-            phone: "+91 98770 11223",
-            title: "Frontend Developer",
-            location: "Delhi, India",
-            experience: "2 Years",
-            company: "PixelSoft",
-            education: "BCA",
-            university: "Delhi University",
-            skills: [
-                "React",
-                "HTML",
-                "CSS",
-                "JavaScript",
-                "Tailwind CSS",
-            ],
-            summary:
-                "Frontend developer passionate about building clean, responsive interfaces and interactive React applications.",
-            linkedin:
-                "https://www.linkedin.com/in/rohit-malhotra",
-            github:
-                "https://github.com/rohitmalhotra",
-            resume:
-                "https://example.com/resumes/rohit-malhotra.pdf",
-        },
-
-        {
-            id: 8,
-            name: "Ananya Sharma",
-            email: "ananya.sharma@example.com",
-            phone: "+91 98990 44556",
-            title: "HR Executive",
-            location: "Gurgaon, India",
-            experience: "3 Years",
-            company: "PeopleFirst HR",
-            education: "MBA in Human Resources",
-            university: "Gurgaon University",
-            skills: [
-                "Recruitment",
-                "Communication",
-                "HR",
-                "Talent Acquisition",
-            ],
-            summary:
-                "HR professional experienced in recruitment, candidate screening, employee engagement and talent acquisition.",
-            linkedin:
-                "https://www.linkedin.com/in/ananya-sharma",
-            github: null,
-            resume:
-                "https://example.com/resumes/ananya-sharma.pdf",
-        },
-    ];
-
+        return () => {
+            active = false;
+        };
+    }, []);
     const filteredCandidates = candidates.filter((candidate) => {
         const searchValue = search.toLowerCase();
 
@@ -270,6 +97,14 @@ const Candidates = () => {
             matchesLocation
         );
     });
+    const experienceOptions = [...new Set(
+        candidates.map((candidate) => candidate.experience)
+    )].sort((first, second) =>
+        Number.parseFloat(first) - Number.parseFloat(second)
+    );
+    const locationOptions = [...new Set(
+        candidates.map((candidate) => candidate.location)
+    )].sort();
 
     const getInitials = (name) => {
         return name
@@ -296,7 +131,11 @@ const Candidates = () => {
 
     const openExternalLink = (url) => {
         if (url) {
-            window.open(url, "_blank", "noopener,noreferrer");
+            const target = /^https?:\/\//i.test(url)
+                ? url
+                : `${(import.meta.env.VITE_API_URL || "http://localhost:5000/api")
+                    .replace(/\/api\/?$/, "")}/${url.replace(/^[\\/]+/, "").replaceAll("\\", "/")}`;
+            window.open(target, "_blank", "noopener,noreferrer");
         }
     };
 
@@ -369,18 +208,11 @@ const Candidates = () => {
                             <option value="All">
                                 All Experience
                             </option>
-                            <option value="2 Years">
-                                2 Years
-                            </option>
-                            <option value="3 Years">
-                                3 Years
-                            </option>
-                            <option value="4 Years">
-                                4 Years
-                            </option>
-                            <option value="5 Years">
-                                5 Years
-                            </option>
+                            {experienceOptions.map((experience) => (
+                                <option key={experience} value={experience}>
+                                    {experience}
+                                </option>
+                            ))}
                         </select>
 
                         <ChevronDown
@@ -400,21 +232,11 @@ const Candidates = () => {
                             <option value="All">
                                 All Locations
                             </option>
-                            <option value="Delhi, India">
-                                Delhi, India
-                            </option>
-                            <option value="Bangalore, India">
-                                Bangalore, India
-                            </option>
-                            <option value="Gurgaon, India">
-                                Gurgaon, India
-                            </option>
-                            <option value="Noida, India">
-                                Noida, India
-                            </option>
-                            <option value="Remote">
-                                Remote
-                            </option>
+                            {locationOptions.map((location) => (
+                                <option key={location} value={location}>
+                                    {location}
+                                </option>
+                            ))}
                         </select>
 
                         <ChevronDown
@@ -442,7 +264,15 @@ const Candidates = () => {
                     </p>
                 </div>
 
-                {filteredCandidates.length > 0 ? (
+                {loading ? (
+                    <p className="mt-5 rounded-xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">
+                        Loading candidates...
+                    </p>
+                ) : error ? (
+                    <p className="mt-5 rounded-xl border border-red-200 bg-red-50 p-8 text-center text-sm text-red-700">
+                        {error}
+                    </p>
+                ) : filteredCandidates.length > 0 ? (
                     <div className="mt-5 grid gap-5 xl:grid-cols-2">
                         {filteredCandidates.map(
                             (candidate) => (
