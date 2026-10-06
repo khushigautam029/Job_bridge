@@ -8,6 +8,7 @@ import {
     withdrawApplication,
 } from "../services/applicationService.js";
 import asyncHandler from "../utils/asyncHandler.js";
+import { sendError, sendSuccess } from "../utils/responseHandler.js";
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 import {
     createApplicationSchema,
@@ -26,13 +27,14 @@ const apply = asyncHandler(
             );
 
         if (error) {
-            return res.status(STATUS_CODES.BAD_REQUEST).json({
-                success: false,
-                message: MESSAGES.VALIDATION_FAILED,
-                errors: error.details.map(
+            return sendError(
+                res,
+                STATUS_CODES.BAD_REQUEST,
+                MESSAGES.VALIDATION_FAILED,
+                error.details.map(
                     (detail) => detail.message
-                ),
-            });
+                )
+            );
         }
 
         const application =
@@ -42,13 +44,14 @@ const apply = asyncHandler(
                 value
             );
 
-        res.status(STATUS_CODES.CREATED).json({
-            success: true,
-            message: MESSAGES.APPLIED,
-            data: {
+        return sendSuccess(
+            res,
+            STATUS_CODES.CREATED,
+            MESSAGES.APPLIED,
+            {
                 application,
-            },
-        });
+            }
+        );
     }
 );
 
@@ -58,12 +61,15 @@ const getMine = asyncHandler(
             await getMyApplications(
                 req.user.id
             );
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            data: {
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            "Applications retrieved successfully",
+            {
                 applications,
-            },
-        });
+            }
+        );
     }
 );
 
@@ -75,12 +81,15 @@ const getOne = asyncHandler(
                 req.user.id,
                 req.params.id
             );
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            data: {
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            "Application retrieved successfully",
+            {
                 application,
-            },
-        });
+            }
+        );
     }
 );
 
@@ -91,10 +100,12 @@ const withdraw = asyncHandler(
             req.user.id,
             req.params.id
         );
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.APPLICATION_WITHDRAWN ,
-        });
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.APPLICATION_WITHDRAWN
+        );
     }
 );
 
@@ -105,25 +116,35 @@ const getForJob = asyncHandler(
                 req.user.id,
                 req.params.jobId
             );
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            data: {
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            "Job applications retrieved successfully",
+            {
                 applications,
-            },
-        });
+            }
+        );
     }
 );
 
-const getForRecruiter = asyncHandler(async (req, res) => {
-    const applications =
-        await getRecruiterApplications(req.user.id);
-    return res.status(STATUS_CODES.OK).json({
-        success: true,
-        data: {
-            applications,
-        },
-    });
-});
+const getForRecruiter = asyncHandler(
+    async (req, res) => {
+        const applications =
+            await getRecruiterApplications(
+                req.user.id
+            );
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            "Recruiter applications retrieved successfully",
+            {
+                applications,
+            }
+        );
+    }
+);
 
 // Recruiter → Update status
 const updateStatus = asyncHandler(
@@ -136,32 +157,43 @@ const updateStatus = asyncHandler(
                     stripUnknown: true,
                 }
             );
+
         if (error) {
-            return res.status(STATUS_CODES.BAD_REQUEST).json({
-                success: false,
-                message: MESSAGES.VALIDATION_FAILED,
-                errors: error.details.map(
+            return sendError(
+                res,
+                STATUS_CODES.BAD_REQUEST,
+                MESSAGES.VALIDATION_FAILED,
+                error.details.map(
                     (detail) => detail.message
-                ),
-            });
+                )
+            );
         }
+
         const application =
             await updateApplicationStatus(
                 req.user.id,
                 req.params.id,
                 value.status
             );
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.APPLICATION_STATUS_UPDATED,
-            data: {
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.APPLICATION_STATUS_UPDATED,
+            {
                 application,
-            },
-        });
+            }
+        );
     }
 );
 
 export {
-    apply, getForJob, getForRecruiter, getMine,
-    getOne, updateStatus, withdraw
+    apply,
+    getForJob,
+    getForRecruiter,
+    getMine,
+    getOne,
+    updateStatus,
+    withdraw
 };
+

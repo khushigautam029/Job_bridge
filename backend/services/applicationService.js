@@ -248,7 +248,6 @@ const getApplicationById = async (
                     {
                         model: CandidateProfile,
                         as: "candidate",
-
                         include: [
                             {
                                 model: User,
@@ -383,6 +382,7 @@ const withdrawApplication = async (
 
 
     application.status = "WITHDRAWN";
+    
 
     await application.save();
 

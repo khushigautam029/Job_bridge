@@ -1,10 +1,12 @@
 import bcrypt from "bcryptjs";
+
 import {
     CandidateProfile,
     Company,
     RecruiterProfile,
     User,
 } from "../models/index.js";
+
 import { STATUS_CODES } from "../utils/setConstants.js";
 
 const registerUser = async ({
@@ -14,19 +16,24 @@ const registerUser = async ({
     phone,
     role = "CANDIDATE",
     companyName,
+    companyType,
 }) => {
     const normalizedEmail = email.trim().toLowerCase();
+
     const existingUser = await User.findOne({
         where: {
             email: normalizedEmail,
         },
     });
+
     if (existingUser) {
         const error = new Error("Email is already registered");
         error.statusCode = STATUS_CODES.CONFLICT;
         throw error;
     }
+
     const hashedPassword = await bcrypt.hash(password, 12);
+
     const user = await User.create({
         name: name.trim(),
         email: normalizedEmail,
@@ -34,25 +41,31 @@ const registerUser = async ({
         phone: phone || null,
         role,
     });
+
     if (role === "CANDIDATE") {
         await CandidateProfile.create({
             userId: user.id,
         });
     }
+
     if (role === "RECRUITER") {
         const company = await Company.create({
             name: companyName.trim(),
+            companyType,
         });
+
         await RecruiterProfile.create({
             userId: user.id,
             companyId: company.id,
         });
     }
+
     return user;
 };
 
 const loginUser = async ({ email, password }) => {
     const normalizedEmail = email.trim().toLowerCase();
+
     const user = await User.findOne({
         where: {
             email: normalizedEmail,

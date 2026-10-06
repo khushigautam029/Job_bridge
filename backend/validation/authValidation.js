@@ -14,6 +14,18 @@ const registerSchema = Joi.object({
             "any.required": "Name is required",
         }),
 
+    companyType: Joi.string()
+    .valid("DIRECT", "CONSULTANCY")
+    .when("role", {
+        is: "RECRUITER",
+        then: Joi.required(),
+        otherwise: Joi.forbidden(),
+    })
+    .messages({
+        "any.only": "Company type must be either DIRECT or CONSULTANCY",
+        "any.required": "Company type is required for recruiters",
+    }),
+
     email: Joi.string()
         .trim()
         .email()

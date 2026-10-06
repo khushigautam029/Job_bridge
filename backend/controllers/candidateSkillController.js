@@ -4,27 +4,37 @@ import {
     removeCandidateSkill,
 } from "../services/candidateSkillService.js";
 import asyncHandler from "../utils/asyncHandler.js";
-import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
+import {
+    sendError,
+    sendSuccess,
+} from "../utils/responseHandler.js";
+import {
+    MESSAGES,
+    STATUS_CODES,
+} from "../utils/setConstants.js";
 import {
     addCandidateSkillSchema,
 } from "../validation/candidateSkillValidation.js";
 
+// Get Candidate Skills
 const getSkills = asyncHandler(
     async (req, res) => {
         const skills =
             await getCandidateSkills(
                 req.user.id
             );
-        res.status(STATUS_CODES,OK).json({
-            success: true,
-            data: {
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            "Candidate skills retrieved successfully",
+            {
                 skills,
-            },
-        });
+            }
+        );
     }
 );
 
-
+// Add Candidate Skill
 const addSkill = asyncHandler(
     async (req, res) => {
         const {
@@ -38,43 +48,51 @@ const addSkill = asyncHandler(
             }
         );
         if (error) {
-            return res.status(STATUS_CODES.BAD_REQUEST).json({
-                success: false,
-                message: MESSAGES.VALIDATION_FAILED,
-                errors: error.details.map(
+            return sendError(
+                res,
+                STATUS_CODES.BAD_REQUEST,
+                MESSAGES.VALIDATION_FAILED,
+                error.details.map(
                     (detail) => detail.message
-                ),
-            });
+                )
+            );
         }
+
         const skill =
             await addCandidateSkill(
                 req.user.id,
                 value.skillId
             );
-        res.status(STATUS_CODES.CREATED).json({
-            success: true,
-            message: MESSAGES.SKILL_ADDED,
-            data: {
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.CREATED,
+            MESSAGES.SKILL_ADDED,
+            {
                 skill,
-            },
-        });
+            }
+        );
     }
 );
 
-
+// Remove Candidate Skill
 const removeSkill = asyncHandler(
     async (req, res) => {
         await removeCandidateSkill(
             req.user.id,
             req.params.skillId
         );
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.SKILL_REMOVED,
-        });
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.SKILL_REMOVED
+        );
     }
 );
 
 export {
-    addSkill, getSkills, removeSkill
+    addSkill,
+    getSkills,
+    removeSkill
 };

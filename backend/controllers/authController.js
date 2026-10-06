@@ -2,11 +2,11 @@ import {
     loginUser,
     registerUser,
 } from "../services/authService.js";
-
 import asyncHandler from "../utils/asyncHandler.js";
-
 import generateToken from "../utils/generateToken.js";
-
+import {
+    sendSuccess,
+} from "../utils/responseHandler.js";
 import {
     MESSAGES,
     STATUS_CODES,
@@ -14,13 +14,12 @@ import {
 
 const register = asyncHandler(async (req, res) => {
     const user = await registerUser(req.body);
-
     const token = generateToken(user);
-
-    res.status(STATUS_CODES.CREATED).json({
-        success: true,
-        message: MESSAGES.REGISTRATION_SUCCESS,
-        data: {
+    return sendSuccess(
+        res,
+        STATUS_CODES.CREATED,
+        MESSAGES.REGISTRATION_SUCCESS,
+        {
             token,
             user: {
                 id: user.id,
@@ -28,19 +27,18 @@ const register = asyncHandler(async (req, res) => {
                 email: user.email,
                 role: user.role,
             },
-        },
-    });
+        }
+    );
 });
 
 const login = asyncHandler(async (req, res) => {
     const user = await loginUser(req.body);
-
     const token = generateToken(user);
-
-    res.status(STATUS_CODES.OK).json({
-        success: true,
-        message: MESSAGES.LOGIN_SUCCESS,
-        data: {
+    return sendSuccess(
+        res,
+        STATUS_CODES.OK,
+        MESSAGES.LOGIN_SUCCESS,
+        {
             token,
             user: {
                 id: user.id,
@@ -48,8 +46,8 @@ const login = asyncHandler(async (req, res) => {
                 email: user.email,
                 role: user.role,
             },
-        },
-    });
+        }
+    );
 });
 
 export {
