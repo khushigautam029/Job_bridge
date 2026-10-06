@@ -8,13 +8,23 @@ import {
     updateInterviewStatus,
 } from "../services/interviewService.js";
 import asyncHandler from "../utils/asyncHandler.js";
-import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
+import {
+    sendError,
+    sendSuccess,
+} from "../utils/responseHandler.js";
+
+import {
+    MESSAGES,
+    STATUS_CODES,
+} from "../utils/setConstants.js";
+
 import {
     createInterviewSchema,
     updateInterviewSchema,
     updateInterviewStatusSchema,
 } from "../validation/interviewValidation.js";
 
+// Recruiter → Schedule Interview
 const schedule = asyncHandler(
     async (req, res) => {
         const { error, value } =
@@ -25,59 +35,74 @@ const schedule = asyncHandler(
                     stripUnknown: true,
                 }
             );
+
         if (error) {
-            return res.status(STATUS_CODES.BAD_REQUEST).json({
-                success: false,
-                message: MESSAGES.VALIDATION_FAILED,
-                errors: error.details.map(
-                    (detail) =>
-                        detail.message
-                ),
-            });
+            return sendError(
+                res,
+                STATUS_CODES.BAD_REQUEST,
+                MESSAGES.VALIDATION_FAILED,
+                error.details.map(
+                    (detail) => detail.message
+                )
+            );
         }
+
         const interview =
             await scheduleInterview(
                 req.user.id,
                 req.params.applicationId,
                 value
             );
-        res.status(STATUS_CODES.CREATED).json({
-            success: true,
-            message:MESSAGES.INTERVIEW_SCHEDULED,
-            data: {
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.CREATED,
+            MESSAGES.INTERVIEW_SCHEDULED,
+            {
                 interview,
-            },
-        });
+            }
+        );
     }
 );
 
+// Candidate → My Interviews
 const getMine = asyncHandler(
     async (req, res) => {
         const interviews =
             await getMyInterviews(
                 req.user.id
             );
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            data: {
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.INTERVIEWS_FETCHED,
+            {
                 interviews,
-            },
-        });
+            }
+        );
     }
 );
 
-const getRecruiterMine = asyncHandler(async (req, res) => {
-    const interviews =
-        await getRecruiterInterviews(req.user.id);
-    return res.status(STATUS_CODES.OK).json({
-        success: true,
-        data: {
-            interviews,
-        },
-    });
-});
+// Recruiter → My Interviews
+const getRecruiterMine =
+    asyncHandler(async (req, res) => {
+        const interviews =
+            await getRecruiterInterviews(
+                req.user.id
+            );
 
-// Candidate / Recruiter → One interview
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.INTERVIEWS_FETCHED,
+            {
+                interviews,
+            }
+        );
+    });
+
+// Candidate / Recruiter → One Interview
 const getOne = asyncHandler(
     async (req, res) => {
         const interview =
@@ -85,17 +110,19 @@ const getOne = asyncHandler(
                 req.user.id,
                 req.params.id
             );
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            data: {
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.INTERVIEW_FETCHED,
+            {
                 interview,
-            },
-        });
+            }
+        );
     }
 );
 
-
-// Recruiter → Update interview
+// Recruiter → Update Interview
 const update = asyncHandler(
     async (req, res) => {
         const { error, value } =
@@ -106,34 +133,37 @@ const update = asyncHandler(
                     stripUnknown: true,
                 }
             );
+
         if (error) {
-            return res.status(STATUS_CODES.BAD_REQUEST).json({
-                success: false,
-                message: MESSAGES.VALIDATION_FAILED,
-                errors: error.details.map(
-                    (detail) =>
-                        detail.message
-                ),
-            });
+            return sendError(
+                res,
+                STATUS_CODES.BAD_REQUEST,
+                MESSAGES.VALIDATION_FAILED,
+                error.details.map(
+                    (detail) => detail.message
+                )
+            );
         }
+
         const interview =
             await updateInterview(
                 req.user.id,
                 req.params.id,
                 value
             );
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            message:MESSAGES.INTERVIEW_UPDATED,
-            data: {
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.INTERVIEW_UPDATED,
+            {
                 interview,
-            },
-        });
+            }
+        );
     }
 );
 
-
-//  Recruiter → Update status
+// Recruiter → Update Status
 const updateStatus = asyncHandler(
     async (req, res) => {
         const { error, value } =
@@ -144,50 +174,56 @@ const updateStatus = asyncHandler(
                     stripUnknown: true,
                 }
             );
+
         if (error) {
-            return res.status(STATUS_CODES.BAD_REQUEST).json({
-                success: false,
-                message: MESSAGES.VALIDATION_FAILED,
-                errors: error.details.map(
-                    (detail) =>
-                        detail.message
-                ),
-            });
+            return sendError(
+                res,
+                STATUS_CODES.BAD_REQUEST,
+                MESSAGES.VALIDATION_FAILED,
+                error.details.map(
+                    (detail) => detail.message
+                )
+            );
         }
+
         const interview =
             await updateInterviewStatus(
                 req.user.id,
                 req.params.id,
                 value.status
             );
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            message:MESSAGES.INTERVIEW_STATUS_UPDATED,
-            data: {
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.INTERVIEW_STATUS_UPDATED,
+            {
                 interview,
-            },
-        });
+            }
+        );
     }
 );
 
-
-// Recruiter → Cancel interview
+// Recruiter → Cancel Interview
 const cancel = asyncHandler(
     async (req, res) => {
         await cancelInterview(
             req.user.id,
             req.params.id
         );
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            message:
-                "Interview cancelled successfully",
-        });
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.INTERVIEW_CANCELLED
+        );
     }
 );
 
 export {
-    cancel, getMine, getRecruiterMine,
-    getOne, schedule, update,
+    cancel,
+    getMine, getOne, getRecruiterMine, schedule,
+    update,
     updateStatus
 };
+

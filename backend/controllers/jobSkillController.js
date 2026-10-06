@@ -4,60 +4,83 @@ import {
     removeJobSkill,
 } from "../services/jobSkillService.js";
 import asyncHandler from "../utils/asyncHandler.js";
-import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
+import {
+    sendError,
+    sendSuccess,
+} from "../utils/responseHandler.js";
+import {
+    MESSAGES,
+    STATUS_CODES,
+} from "../utils/setConstants.js";
 import {
     addJobSkillSchema,
 } from "../validation/jobSkillValidation.js";
 
+// GET JOB SKILLS
 const getSkills = asyncHandler(
     async (req, res) => {
         const { jobId } = req.params;
-        const skills = await getJobSkills(jobId);
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            data: {
+
+        const skills =
+            await getJobSkills(jobId);
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.JOB_SKILLS_FETCHED,
+            {
                 skills,
-            },
-        });
+            }
+        );
     }
 );
 
+// ADD SKILL TO JOB
 const addSkill = asyncHandler(
     async (req, res) => {
-        const { error, value } =
-            addJobSkillSchema.validate(
-                req.body,
-                {
-                    abortEarly: false,
-                    stripUnknown: true,
-                }
-            );
+        const {
+            error,
+            value,
+        } = addJobSkillSchema.validate(
+            req.body,
+            {
+                abortEarly: false,
+                stripUnknown: true,
+            }
+        );
+
         if (error) {
-            return res.status(STATUS_CODES.BAD_REQUEST).json({
-                success: false,
-                message: MESSAGES.VALIDATION_FAILED,
-                errors: error.details.map(
+            return sendError(
+                res,
+                STATUS_CODES.BAD_REQUEST,
+                MESSAGES.VALIDATION_FAILED,
+                error.details.map(
                     (detail) => detail.message
-                ),
-            });
+                )
+            );
         }
+
         const { jobId } = req.params;
+
         const jobSkill =
             await addJobSkill(
                 req.user.id,
                 jobId,
                 value.skillId
             );
-        res.status(STATUS_CODES.CREATED).json({
-            success: true,
-            message: MESSAGES.SKILL_ADDED_TO_JOB,
-            data: {
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.CREATED,
+            MESSAGES.SKILL_ADDED_TO_JOB,
+            {
                 jobSkill,
-            },
-        });
+            }
+        );
     }
 );
 
+// REMOVE SKILL FROM JOB
 const removeSkill = asyncHandler(
     async (req, res) => {
         const {
@@ -69,13 +92,16 @@ const removeSkill = asyncHandler(
             jobId,
             skillId
         );
-        res.status(STATUS_CODES.OK).json({
-            success: true,
-            message: MESSAGES.SKILL_REMOVED_FROM_JOB,
-        });
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.SKILL_REMOVED_FROM_JOB
+        );
     }
 );
 
 export {
-    addSkill, getSkills, removeSkill
+    addSkill,
+    getSkills,
+    removeSkill
 };
