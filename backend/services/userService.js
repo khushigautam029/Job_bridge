@@ -1,5 +1,4 @@
 import bcrypt from "bcryptjs";
-
 import {
     CandidateProfile,
     Company,
@@ -43,25 +42,6 @@ const getUserById = async (userId) => {
     }
 
     return user;
-};
-
-
-const updateUserProfile = async (userId, data) => {
-
-    const user = await User.findByPk(userId);
-
-    if (!user) {
-        const error = new Error("User not found");
-        error.statusCode = STATUS_CODES.NOT_FOUND;
-        throw error;
-    }
-
-    await user.update({
-        name: data.name ?? user.name,
-        phone: data.phone ?? user.phone,
-    });
-
-    return getUserById(userId);
 };
 
 
@@ -121,6 +101,6 @@ const deleteAccount = async (userId) => {
 
 export {
     changePassword,
-    deleteAccount, getUserById,
-    updateUserProfile
+    deleteAccount, getUserById
 };
+
