@@ -1,4 +1,5 @@
 import { Op } from "sequelize";
+import sequelize from "../config/database.js";
 import {
     Application,
     Company,
@@ -7,7 +8,6 @@ import {
     RecruiterProfile,
     Skill,
 } from "../models/index.js";
-import sequelize from "../config/database.js";
 import { STATUS_CODES } from "../utils/setConstants.js";
 
 const getRecruiterProfile = async (userId) => {
@@ -31,8 +31,7 @@ const createJob = async (
     userId,
     data
 ) => {
-    const recruiterProfile =
-        await getRecruiterProfile(userId);
+    const recruiterProfile = await getRecruiterProfile(userId);
     const category =
         await JobCategory.findByPk(
             data.categoryId
@@ -400,9 +399,7 @@ const deleteJob = async (
 export {
     createJob,
     deleteJob,
-    getAllJobs,
-    getJobCategories,
-    getJobById,
-    getRecruiterJobs,
+    getAllJobs, getJobById, getJobCategories, getRecruiterJobs,
     updateJob
 };
+

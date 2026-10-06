@@ -288,12 +288,6 @@ const getApplicationById = async (
         throw error;
     }
 
-
-    /*
-        Check whether the logged-in user
-        is the candidate who applied.
-    */
-
     if (
         application.candidate.userId !==
         userId
@@ -661,5 +655,6 @@ export {
     getMyApplications,
     getRecruiterApplications,
     updateApplicationStatus,
-    withdrawApplication,
+    withdrawApplication
 };
+

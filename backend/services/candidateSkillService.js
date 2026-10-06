@@ -5,23 +5,18 @@ import {
 } from "../models/index.js";
 import { STATUS_CODES } from "../utils/setConstants.js";
 
-
 const getCandidateSkills = async (userId) => {
-
     const candidate =
         await CandidateProfile.findOne({
             where: {
                 userId,
             },
         });
-
     if (!candidate) {
         const error = new Error(
             "Candidate profile not found"
         );
-
         error.statusCode = STATUS_CODES.NOT_FOUND;
-
         throw error;
     }
 
@@ -43,7 +38,6 @@ const getCandidateSkills = async (userId) => {
             ["name", "ASC"],
         ],
     });
-
     return skills;
 };
 
@@ -52,28 +46,22 @@ const addCandidateSkill = async (
     userId,
     skillId
 ) => {
-
     const candidate =
         await CandidateProfile.findOne({
             where: {
                 userId,
             },
         });
-
     if (!candidate) {
         const error = new Error(
             "Candidate profile not found"
         );
-
         error.statusCode = STATUS_CODES.NOT_FOUND;
-
         throw error;
     }
-
     const skill = await Skill.findByPk(
         skillId
     );
-
     if (!skill) {
         const error = new Error(
             "Skill not found"
