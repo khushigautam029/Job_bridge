@@ -109,33 +109,26 @@ const updateMyCompany = async (
 
 
 const getAllCompanies = async () => {
-
     const companies = await Company.findAll({
         order: [
             ["createdAt", "DESC"],
         ],
     });
-
     return companies;
 };
 
 
 const getCompanyById = async (companyId) => {
-
     const company = await Company.findByPk(
         companyId
     );
-
     if (!company) {
         const error = new Error(
             "Company not found"
         );
-
         error.statusCode = STATUS_CODES.NOT_FOUND;
-
         throw error;
     }
-
     return company;
 };
 

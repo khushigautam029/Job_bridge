@@ -84,17 +84,13 @@ const changePassword = async (
 
 
 const deleteAccount = async (userId) => {
-
     const user = await User.findByPk(userId);
-
     if (!user) {
         const error = new Error("User not found");
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
-
     await user.destroy();
-
     return true;
 };
 
