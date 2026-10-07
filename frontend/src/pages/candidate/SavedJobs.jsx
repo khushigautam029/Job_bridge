@@ -12,8 +12,8 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { formatJobCard } from "../../services/jobService";
 import {
-    formatJobCard,
     getSavedJobs,
     saveJob,
     unsaveJob,

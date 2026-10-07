@@ -13,7 +13,7 @@ import {
     XCircle,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getRecruiterInterviews } from "../../services/projectService";
+import { getRecruiterInterviews } from "../../services/interviewService";
 
 const RecruiterInterviews = () => {
     const [search, setSearch] = useState("");

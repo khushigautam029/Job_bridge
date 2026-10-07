@@ -14,12 +14,14 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-    getApplications,
     getJob,
+} from "../../services/jobService";
+import { getApplications } from "../../services/applicationService";
+import {
     isJobSaved,
     saveJob,
     unsaveJob,
-} from "../../services/jobService";
+} from "../../services/savedJobService";
 
 const JobDetails = () => {
     const navigate = useNavigate();

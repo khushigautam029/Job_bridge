@@ -14,8 +14,8 @@ import { useNavigate } from "react-router-dom";
 import {
     createJob,
     getJobCategories,
-    getSkills,
-} from "../../services/projectService";
+} from "../../services/jobService";
+import { getSkills } from "../../services/skillService";
 
 const PostJob = () => {
     const navigate = useNavigate();

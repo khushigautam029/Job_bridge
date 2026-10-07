@@ -14,8 +14,8 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
     getJob,
-    getJobApplications,
-} from "../../services/projectService";
+} from "../../services/jobService";
+import { getJobApplications } from "../../services/applicationService";
 
 const RecruiterJobDetails = () => {
     const navigate = useNavigate();

@@ -13,10 +13,8 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-    applyForJob,
-    getJob,
-} from "../../services/applicationService";
+import { applyForJob } from "../../services/applicationService";
+import { getJob } from "../../services/jobService";
 import {
     getCandidateProfile,
     uploadCandidateResume,

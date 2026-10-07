@@ -13,7 +13,7 @@ import {
     changePassword,
     getCurrentUser,
     updateCurrentUser,
-} from "../../services/projectService";
+} from "../../services/userService";
 
 const RecruiterSetting = () => {
     const [activeSection, setActiveSection] = useState("account");

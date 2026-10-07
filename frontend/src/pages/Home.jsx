@@ -28,10 +28,12 @@ import {
     formatJobCard,
     getJobCategories,
     getJobs,
+} from "../services/jobService";
+import {
     getSavedJobs,
     saveJob,
     unsaveJob,
-} from "../services/projectService";
+} from "../services/savedJobService";
 
 const Home = () => {
     const navigate = useNavigate();

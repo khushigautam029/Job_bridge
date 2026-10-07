@@ -19,7 +19,7 @@ import {
     getJobApplications,
     getRecruiterApplications,
     updateApplicationStatus as updateApplicationStatusRequest,
-} from "../../services/projectService";
+} from "../../services/applicationService";
 
 const RecruiterApplications = () => {
     const { jobId } = useParams();

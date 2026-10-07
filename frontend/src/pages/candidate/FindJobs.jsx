@@ -11,10 +11,12 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import {
     formatJobCard,
     getJobs,
+} from "../../services/jobService";
+import {
     getSavedJobs,
     saveJob,
     unsaveJob,
-} from "../../services/jobService";
+} from "../../services/savedJobService";
 
 const FindJobs = () => {
     const [search, setSearch] = useState("");

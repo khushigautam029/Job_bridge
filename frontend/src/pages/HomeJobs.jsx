@@ -18,10 +18,12 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import {
     formatJobCard,
     getJobs,
+} from "../services/jobService";
+import {
     getSavedJobs,
     saveJob as saveJobRequest,
     unsaveJob,
-} from "../services/jobService";
+} from "../services/savedJobService";
 
 const HomeJobs = () => {
     const navigate = useNavigate();

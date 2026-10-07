@@ -19,11 +19,11 @@ import {
 import {
     deleteJob as deleteJobRequest,
     formatJobCard,
-    getJobApplications,
     getJobCategories,
     getMyJobs,
     updateJob,
 } from "../../services/jobService";
+import { getJobApplications } from "../../services/applicationService";
 
 const formatRecruiterJob = (job) => ({
     ...formatJobCard(job),
