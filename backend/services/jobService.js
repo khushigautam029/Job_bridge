@@ -208,7 +208,19 @@ const getAllJobs = async (filters = {}) => {
 
 const getJobCategories = async () =>
     JobCategory.findAll({
-        attributes: ["id", "name"],
+        attributes: [
+            "id",
+            "name",
+            [sequelize.fn("COUNT", sequelize.col("jobs.id")), "jobCount"],
+        ],
+        include: [{
+            model: Job,
+            as: "jobs",
+            attributes: [],
+            where: { status: "OPEN" },
+            required: false,
+        }],
+        group: ["JobCategory.id", "JobCategory.name"],
         order: [["name", "ASC"]],
     });
 

@@ -29,7 +29,8 @@ const HomeJobs = () => {
 
     const category = searchParams.get("category");
 
-    const [search, setSearch] = useState("");
+    const [search, setSearch] = useState(searchParams.get("search") || "");
+    const [location, setLocation] = useState(searchParams.get("location") || "");
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [authAction, setAuthAction] = useState("");
     const [savedJobs, setSavedJobs] = useState([]);
@@ -41,6 +42,7 @@ const HomeJobs = () => {
         localStorage.getItem("token") ||
         sessionStorage.getItem("token")
     );
+    const storedUser = JSON.parse(localStorage.getItem("user") || sessionStorage.getItem("user") || "null");
 
     useEffect(() => {
         let active = true;
@@ -62,7 +64,7 @@ const HomeJobs = () => {
                 if (active) setLoading(false);
             });
 
-        if (isLoggedIn) {
+        if (isLoggedIn && storedUser?.role === "CANDIDATE") {
             getSavedJobs()
                 .then((saved) => {
                     if (active) {
@@ -82,7 +84,7 @@ const HomeJobs = () => {
         return () => {
             active = false;
         };
-    }, [isLoggedIn]);
+    }, [isLoggedIn, storedUser?.role]);
 
     // FILTER JOBS
     const filteredJobs = useMemo(() => {
@@ -109,9 +111,10 @@ const HomeJobs = () => {
                     skill.toLowerCase().includes(searchValue)
                 );
 
-            return matchesCategory && matchesSearch;
+            const matchesLocation = !location || job.location?.toLowerCase().includes(location.trim().toLowerCase());
+            return matchesCategory && matchesSearch && matchesLocation;
         });
-    }, [category, jobs, search]);
+    }, [category, jobs, location, search]);
 
     // AUTH CHECK
     const requireLogin = (action, jobId = null) => {
@@ -120,6 +123,8 @@ const HomeJobs = () => {
             setShowAuthModal(true);
             return;
         }
+
+        if (storedUser?.role !== "CANDIDATE") return;
 
         if (action === "apply" && jobId) {
             navigate(`/candidate/jobs/${jobId}`);
@@ -316,6 +321,13 @@ const HomeJobs = () => {
                             </button>
                         )}
                     </div>
+                    <input
+                        type="text"
+                        value={location}
+                        onChange={(event) => setLocation(event.target.value)}
+                        placeholder="Filter by location"
+                        className="mt-3 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-indigo-300"
+                    />
                 </div>
             </section>
 

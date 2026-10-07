@@ -25,6 +25,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import NotificationDropdown from "../pages/Notification";
+import { formatJobCard, getJobCategories, getJobs, getSavedJobs, saveJob, unsaveJob } from "../services/projectService";
 
 const Home = () => {
     const navigate = useNavigate();
@@ -67,6 +68,55 @@ const Home = () => {
 
     const [successMessage, setSuccessMessage] =
         useState("");
+    const [featuredJobs, setFeaturedJobs] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [savedJobIds, setSavedJobIds] = useState([]);
+    const [homeError, setHomeError] = useState("");
+
+    useEffect(() => {
+        let active = true;
+        Promise.all([getJobs({ limit: 50 }), getJobCategories()])
+            .then(([jobResult, categoryResult]) => {
+                if (!active) return;
+                const jobs = (jobResult.jobs || []).map(formatJobCard);
+                setFeaturedJobs(jobs.slice(0, 3));
+                setCategories(categoryResult.map((category) => ({
+                    ...category,
+                    jobs: Number(category.jobCount || 0),
+                })));
+            })
+            .catch((error) => {
+                if (active) setHomeError(error.response?.data?.message || "Unable to load current jobs.");
+            });
+        if (isLoggedIn && userRole === "CANDIDATE") {
+            getSavedJobs()
+                .then((saved) => { if (active) setSavedJobIds(saved.map((entry) => String(entry.jobId))); })
+                .catch(() => { if (active) setHomeError("Unable to load your saved jobs."); });
+        }
+        return () => { active = false; };
+    }, [isLoggedIn, userRole]);
+
+    const toggleFeaturedSave = async (jobId) => {
+        if (!isLoggedIn) {
+            setAuthAction("save");
+            setShowAuthModal(true);
+            return;
+        }
+        if (userRole !== "CANDIDATE") return;
+        const id = String(jobId);
+        try {
+            setHomeError("");
+            if (savedJobIds.includes(id)) {
+                await unsaveJob(jobId);
+                setSavedJobIds((current) => current.filter((savedId) => savedId !== id));
+            } else {
+                await saveJob(jobId);
+                setSavedJobIds((current) => [...current, id]);
+            }
+        } catch (error) {
+            setHomeError(error.response?.data?.message || "Unable to update saved jobs.");
+        }
+    };
 
     // SUCCESS MESSAGE
     useEffect(() => {
@@ -333,86 +383,6 @@ const Home = () => {
         navigate("/");
         window.location.reload();
     };
-
-    // CATEGORIES
-    const categories = [
-        {
-            name: "Software Development",
-            jobs: "1,240 Jobs",
-            icon: BriefcaseBusiness,
-        },
-        {
-            name: "Design",
-            jobs: "580 Jobs",
-            icon: Users,
-        },
-        {
-            name: "Marketing",
-            jobs: "430 Jobs",
-            icon: Building2,
-        },
-        {
-            name: "Finance",
-            jobs: "320 Jobs",
-            icon: BriefcaseBusiness,
-        },
-        {
-            name: "Human Resources",
-            jobs: "210 Jobs",
-            icon: Users,
-        },
-        {
-            name: "Sales",
-            jobs: "390 Jobs",
-            icon: Building2,
-        },
-    ];
-
-    // FEATURED JOBS
-    const featuredJobs = [
-        {
-            id: 1,
-            title: "Senior React Developer",
-            company: "TechNova Solutions",
-            location: "Delhi, India",
-            type: "Full Time",
-            salary: "₹8L - ₹14L",
-            skills: [
-                "React",
-                "JavaScript",
-                "Node.js",
-            ],
-            posted: "2 days ago",
-        },
-        {
-            id: 2,
-            title: "Backend Developer",
-            company: "CloudCore Technologies",
-            location: "Bangalore, India",
-            type: "Full Time",
-            salary: "₹7L - ₹12L",
-            skills: [
-                "Node.js",
-                "Express",
-                "MySQL",
-            ],
-            posted: "1 day ago",
-        },
-        {
-            id: 3,
-            title: "UI/UX Designer",
-            company: "Creative Labs",
-            location: "Remote",
-            type: "Full Time",
-            salary: "₹5L - ₹9L",
-            skills: [
-                "Figma",
-                "UI Design",
-                "UX",
-            ],
-            posted: "3 days ago",
-        },
-    ];
 
     // FEATURES
     const features = [
@@ -972,9 +942,10 @@ const Home = () => {
                     </button>
                 </div>
 
+                {homeError && <p className="mb-4 text-sm text-red-600">{homeError}</p>}
                 <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {categories.map((category) => {
-                        const Icon = category.icon;
+                        const Icon = /design|marketing|sales/i.test(category.name) ? Building2 : BriefcaseBusiness;
 
                         return (
                             <button
@@ -1003,7 +974,7 @@ const Home = () => {
                                 </h3>
 
                                 <p className="mt-1 text-sm text-slate-500">
-                                    {category.jobs}
+                                    {category.jobs} {category.jobs === 1 ? "Job" : "Jobs"}
                                 </p>
                             </button>
                         );
@@ -1068,14 +1039,10 @@ const Home = () => {
 
                                     <button
                                         type="button"
-                                        onClick={() =>
-                                            requireLogin(
-                                                "save"
-                                            )
-                                        }
+                                        onClick={() => toggleFeaturedSave(job.id)}
                                         className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-500 transition hover:border-indigo-200 hover:text-indigo-600"
                                     >
-                                        Save
+                                        {savedJobIds.includes(String(job.id)) ? "Saved" : "Save"}
                                     </button>
                                 </div>
 
