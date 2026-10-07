@@ -1,10 +1,10 @@
-import apiClient from "./apiClient";
+import api from "./api";
 
 
 // CANDIDATE
 export const getCandidateProfile = async () => {
 
-    const response = await apiClient.get(
+    const response = await api.get(
         "/candidates/profile"
     );
 
@@ -16,7 +16,7 @@ export const updateCandidateProfile = async (
     profileData
 ) => {
 
-    const response = await apiClient.put(
+    const response = await api.put(
         "/candidates/profile",
         profileData
     );
@@ -36,7 +36,7 @@ export const uploadCandidateResume = async (
         file
     );
 
-    const response = await apiClient.post(
+    const response = await api.post(
         "/candidates/profile/resume",
         formData,
         {
@@ -52,7 +52,7 @@ export const uploadCandidateResume = async (
 // RECRUITER
 export const getRecruiterProfile = async () => {
 
-    const response = await apiClient.get(
+    const response = await api.get(
         "/recruiters/profile"
     );
 
@@ -64,7 +64,7 @@ export const updateRecruiterProfile = async (
     profileData
 ) => {
 
-    const response = await apiClient.put(
+    const response = await api.put(
         "/recruiters/profile",
         profileData
     );
@@ -75,7 +75,7 @@ export const updateRecruiterProfile = async (
 
 export const getMyCompany = async () => {
 
-    const response = await apiClient.get(
+    const response = await api.get(
         "/companies/my"
     );
 
@@ -87,7 +87,7 @@ export const updateMyCompany = async (
     companyData
 ) => {
 
-    const response = await apiClient.put(
+    const response = await api.put(
         "/companies/my",
         companyData
     );

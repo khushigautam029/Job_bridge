@@ -1,4 +1,4 @@
-import apiClient from "./apiClient";
+import api from "./api";
 
 const getData = (response) => response.data.data;
 
@@ -40,112 +40,112 @@ export const formatJobCard = (job) => {
 };
 
 export const getJobs = async (filters = {}) =>
-    getData(await apiClient.get("/jobs", { params: filters }));
+    getData(await api.get("/jobs", { params: filters }));
 
 export const getJob = async (jobId) =>
-    getData(await apiClient.get(`/jobs/${jobId}`)).job;
+    getData(await api.get(`/jobs/${jobId}`)).job;
 
 export const getMyJobs = async () =>
-    getData(await apiClient.get("/jobs/my")).jobs;
+    getData(await api.get("/jobs/my")).jobs;
 
 export const getJobCategories = async () =>
-    (await apiClient.get("/jobs/categories")).data.data.categories;
+    (await api.get("/jobs/categories")).data.data.categories;
 
 export const getSkills = async () =>
-    (await apiClient.get("/skills")).data.data.skills;
+    (await api.get("/skills")).data.data.skills;
 
 export const createJob = async (job) =>
-    getData(await apiClient.post("/jobs", job));
+    getData(await api.post("/jobs", job));
 
 export const updateJob = async (jobId, job) =>
-    getData(await apiClient.put(`/jobs/${jobId}`, job));
+    getData(await api.put(`/jobs/${jobId}`, job));
 
 export const deleteJob = async (jobId) =>
-    apiClient.delete(`/jobs/${jobId}`);
+    api.delete(`/jobs/${jobId}`);
 
 export const getApplications = async () =>
-    (await apiClient.get("/applications/my-applications")).data.data.applications;
+    (await api.get("/applications/my-applications")).data.data.applications;
 
 export const getRecruiterApplications = async () =>
-    (await apiClient.get("/applications/recruiter")).data.data.applications;
+    (await api.get("/applications/recruiter")).data.data.applications;
 
 export const getJobApplications = async (jobId) =>
-    (await apiClient.get(`/jobs/${jobId}/applications`)).data.data.applications;
+    (await api.get(`/jobs/${jobId}/applications`)).data.data.applications;
 
 export const applyForJob = async (jobId, application) =>
-    getData(await apiClient.post(
+    getData(await api.post(
         `/jobs/${jobId}/apply`,
         application
     ));
 
 export const withdrawApplication = async (applicationId) =>
-    apiClient.delete(`/applications/${applicationId}`);
+    api.delete(`/applications/${applicationId}`);
 
 export const updateApplicationStatus = async (
     applicationId,
     status
 ) =>
-    getData(await apiClient.patch(
+    getData(await api.patch(
         `/applications/${applicationId}/status`,
         { status }
     ));
 
 export const getSavedJobs = async () =>
-    (await apiClient.get("/saved-jobs")).data.data.savedJobs;
+    (await api.get("/saved-jobs")).data.data.savedJobs;
 
 export const saveJob = async (jobId) =>
-    apiClient.post(`/jobs/${jobId}/save`);
+    api.post(`/jobs/${jobId}/save`);
 
 export const unsaveJob = async (jobId) =>
-    apiClient.delete(`/jobs/${jobId}/save`);
+    api.delete(`/jobs/${jobId}/save`);
 
 export const isJobSaved = async (jobId) =>
-    (await apiClient.get(`/jobs/${jobId}/is-saved`)).data.data.saved;
+    (await api.get(`/jobs/${jobId}/is-saved`)).data.data.saved;
 
 export const getInterviews = async () =>
-    (await apiClient.get("/interviews/my-interviews")).data.data.interviews;
+    (await api.get("/interviews/my-interviews")).data.data.interviews;
 
 export const getRecruiterInterviews = async () =>
-    (await apiClient.get("/interviews/recruiter")).data.data.interviews;
+    (await api.get("/interviews/recruiter")).data.data.interviews;
 
 export const scheduleInterview = async (applicationId, interview) =>
-    getData(await apiClient.post(
+    getData(await api.post(
         `/applications/${applicationId}/interviews`,
         interview
     ));
 
 export const updateInterviewStatus = async (interviewId, status) =>
-    getData(await apiClient.patch(
+    getData(await api.patch(
         `/interviews/${interviewId}/status`,
         { status }
     ));
 
 export const cancelInterview = async (interviewId) =>
-    apiClient.delete(`/interviews/${interviewId}`);
+    api.delete(`/interviews/${interviewId}`);
 
 export const getNotifications = async () =>
-    (await apiClient.get("/notifications")).data.data.notifications;
+    (await api.get("/notifications")).data.data.notifications;
 
 export const getUnreadNotificationCount = async () =>
-    (await apiClient.get("/notifications/unread-count")).data.data.unreadCount;
+    (await api.get("/notifications/unread-count")).data.data.unreadCount;
 
 export const markNotificationRead = async (notificationId) =>
-    apiClient.patch(`/notifications/${notificationId}/read`);
+    api.patch(`/notifications/${notificationId}/read`);
 
 export const markAllNotificationsRead = async () =>
-    apiClient.patch("/notifications/read-all");
+    api.patch("/notifications/read-all");
 
 export const deleteNotification = async (notificationId) =>
-    apiClient.delete(`/notifications/${notificationId}`);
+    api.delete(`/notifications/${notificationId}`);
 
 export const getCurrentUser = async () =>
-    getData(await apiClient.get("/users/me"));
+    getData(await api.get("/users/me"));
 
 export const updateCurrentUser = async (profile) =>
-    getData(await apiClient.put("/users/profile", profile));
+    getData(await api.put("/users/profile", profile));
 
 export const changePassword = async (passwords) =>
-    apiClient.put("/users/change-password", passwords);
+    api.put("/users/change-password", passwords);
 
 export const deleteAccount = async () =>
-    apiClient.delete("/users/account");
+    api.delete("/users/account");

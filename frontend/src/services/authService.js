@@ -1,7 +1,7 @@
-import apiClient from "./apiClient";
+import api from "./api";
 
 const registerUser = async (userData) => {
-    const response = await apiClient.post(
+    const response = await api.post(
         "/auth/register",
         userData
     );
@@ -9,7 +9,7 @@ const registerUser = async (userData) => {
 };
 
 const loginUser = async (credentials) => {
-    const response = await apiClient.post(
+    const response = await api.post(
         "/auth/login",
         credentials
     );

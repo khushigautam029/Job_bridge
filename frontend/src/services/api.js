@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const apiClient = axios.create({
+const api = axios.create({
     baseURL:
         import.meta.env.VITE_API_URL ||
         "http://localhost:5000/api",
@@ -9,7 +9,7 @@ const apiClient = axios.create({
     },
 });
 
-apiClient.interceptors.request.use((config) => {
+api.interceptors.request.use((config) => {
     const token =
         localStorage.getItem("token") ||
         sessionStorage.getItem("token");
@@ -21,4 +21,4 @@ apiClient.interceptors.request.use((config) => {
     return config;
 });
 
-export default apiClient;
+export default api;
