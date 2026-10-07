@@ -21,7 +21,7 @@ import {
     getSavedJobs,
     saveJob as saveJobRequest,
     unsaveJob,
-} from "../services/projectService";
+} from "../services/jobService";
 
 const HomeJobs = () => {
     const navigate = useNavigate();

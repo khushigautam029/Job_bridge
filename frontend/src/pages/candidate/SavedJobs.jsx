@@ -17,7 +17,7 @@ import {
     getSavedJobs,
     saveJob,
     unsaveJob,
-} from "../../services/projectService";
+} from "../../services/savedJobService";
 
 const SavedJobs = () => {
     const navigate = useNavigate();

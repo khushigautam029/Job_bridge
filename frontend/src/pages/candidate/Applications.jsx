@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getApplications } from "../../services/projectService";
+import { getApplications } from "../../services/applicationService";
 
 const Applications = () => {
     const navigate = useNavigate();

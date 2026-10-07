@@ -16,7 +16,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
     cancelInterview as cancelInterviewRequest,
     getInterviews,
-} from "../../services/projectService";
+} from "../../services/interviewService";
 
 const Interviews = () => {
     const [interviews, setInterviews] = useState([

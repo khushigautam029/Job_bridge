@@ -23,7 +23,7 @@ import {
     getJobCategories,
     getMyJobs,
     updateJob,
-} from "../../services/projectService";
+} from "../../services/jobService";
 
 const formatRecruiterJob = (job) => ({
     ...formatJobCard(job),

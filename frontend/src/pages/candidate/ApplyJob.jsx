@@ -14,13 +14,13 @@ import {
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
+    applyForJob,
+    getJob,
+} from "../../services/applicationService";
+import {
     getCandidateProfile,
     uploadCandidateResume,
 } from "../../services/profileService";
-import {
-    applyForJob,
-    getJob,
-} from "../../services/projectService";
 
 const getStoredUser = () => {
     try {

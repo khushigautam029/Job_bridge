@@ -14,7 +14,7 @@ import {
     X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { getRecruiterApplications } from "../../services/projectService";
+import { getRecruiterApplications } from "../../services/applicationService";
 
 const Candidates = () => {
     const [search, setSearch] = useState("");

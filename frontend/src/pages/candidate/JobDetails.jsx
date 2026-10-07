@@ -19,7 +19,7 @@ import {
     isJobSaved,
     saveJob,
     unsaveJob,
-} from "../../services/projectService";
+} from "../../services/jobService";
 
 const JobDetails = () => {
     const navigate = useNavigate();

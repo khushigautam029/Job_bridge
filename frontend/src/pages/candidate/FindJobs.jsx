@@ -14,7 +14,7 @@ import {
     getSavedJobs,
     saveJob,
     unsaveJob,
-} from "../../services/projectService";
+} from "../../services/jobService";
 
 const FindJobs = () => {
     const [search, setSearch] = useState("");

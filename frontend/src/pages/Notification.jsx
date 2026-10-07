@@ -15,7 +15,7 @@ import {
     getNotifications,
     markAllNotificationsRead,
     markNotificationRead,
-} from "../services/projectService";
+} from "../services/notificationService";
 
 const candidateNotifications = [
     {
