@@ -7,6 +7,7 @@ import notFoundMiddleware from "./middleware/notFoundMiddleware.js";
 import applicationRoutes from "./routes/applicationRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import candidateEducationRoutes from "./routes/candidateEducationRoutes.js";
+import candidateExperienceRoutes from "./routes/candidateExperienceRoutes.js";
 import candidateRoutes from "./routes/candidateRoutes.js";
 import candidateSkillRoutes from "./routes/candidateSkillRoutes.js";
 import companyRoutes from "./routes/companyRoutes.js";
@@ -80,6 +81,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/uploads", express.static("uploads"));
 app.use("/api/candidate/education", candidateEducationRoutes);
+app.use("/api/candidate/experience", candidateExperienceRoutes);
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);

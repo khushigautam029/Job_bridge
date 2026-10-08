@@ -1,6 +1,7 @@
 import Application from "./Application.js";
 import ApplicationStatusHistory from "./ApplicationStatusHistory.js";
 import CandidateEducation from "./CandidateEducation.js";
+import CandidateExperience from "./CandidateExperience.js";
 import CandidateProfile from "./CandidateProfile.js";
 import CandidateSkill from "./CandidateSkill.js";
 import Company from "./Company.js";
@@ -248,7 +249,25 @@ CandidateEducation.belongsTo(
     }
 );
 
+CandidateProfile.hasMany(
+    CandidateExperience,
+    {
+        foreignKey: "candidateId",
+        as: "experiences",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+    }
+);
+
+CandidateExperience.belongsTo(
+    CandidateProfile,
+    {
+        foreignKey: "candidateId",
+        as: "candidate",
+    }
+);
+
 export {
-    Application, ApplicationStatusHistory, CandidateEducation, CandidateProfile, CandidateSkill, Company, Interview, Job, JobCategory, JobSkill, Notification, RecruiterProfile, SavedJob, Skill, User
+    Application, ApplicationStatusHistory, CandidateEducation, CandidateExperience, CandidateProfile, CandidateSkill, Company, Interview, Job, JobCategory, JobSkill, Notification, RecruiterProfile, SavedJob, Skill, User
 };
 
