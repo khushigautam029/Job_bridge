@@ -36,3 +36,19 @@ export const updateInterviewStatus = async (
 
 export const cancelInterview = async (interviewId) =>
     api.delete(`/interviews/${interviewId}`);
+
+export const getInterview = async (interviewId) =>
+    getData(
+        await api.get(`/interviews/${interviewId}`)
+    );
+
+export const updateInterview = async (
+    interviewId,
+    interview
+) =>
+    getData(
+        await api.patch(
+            `/interviews/${interviewId}`,
+            interview
+        )
+    );
