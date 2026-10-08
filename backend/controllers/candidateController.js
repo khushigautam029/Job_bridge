@@ -1,13 +1,14 @@
 import path from "path";
 import { fileURLToPath } from "url";
 import {
+    deleteCandidateProfileImage,
     deleteCandidateResume,
     getCandidateProfile,
     getCandidateProfileCompletion,
     getCandidateResumeForRecruiter,
     updateCandidateProfile,
     uploadCandidateProfileImage,
-    uploadCandidateResume
+    uploadCandidateResume,
 } from "../services/candidateService.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { sendSuccess } from "../utils/responseHandler.js";
@@ -221,6 +222,28 @@ export const uploadProfileImage = async (
         next(error);
     }
 };
+
+export const deleteProfileImage = async (
+    req,
+    res,
+    next
+) => {
+    try {
+        const result =
+            await deleteCandidateProfileImage(
+                req.user.id
+            );
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            result.message
+        );
+    } catch (error) {
+        next(error);
+    }
+};
+
 
 
 export {

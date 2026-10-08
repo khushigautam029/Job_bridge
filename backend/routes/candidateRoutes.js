@@ -1,5 +1,6 @@
 import express from "express";
 import {
+    deleteProfileImage,
     deleteResume,
     getCandidateResume,
     getProfile,
@@ -57,6 +58,13 @@ router.post(
     authorizeRoles("CANDIDATE"),
     uploadProfileImageMiddleware,
     uploadProfileImage
+);
+
+router.delete(
+    "/profile/image",
+    protect,
+    authorizeRoles("CANDIDATE"),
+    deleteProfileImage
 );
 
 /*

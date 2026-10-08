@@ -737,8 +737,60 @@ const uploadCandidateProfileImage = async (
 };
 
 
+const deleteCandidateProfileImage = async (userId) => {
+    const candidateProfile = await CandidateProfile.findOne({
+        where: {
+            userId,
+        },
+    });
+
+    if (!candidateProfile) {
+        const error = new Error(
+            "Candidate profile not found"
+        );
+        error.statusCode = STATUS_CODES.NOT_FOUND;
+        throw error;
+    }
+
+    if (!candidateProfile.profileImage) {
+        const error = new Error(
+            "Profile image not found"
+        );
+        error.statusCode = STATUS_CODES.NOT_FOUND;
+        throw error;
+    }
+
+    const imagePath = path.join(
+        process.cwd(),
+        candidateProfile.profileImage.replace(/^\/+/, "")
+    );
+
+    try {
+        await fs.unlink(imagePath);
+    } catch (error) {
+        if (error.code !== "ENOENT") {
+            throw error;
+        }
+    }
+
+    candidateProfile.profileImage = null;
+
+    const completionResult =
+        calculateProfileCompletion(candidateProfile);
+
+    candidateProfile.profileCompletionPercentage =
+        completionResult.percentage;
+
+    await candidateProfile.save();
+
+    return {
+        message: "Profile image deleted successfully",
+    };
+};
+
+
 export {
-    deleteCandidateResume, getCandidateProfile,
+    deleteCandidateProfileImage, deleteCandidateResume, getCandidateProfile,
     getCandidateProfileCompletion,
     getCandidateResumeForRecruiter,
     updateCandidateProfile, uploadCandidateProfileImage, uploadCandidateResume
