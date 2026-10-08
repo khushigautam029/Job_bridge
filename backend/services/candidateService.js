@@ -1,3 +1,5 @@
+import fs from "fs/promises";
+import path from "path";
 import {
     Application,
     CandidateProfile,
@@ -7,7 +9,6 @@ import {
 } from "../models/index.js";
 
 import { STATUS_CODES } from "../utils/setConstants.js";
-
 
 // ======================================================
 // PROFILE COMPLETION HELPER
@@ -628,12 +629,118 @@ const getCandidateProfileCompletion = async (
     };
 };
 
+const deleteCandidateResume = async (userId) => {
+    const candidateProfile = await CandidateProfile.findOne({
+        where: {
+            userId,
+        },
+    });
+
+    if (!candidateProfile) {
+        const error = new Error("Candidate profile not found");
+        error.statusCode = STATUS_CODES.NOT_FOUND;
+        throw error;
+    }
+
+    if (!candidateProfile.resume) {
+        const error = new Error("Resume not found");
+        error.statusCode = STATUS_CODES.NOT_FOUND;
+        throw error;
+    }
+
+    const resumePath = candidateProfile.resume;
+    const filePath = path.join(
+        process.cwd(),
+        resumePath.replace(/^\/+/, "")
+    );
+
+    try {
+        await fs.unlink(filePath);
+    } catch (error) {
+        if (error.code !== "ENOENT") {
+            throw error;
+        }
+    }
+    candidateProfile.resume = null;
+    const completionResult =
+        calculateProfileCompletion(candidateProfile);
+
+    candidateProfile.profileCompletionPercentage =
+        completionResult.percentage;
+
+
+    await candidateProfile.save();
+
+    return {
+        message: "Resume deleted successfully",
+    };
+};
+
+const uploadCandidateProfileImage = async (
+    userId,
+    file
+) => {
+    const candidateProfile =
+        await CandidateProfile.findOne({
+            where: {
+                userId,
+            },
+        });
+
+    if (!candidateProfile) {
+        const error = new Error(
+            "Candidate profile not found"
+        );
+
+        error.statusCode =
+            STATUS_CODES.NOT_FOUND;
+
+        throw error;
+    }
+
+    if (!file) {
+        const error = new Error(
+            "Profile image is required"
+        );
+
+        error.statusCode =
+            STATUS_CODES.BAD_REQUEST;
+
+        throw error;
+    }
+
+    if (candidateProfile.profileImage) {
+        const oldImagePath = path.join(
+            process.cwd(),
+            candidateProfile.profileImage.replace(
+                /^\/+/,
+                ""
+            )
+        );
+        try {
+            await fs.unlink(oldImagePath);
+        } catch (error) {
+            if (error.code !== "ENOENT") {
+                throw error;
+            }
+        }
+    }
+
+    const imagePath = `/uploads/profile-images/${file.filename}`;
+    candidateProfile.profileImage = imagePath;
+    await candidateProfile.save();
+
+    return {
+        profileImage: imagePath,
+        message: "Profile image uploaded successfully",
+    };
+};
+
 
 export {
-    getCandidateProfile,
+    deleteCandidateResume, getCandidateProfile,
     getCandidateProfileCompletion,
     getCandidateResumeForRecruiter,
-    updateCandidateProfile,
-    uploadCandidateResume
+    updateCandidateProfile, uploadCandidateProfileImage, uploadCandidateResume
 };
 

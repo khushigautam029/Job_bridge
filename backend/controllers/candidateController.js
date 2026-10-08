@@ -1,13 +1,16 @@
 import path from "path";
 import { fileURLToPath } from "url";
 import {
+    deleteCandidateResume,
     getCandidateProfile,
     getCandidateProfileCompletion,
     getCandidateResumeForRecruiter,
     updateCandidateProfile,
-    uploadCandidateResume,
+    uploadCandidateProfileImage,
+    uploadCandidateResume
 } from "../services/candidateService.js";
 import asyncHandler from "../utils/asyncHandler.js";
+import { sendSuccess } from "../utils/responseHandler.js";
 import {
     MESSAGES,
     STATUS_CODES,
@@ -16,9 +19,8 @@ import {
     updateCandidateProfileSchema,
 } from "../validation/candidateValidation.js";
 
-
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// const __dirname = path.dirname(__filename);
 
 
 const getProfile = asyncHandler(
@@ -178,10 +180,52 @@ const getProfileCompletion =
         }
     );
 
+const deleteResume = async (req, res, next) => {
+    try {
+        const result = await deleteCandidateResume(
+            req.user.id
+        );
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            result.message
+        );
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const uploadProfileImage = async (
+    req,
+    res,
+    next
+) => {
+    try {
+        const result =
+            await uploadCandidateProfileImage(
+                req.user.id,
+                req.file
+            );
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            result.message,
+            {
+                profileImage:
+                    result.profileImage,
+            }
+        );
+    } catch (error) {
+        next(error);
+    }
+};
+
 
 export {
-    getCandidateResume, getProfile,
+    deleteResume, getCandidateResume, getProfile,
     getProfileCompletion,
-    updateProfile,
-    uploadResume
+    updateProfile, uploadResume
 };
+

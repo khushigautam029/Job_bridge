@@ -1,14 +1,17 @@
 import express from "express";
 import {
+    deleteResume,
     getCandidateResume,
     getProfile,
     getProfileCompletion,
     updateProfile,
+    uploadProfileImage,
     uploadResume,
 } from "../controllers/candidateController.js";
 import protect from "../middleware/authMiddleware.js";
 import authorizeRoles from "../middleware/roleMiddleware.js";
 import uploadResumeMiddleware from "../middleware/uploadMiddleware.js";
+import uploadProfileImageMiddleware from "../middleware/uploadProfileImage.js";
 
 const router = express.Router();
 
@@ -40,6 +43,22 @@ router.get(
     authorizeRoles("CANDIDATE"),
     getProfileCompletion
 );
+
+router.delete(
+    "/profile/resume",
+    protect,
+    authorizeRoles("CANDIDATE"),
+    deleteResume
+);
+
+router.post(
+    "/profile/image",
+    protect,
+    authorizeRoles("CANDIDATE"),
+    uploadProfileImageMiddleware,
+    uploadProfileImage
+);
+
 /*
     Recruiter views candidate resume
     Recruiter must have at least one job
@@ -51,5 +70,6 @@ router.get(
     authorizeRoles("RECRUITER"),
     getCandidateResume
 );
+
 
 export default router;
