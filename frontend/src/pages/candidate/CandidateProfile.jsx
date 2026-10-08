@@ -346,7 +346,7 @@ const CandidateProfile = () => {
                             </div>
                             <div className="flex items-center justify-between text-xs font-semibold text-gray-700">
                                 <span className="flex items-center gap-2">
-                                    <GraduationCap size={16} className="text-amber-600" /> Add certificates
+                                    <GraduationCap size={16} className="text-amber-600" /> Add experience
                                 </span>
                                 <span className="text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded">↑ 5%</span>
                             </div>
