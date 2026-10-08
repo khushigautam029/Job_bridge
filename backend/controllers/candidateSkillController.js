@@ -5,58 +5,69 @@ import {
 } from "../services/candidateSkillService.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import {
-    sendError,
-    sendSuccess,
-} from "../utils/responseHandler.js";
-import {
-    MESSAGES,
     STATUS_CODES,
 } from "../utils/setConstants.js";
 import {
     addCandidateSkillSchema,
 } from "../validation/candidateSkillValidation.js";
 
-// Get Candidate Skills
+// GET CANDIDATE SKILLS
 const getSkills = asyncHandler(
     async (req, res) => {
+
         const skills =
             await getCandidateSkills(
                 req.user.id
             );
-        return sendSuccess(
-            res,
-            STATUS_CODES.OK,
-            "Candidate skills retrieved successfully",
-            {
+
+
+        res.status(
+            STATUS_CODES.OK
+        ).json({
+            success: true,
+
+            data: {
                 skills,
-            }
-        );
+            },
+        });
     }
 );
 
-// Add Candidate Skill
+
+// ADD CANDIDATE SKILL
 const addSkill = asyncHandler(
     async (req, res) => {
+
         const {
             error,
             value,
-        } = addCandidateSkillSchema.validate(
-            req.body,
-            {
-                abortEarly: false,
-                stripUnknown: true,
-            }
-        );
-        if (error) {
-            return sendError(
-                res,
-                STATUS_CODES.BAD_REQUEST,
-                MESSAGES.VALIDATION_FAILED,
-                error.details.map(
-                    (detail) => detail.message
-                )
+        } =
+            addCandidateSkillSchema.validate(
+                req.body,
+                {
+                    abortEarly: false,
+                    stripUnknown: true,
+                }
             );
+
+
+        if (error) {
+            return res.status(
+                STATUS_CODES.BAD_REQUEST
+            ).json({
+                success: false,
+
+                message:
+                    "Validation failed",
+
+                errors:
+                    error.details.map(
+                        (detail) =>
+                            detail.message
+                    ),
+            });
         }
+
 
         const skill =
             await addCandidateSkill(
@@ -64,35 +75,58 @@ const addSkill = asyncHandler(
                 value.skillId
             );
 
-        return sendSuccess(
-            res,
-            STATUS_CODES.CREATED,
-            MESSAGES.SKILL_ADDED,
-            {
+
+        res.status(
+            STATUS_CODES.CREATED
+        ).json({
+            success: true,
+
+            message:
+                "Skill added successfully",
+
+            data: {
                 skill,
-            }
-        );
+            },
+        });
     }
 );
 
-// Remove Candidate Skill
+
+
+// REMOVE CANDIDATE SKILL
 const removeSkill = asyncHandler(
     async (req, res) => {
-        await removeCandidateSkill(
-            req.user.id,
-            req.params.skillId
-        );
 
-        return sendSuccess(
-            res,
-            STATUS_CODES.OK,
-            MESSAGES.SKILL_REMOVED
-        );
+        const {
+            skillId,
+        } = req.params;
+
+
+        const result =
+            await removeCandidateSkill(
+                req.user.id,
+                Number(skillId)
+            );
+
+
+        res.status(
+            STATUS_CODES.OK
+        ).json({
+            success: true,
+
+            message:
+                result.message,
+
+            data: {
+                skillId:
+                    result.skillId,
+            },
+        });
     }
 );
 
+
 export {
-    addSkill,
-    getSkills,
-    removeSkill
+    addSkill, getSkills, removeSkill
 };
+

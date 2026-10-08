@@ -62,6 +62,52 @@ const CandidateProfile = sequelize.define(
             defaultValue: 0,
             field: "experience_years",
         },
+
+        // New profile fields
+
+        degree: {
+            type: DataTypes.STRING(255),
+            allowNull: true,
+        },
+
+        college: {
+            type: DataTypes.STRING(255),
+            allowNull: true,
+        },
+
+        gender: {
+            type: DataTypes.STRING(50),
+            allowNull: true,
+        },
+
+        dob: {
+            type: DataTypes.DATEONLY,
+            allowNull: true,
+        },
+
+        preferredJobType: {
+            type: DataTypes.JSON,
+            allowNull: true,
+            field: "preferred_job_type",
+        },
+
+        preferredLocation: {
+            type: DataTypes.JSON,
+            allowNull: true,
+            field: "preferred_location",
+        },
+
+        availability: {
+            type: DataTypes.STRING(100),
+            allowNull: true,
+        },
+
+        profileCompletionPercentage: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 0,
+            field: "profile_completion_percentage",
+        },
     },
     {
         tableName: "candidate_profiles",
