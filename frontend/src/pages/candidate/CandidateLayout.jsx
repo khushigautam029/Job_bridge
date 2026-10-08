@@ -419,7 +419,7 @@ const CandidateLayout = () => {
                                         >
                                             <UserCircle size={18} />
 
-                                            My Profile
+                                            View and Update profile
                                         </button>
 
                                         {/* Settings */}
