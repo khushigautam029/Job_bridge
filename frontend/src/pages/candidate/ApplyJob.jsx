@@ -393,6 +393,7 @@ const ApplyJob = () => {
                                         setCandidateName(e.target.value)
                                     }
                                     placeholder="Enter your full name"
+                                    required
                                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 />
                             </div>
@@ -419,6 +420,7 @@ const ApplyJob = () => {
                                             setEmail(e.target.value)
                                         }
                                         placeholder="Enter your email"
+                                        required
                                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
@@ -442,6 +444,7 @@ const ApplyJob = () => {
                                             setPhone(e.target.value)
                                         }
                                         placeholder="Enter your phone number"
+                                        required
                                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     />
                                 </div>
@@ -452,8 +455,18 @@ const ApplyJob = () => {
                         {/* Resume */}
                         <div className="mt-7">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Resume <span className="text-red-500">*</span>
+                                Resume {!existingResume && !resume && <span className="text-red-500">*</span>}
                             </label>
+
+                            {existingResume && !resume && (
+                                <div className="mb-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm">
+                                    <div className="flex items-center gap-2 text-blue-800">
+                                        <FileText size={17} />
+                                        <span>Saved resume: <strong>{existingResume.split(/[\\/]/).pop()}</strong></span>
+                                    </div>
+                                    <span className="text-xs text-blue-700">This resume will be sent with your application.</span>
+                                </div>
+                            )}
 
                             <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-400 transition">
                                 <input
@@ -476,7 +489,7 @@ const ApplyJob = () => {
                                     </div>
 
                                     <p className="text-sm font-medium text-gray-800 mt-3">
-                                        Click to upload your resume
+                                        {existingResume ? "Upload a latest resume (optional)" : "Click to upload your resume"}
                                     </p>
 
                                     <p className="text-xs text-gray-500 mt-1">

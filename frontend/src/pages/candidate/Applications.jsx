@@ -410,7 +410,7 @@ const Applications = () => {
             </section>
 
             {/* APPLICATION SUMMARY */}
-            <section className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <section className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {/* Total */}
                 <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                     <div className="flex items-center justify-between">
@@ -430,24 +430,6 @@ const Applications = () => {
                     </div>
                 </div>
 
-                {/* Review */}
-                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-slate-500">
-                                Under Review
-                            </p>
-
-                            <p className="mt-2 text-2xl font-bold text-slate-900">
-                                {underReviewCount}
-                            </p>
-                        </div>
-
-                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
-                            <Clock3 size={21} />
-                        </div>
-                    </div>
-                </div>
 
                 {/* Interviews */}
                 <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">

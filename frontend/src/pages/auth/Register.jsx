@@ -901,6 +901,7 @@ const Register = () => {
 
                                                         <input
                                                             name="name"
+                                                            required
                                                             type="text"
                                                             value={
                                                                 formData.name
@@ -940,6 +941,7 @@ const Register = () => {
 
                                                         <input
                                                             name="phone"
+                                                            required
                                                             type="tel"
                                                             value={
                                                                 formData.phone
@@ -1002,6 +1004,7 @@ const Register = () => {
 
                                                     <input
                                                         name="email"
+                                                        required
                                                         type="email"
                                                         value={
                                                             formData.email
@@ -1042,6 +1045,7 @@ const Register = () => {
 
                                                             <input
                                                                 name="companyName"
+                                                            required
                                                                 type="text"
                                                                 value={
                                                                     formData.companyName
@@ -1086,6 +1090,7 @@ const Register = () => {
 
                                                             <select
                                                                 name="companyType"
+                                                            required
                                                                 value={
                                                                     formData.companyType
                                                                 }
@@ -1206,6 +1211,7 @@ const Register = () => {
 
                                                         <input
                                                             name="password"
+                                                            required
                                                             type={
                                                                 showPassword
                                                                     ? "text"
@@ -1278,6 +1284,7 @@ const Register = () => {
 
                                                         <input
                                                             name="confirmPassword"
+                                                            required
                                                             type={
                                                                 showConfirmPassword
                                                                     ? "text"

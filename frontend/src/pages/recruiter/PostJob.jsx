@@ -282,6 +282,7 @@ const PostJob = () => {
                             <input
                                 type="text"
                                 name="title"
+                                required
                                 value={formData.title}
                                 onChange={handleChange}
                                 placeholder="e.g. Senior React Developer"
@@ -298,6 +299,7 @@ const PostJob = () => {
                             <div className="relative">
                                 <select
                                     name="category"
+                                    required
                                     value={formData.category}
                                     onChange={handleChange}
                                     className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-10 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
@@ -332,6 +334,7 @@ const PostJob = () => {
                             <div className="relative">
                                 <select
                                     name="type"
+                                    required
                                     value={formData.type}
                                     onChange={handleChange}
                                     className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-10 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
@@ -373,6 +376,7 @@ const PostJob = () => {
                             <div className="relative">
                                 <select
                                     name="workMode"
+                                    required
                                     value={formData.workMode}
                                     onChange={handleChange}
                                     className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-10 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
@@ -416,6 +420,7 @@ const PostJob = () => {
                                 <input
                                     type="text"
                                     name="location"
+                                    required
                                     value={formData.location}
                                     onChange={handleChange}
                                     placeholder="e.g. Delhi, India"
@@ -433,6 +438,7 @@ const PostJob = () => {
                             <div className="relative">
                                 <select
                                     name="experience"
+                                    required
                                     value={formData.experience}
                                     onChange={handleChange}
                                     className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-10 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
@@ -482,6 +488,7 @@ const PostJob = () => {
                             <input
                                 type="text"
                                 name="salary"
+                                required
                                 value={formData.salary}
                                 onChange={handleChange}
                                 placeholder="e.g. ₹8 - ₹12 LPA"
@@ -504,6 +511,7 @@ const PostJob = () => {
                                 <input
                                     type="date"
                                     name="deadline"
+                                    required
                                     value={formData.deadline}
                                     onChange={handleChange}
                                     className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
@@ -541,6 +549,7 @@ const PostJob = () => {
 
                             <textarea
                                 name="description"
+                                required
                                 value={formData.description}
                                 onChange={handleChange}
                                 rows={6}
@@ -557,6 +566,7 @@ const PostJob = () => {
 
                             <textarea
                                 name="requirements"
+                                required
                                 value={formData.requirements}
                                 onChange={handleChange}
                                 rows={6}
@@ -570,7 +580,7 @@ const PostJob = () => {
                 <section className="mt-6 rounded-2xl border border-slate-200 bg-white shadow-sm">
                     <div className="border-b border-slate-200 px-6 py-5">
                         <h2 className="font-semibold text-slate-900">
-                            Required Skills
+                            Required Skills <span className="text-red-500">*</span>
                         </h2>
 
                         <p className="mt-1 text-xs text-slate-400">

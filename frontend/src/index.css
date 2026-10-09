@@ -8,3 +8,18 @@ body {
     margin: 0;
     font-family: Arial, sans-serif;
 }
+
+/* Keep required markers consistent across candidate and recruiter forms. */
+form label:has(+ input[required])::after,
+form label:has(+ select[required])::after,
+form label:has(+ textarea[required])::after,
+form label:has(+ div input[required])::after,
+form label:has(+ div select[required])::after,
+form label:has(+ div textarea[required])::after,
+form label:has(+ div:has(input[required]))::after,
+form label:has(+ div:has(select[required]))::after,
+form label:has(+ div:has(textarea[required]))::after {
+    content: " *";
+    color: #ef4444;
+    font-weight: 700;
+}
