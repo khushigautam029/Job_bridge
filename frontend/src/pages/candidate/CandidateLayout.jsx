@@ -161,7 +161,7 @@ const CandidateLayout = () => {
                         {/* LOGO */}
                     <button
                         type="button"
-                        onClick={() => navigate("/candidate/jobs")}
+                        onClick={() => navigate("/")}
                         className="flex items-center gap-2.5"
                     >
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm">
