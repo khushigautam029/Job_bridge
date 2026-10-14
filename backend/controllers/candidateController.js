@@ -170,8 +170,7 @@ const getProfileCompletion =
 
                 success: true,
 
-                message:
-                    "Profile completion fetched successfully",
+                message:MESSAGES.PROFILE_COMPLETION_FETCHED,
 
                 data: {
                     completion,

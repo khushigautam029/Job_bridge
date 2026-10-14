@@ -158,6 +158,10 @@ export const MESSAGES = {
     SKILLS_FETCHED: "Skills fetched successfully",
     SKILL_FETCHED: "Skill fetched successfully",
 
-    RESUME_UPLOADED: "Resume uploaded successfully"
+    RESUME_UPLOADED: "Resume uploaded successfully",
+    PROFILE_COMPLETION_FETCHED: "Profile completion fetched successfully",
+    EDUCATION_ADDED: "Education added successfully",
+    EDUCATION_UPDATED: "Education updated successfully",
+    EDUCATION_DELETED: "Education deleted successfully"
 
 };

@@ -7,7 +7,8 @@ import {
 } from "../services/candidateEducationService.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import {
-    STATUS_CODES,
+    MESSAGES,
+    STATUS_CODES
 } from "../utils/setConstants.js";
 import {
     createCandidateEducationSchema,
@@ -95,8 +96,7 @@ const addEducation = asyncHandler(
 
                 success: false,
 
-                message:
-                    "Validation failed",
+                message:MESSAGES.VALIDATION_FAILED,
 
                 errors:
                     error.details.map(
@@ -121,8 +121,7 @@ const addEducation = asyncHandler(
 
             success: true,
 
-            message:
-                "Education added successfully",
+            message:MESSAGES.EDUCATION_ADDED,
 
             data: {
                 education,
@@ -162,8 +161,7 @@ const updateEducation = asyncHandler(
 
                 success: false,
 
-                message:
-                    "Validation failed",
+                message:MESSAGES.VALIDATION_FAILED,
 
                 errors:
                     error.details.map(
@@ -189,8 +187,7 @@ const updateEducation = asyncHandler(
 
             success: true,
 
-            message:
-                "Education updated successfully",
+            message:MESSAGES.EDUCATION_UPDATED,
 
             data: {
                 education,
@@ -221,8 +218,7 @@ const deleteEducation = asyncHandler(
 
             success: true,
 
-            message:
-                "Education deleted successfully",
+            message:MESSAGES.EDUCATION_DELETED,
 
         });
     }
