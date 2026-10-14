@@ -2410,11 +2410,7 @@ const CandidateProfile = () => {
 
                 </div>
 
-
-                {/* =====================================================
-                    TABS
-                ===================================================== */}
-
+                    {/* TABS */}
                 <div className="border-b border-gray-200">
 
                     <nav className="flex gap-8">
@@ -2458,20 +2454,13 @@ const CandidateProfile = () => {
 
                 </div>
 
-
-                {/* =====================================================
-                    VIEW & EDIT
-                ===================================================== */}
-
+                    {/* VIEW & EDIT */}
                 {activeTab === "viewEdit" && (
 
                     <div className="w-full space-y-6">
 
 
-                        {/* =================================================
-                            CAREER PREFERENCES
-                        ================================================= */}
-
+                        {/*CAREER PREFERENCES */}
                         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
 
                             <div className="flex items-center justify-between mb-4">
@@ -2558,11 +2547,7 @@ const CandidateProfile = () => {
 
                         </div>
 
-
-                        {/* =================================================
-                            EDUCATION
-                        ================================================= */}
-
+                            {/* EDUCATION */}
                         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
 
                             <div className="flex items-center justify-between mb-4">
@@ -2737,10 +2722,7 @@ const CandidateProfile = () => {
                         </div>
 
 
-                        {/* =================================================
-                            SKILLS
-                        ================================================= */}
-
+                        {/* SKILLS */}
                         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
 
                             <div className="flex items-center justify-between mb-4">
@@ -2896,10 +2878,7 @@ const CandidateProfile = () => {
                         </div>
 
 
-                        {/* =================================================
-                            EXPERIENCE
-                        ================================================= */}
-
+                            {/* EXPERIENCE */}
                         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
 
                             <div className="flex items-center justify-between mb-4">
@@ -3081,10 +3060,8 @@ const CandidateProfile = () => {
                         </div>
 
 
-                        {/* =================================================
-                            PROJECTS
-                        ================================================= */}
-
+                        
+                            {/* PROJECTS */}
                         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
 
                             <div className="flex items-center justify-between mb-2">
@@ -3270,11 +3247,7 @@ const CandidateProfile = () => {
 
                         </div>
 
-
-                        {/* =================================================
-                            PROFILE SUMMARY
-                        ================================================= */}
-
+                            {/* PROFILE SUMMARY */}
                         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
 
                             <div className="flex items-center justify-between mb-2">
@@ -3327,11 +3300,7 @@ const CandidateProfile = () => {
 
                         </div>
 
-
-                        {/* =================================================
-                            RESUME
-                        ================================================= */}
-
+                            {/* RESUME */}
                         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm space-y-4">
 
                             <div>
@@ -3482,11 +3451,7 @@ const CandidateProfile = () => {
                     </div>
                 )}
 
-
-                {/* =====================================================
-                    ACTIVITY
-                ===================================================== */}
-
+                    {/* ACTIVITY */}
                 {activeTab === "activity" && (
 
                     <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
@@ -3504,11 +3469,7 @@ const CandidateProfile = () => {
 
             </div>
 
-
-            {/* =========================================================
-                PERSONAL DETAILS MODAL
-            ========================================================= */}
-
+                {/* PERSONAL DETAILS MODAL */}
             {editingHeader && (
 
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -3817,11 +3778,7 @@ const CandidateProfile = () => {
                 </div>
             )}
 
-
-            {/* =========================================================
-                CAREER PREFERENCES MODAL
-            ========================================================= */}
-
+                {/* CAREER PREFERENCES MODAL */}
             {editingPref && (
 
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -4028,11 +3985,7 @@ const CandidateProfile = () => {
                 </div>
             )}
 
-
-            {/* =========================================================
-                EDUCATION MODAL
-            ========================================================= */}
-
+                {/* EDUCATION MODAL */}
             {showEducationModal && (
 
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -4350,10 +4303,7 @@ const CandidateProfile = () => {
             )}
 
 
-            {/* =========================================================
-                EXPERIENCE MODAL
-            ========================================================= */}
-
+                {/* EXPERIENCE MODAL */}
             {showExperienceModal && (
 
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -4733,10 +4683,7 @@ const CandidateProfile = () => {
             )}
 
 
-            {/* =========================================================
-                PROJECT MODAL
-            ========================================================= */}
-
+                {/* PROJECT MODAL */}
             {showProjectModal && (
 
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
@@ -5091,11 +5038,7 @@ const CandidateProfile = () => {
                 </div>
             )}
 
-
-            {/* =========================================================
-                PROFILE SUMMARY MODAL
-            ========================================================= */}
-
+                {/* PROFILE SUMMARY MODAL */}
             {editingBio && (
 
                 <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
