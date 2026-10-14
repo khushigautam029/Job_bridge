@@ -23,3 +23,20 @@ form label:has(+ div:has(textarea[required]))::after {
     color: #ef4444;
     font-weight: 700;
 }
+
+.field-invalid {
+    border-color: #ef4444 !important;
+    background-color: #fff7f7 !important;
+}
+
+.field-invalid:focus {
+    border-color: #ef4444 !important;
+    --tw-ring-color: rgb(254 202 202) !important;
+}
+
+.field-error {
+    margin: 0.35rem 0 0;
+    color: #dc2626;
+    font-size: 0.8rem;
+    line-height: 1.25rem;
+}

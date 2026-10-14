@@ -19,6 +19,8 @@ import { getSkills } from "../../services/skillService";
 
 const PostJob = () => {
     const navigate = useNavigate();
+    const today = new Date();
+    const minimumDeadline = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
     const [formData, setFormData] = useState({
         title: "",
         category: "",
@@ -35,6 +37,7 @@ const PostJob = () => {
     const [categories, setCategories] = useState([]);
     const [skillCatalog, setSkillCatalog] = useState([]);
     const [skillInput, setSkillInput] = useState("");
+    const [skillsError, setSkillsError] = useState("");
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [loading, setLoading] = useState(false);
@@ -79,6 +82,7 @@ const PostJob = () => {
         if (!skillExists) {
             setSkills((prev) => [...prev, skill]);
         }
+        setSkillsError("");
 
         setSkillInput("");
     };
@@ -143,7 +147,7 @@ const PostJob = () => {
         }
 
         if (skills.length === 0) {
-            setError("Please add at least one required skill.");
+            setSkillsError("Please add at least one required skill.");
             return;
         }
 
@@ -512,6 +516,7 @@ const PostJob = () => {
                                     type="date"
                                     name="deadline"
                                     required
+                                    min={minimumDeadline}
                                     value={formData.deadline}
                                     onChange={handleChange}
                                     className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
@@ -550,6 +555,8 @@ const PostJob = () => {
                             <textarea
                                 name="description"
                                 required
+                                pattern="(?!.*\\s{2,})[\\s\\S]*"
+                                title="Use only one space between words."
                                 value={formData.description}
                                 onChange={handleChange}
                                 rows={6}
@@ -567,6 +574,8 @@ const PostJob = () => {
                             <textarea
                                 name="requirements"
                                 required
+                                pattern="(?!.*\\s{2,})[\\s\\S]*"
+                                title="Use only one space between words."
                                 value={formData.requirements}
                                 onChange={handleChange}
                                 rows={6}
@@ -594,6 +603,7 @@ const PostJob = () => {
                             <input
                                 type="text"
                                 value={skillInput}
+                                aria-invalid={Boolean(skillsError)}
                                 onChange={(e) =>
                                     setSkillInput(e.target.value)
                                 }
@@ -604,7 +614,7 @@ const PostJob = () => {
                                     }
                                 }}
                                 placeholder="e.g. React, Node.js, MySQL"
-                                className="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                className={`flex-1 rounded-xl border ${skillsError ? "border-red-500 bg-red-50" : "border-slate-200 bg-slate-50"} px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100`}
                             />
 
                             <button
@@ -616,6 +626,10 @@ const PostJob = () => {
                                 Add Skill
                             </button>
                         </div>
+
+                        {skillsError && (
+                            <p className="mt-2 text-sm text-red-600" role="alert">{skillsError}</p>
+                        )}
 
                         {skills.length > 0 && (
                             <div className="mt-4 flex flex-wrap gap-2">

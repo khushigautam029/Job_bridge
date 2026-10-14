@@ -506,7 +506,22 @@ const RecruiterInterviews = () => {
             validateForm();
 
         if (validationError) {
-            setFormError(validationError);
+            const fieldName = validationError.includes("application")
+                ? "applicationId"
+                : validationError.includes("date") || validationError.includes("future")
+                    ? "scheduledAt"
+                    : validationError.includes("Meeting link")
+                        ? "meetingLink"
+                        : validationError.includes("Office location")
+                            ? "location"
+                            : "interviewType";
+            const field = event.currentTarget.elements.namedItem(fieldName);
+            if (field instanceof HTMLElement && "setCustomValidity" in field) {
+                field.setCustomValidity(validationError);
+                field.reportValidity();
+                field.addEventListener("input", () => field.setCustomValidity(""), { once: true });
+                field.addEventListener("change", () => field.setCustomValidity(""), { once: true });
+            }
             return;
         }
 
@@ -1362,14 +1377,6 @@ const RecruiterInterviews = () => {
                             onSubmit={handleSubmit}
                             className="p-6"
                         >
-                            {/* FORM ERROR */}
-
-                            {formError && (
-                                <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                                    {formError}
-                                </div>
-                            )}
-
                             {/* APPLICATION */}
 
                             {!editingInterviewId && (
@@ -1385,6 +1392,7 @@ const RecruiterInterviews = () => {
                                     <div className="relative mt-2">
                                         <select
                                             name="applicationId"
+                                            required
                                             value={
                                                 form.applicationId
                                             }
@@ -1516,6 +1524,7 @@ const RecruiterInterviews = () => {
                                     <input
                                         type="datetime-local"
                                         name="scheduledAt"
+                                        required
                                         value={
                                             form.scheduledAt
                                         }
@@ -1591,6 +1600,7 @@ const RecruiterInterviews = () => {
                                         <input
                                             type="url"
                                             name="meetingLink"
+                                            required
                                             value={
                                                 form.meetingLink
                                             }
@@ -1632,6 +1642,7 @@ const RecruiterInterviews = () => {
                                         <input
                                             type="text"
                                             name="location"
+                                            required
                                             value={
                                                 form.location
                                             }

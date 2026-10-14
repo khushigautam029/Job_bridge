@@ -428,32 +428,6 @@ const RecruiterProfile = () => {
     return (
         <div className="-mx-5 -my-6 min-h-[calc(100vh-4rem)] w-auto bg-slate-50 sm:-mx-7 lg:-mx-10">
             <div className="w-full px-5 py-5 sm:px-7 lg:px-8">
-                {/* Page header */}
-                <div className="mb-5 flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm">
-                            <Building2 size={24} />
-                        </div>
-
-                        <div>
-                            <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
-                                Recruiter Profile
-                            </h1>
-                            <p className="mt-1 text-sm text-slate-500">
-                                Manage your personal and company information.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 self-start rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-600 sm:self-center">
-                        <CheckCircle2
-                            size={15}
-                            className="text-emerald-600"
-                        />
-                        Profile settings
-                    </div>
-                </div>
-
                 {/* Feedback messages */}
                 {message && (
                     <div
