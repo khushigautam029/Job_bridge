@@ -3,7 +3,8 @@ import {
     CandidateProject,
 } from "../models/index.js";
 import {
-    STATUS_CODES,
+    MESSAGES,
+    STATUS_CODES
 } from "../utils/setConstants.js";
 
 
@@ -17,7 +18,7 @@ const findCandidateProfile = async (userId) => {
 
     if (!candidateProfile) {
         const error = new Error(
-            "Candidate profile not found"
+            MESSAGES.PROFILE_NOT_FOUND
         );
 
         error.statusCode =
@@ -70,7 +71,7 @@ const getCandidateProjectById = async (
 
     if (!project) {
         const error = new Error(
-            "Project not found"
+            MESSAGES.PROJECT_NOT_FOUND
         );
 
         error.statusCode =
@@ -157,9 +158,7 @@ const deleteCandidateProject = async (
 
     return {
         projectId: Number(projectId),
-
-        message:
-            "Project deleted successfully",
+        message:MESSAGES.PROJECT_DELETED,
     };
 };
 

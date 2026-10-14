@@ -5,7 +5,8 @@ import {
 } from "../services/candidateSkillService.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import {
-    STATUS_CODES,
+    MESSAGES,
+    STATUS_CODES
 } from "../utils/setConstants.js";
 import {
     addCandidateSkillSchema,
@@ -57,8 +58,7 @@ const addSkill = asyncHandler(
             ).json({
                 success: false,
 
-                message:
-                    "Validation failed",
+                message:MESSAGES.VALIDATION_FAILED,
 
                 errors:
                     error.details.map(
@@ -82,7 +82,7 @@ const addSkill = asyncHandler(
             success: true,
 
             message:
-                "Skill added successfully",
+                MESSAGES.SKILL_ADDED,
 
             data: {
                 skill,

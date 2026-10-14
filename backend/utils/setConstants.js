@@ -169,6 +169,10 @@ export const MESSAGES = {
     PROJECTS_FETCHED: "Projects retrieved successfully",
     PROJECT_FETCHED: "Project retrieved successfully",
     PROJECT_ADDED: "Project added successfully",
-    PROJECT_UPDATED: "Project updated successfully"
+    PROJECT_DELETED: "Project deleted successfully",
+    PROJECT_UPDATED: "Project updated successfully",
+    PROJECT_NOT_FOUND: "Project not found",
+    MY_COMPANY_FETCHED: "My Company retrieved successfully",
+    COMPANIES_FETCHED: "Companies retrieved successfully"
 
 };

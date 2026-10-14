@@ -27,7 +27,7 @@ const getMyCompanyController = asyncHandler(
         return sendSuccess(
             res,
             STATUS_CODES.OK,
-            "My Company retrieved successfully",
+            MESSAGES.MY_COMPANY_FETCHED,
             {
                 company,
             }
@@ -87,7 +87,7 @@ const getCompanies = asyncHandler(
         return sendSuccess(
             res,
             STATUS_CODES.OK,
-            "Companies retrieved successfully",
+            MESSAGES.COMPANIES_FETCHED,
             {
                 companies,
             }
@@ -106,7 +106,7 @@ const getCompany = asyncHandler(
         return sendSuccess(
             res,
             STATUS_CODES.OK,
-            "Company retrieved successfully",
+            MESSAGES.COMPANY_FETCHED,
             {
                 company,
             }
