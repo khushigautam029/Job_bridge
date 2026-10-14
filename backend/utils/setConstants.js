@@ -162,6 +162,13 @@ export const MESSAGES = {
     PROFILE_COMPLETION_FETCHED: "Profile completion fetched successfully",
     EDUCATION_ADDED: "Education added successfully",
     EDUCATION_UPDATED: "Education updated successfully",
-    EDUCATION_DELETED: "Education deleted successfully"
+    EDUCATION_DELETED: "Education deleted successfully",
+    EXPERIENCES_FETCHED: "Experiences retrieved successfully",
+    EXPERIENCE_ADDED: "Experience added successfully",
+    EXPERIENCE_UPDATED: "Experience updated successfully",
+    PROJECTS_FETCHED: "Projects retrieved successfully",
+    PROJECT_FETCHED: "Project retrieved successfully",
+    PROJECT_ADDED: "Project added successfully",
+    PROJECT_UPDATED: "Project updated successfully"
 
 };

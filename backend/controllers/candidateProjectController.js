@@ -11,7 +11,8 @@ import {
 } from "../utils/responseHandler.js";
 
 import {
-    STATUS_CODES,
+    MESSAGES,
+    STATUS_CODES
 } from "../utils/setConstants.js";
 
 
@@ -24,7 +25,7 @@ const getProjects = async (req, res) => {
     return sendSuccess(
         res,
         STATUS_CODES.OK,
-        "Projects retrieved successfully",
+        MESSAGES.PROJECTS_FETCHED,
         {
             projects,
         }
@@ -42,7 +43,7 @@ const getProject = async (req, res) => {
     return sendSuccess(
         res,
         STATUS_CODES.OK,
-        "Project retrieved successfully",
+        MESSAGES.PROJECT_FETCHED,
         {
             project,
         }
@@ -60,7 +61,7 @@ const createProject = async (req, res) => {
     return sendSuccess(
         res,
         STATUS_CODES.CREATED,
-        "Project added successfully",
+        MESSAGES.PROJECT_ADDED,
         {
             project,
         }
@@ -79,7 +80,7 @@ const updateProject = async (req, res) => {
     return sendSuccess(
         res,
         STATUS_CODES.OK,
-        "Project updated successfully",
+        MESSAGES.PROJECT_UPDATED,
         {
             project,
         }

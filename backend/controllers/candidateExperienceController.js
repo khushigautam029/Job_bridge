@@ -11,7 +11,8 @@ import {
 } from "../utils/responseHandler.js";
 
 import {
-    STATUS_CODES,
+    MESSAGES,
+    STATUS_CODES
 } from "../utils/setConstants.js";
 
 
@@ -24,7 +25,7 @@ const getExperiences = async (req, res) => {
     return sendSuccess(
         res,
         STATUS_CODES.OK,
-        "Experiences retrieved successfully",
+        MESSAGES.EXPERIENCES_FETCHED,
         {
             experiences,
         }
@@ -42,7 +43,7 @@ const getExperience = async (req, res) => {
     return sendSuccess(
         res,
         STATUS_CODES.OK,
-        "Experience retrieved successfully",
+        MESSAGES.EXPERIENCES_FETCHED,
         {
             experience,
         }
@@ -60,7 +61,7 @@ const createExperience = async (req, res) => {
     return sendSuccess(
         res,
         STATUS_CODES.CREATED,
-        "Experience added successfully",
+        MESSAGES.EXPERIENCE_ADDED,
         {
             experience,
         }
@@ -79,7 +80,7 @@ const updateExperience = async (req, res) => {
     return sendSuccess(
         res,
         STATUS_CODES.OK,
-        "Experience updated successfully",
+        MESSAGES.EXPERIENCE_UPDATED,
         {
             experience,
         }
