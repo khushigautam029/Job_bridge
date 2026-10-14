@@ -121,8 +121,7 @@ const uploadResume = asyncHandler(
 
             success: true,
 
-            message:
-                "Resume uploaded successfully",
+            message:MESSAGES.RESUME_UPLOADED,
 
             data: {
                 candidate,

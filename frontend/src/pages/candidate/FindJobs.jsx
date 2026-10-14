@@ -43,9 +43,6 @@ const FindJobs = () => {
                     const formattedJobs = (result.jobs || []).map(
                         (job) => ({
                             ...formatJobCard(job),
-
-                            // Preserve the company type returned by the API.
-                            // formatJobCard may convert company into a string.
                             companyType:
                                 job.company?.companyType ||
                                 job.companyType ||
