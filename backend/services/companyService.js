@@ -3,6 +3,7 @@ import {
     RecruiterProfile,
 } from "../models/index.js";
 import { STATUS_CODES } from "../utils/setConstants.js";
+import { getHiddenCompanyIds } from "../utils/companyVisibility.js";
 
 
 const getMyCompany = async (userId) => {
@@ -114,7 +115,8 @@ const getAllCompanies = async () => {
             ["createdAt", "DESC"],
         ],
     });
-    return companies;
+    const hiddenCompanyIds = await getHiddenCompanyIds(companies.map((company) => company.id));
+    return companies.filter((company) => !hiddenCompanyIds.has(company.id));
 };
 
 
@@ -126,6 +128,12 @@ const getCompanyById = async (companyId) => {
         const error = new Error(
             "Company not found"
         );
+        error.statusCode = STATUS_CODES.NOT_FOUND;
+        throw error;
+    }
+    const hiddenCompanyIds = await getHiddenCompanyIds([company.id]);
+    if (hiddenCompanyIds.has(company.id)) {
+        const error = new Error("Company not found");
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }

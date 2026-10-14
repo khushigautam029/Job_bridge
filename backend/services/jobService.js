@@ -9,6 +9,7 @@ import {
     Skill,
 } from "../models/index.js";
 import { STATUS_CODES } from "../utils/setConstants.js";
+import { getHiddenCompanyIds } from "../utils/companyVisibility.js";
 
 const getRecruiterProfile = async (userId) => {
     const recruiterProfile =
@@ -189,6 +190,10 @@ const getAllJobs = async (filters = {}) => {
             offset,
             distinct: true,
         });
+    const hiddenCompanyIds = await getHiddenCompanyIds(rows.map((job) => job.companyId));
+    rows.forEach((job) => {
+        if (hiddenCompanyIds.has(job.companyId)) job.setDataValue("company", null);
+    });
     return {
         jobs: rows,
         pagination: {
@@ -324,6 +329,8 @@ const getJobById = async (
             STATUS_CODES.NOT_FOUND;
         throw error;
     }
+    const hiddenCompanyIds = await getHiddenCompanyIds([job.companyId]);
+    if (hiddenCompanyIds.has(job.companyId)) job.setDataValue("company", null);
     return job;
 };
 

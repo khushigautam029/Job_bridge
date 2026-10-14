@@ -4,6 +4,7 @@ import {
     RecruiterProfile,
     User,
 } from "../models/index.js";
+import sequelize from "../config/database.js";
 import {
     comparePassword,
     hashPassword,
@@ -39,31 +40,33 @@ const registerUser = async ({
 
     const hashedPassword = await hashPassword(password);
 
-    const user = await User.create({
-        name: name.trim(),
-        email: normalizedEmail,
-        password: hashedPassword,
-        phone: phone || null,
-        role,
+    return sequelize.transaction(async (transaction) => {
+        const user = await User.create({
+            name: name.trim(),
+            email: normalizedEmail,
+            password: hashedPassword,
+            phone: phone || null,
+            role,
+        }, { transaction });
+
+        if (role === "CANDIDATE") {
+            await CandidateProfile.create({
+                userId: user.id,
+            }, { transaction });
+        }
+
+        if (role === "RECRUITER") {
+            const company = await Company.create({
+                name: companyName.trim(),
+                companyType,
+            }, { transaction });
+            await RecruiterProfile.create({
+                userId: user.id,
+                companyId: company.id,
+            }, { transaction });
+        }
+        return user;
     });
-
-    if (role === "CANDIDATE") {
-        await CandidateProfile.create({
-            userId: user.id,
-        });
-    }
-
-    if (role === "RECRUITER") {
-        const company = await Company.create({
-            name: companyName.trim(),
-            companyType,
-        });
-        await RecruiterProfile.create({
-            userId: user.id,
-            companyId: company.id,
-        });
-    }
-    return user;
 };
 
 const loginUser = async ({
@@ -105,6 +108,26 @@ const loginUser = async ({
         );
         error.statusCode = STATUS_CODES.UNAUTHORIZED;
         throw error;
+    }
+
+    if (user.role === "RECRUITER") {
+        const recruiterProfile = await RecruiterProfile.findOne({
+            where: { userId: user.id },
+        });
+
+        // Repair recruiter accounts created before profile creation was atomic.
+        if (!recruiterProfile) {
+            await sequelize.transaction(async (transaction) => {
+                const company = await Company.create({
+                    name: `${user.name} Company (${user.id})`,
+                    companyType: "DIRECT",
+                }, { transaction });
+                await RecruiterProfile.create({
+                    userId: user.id,
+                    companyId: company.id,
+                }, { transaction });
+            });
+        }
     }
 
     return user;

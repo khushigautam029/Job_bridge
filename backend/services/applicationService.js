@@ -8,6 +8,7 @@ import {
     RecruiterProfile,
     Skill,
     User,
+    UserPreference,
 } from "../models/index.js";
 import createNotification from "../utils/createNotification.js";
 import { STATUS_CODES } from "../utils/setConstants.js";
@@ -319,6 +320,47 @@ const getApplicationById = async (
     return application;
 };
 
+const applyCandidatePrivacySettings = async (applications) => {
+    const rows = applications.map((application) => application.toJSON());
+    const userIds = rows
+        .map((application) => application.candidate?.user?.id)
+        .filter(Boolean);
+    if (userIds.length === 0) return rows;
+
+    const preferences = await UserPreference.findAll({
+        where: { userId: [...new Set(userIds)] },
+    });
+    const byUserId = new Map(preferences.map((preference) => [
+        preference.userId,
+        preference,
+    ]));
+
+    return rows.map((application) => {
+        const candidate = application.candidate;
+        const userId = candidate?.user?.id;
+        const settings = byUserId.get(userId);
+        const privacy = settings?.privacySettings || {};
+
+        if (privacy.profileVisibility === false && candidate) {
+            candidate.bio = null;
+            candidate.location = null;
+            candidate.experienceYears = null;
+            candidate.linkedinUrl = null;
+            candidate.githubUrl = null;
+            candidate.skills = [];
+            if (candidate.user) {
+                candidate.user.name = "Candidate";
+                candidate.user.email = null;
+                candidate.user.phone = null;
+            }
+        }
+        if (privacy.resumeVisibility === false) {
+            application.resume = null;
+        }
+        return application;
+    });
+};
+
 
 /*
     Candidate withdraws application
@@ -475,7 +517,7 @@ const getJobApplications = async (
         });
 
 
-    return applications;
+    return applyCandidatePrivacySettings(applications);
 };
 
 const getRecruiterApplications = async (userId) => {
@@ -494,7 +536,7 @@ const getRecruiterApplications = async (userId) => {
         throw error;
     }
 
-    return Application.findAll({
+    const applications = await Application.findAll({
         include: [
             {
                 model: Job,
@@ -537,6 +579,7 @@ const getRecruiterApplications = async (userId) => {
         ],
         order: [["appliedAt", "DESC"]],
     });
+    return applyCandidatePrivacySettings(applications);
 };
 
 

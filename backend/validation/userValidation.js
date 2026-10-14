@@ -12,6 +12,7 @@ const updateProfileSchema = Joi.object({
     phone: Joi.string()
         .pattern(/^[6-9]\d{9}$/)
         .optional()
+        .allow("")
         .messages({
             "string.pattern.base":
                 MESSAGES.PROVIDE_VALID_PHONE_NO,
@@ -29,7 +30,24 @@ const changePasswordSchema = Joi.object({
         .required(),
 }).required();
 
+const userPreferencesSchema = Joi.object({
+    notificationSettings: Joi.object({
+        jobAlerts: Joi.boolean(),
+        applicationUpdates: Joi.boolean(),
+        interviewReminders: Joi.boolean(),
+        applicationAlerts: Joi.boolean(),
+        interviewUpdates: Joi.boolean(),
+        newCandidateAlerts: Joi.boolean(),
+        emailNotifications: Joi.boolean(),
+    }).min(1),
+    privacySettings: Joi.object({
+        profileVisibility: Joi.boolean(),
+        resumeVisibility: Joi.boolean(),
+        companyVisibility: Joi.boolean(),
+    }).min(1),
+}).min(1).required();
+
 
 export {
-    changePasswordSchema, updateProfileSchema
+    changePasswordSchema, updateProfileSchema, userPreferencesSchema
 };

@@ -15,6 +15,7 @@ import RecruiterProfile from "./RecruiterProfile.js";
 import SavedJob from "./SavedJob.js";
 import Skill from "./Skill.js";
 import User from "./User.js";
+import UserPreference from "./UserPreference.js";
 
 // User Profile
 User.hasOne(CandidateProfile, {
@@ -32,6 +33,17 @@ User.hasOne(RecruiterProfile, {
     foreignKey: "userId",
     as: "recruiterProfile",
     onDelete: "CASCADE",
+});
+
+User.hasOne(UserPreference, {
+    foreignKey: "userId",
+    as: "preferences",
+    onDelete: "CASCADE",
+});
+
+UserPreference.belongsTo(User, {
+    foreignKey: "userId",
+    as: "user",
 });
 
 RecruiterProfile.belongsTo(User, {
@@ -290,6 +302,6 @@ CandidateProject.belongsTo(
 export {
     Application, ApplicationStatusHistory, CandidateEducation, CandidateExperience, CandidateProfile, CandidateProject,
     CandidateSkill, Company, Interview, Job, JobCategory, JobSkill, Notification, RecruiterProfile,
-    SavedJob, Skill, User
+    SavedJob, Skill, User, UserPreference
 };
 

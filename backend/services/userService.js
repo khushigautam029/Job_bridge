@@ -3,6 +3,7 @@ import {
     Company,
     RecruiterProfile,
     User,
+    UserPreference,
 } from "../models/index.js";
 import {
     comparePassword,
@@ -47,6 +48,62 @@ const getUserById = async (userId) => {
         throw error;
     }
     return user;
+};
+
+const updateUserProfile = async (userId, updates) => {
+    const user = await User.findByPk(userId);
+    if (!user) {
+        const error = new Error("User not found");
+        error.statusCode = STATUS_CODES.NOT_FOUND;
+        throw error;
+    }
+    await user.update(updates);
+    return getUserById(userId);
+};
+
+const DEFAULT_NOTIFICATION_SETTINGS = {
+    jobAlerts: true,
+    applicationUpdates: true,
+    interviewReminders: true,
+    applicationAlerts: true,
+    interviewUpdates: true,
+    newCandidateAlerts: true,
+    emailNotifications: true,
+};
+
+const DEFAULT_PRIVACY_SETTINGS = {
+    profileVisibility: true,
+    resumeVisibility: true,
+    companyVisibility: true,
+};
+
+const getUserPreferences = async (userId) => {
+    const [preferences] = await UserPreference.findOrCreate({
+        where: { userId },
+        defaults: {
+            userId,
+            notificationSettings: DEFAULT_NOTIFICATION_SETTINGS,
+            privacySettings: DEFAULT_PRIVACY_SETTINGS,
+        },
+    });
+    return preferences;
+};
+
+const updateUserPreferences = async (userId, updates) => {
+    const preferences = await getUserPreferences(userId);
+    await preferences.update({
+        notificationSettings: {
+            ...DEFAULT_NOTIFICATION_SETTINGS,
+            ...preferences.notificationSettings,
+            ...updates.notificationSettings,
+        },
+        privacySettings: {
+            ...DEFAULT_PRIVACY_SETTINGS,
+            ...preferences.privacySettings,
+            ...updates.privacySettings,
+        },
+    });
+    return preferences;
 };
 
 
@@ -106,6 +163,9 @@ const deleteAccount = async (userId) => {
 export {
     changePassword,
     deleteAccount,
-    getUserById
+    getUserById,
+    getUserPreferences,
+    updateUserPreferences,
+    updateUserProfile,
 };
 

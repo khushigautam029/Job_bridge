@@ -12,6 +12,8 @@ import { useEffect, useState } from "react";
 import {
     changePassword,
     getCurrentUser,
+    getUserPreferences,
+    saveUserPreferences,
     updateCurrentUser,
 } from "../../services/userService";
 
@@ -49,13 +51,15 @@ const RecruiterSetting = () => {
 
     useEffect(() => {
         let active = true;
-        getCurrentUser()
-            .then(({ user }) => {
+        Promise.all([getCurrentUser(), getUserPreferences()])
+            .then(([{ user }, preferences]) => {
                 if (active) {
                     setAccountSettings({
                         email: user.email || "",
                         phone: user.phone || "",
                     });
+                    setNotificationSettings(preferences.notificationSettings);
+                    setPrivacySettings(preferences.privacySettings);
                 }
             })
             .catch((loadError) => {
@@ -151,14 +155,26 @@ const RecruiterSetting = () => {
         }
     };
 
-    const handleNotificationSave = () => {
-        setMessage("");
-        setError("Notification preferences cannot be saved because the backend does not support them yet.");
+    const handleNotificationSave = async () => {
+        try {
+            await saveUserPreferences({ notificationSettings });
+            setError("");
+            setMessage("Notification preferences saved successfully.");
+        } catch (saveError) {
+            setMessage("");
+            setError(saveError.response?.data?.message || "Unable to save notification preferences.");
+        }
     };
 
-    const handlePrivacySave = () => {
-        setMessage("");
-        setError("Privacy preferences cannot be saved because the backend does not support them yet.");
+    const handlePrivacySave = async () => {
+        try {
+            await saveUserPreferences({ privacySettings });
+            setError("");
+            setMessage("Privacy preferences saved successfully.");
+        } catch (saveError) {
+            setMessage("");
+            setError(saveError.response?.data?.message || "Unable to save privacy preferences.");
+        }
     };
 
     const sections = [
