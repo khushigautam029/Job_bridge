@@ -1,3 +1,4 @@
+
 import {
     Bookmark,
     BriefcaseBusiness,
@@ -39,7 +40,20 @@ const FindJobs = () => {
         getJobs({ limit: 50 })
             .then((result) => {
                 if (active) {
-                    setJobs((result.jobs || []).map(formatJobCard));
+                    const formattedJobs = (result.jobs || []).map(
+                        (job) => ({
+                            ...formatJobCard(job),
+
+                            // Preserve the company type returned by the API.
+                            // formatJobCard may convert company into a string.
+                            companyType:
+                                job.company?.companyType ||
+                                job.companyType ||
+                                "",
+                        })
+                    );
+
+                    setJobs(formattedJobs);
                 }
             })
             .catch((loadError) => {
@@ -54,11 +68,16 @@ const FindJobs = () => {
                 if (active) setLoading(false);
             });
 
-        if (localStorage.getItem("token") || sessionStorage.getItem("token")) {
+        if (
+            localStorage.getItem("token") ||
+            sessionStorage.getItem("token")
+        ) {
             getSavedJobs()
                 .then((saved) => {
                     if (active) {
-                        setSavedJobs(saved.map((entry) => entry.jobId));
+                        setSavedJobs(
+                            saved.map((entry) => entry.jobId)
+                        );
                     }
                 })
                 .catch((loadError) => {
@@ -76,28 +95,52 @@ const FindJobs = () => {
         };
     }, []);
 
+    const getHiringInfo = (companyType) => {
+        const type = String(companyType || "").toUpperCase();
+
+        if (type === "DIRECT") {
+            return {
+                label: "Direct Hiring",
+                className:
+                    "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100",
+            };
+        }
+
+        if (type === "CONSULTANCY") {
+            return {
+                label: "Consultancy Hiring",
+                className:
+                    "bg-amber-50 text-amber-700 ring-1 ring-amber-100",
+            };
+        }
+
+        return null;
+    };
+
     const filteredJobs = jobs.filter((job) => {
         const matchesCategory =
             !selectedCategory ||
-            job.category?.toLowerCase() ===
+            String(job.category || "").toLowerCase() ===
                 selectedCategory.toLowerCase();
 
+        const searchTerm = search.toLowerCase();
+
         const matchesSearch =
-            job.title
+            String(job.title || "")
                 .toLowerCase()
-                .includes(search.toLowerCase()) ||
-            job.company
+                .includes(searchTerm) ||
+            String(job.company || "")
                 .toLowerCase()
-                .includes(search.toLowerCase()) ||
-            job.skills.some((skill) =>
-                skill
+                .includes(searchTerm) ||
+            (job.skills || []).some((skill) =>
+                String(skill)
                     .toLowerCase()
-                    .includes(search.toLowerCase())
+                    .includes(searchTerm)
             );
 
         const matchesLocation =
             !location ||
-            job.location
+            String(job.location || "")
                 .toLowerCase()
                 .includes(location.toLowerCase());
 
@@ -105,7 +148,8 @@ const FindJobs = () => {
             jobType === "All" || job.type === jobType;
 
         const matchesExperience =
-            experience === "All" || job.experience === experience;
+            experience === "All" ||
+            job.experience === experience;
 
         return (
             matchesCategory &&
@@ -117,21 +161,32 @@ const FindJobs = () => {
     });
 
     const toggleSavedJob = async (jobId) => {
-        if (!(localStorage.getItem("token") || sessionStorage.getItem("token"))) {
+        if (
+            !(
+                localStorage.getItem("token") ||
+                sessionStorage.getItem("token")
+            )
+        ) {
             navigate("/login");
             return;
         }
 
         try {
             setError("");
+
             if (savedJobs.includes(jobId)) {
                 await unsaveJob(jobId);
+
                 setSavedJobs((current) =>
                     current.filter((id) => id !== jobId)
                 );
             } else {
                 await saveJob(jobId);
-                setSavedJobs((current) => [...current, jobId]);
+
+                setSavedJobs((current) => [
+                    ...current,
+                    jobId,
+                ]);
             }
         } catch (saveError) {
             setError(
@@ -148,6 +203,7 @@ const FindJobs = () => {
                     {error}
                 </div>
             )}
+
             {/* Page Heading */}
             <div>
                 <p className="text-sm font-semibold uppercase tracking-wider text-indigo-600">
@@ -305,100 +361,123 @@ const FindJobs = () => {
                         Loading jobs...
                     </p>
                 ) : filteredJobs.length > 0 ? (
-                    filteredJobs.map((job) => (
-                        <div
-                            key={job.id}
-                            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-indigo-200 hover:shadow-md sm:p-6"
-                        >
-                            <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-                                {/* Job Info */}
-                                <div className="flex gap-4">
-                                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                                        <BriefcaseBusiness
-                                            size={22}
-                                        />
-                                    </div>
+                    filteredJobs.map((job) => {
+                        const hiringInfo = getHiringInfo(
+                            job.companyType
+                        );
 
-                                    <div>
-                                        <div className="flex flex-wrap items-center gap-2">
-                                            <h4 className="text-lg font-semibold text-slate-900">
-                                                {job.title}
-                                            </h4>
-
-                                            <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-600">
-                                                {job.category}
-                                            </span>
+                        return (
+                            <div
+                                key={job.id}
+                                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-indigo-200 hover:shadow-md sm:p-6"
+                            >
+                                <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                                    {/* Job Info */}
+                                    <div className="flex gap-4">
+                                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                                            <BriefcaseBusiness
+                                                size={22}
+                                            />
                                         </div>
 
-                                        <p className="mt-1 text-sm font-medium text-slate-600">
-                                            {job.company}
-                                        </p>
+                                        <div className="min-w-0">
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <h4 className="text-lg font-semibold text-slate-900">
+                                                    {job.title}
+                                                </h4>
 
-                                        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-slate-500">
-                                            <span className="flex items-center gap-1.5">
-                                                <MapPin size={14} />
-                                                {job.location}
-                                            </span>
+                                                <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-600">
+                                                    {job.category}
+                                                </span>
 
-                                            <span>
-                                                💼 {job.type}
-                                            </span>
+                                                {/* Hiring Type Badge */}
+                                                {hiringInfo && (
+                                                    <span
+                                                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${hiringInfo.className}`}
+                                                    >
+                                                        {hiringInfo.label}
+                                                    </span>
+                                                )}
+                                            </div>
 
-                                            <span>
-                                                💰 {job.salary}
-                                            </span>
+                                            <p className="mt-1 text-sm font-medium text-slate-600">
+                                                {job.company}
+                                            </p>
+
+                                            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-slate-500">
+                                                <span className="flex items-center gap-1.5">
+                                                    <MapPin size={14} />
+                                                    {job.location}
+                                                </span>
+
+                                                <span>
+                                                    💼 {job.type}
+                                                </span>
+
+                                                <span>
+                                                    💰 {job.salary}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                {/* Save */}
-                                <button
-                                    type="button"
-                                    onClick={() => toggleSavedJob(job.id)}
-                                    aria-label={savedJobs.includes(job.id) ? "Remove saved job" : "Save job"}
-                                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition ${
-                                        savedJobs.includes(job.id)
-                                            ? "border-indigo-200 bg-indigo-50 text-indigo-600"
-                                            : "border-slate-200 text-slate-400 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
-                                    }`}
-                                >
-                                    <Bookmark size={18} />
-                                </button>
-                            </div>
-
-                            {/* Bottom */}
-                            <div className="mt-5 flex flex-col gap-4 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
-                                <div className="flex flex-wrap gap-2">
-                                    {job.skills.map((skill) => (
-                                        <span
-                                            key={skill}
-                                            className="rounded-md bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-600"
-                                        >
-                                            {skill}
-                                        </span>
-                                    ))}
-                                </div>
-
-                                <div className="flex items-center justify-between gap-5 sm:justify-end">
-                                    <span className="text-xs text-slate-400">
-                                        {job.posted}
-                                    </span>
-
+                                    {/* Save */}
                                     <button
                                         type="button"
                                         onClick={() =>
-                                            navigate(
-                                                `/candidate/jobs/${job.id}`
-                                            )
+                                            toggleSavedJob(job.id)
                                         }
-                                        className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                                        aria-label={
+                                            savedJobs.includes(job.id)
+                                                ? "Remove saved job"
+                                                : "Save job"
+                                        }
+                                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition ${
+                                            savedJobs.includes(job.id)
+                                                ? "border-indigo-200 bg-indigo-50 text-indigo-600"
+                                                : "border-slate-200 text-slate-400 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
+                                        }`}
                                     >
-                                        View Job
+                                        <Bookmark size={18} />
                                     </button>
                                 </div>
+
+                                {/* Bottom */}
+                                <div className="mt-5 flex flex-col gap-4 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
+                                    <div className="flex flex-wrap gap-2">
+                                        {(job.skills || []).map(
+                                            (skill) => (
+                                                <span
+                                                    key={skill}
+                                                    className="rounded-md bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-600"
+                                                >
+                                                    {skill}
+                                                </span>
+                                            )
+                                        )}
+                                    </div>
+
+                                    <div className="flex items-center justify-between gap-5 sm:justify-end">
+                                        <span className="text-xs text-slate-400">
+                                            {job.posted}
+                                        </span>
+
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                navigate(
+                                                    `/candidate/jobs/${job.id}`
+                                                )
+                                            }
+                                            className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                                        >
+                                            View Job
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    ))
+                        );
+                    })
                 ) : (
                     <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
                         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-400">

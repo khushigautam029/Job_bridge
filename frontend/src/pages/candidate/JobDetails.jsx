@@ -1,3 +1,4 @@
+
 import {
     ArrowLeft,
     ArrowRight,
@@ -13,10 +14,8 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-    getJob,
-} from "../../services/jobService";
 import { getApplications } from "../../services/applicationService";
+import { getJob } from "../../services/jobService";
 import {
     isJobSaved,
     saveJob,
@@ -36,56 +35,80 @@ const JobDetails = () => {
 
     useEffect(() => {
         let active = true;
+
+        // Load job details
         getJob(jobId)
             .then((selectedJob) => {
                 if (!active) return;
+
                 setJob({
                     ...selectedJob,
                     responsibilities: selectedJob.responsibilities
-                        ? selectedJob.responsibilities.split("\n").filter(Boolean)
+                        ? selectedJob.responsibilities
+                              .split("\n")
+                              .filter(Boolean)
                         : [],
                     requirements: selectedJob.requirements
-                        ? selectedJob.requirements.split("\n").filter(Boolean)
+                        ? selectedJob.requirements
+                              .split("\n")
+                              .filter(Boolean)
                         : [],
-                    skills: (selectedJob.skills || []).map((skill) =>
-                        typeof skill === "string" ? skill : skill.name
+                    skills: (selectedJob.skills || []).map(
+                        (skill) =>
+                            typeof skill === "string"
+                                ? skill
+                                : skill.name
                     ),
                 });
+
+                setError("");
             })
             .catch((loadError) => {
                 if (active) {
                     setJob(null);
                     setError(
                         loadError.response?.data?.message ||
-                        "This job could not be found."
+                            "This job could not be found."
                     );
                 }
             })
             .finally(() => {
-                if (active) setLoadedJobId(jobId);
+                if (active) {
+                    setLoadedJobId(jobId);
+                }
             });
 
-        if (localStorage.getItem("token") || sessionStorage.getItem("token")) {
+        const isAuthenticated = Boolean(
+            localStorage.getItem("token") ||
+                sessionStorage.getItem("token")
+        );
+
+        if (isAuthenticated) {
+            // Check whether the job is saved
             isJobSaved(jobId)
                 .then((saved) => {
-                    if (active) setIsSaved(saved);
+                    if (active) {
+                        setIsSaved(saved);
+                    }
                 })
                 .catch((loadError) => {
                     if (active) {
                         setError(
                             loadError.response?.data?.message ||
-                            "Unable to check whether this job is saved."
+                                "Unable to check whether this job is saved."
                         );
                     }
                 });
 
+            // Check whether the candidate has applied
             getApplications()
                 .then((applications) => {
                     if (active) {
                         setIsApplied(
                             applications.some(
                                 (application) =>
-                                    String(application.jobId) === String(jobId) &&
+                                    String(application.jobId) ===
+                                        String(jobId) &&
                                     application.status !== "WITHDRAWN"
                             )
                         );
@@ -95,10 +118,13 @@ const JobDetails = () => {
                     if (active) {
                         setError(
                             loadError.response?.data?.message ||
-                            "Unable to load your applications."
+                                "Unable to load your applications."
                         );
                     }
                 });
+        } else {
+            setIsSaved(false);
+            setIsApplied(false);
         }
 
         return () => {
@@ -108,12 +134,8 @@ const JobDetails = () => {
 
     const isAuthenticated = Boolean(
         localStorage.getItem("token") ||
-        sessionStorage.getItem("token")
+            sessionStorage.getItem("token")
     );
-
-    const saveError = (message) => {
-        setError(message);
-    };
 
     const toggleSavedJob = async () => {
         if (!isAuthenticated) {
@@ -121,7 +143,11 @@ const JobDetails = () => {
             return;
         }
 
+        if (!job) return;
+
         try {
+            setError("");
+
             if (isSaved) {
                 await unsaveJob(job.id);
                 setIsSaved(false);
@@ -129,19 +155,19 @@ const JobDetails = () => {
                 await saveJob(job.id);
                 setIsSaved(true);
             }
-            setError("");
         } catch (requestError) {
-            saveError(
+            setError(
                 requestError.response?.data?.message ||
-                "Unable to update saved jobs."
+                    "Unable to update saved jobs."
             );
         }
     };
 
+    // Format enum values for display
     const formatText = (value) => {
         if (!value) return "Not specified";
 
-        return value
+        return String(value)
             .replaceAll("_", " ")
             .toLowerCase()
             .replace(/\b\w/g, (letter) =>
@@ -149,6 +175,34 @@ const JobDetails = () => {
             );
     };
 
+    // Direct Hiring / Consultancy Hiring badge
+    const getHiringInfo = (companyType) => {
+        const type = String(companyType || "").toUpperCase();
+
+        if (type === "DIRECT") {
+            return {
+                label: "Direct Hiring",
+                className:
+                    "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100",
+            };
+        }
+
+        if (type === "CONSULTANCY") {
+            return {
+                label: "Consultancy Hiring",
+                className:
+                    "bg-amber-50 text-amber-700 ring-1 ring-amber-100",
+            };
+        }
+
+        return null;
+    };
+
+    const hiringInfo = getHiringInfo(
+        job?.company?.companyType || job?.companyType
+    );
+
+    // Format experience
     const formatExperience = () => {
         if (!job) return "Not specified";
 
@@ -166,6 +220,7 @@ const JobDetails = () => {
         return `${min} - ${max} Years`;
     };
 
+    // Format salary
     const formatSalary = () => {
         if (!job?.minSalary && !job?.maxSalary) {
             return "Salary not disclosed";
@@ -186,19 +241,18 @@ const JobDetails = () => {
         return min || max;
     };
 
+    // Format date
     const formatDate = (date) => {
         if (!date) return "Not specified";
 
-        return new Date(date).toLocaleDateString(
-            "en-IN",
-            {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-            }
-        );
+        return new Date(date).toLocaleDateString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+        });
     };
 
+    // Calculate when the job was posted
     const getDaysAgo = (date) => {
         if (!date) return "";
 
@@ -223,6 +277,7 @@ const JobDetails = () => {
         return `Posted ${days} days ago`;
     };
 
+    // Display description paragraphs
     const formatDescription = (text) => {
         if (!text) {
             return (
@@ -233,26 +288,29 @@ const JobDetails = () => {
             );
         }
 
-        return text
-            .split("\n")
-            .map((paragraph, index) => (
-                <p
-                    key={index}
-                    className="mb-4 text-sm leading-7 text-slate-600 last:mb-0"
-                >
-                    {paragraph}
-                </p>
-            ));
+        return text.split("\n").map((paragraph, index) => (
+            <p
+                key={index}
+                className="mb-4 text-sm leading-7 text-slate-600 last:mb-0"
+            >
+                {paragraph}
+            </p>
+        ));
     };
 
+    // Apply for the job
     const handleApply = () => {
         if (!isAuthenticated) {
             navigate("/login");
             return;
         }
-        navigate(`/candidate/jobs/${job.id}/apply`);
+
+        if (job) {
+            navigate(`/candidate/jobs/${job.id}/apply`);
+        }
     };
 
+    // Loading screen
     if (loading) {
         return (
             <div className="min-h-full bg-slate-50">
@@ -264,7 +322,6 @@ const JobDetails = () => {
 
                         <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
                             <div className="h-[500px] rounded-2xl bg-white" />
-
                             <div className="h-80 rounded-2xl bg-white" />
                         </div>
                     </div>
@@ -273,6 +330,7 @@ const JobDetails = () => {
         );
     }
 
+    // Error screen
     if (error || !job) {
         return (
             <div className="flex min-h-full items-center justify-center bg-slate-50 px-5 py-10">
@@ -292,9 +350,7 @@ const JobDetails = () => {
 
                     <button
                         type="button"
-                        onClick={() =>
-                            navigate("/candidate/jobs")
-                        }
+                        onClick={() => navigate("/candidate/jobs")}
                         className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
                     >
                         <ArrowLeft size={17} />
@@ -312,13 +368,11 @@ const JobDetails = () => {
     return (
         <div className="min-h-full bg-slate-50 text-slate-800">
             <main className="w-full px-5 py-6 sm:px-6 lg:px-7">
-                {/* Top Back Navigation */}
+                {/* Back Navigation */}
                 <div className="mb-5">
                     <button
                         type="button"
-                        onClick={() =>
-                            navigate("/candidate/jobs")
-                        }
+                        onClick={() => navigate("/candidate/jobs")}
                         className="flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-indigo-600"
                     >
                         <ArrowLeft size={17} />
@@ -329,13 +383,14 @@ const JobDetails = () => {
                 {/* Job Header */}
                 <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
                     <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
-                        {/* Company + Job */}
+                        {/* Company and Job Details */}
                         <div className="flex min-w-0 gap-4">
                             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
                                 <Building2 size={26} />
                             </div>
 
                             <div className="min-w-0">
+                                {/* Category, Status and Hiring Type */}
                                 <div className="flex flex-wrap items-center gap-2">
                                     <p className="text-sm font-medium text-indigo-600">
                                         {job.category?.name ||
@@ -345,6 +400,14 @@ const JobDetails = () => {
                                     <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-600">
                                         Open
                                     </span>
+
+                                    {hiringInfo && (
+                                        <span
+                                            className={`rounded-full px-2.5 py-1 text-xs font-semibold ${hiringInfo.className}`}
+                                        >
+                                            {hiringInfo.label}
+                                        </span>
+                                    )}
                                 </div>
 
                                 <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
@@ -352,8 +415,7 @@ const JobDetails = () => {
                                 </h1>
 
                                 <p className="mt-2 text-sm font-medium text-slate-600">
-                                    {job.company?.name ||
-                                        "Company"}
+                                    {job.company?.name || "Company"}
                                 </p>
 
                                 <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-slate-500">
@@ -364,32 +426,27 @@ const JobDetails = () => {
                                     </span>
 
                                     <span className="flex items-center gap-2">
-                                        <BriefcaseBusiness
-                                            size={16}
-                                        />
-                                        {formatText(
-                                            job.jobType
-                                        )}
+                                        <BriefcaseBusiness size={16} />
+                                        {formatText(job.jobType)}
                                     </span>
 
                                     <span className="flex items-center gap-2">
                                         <Clock3 size={16} />
-                                        {formatText(
-                                            job.workMode
-                                        )}
+                                        {formatText(job.workMode)}
                                     </span>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Save */}
+                        {/* Save Job */}
                         <button
                             type="button"
                             onClick={toggleSavedJob}
-                            className={`flex shrink-0 items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold transition ${isSaved
+                            className={`flex shrink-0 items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold transition ${
+                                isSaved
                                     ? "border-indigo-200 bg-indigo-50 text-indigo-600"
                                     : "border-slate-200 text-slate-600 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
-                                }`}
+                            }`}
                         >
                             {isSaved ? (
                                 <BookmarkCheck size={17} />
@@ -407,7 +464,6 @@ const JobDetails = () => {
                             <p className="text-xs font-medium text-slate-400">
                                 Salary
                             </p>
-
                             <p className="mt-1 text-sm font-semibold text-slate-800">
                                 {formatSalary()}
                             </p>
@@ -417,7 +473,6 @@ const JobDetails = () => {
                             <p className="text-xs font-medium text-slate-400">
                                 Experience
                             </p>
-
                             <p className="mt-1 text-sm font-semibold text-slate-800">
                                 {formatExperience()}
                             </p>
@@ -427,7 +482,6 @@ const JobDetails = () => {
                             <p className="text-xs font-medium text-slate-400">
                                 Job Type
                             </p>
-
                             <p className="mt-1 text-sm font-semibold text-slate-800">
                                 {formatText(job.jobType)}
                             </p>
@@ -437,7 +491,6 @@ const JobDetails = () => {
                             <p className="text-xs font-medium text-slate-400">
                                 Applicants
                             </p>
-
                             <p className="mt-1 text-sm font-semibold text-slate-800">
                                 {job.applicants || 0}
                             </p>
@@ -447,17 +500,14 @@ const JobDetails = () => {
                             <p className="text-xs font-medium text-slate-400">
                                 Deadline
                             </p>
-
                             <p className="mt-1 text-sm font-semibold text-slate-800">
-                                {formatDate(
-                                    job.applicationDeadline
-                                )}
+                                {formatDate(job.applicationDeadline)}
                             </p>
                         </div>
                     </div>
                 </section>
 
-                {/* Content */}
+                {/* Main Content and Sidebar */}
                 <div className="mt-5 grid gap-5 lg:grid-cols-[1fr_320px]">
                     {/* Main Content */}
                     <div className="space-y-5">
@@ -468,9 +518,7 @@ const JobDetails = () => {
                             </h2>
 
                             <div className="mt-4">
-                                {formatDescription(
-                                    job.description
-                                )}
+                                {formatDescription(job.description)}
                             </div>
                         </section>
 
@@ -595,11 +643,8 @@ const JobDetails = () => {
                                         size={17}
                                         className="text-slate-400"
                                     />
-
                                     <span>
-                                        {getDaysAgo(
-                                            job.createdAt
-                                        )}
+                                        {getDaysAgo(job.createdAt)}
                                     </span>
                                 </div>
 
@@ -608,39 +653,42 @@ const JobDetails = () => {
                                         size={17}
                                         className="text-slate-400"
                                     />
-
                                     <span>
-                                        {job.applicants || 0}{" "}
-                                        applicants
+                                        {job.applicants || 0} applicants
                                     </span>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Company */}
+                        {/* Company Information */}
                         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                                 About the company
                             </p>
 
-                            <div className="mt-4 flex items-center gap-3">
-                                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                            <div className="mt-4 flex items-start gap-3">
+                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
                                     <Building2 size={20} />
                                 </div>
 
-                                <div>
+                                <div className="min-w-0">
                                     <p className="font-semibold text-slate-800">
-                                        {job.company?.name ||
-                                            "Company"}
+                                        {job.company?.name || "Company"}
                                     </p>
 
                                     {job.company?.location && (
                                         <p className="mt-0.5 text-xs text-slate-400">
-                                            {
-                                                job.company
-                                                    .location
-                                            }
+                                            {job.company.location}
                                         </p>
+                                    )}
+
+                                    {/* Hiring Type Badge */}
+                                    {hiringInfo && (
+                                        <span
+                                            className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${hiringInfo.className}`}
+                                        >
+                                            {hiringInfo.label}
+                                        </span>
                                     )}
                                 </div>
                             </div>
@@ -663,7 +711,7 @@ const JobDetails = () => {
                             )}
                         </div>
 
-                        {/* Quick Info */}
+                        {/* Quick Job Information */}
                         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                             <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
                                 Job Information
@@ -674,7 +722,6 @@ const JobDetails = () => {
                                     <p className="text-xs text-slate-400">
                                         Category
                                     </p>
-
                                     <p className="mt-1 text-sm font-medium text-slate-700">
                                         {job.category?.name ||
                                             "Not specified"}
@@ -685,11 +732,8 @@ const JobDetails = () => {
                                     <p className="text-xs text-slate-400">
                                         Work Mode
                                     </p>
-
                                     <p className="mt-1 text-sm font-medium text-slate-700">
-                                        {formatText(
-                                            job.workMode
-                                        )}
+                                        {formatText(job.workMode)}
                                     </p>
                                 </div>
 
@@ -697,7 +741,6 @@ const JobDetails = () => {
                                     <p className="text-xs text-slate-400">
                                         Application Deadline
                                     </p>
-
                                     <p className="mt-1 text-sm font-medium text-slate-700">
                                         {formatDate(
                                             job.applicationDeadline

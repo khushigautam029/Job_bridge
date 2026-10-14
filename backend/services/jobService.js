@@ -159,6 +159,7 @@ const getAllJobs = async (filters = {}) => {
                     attributes: [
                         "id",
                         "name",
+                        "companyType",
                         "logo",
                         "website",
                         "location",
@@ -274,6 +275,7 @@ const getJobById = async (
                     attributes: [
                         "id",
                         "name",
+                        "companyType",
                         "description",
                         "logo",
                         "website",
