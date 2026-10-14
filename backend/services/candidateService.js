@@ -10,10 +10,7 @@ import {
 
 import { STATUS_CODES } from "../utils/setConstants.js";
 
-// ======================================================
 // PROFILE COMPLETION HELPER
-// ======================================================
-
 const isFieldCompleted = (value) => {
     if (
         value === null ||
@@ -71,11 +68,7 @@ const calculateProfileCompletion = (candidateProfile) => {
     };
 };
 
-
-// ======================================================
 // GET CANDIDATE PROFILE
-// ======================================================
-
 const getCandidateProfile = async (userId) => {
     const candidateProfile =
         await CandidateProfile.findOne({
@@ -112,11 +105,7 @@ const getCandidateProfile = async (userId) => {
     return candidateProfile;
 };
 
-
-// ======================================================
 // UPDATE CANDIDATE PROFILE
-// ======================================================
-
 const updateCandidateProfile = async (
     userId,
     data
@@ -154,10 +143,7 @@ const updateCandidateProfile = async (
     }
 
 
-    // ==================================================
     // UPDATE USERS TABLE
-    // ==================================================
-
     await user.update({
         name:
             data.name !== undefined
@@ -170,11 +156,7 @@ const updateCandidateProfile = async (
                 : user.phone,
     });
 
-
-    // ==================================================
     // UPDATE CANDIDATE_PROFILES TABLE
-    // ==================================================
-
     const candidateData = {
         location: data.location,
         bio: data.bio,
@@ -214,8 +196,6 @@ const updateCandidateProfile = async (
             data.availability,
     };
 
-
-    // Remove undefined values
     Object.keys(candidateData).forEach(
         (key) => {
             if (
@@ -232,11 +212,7 @@ const updateCandidateProfile = async (
         candidateData
     );
 
-
-    // ==================================================
     // RECALCULATE PROFILE COMPLETION
-    // ==================================================
-
     const updatedProfile =
         await getCandidateProfile(userId);
 
@@ -258,10 +234,7 @@ const updateCandidateProfile = async (
 };
 
 
-// ======================================================
 // UPLOAD CANDIDATE RESUME
-// ======================================================
-
 const uploadCandidateResume = async (
     userId,
     file
@@ -306,10 +279,7 @@ const uploadCandidateResume = async (
     });
 
 
-    // ==================================================
     // RECALCULATE PROFILE COMPLETION AFTER RESUME
-    // ==================================================
-
     const updatedProfile =
         await getCandidateProfile(userId);
 
@@ -328,11 +298,7 @@ const uploadCandidateResume = async (
     return getCandidateProfile(userId);
 };
 
-
-// ======================================================
 // GET CANDIDATE RESUME FOR RECRUITER
-// ======================================================
-
 const getCandidateResumeForRecruiter = async (
     userId,
     candidateId
@@ -433,11 +399,7 @@ const getCandidateResumeForRecruiter = async (
     return resumePath;
 };
 
-
-// ======================================================
 // GET PROFILE COMPLETION
-// ======================================================
-
 const getCandidateProfileCompletion = async (
     userId
 ) => {

@@ -1898,11 +1898,7 @@ const CandidateProfile = () => {
             }
         };
 
-
-    // =====================================================
     // SKILLS
-    // =====================================================
-
     const handleAddSkill = async (e) => {
 
         e.preventDefault();
