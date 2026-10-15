@@ -173,6 +173,11 @@ export const MESSAGES = {
     PROJECT_UPDATED: "Project updated successfully",
     PROJECT_NOT_FOUND: "Project not found",
     MY_COMPANY_FETCHED: "My Company retrieved successfully",
-    COMPANIES_FETCHED: "Companies retrieved successfully"
+    COMPANIES_FETCHED: "Companies retrieved successfully",
+    RESUME_DELETED:"Resume deleted successfully",
+    PROFILE_IMAGE_REQUIRED:"Profile image is required",
+    PROFILE_IMAGE_UPLOADED:"Profile image uploaded successfully",
+    PROFILE_IMAGE_NOT_FOUND:"Profile image not found",
+    PROFILE_IMAGE_DELETED:"Profile image deleted successfully"
 
 };

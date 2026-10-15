@@ -1,21 +1,29 @@
 ﻿import {
     BriefcaseBusiness,
+    Building2,
     CalendarDays,
+    Clock,
     Edit,
     Eye,
+    FileText,
+    GraduationCap,
+    Mail,
     MapPin,
+    Phone,
     Plus,
     Search,
     Trash2,
     Users,
     X,
 } from "lucide-react";
+
 import { useEffect, useMemo, useState } from "react";
 import {
     useLocation,
     useNavigate,
     useSearchParams,
 } from "react-router-dom";
+
 import {
     deleteJob as deleteJobRequest,
     formatJobCard,
@@ -23,7 +31,9 @@ import {
     getMyJobs,
     updateJob,
 } from "../../services/jobService";
+
 import { getJobApplications } from "../../services/applicationService";
+
 
 const formatRecruiterJob = (job) => ({
     ...formatJobCard(job),
@@ -32,11 +42,12 @@ const formatRecruiterJob = (job) => ({
     postedDate: job.createdAt
         ? new Date(job.createdAt).toLocaleDateString()
         : "",
-    status: job.status === "OPEN"
-        ? "Active"
-        : job.status === "CLOSED"
-            ? "Closed"
-            : "Draft",
+    status:
+        job.status === "OPEN"
+            ? "Active"
+            : job.status === "CLOSED"
+                ? "Closed"
+                : "Draft",
     deadline: job.applicationDeadline || "",
     responsibilities: job.responsibilities
         ? job.responsibilities.split("\n").filter(Boolean)
@@ -46,38 +57,345 @@ const formatRecruiterJob = (job) => ({
         : [],
 });
 
+
+const inputClass =
+    "w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100";
+
+
+/*
+ * Normalize an application response.
+ * Keep the original API data so the modal can display
+ * all additional candidate details returned by the backend.
+ */
+const formatApplication = (application) => {
+    const candidate = application.candidate || {};
+    const user = candidate.user || {};
+
+    return {
+        id: application.id,
+        name: user.name || candidate.name || "Candidate",
+        email: user.email || candidate.email || "",
+        phone: user.phone || candidate.phone || "",
+        experienceYears: candidate.experienceYears,
+        candidate,
+        user,
+        application,
+    };
+};
+
+
+const Detail = ({ icon: Icon, label, value }) => {
+    if (
+        value === null ||
+        value === undefined ||
+        value === "" ||
+        (Array.isArray(value) && value.length === 0)
+    ) {
+        return null;
+    }
+
+    const displayValue = Array.isArray(value)
+        ? value
+            .map((item) => {
+                if (typeof item === "object" && item !== null) {
+                    return (
+                        item.name ||
+                        item.title ||
+                        item.skillName ||
+                        JSON.stringify(item)
+                    );
+                }
+                return item;
+            })
+            .join(", ")
+        : typeof value === "object"
+            ? value.name ||
+              value.title ||
+              value.url ||
+              JSON.stringify(value)
+            : String(value);
+
+    return (
+        <div className="flex min-w-0 items-start gap-3 rounded-xl bg-slate-50 p-3">
+            {Icon && (
+                <Icon
+                    size={17}
+                    className="mt-0.5 shrink-0 text-indigo-500"
+                />
+            )}
+
+            <div className="min-w-0">
+                <p className="text-xs font-medium text-slate-400">
+                    {label}
+                </p>
+                <p className="mt-1 break-words text-sm text-slate-700">
+                    {displayValue}
+                </p>
+            </div>
+        </div>
+    );
+};
+
+
+const getInitials = (name = "Candidate") =>
+    name
+        .trim()
+        .split(/\s+/)
+        .map((part) => part[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase();
+
+
+const CandidateDetails = ({ application }) => {
+    const candidate = application.candidate || {};
+    const user = application.user || {};
+
+    /*
+     * Include common candidate-profile fields.
+     * Empty fields are automatically hidden.
+     */
+    const details = [
+        {
+            label: "Email",
+            value: application.email,
+            icon: Mail,
+        },
+        {
+            label: "Phone",
+            value:
+                application.phone ||
+                candidate.phone ||
+                user.phone,
+            icon: Phone,
+        },
+        {
+            label: "Total Experience",
+            value:
+                application.experienceYears !== null &&
+                application.experienceYears !== undefined
+                    ? `${application.experienceYears} years`
+                    : null,
+            icon: Clock,
+        },
+        {
+            label: "Location",
+            value:
+                candidate.location ||
+                candidate.currentLocation ||
+                user.location,
+            icon: MapPin,
+        },
+        {
+            label: "Education",
+            value:
+                candidate.education ||
+                candidate.highestQualification ||
+                candidate.degree,
+            icon: GraduationCap,
+        },
+        {
+            label: "College / University",
+            value:
+                candidate.college ||
+                candidate.university ||
+                candidate.institution,
+            icon: Building2,
+        },
+        {
+            label: "Current Company",
+            value:
+                candidate.currentCompany ||
+                candidate.companyName,
+            icon: Building2,
+        },
+        {
+            label: "Current Designation",
+            value:
+                candidate.currentDesignation ||
+                candidate.designation,
+            icon: BriefcaseBusiness,
+        },
+        {
+            label: "Skills",
+            value:
+                candidate.skills ||
+                candidate.CandidateSkills ||
+                candidate.candidateSkills,
+            icon: FileText,
+        },
+        {
+            label: "Resume",
+            value:
+                candidate.resumeUrl ||
+                candidate.resume ||
+                candidate.resumeLink,
+            icon: FileText,
+        },
+        {
+            label: "Address",
+            value: candidate.address,
+            icon: MapPin,
+        },
+        {
+            label: "Date of Birth",
+            value: candidate.dateOfBirth,
+            icon: CalendarDays,
+        },
+        {
+            label: "Gender",
+            value: candidate.gender,
+            icon: Users,
+        },
+        {
+            label: "Bio / About",
+            value:
+                candidate.bio ||
+                candidate.about ||
+                candidate.summary,
+            icon: FileText,
+        },
+    ];
+
+    /*
+     * Add other scalar fields from the candidate profile
+     * so new backend fields can also appear without
+     * adding a separate UI component for each one.
+     */
+    const knownKeys = new Set([
+        "id",
+        "userId",
+        "createdAt",
+        "updatedAt",
+        "deletedAt",
+        "user",
+        "User",
+        "applications",
+        "Applications",
+        "password",
+        "passwordHash",
+    ]);
+
+    const extraDetails = Object.entries(candidate)
+        .filter(([key, value]) => {
+            if (knownKeys.has(key)) return false;
+
+            if (
+                value === null ||
+                value === undefined ||
+                value === ""
+            ) {
+                return false;
+            }
+
+            if (
+                typeof value === "object" &&
+                !Array.isArray(value)
+            ) {
+                return false;
+            }
+
+            return !details.some(
+                (detail) =>
+                    detail.value === value &&
+                    detail.value !== undefined
+            );
+        })
+        .map(([key, value]) => ({
+            label: key
+                .replace(/([A-Z])/g, " $1")
+                .replace(/^./, (letter) => letter.toUpperCase()),
+            value:
+                typeof value === "boolean"
+                    ? value
+                        ? "Yes"
+                        : "No"
+                    : value,
+            icon: FileText,
+        }));
+
+    const visibleDetails = [...details, ...extraDetails].filter(
+        (detail) =>
+            detail.value !== null &&
+            detail.value !== undefined &&
+            detail.value !== "" &&
+            (!Array.isArray(detail.value) ||
+                detail.value.length > 0)
+    );
+
+    return (
+        <article className="rounded-2xl border border-slate-200 bg-white p-5">
+            <div className="flex items-start gap-3">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-sm font-bold text-indigo-600">
+                    {getInitials(application.name)}
+                </div>
+
+                <div className="min-w-0 flex-1">
+                    <h3 className="break-words font-semibold text-slate-900">
+                        {application.name}
+                    </h3>
+                    <p className="mt-1 text-xs text-slate-500">
+                        Candidate
+                    </p>
+                </div>
+            </div>
+
+            {visibleDetails.length > 0 ? (
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                    {visibleDetails.map((detail, index) => (
+                        <Detail
+                            key={`${detail.label}-${index}`}
+                            icon={detail.icon}
+                            label={detail.label}
+                            value={detail.value}
+                        />
+                    ))}
+                </div>
+            ) : (
+                <p className="mt-4 text-sm text-slate-400">
+                    No additional profile details were returned
+                    by the API.
+                </p>
+            )}
+        </article>
+    );
+};
+
+
 const Jobs = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [searchParams] = useSearchParams();
 
-   
     const selectedCategory = searchParams.get("category");
 
-  
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("All");
-
-    // If category exists in URL, use it.
-    // Otherwise show all categories.
     const [categoryFilter, setCategoryFilter] = useState(
         selectedCategory || "All"
     );
+
     const [selectedJob, setSelectedJob] = useState(null);
     const [showApplications, setShowApplications] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+
     const [jobs, setJobs] = useState([]);
     const [categories, setCategories] = useState([]);
     const [remoteApplications, setRemoteApplications] = useState({});
+    const [applicationsLoading, setApplicationsLoading] = useState(false);
+
     const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
 
     useEffect(() => {
         let active = true;
+
         Promise.all([getMyJobs(), getJobCategories()])
             .then(([myJobs, jobCategories]) => {
                 if (!active) return;
+
                 setJobs(myJobs.map(formatRecruiterJob));
                 setCategories(jobCategories);
             })
@@ -101,121 +419,51 @@ const Jobs = () => {
 
     useEffect(() => {
         const editJobId = location.state?.editJobId;
+
         if (loading || !editJobId) return;
 
         const selected = jobs.find(
             (job) => job.id === Number(editJobId)
         );
+
         if (selected) {
             setSelectedJob({ ...selected });
             setShowEditModal(true);
         }
+
         navigate(location.pathname, {
             replace: true,
             state: null,
         });
-    }, [jobs, loading, location.pathname, location.state, navigate]);
+    }, [
+        jobs,
+        loading,
+        location.pathname,
+        location.state,
+        navigate,
+    ]);
 
-    const applications = {
-        1: [
-            {
-                id: 101,
-                name: "Rahul Sharma",
-                email: "rahul@example.com",
-                experience: "4 Years",
-                status: "Shortlisted",
-            },
-            {
-                id: 102,
-                name: "Aman Verma",
-                email: "aman@example.com",
-                experience: "3 Years",
-                status: "Interview",
-            },
-            {
-                id: 103,
-                name: "Vikas Kumar",
-                email: "vikas@example.com",
-                experience: "5 Years",
-                status: "Under Review",
-            },
-        ],
-
-        2: [
-            {
-                id: 201,
-                name: "Priya Singh",
-                email: "priya@example.com",
-                experience: "3 Years",
-                status: "Under Review",
-            },
-            {
-                id: 202,
-                name: "Rohit Mehta",
-                email: "rohit@example.com",
-                experience: "4 Years",
-                status: "Shortlisted",
-            },
-        ],
-
-        3: [
-            {
-                id: 301,
-                name: "Sneha Kapoor",
-                email: "sneha@example.com",
-                experience: "2 Years",
-                status: "Applied",
-            },
-            {
-                id: 302,
-                name: "Anjali Sharma",
-                email: "anjali@example.com",
-                experience: "3 Years",
-                status: "Shortlisted",
-            },
-        ],
-
-        4: [
-            {
-                id: 401,
-                name: "Karan Malhotra",
-                email: "karan@example.com",
-                experience: "2 Years",
-                status: "Applied",
-            },
-        ],
-
-        5: [
-            {
-                id: 501,
-                name: "Neha Gupta",
-                email: "neha@example.com",
-                experience: "3 Years",
-                status: "Under Review",
-            },
-        ],
-
-        6: [
-            {
-                id: 601,
-                name: "Arjun Kapoor",
-                email: "arjun@example.com",
-                experience: "2 Years",
-                status: "Applied",
-            },
-        ],
-    };
     const filteredJobs = useMemo(() => {
         const searchValue = search.toLowerCase().trim();
 
         return jobs.filter((job) => {
             const matchesSearch =
-                job.title.toLowerCase().includes(searchValue) ||
-                job.category.toLowerCase().includes(searchValue) ||
-                job.location.toLowerCase().includes(searchValue) ||
-                job.type.toLowerCase().includes(searchValue) ||
-                job.skills.some((skill) =>
-                    skill.toLowerCase().includes(searchValue)
+                (job.title || "")
+                    .toLowerCase()
+                    .includes(searchValue) ||
+                (job.category || "")
+                    .toLowerCase()
+                    .includes(searchValue) ||
+                (job.location || "")
+                    .toLowerCase()
+                    .includes(searchValue) ||
+                (job.type || "")
+                    .toLowerCase()
+                    .includes(searchValue) ||
+                (job.skills || []).some((skill) =>
+                    String(skill)
+                        .toLowerCase()
+                        .includes(searchValue)
                 );
 
             const matchesStatus =
@@ -232,112 +480,118 @@ const Jobs = () => {
                 matchesCategory
             );
         });
-    }, [
-        jobs,
-        search,
-        statusFilter,
-        categoryFilter,
-    ]);
-
-    const getStatusClasses = (status) => {
-        if (status === "Active") {
-            return "bg-green-50 text-green-600";
-        }
-
-        return "bg-slate-100 text-slate-500";
-    };
-
-    const getApplicationStatusClasses = (status) => {
-        if (status === "Shortlisted") {
-            return "bg-green-50 text-green-600";
-        }
-
-        if (status === "Interview") {
-            return "bg-indigo-50 text-indigo-600";
-        }
-
-        if (status === "Under Review") {
-            return "bg-amber-50 text-amber-600";
-        }
-
-        return "bg-slate-100 text-slate-500";
-    };
+    }, [jobs, search, statusFilter, categoryFilter]);
 
     const selectedApplications = selectedJob
-        ? remoteApplications[selectedJob.id] ??
-          applications[selectedJob.id] ??
-          []
+        ? remoteApplications[selectedJob.id] || []
         : [];
+
+    const getStatusClasses = (status) =>
+        status === "Active"
+            ? "bg-green-50 text-green-600"
+            : status === "Closed"
+                ? "bg-slate-100 text-slate-500"
+                : "bg-amber-50 text-amber-600";
 
     const handleViewJob = (job) => {
         navigate(`/recruiter/jobs/${job.id}`, {
             state: { job },
         });
     };
+
     const handleViewApplications = async (job) => {
         setSelectedJob(job);
         setShowApplications(true);
+        setApplicationsLoading(true);
+        setError("");
+
         try {
             const result = await getJobApplications(job.id);
+
+            const applicationList = Array.isArray(result)
+                ? result
+                : result?.applications ||
+                  result?.data?.applications ||
+                  result?.data ||
+                  [];
+
+            const formattedApplications = applicationList.map(
+                formatApplication
+            );
+
             setRemoteApplications((current) => ({
                 ...current,
-                [job.id]: result.map((application) => ({
-                    id: application.id,
-                    name: application.candidate?.user?.name || "Candidate",
-                    email: application.candidate?.user?.email || "",
-                    experience: application.candidate?.experienceYears
-                        ? `${application.candidate.experienceYears} Years`
-                        : "Not specified",
-                    status: (application.status || "APPLIED")
-                        .replaceAll("_", " ")
-                        .toLowerCase()
-                        .replace(/\b\w/g, (letter) => letter.toUpperCase()),
-                })),
+                [job.id]: formattedApplications,
             }));
-            setError("");
         } catch (loadError) {
             setError(
                 loadError.response?.data?.message ||
                 "Unable to load applications for this job."
             );
+        } finally {
+            setApplicationsLoading(false);
         }
     };
+
     const handleEdit = (job) => {
         setSelectedJob({ ...job });
         setShowEditModal(true);
     };
-    const handleEditChange = (e) => {
-        const { name, value } = e.target;
 
-        setSelectedJob((prev) => ({
-            ...prev,
+    const handleEditChange = (event) => {
+        const { name, value } = event.target;
+
+        setSelectedJob((previous) => ({
+            ...previous,
             [name]: value,
         }));
     };
 
     const handleSaveEdit = async () => {
+        if (!selectedJob) return;
+
         const category = categories.find(
             (item) => item.name === selectedJob.category
         );
+
+        setSaving(true);
+        setError("");
+
         try {
             const response = await updateJob(selectedJob.id, {
                 title: selectedJob.title,
-                categoryId: category?.id || selectedJob.categoryId,
+                categoryId:
+                    category?.id || selectedJob.categoryId,
                 location: selectedJob.location,
-                jobType: selectedJob.type.toUpperCase().replaceAll(" ", "_"),
-                workMode: selectedJob.workMode.toUpperCase().replaceAll(" ", "_"),
-                status: selectedJob.status === "Active" ? "OPEN" : "CLOSED",
-                description: Array.isArray(selectedJob.description)
+                jobType: selectedJob.type
+                    .toUpperCase()
+                    .replaceAll(" ", "_"),
+                workMode: selectedJob.workMode
+                    .toUpperCase()
+                    .replaceAll(" ", "_"),
+                status:
+                    selectedJob.status === "Active"
+                        ? "OPEN"
+                        : "CLOSED",
+                description: Array.isArray(
+                    selectedJob.description
+                )
                     ? selectedJob.description.join("\n")
                     : selectedJob.description,
             });
-            const updatedJob = formatRecruiterJob(response.job);
-            setJobs((prevJobs) =>
-                prevJobs.map((job) =>
-                    job.id === updatedJob.id ? updatedJob : job
+
+            const updatedJob = formatRecruiterJob(
+                response.job
+            );
+
+            setJobs((previousJobs) =>
+                previousJobs.map((job) =>
+                    job.id === updatedJob.id
+                        ? updatedJob
+                        : job
                 )
             );
-            setError("");
+
             setShowEditModal(false);
             setSelectedJob(null);
         } catch (updateError) {
@@ -345,58 +599,80 @@ const Jobs = () => {
                 updateError.response?.data?.message ||
                 "Unable to update this job."
             );
+        } finally {
+            setSaving(false);
         }
     };
+
     const handleDelete = (job) => {
         setSelectedJob(job);
         setShowDeleteModal(true);
     };
 
     const confirmDelete = async () => {
+        if (!selectedJob) return;
+
+        setSaving(true);
+        setError("");
+
         try {
             await deleteJobRequest(selectedJob.id);
+
+            setJobs((previousJobs) =>
+                previousJobs.filter(
+                    (job) => job.id !== selectedJob.id
+                )
+            );
+
+            setShowDeleteModal(false);
+            setSelectedJob(null);
         } catch (deleteError) {
             setError(
                 deleteError.response?.data?.message ||
                 "Unable to delete this job."
             );
-            return;
+        } finally {
+            setSaving(false);
         }
-
-        setJobs((prevJobs) =>
-            prevJobs.filter(
-                (job) => job.id !== selectedJob.id
-            )
-        );
-
-        setShowDeleteModal(false);
-        setSelectedJob(null);
     };
+
     const clearFilters = () => {
         setSearch("");
         setStatusFilter("All");
         setCategoryFilter("All");
-
-        // Remove category from URL also
         navigate("/recruiter/jobs");
     };
 
     if (loading) {
         return (
-            <p className="py-10 text-center text-sm text-slate-500">
-                Loading your job postings...
-            </p>
+            <div className="flex min-h-[60vh] w-full items-center justify-center">
+                <p className="text-sm text-slate-500">
+                    Loading your job postings...
+                </p>
+            </div>
         );
     }
 
     return (
-        <div>
+        <main className="min-h-screen w-full max-w-none space-y-7 pb-10">
             {error && (
-                <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
-                    {error}
+                <div
+                    role="alert"
+                    className="flex items-start justify-between gap-3 rounded-xl border border-red-100 bg-red-50 p-4 text-sm text-red-700"
+                >
+                    <p>{error}</p>
+                    <button
+                        type="button"
+                        onClick={() => setError("")}
+                        aria-label="Dismiss error"
+                    >
+                        <X size={18} />
+                    </button>
                 </div>
             )}
-            <section className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+
+            {/* Page header */}
+            <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
                     <p className="text-sm font-medium text-indigo-600">
                         Hiring Management
@@ -407,7 +683,8 @@ const Jobs = () => {
                     </h1>
 
                     <p className="mt-2 text-sm text-slate-500">
-                        Manage your job postings and track applications.
+                        Manage your job postings and review
+                        candidate applications.
                     </p>
                 </div>
 
@@ -416,7 +693,7 @@ const Jobs = () => {
                     onClick={() =>
                         navigate("/recruiter/post-job")
                     }
-                    className="flex w-fit items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                    className="flex w-fit shrink-0 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
                 >
                     <Plus size={18} />
                     Post a Job
@@ -424,12 +701,11 @@ const Jobs = () => {
             </section>
 
             {selectedCategory && (
-                <div className="mt-5 flex items-center justify-between rounded-xl border border-indigo-100 bg-indigo-50 px-4 py-3">
+                <div className="flex items-center justify-between gap-4 rounded-xl border border-indigo-100 bg-indigo-50 px-4 py-3">
                     <div>
                         <p className="text-xs font-medium text-indigo-500">
                             Showing jobs in category
                         </p>
-
                         <p className="mt-0.5 text-sm font-semibold text-indigo-700">
                             {selectedCategory}
                         </p>
@@ -445,10 +721,10 @@ const Jobs = () => {
                 </div>
             )}
 
-            <section className="mt-7 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div className="grid gap-4 md:grid-cols-[1fr_auto_auto]">
-                    {/* Search */}
-                    <div className="relative">
+            {/* Filters */}
+            <section className="w-full rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_200px_220px]">
+                    <div className="relative min-w-0">
                         <Search
                             size={18}
                             className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
@@ -457,58 +733,47 @@ const Jobs = () => {
                         <input
                             type="text"
                             value={search}
-                            onChange={(e) =>
-                                setSearch(e.target.value)
+                            onChange={(event) =>
+                                setSearch(event.target.value)
                             }
                             placeholder="Search jobs, skills, location..."
-                            className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                            className={`${inputClass} pl-10`}
                         />
                     </div>
 
-                    {/* Status */}
                     <select
                         value={statusFilter}
-                        onChange={(e) =>
-                            setStatusFilter(e.target.value)
+                        onChange={(event) =>
+                            setStatusFilter(event.target.value)
                         }
-                        className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                        className={inputClass}
                     >
-                        <option value="All">
-                            All Status
-                        </option>
-
-                        <option value="Active">
-                            Active
-                        </option>
-
-                        <option value="Closed">
-                            Closed
-                        </option>
+                        <option value="All">All Status</option>
+                        <option value="Active">Active</option>
+                        <option value="Closed">Closed</option>
                     </select>
 
-                    {/* Category */}
                     <select
                         value={categoryFilter}
-                        onChange={(e) => {
-                            const value = e.target.value;
+                        onChange={(event) => {
+                            const value = event.target.value;
 
                             setCategoryFilter(value);
 
-                            if (value === "All") {
-                                navigate("/recruiter/jobs");
-                            } else {
-                                navigate(
-                                    `/recruiter/jobs?category=${encodeURIComponent(
-                                        value
-                                    )}`
-                                );
-                            }
+                            navigate(
+                                value === "All"
+                                    ? "/recruiter/jobs"
+                                    : `/recruiter/jobs?category=${encodeURIComponent(
+                                          value
+                                      )}`
+                            );
                         }}
-                        className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                        className={inputClass}
                     >
                         <option value="All">
                             All Categories
                         </option>
+
                         {categories.map((category) => (
                             <option
                                 key={category.id}
@@ -521,42 +786,37 @@ const Jobs = () => {
                 </div>
             </section>
 
-            <div className="mt-7 flex items-center justify-between">
-                <div>
-                    <h2 className="text-lg font-semibold text-slate-900">
-                        {categoryFilter !== "All"
-                            ? `${categoryFilter} Jobs`
-                            : "Your Job Postings"}
-                    </h2>
+            {/* Job count */}
+            <section className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <h2 className="text-lg font-semibold text-slate-900">
+                    {categoryFilter !== "All"
+                        ? `${categoryFilter} Jobs`
+                        : "Your Job Postings"}
+                </h2>
 
-                    <p className="mt-1 text-xs text-slate-400">
-                        {filteredJobs.length}{" "}
-                        {filteredJobs.length === 1
-                            ? "job"
-                            : "jobs"}{" "}
-                        found
-                    </p>
-                </div>
-            </div>
+                <p className="text-xs text-slate-400">
+                    {filteredJobs.length}{" "}
+                    {filteredJobs.length === 1 ? "job" : "jobs"} found
+                </p>
+            </section>
 
+            {/* Three jobs per row on wide screens */}
             {filteredJobs.length > 0 ? (
-                <section className="mt-5 grid gap-5 lg:grid-cols-2">
+                <section className="grid w-full grid-cols-1 items-stretch gap-5 md:grid-cols-2 xl:grid-cols-3">
                     {filteredJobs.map((job) => (
-                        <div
+                        <article
                             key={job.id}
-                            className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-indigo-200 hover:shadow-md"
+                            className="flex min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-indigo-200 hover:shadow-md sm:p-5"
                         >
-                            {/* Card Header */}
-                            <div className="flex items-start justify-between gap-4">
-                                <div className="flex items-start gap-4">
-                                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                                        <BriefcaseBusiness
-                                            size={21}
-                                        />
+                            {/* Card heading */}
+                            <div className="flex items-start justify-between gap-3">
+                                <div className="flex min-w-0 items-start gap-3">
+                                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                                        <BriefcaseBusiness size={20} />
                                     </div>
 
-                                    <div>
-                                        <h3 className="font-semibold text-slate-900">
+                                    <div className="min-w-0">
+                                        <h3 className="break-words font-semibold leading-6 text-slate-900">
                                             {job.title}
                                         </h3>
 
@@ -567,7 +827,7 @@ const Jobs = () => {
                                 </div>
 
                                 <span
-                                    className={`rounded-full px-3 py-1.5 text-xs font-semibold ${getStatusClasses(
+                                    className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${getStatusClasses(
                                         job.status
                                     )}`}
                                 >
@@ -575,66 +835,73 @@ const Jobs = () => {
                                 </span>
                             </div>
 
-                            {/* Job Information */}
-                            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                                <div className="flex items-center gap-2 text-xs text-slate-500">
+                            {/* Job information */}
+                            <div className="mt-5 grid grid-cols-1 gap-3">
+                                <div className="flex items-start gap-2 text-xs text-slate-500">
                                     <MapPin
-                                        size={16}
-                                        className="text-slate-400"
+                                        size={15}
+                                        className="mt-0.5 shrink-0 text-slate-400"
                                     />
-                                    {job.location}
+                                    <span className="break-words">
+                                        {job.location || "Location not specified"}
+                                    </span>
                                 </div>
 
                                 <div className="flex items-center gap-2 text-xs text-slate-500">
                                     <BriefcaseBusiness
-                                        size={16}
-                                        className="text-slate-400"
+                                        size={15}
+                                        className="shrink-0 text-slate-400"
                                     />
-                                    {job.type}
+                                    <span>{job.type}</span>
                                 </div>
 
                                 <div className="flex items-center gap-2 text-xs text-slate-500">
                                     <Users
-                                        size={16}
-                                        className="text-slate-400"
+                                        size={15}
+                                        className="shrink-0 text-slate-400"
                                     />
-                                    {job.applications} applications
+                                    <span>
+                                        {job.applications} applications
+                                    </span>
                                 </div>
 
                                 <div className="flex items-center gap-2 text-xs text-slate-500">
                                     <CalendarDays
-                                        size={16}
-                                        className="text-slate-400"
+                                        size={15}
+                                        className="shrink-0 text-slate-400"
                                     />
-                                    Posted {job.postedDate}
+                                    <span>
+                                        Posted {job.postedDate || "recently"}
+                                    </span>
                                 </div>
                             </div>
 
                             {/* Description */}
-                            <p className="mt-5 text-sm leading-6 text-slate-500">
-                                {job.description}
+                            <p className="mt-4 line-clamp-4 break-words text-sm leading-6 text-slate-500">
+                                {job.description ||
+                                    "No description provided."}
                             </p>
 
                             {/* Skills */}
-                            <div className="mt-5 flex flex-wrap gap-2">
-                                {job.skills.map((skill) => (
-                                    <span
-                                        key={skill}
-                                        className="rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-600"
-                                    >
-                                        {skill}
-                                    </span>
-                                ))}
+                            <div className="mt-4 flex flex-wrap gap-2">
+                                {(job.skills || []).map(
+                                    (skill, index) => (
+                                        <span
+                                            key={`${skill}-${index}`}
+                                            className="max-w-full break-words rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-600"
+                                        >
+                                            {skill}
+                                        </span>
+                                    )
+                                )}
                             </div>
 
-                            {/* Actions */}
-                            <div className="mt-6 grid gap-3 border-t border-slate-100 pt-5 sm:grid-cols-2">
+                            {/* Actions stay at the bottom */}
+                            <div className="mt-auto grid grid-cols-2 gap-2 border-t border-slate-100 pt-5">
                                 <button
                                     type="button"
-                                    onClick={() =>
-                                        handleViewJob(job)
-                                    }
-                                    className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-indigo-700"
+                                    onClick={() => handleViewJob(job)}
+                                    className="flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 px-2 py-2.5 text-xs font-semibold text-white transition hover:bg-indigo-700"
                                 >
                                     <Eye size={15} />
                                     View Job
@@ -645,7 +912,7 @@ const Jobs = () => {
                                     onClick={() =>
                                         handleViewApplications(job)
                                     }
-                                    className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
+                                    className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-2 py-2.5 text-xs font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
                                 >
                                     <Users size={15} />
                                     Applications
@@ -653,10 +920,8 @@ const Jobs = () => {
 
                                 <button
                                     type="button"
-                                    onClick={() =>
-                                        handleEdit(job)
-                                    }
-                                    className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
+                                    onClick={() => handleEdit(job)}
+                                    className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-2 py-2.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
                                 >
                                     <Edit size={15} />
                                     Edit
@@ -664,21 +929,19 @@ const Jobs = () => {
 
                                 <button
                                     type="button"
-                                    onClick={() =>
-                                        handleDelete(job)
-                                    }
-                                    className="flex items-center justify-center gap-2 rounded-xl border border-red-100 px-4 py-2.5 text-xs font-semibold text-red-500 transition hover:bg-red-50"
+                                    onClick={() => handleDelete(job)}
+                                    className="flex items-center justify-center gap-1.5 rounded-xl border border-red-100 px-2 py-2.5 text-xs font-semibold text-red-500 transition hover:bg-red-50"
                                 >
                                     <Trash2 size={15} />
                                     Delete
                                 </button>
                             </div>
-                        </div>
+                        </article>
                     ))}
                 </section>
             ) : (
-                <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
-                    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-slate-400">
+                <section className="flex min-h-72 w-full flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-slate-400">
                         <BriefcaseBusiness size={25} />
                     </div>
 
@@ -698,113 +961,77 @@ const Jobs = () => {
                     >
                         Clear filters
                     </button>
-                </div>
+                </section>
             )}
 
+            {/* Applications modal: candidate names and details only */}
             {showApplications && selectedJob && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4">
-                    <div className="max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-2xl">
-                        <div className="flex items-start justify-between border-b border-slate-200 px-6 py-5">
-                            <div>
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 p-3 sm:p-5">
+                    <section
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="applications-title"
+                        className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+                    >
+                        <header className="flex items-start justify-between gap-4 border-b border-slate-200 px-5 py-5 sm:px-7">
+                            <div className="min-w-0">
                                 <p className="text-xs font-medium text-indigo-600">
-                                    Applications
+                                    Candidate Applications
                                 </p>
 
-                                <h2 className="mt-1 text-xl font-bold text-slate-900">
+                                <h2
+                                    id="applications-title"
+                                    className="mt-1 break-words text-xl font-bold text-slate-900"
+                                >
                                     {selectedJob.title}
                                 </h2>
 
                                 <p className="mt-1 text-sm text-slate-500">
-                                    {selectedJob.applications} candidates
-                                    applied for this position.
+                                    Review candidate names and
+                                    available profile information.
                                 </p>
                             </div>
 
                             <button
                                 type="button"
+                                aria-label="Close applications"
                                 onClick={() => {
                                     setShowApplications(false);
                                     setSelectedJob(null);
                                 }}
-                                className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                                className="shrink-0 rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
                             >
                                 <X size={20} />
                             </button>
-                        </div>
+                        </header>
 
-                        <div className="max-h-[65vh] overflow-y-auto p-6">
-                            {selectedApplications.length > 0 ? (
-                                <div className="space-y-4">
-                                    {selectedApplications.map((application) => (
-                                        <div
-                                            key={application.id}
-                                            className="rounded-2xl border border-slate-200 p-5"
-                                        >
-                                            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-50 font-semibold text-indigo-600">
-                                                        {application.name
-                                                            .split(" ")
-                                                            .map(
-                                                                (name) =>
-                                                                    name[0]
-                                                            )
-                                                            .join("")}
-                                                    </div>
-
-                                                    <div>
-                                                        <h3 className="font-semibold text-slate-900">
-                                                            {
-                                                                application.name
-                                                            }
-                                                        </h3>
-
-                                                        <p className="mt-1 text-xs text-slate-500">
-                                                            {
-                                                                application.email
-                                                            }
-                                                        </p>
-
-                                                        <p className="mt-1 text-xs text-slate-400">
-                                                            {
-                                                                application.experience
-                                                            }{" "}
-                                                            experience
-                                                        </p>
-                                                    </div>
-                                                </div>
-
-                                                <span
-                                                    className={`w-fit rounded-full px-3 py-1.5 text-xs font-semibold ${getApplicationStatusClasses(
-                                                        application.status
-                                                    )}`}
-                                                >
-                                                    {
-                                                        application.status
-                                                    }
-                                                </span>
-                                            </div>
-
-                                            <div className="mt-4 flex flex-wrap gap-2">
-                                                <button
-                                                    type="button"
-                                                    className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
-                                                >
-                                                    View Profile
-                                                </button>
-
-                                                <button
-                                                    type="button"
-                                                    className="rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-indigo-700"
-                                                >
-                                                    Update Status
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
+                        <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
+                            {applicationsLoading ? (
+                                <div className="py-16 text-center text-sm text-slate-500">
+                                    Loading candidate details...
                                 </div>
+                            ) : selectedApplications.length > 0 ? (
+                                <>
+                                    <p className="mb-4 text-sm text-slate-500">
+                                        {selectedApplications.length}{" "}
+                                        {selectedApplications.length === 1
+                                            ? "candidate"
+                                            : "candidates"}
+                                    </p>
+
+                                    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                                        {selectedApplications.map(
+                                            (application) => (
+                                                <CandidateDetails
+                                                    key={application.id}
+                                                    application={application}
+                                                />
+                                            )
+                                        )}
+                                    </div>
+                                </>
                             ) : (
-                                <div className="py-12 text-center">
+                                <div className="py-16 text-center">
                                     <Users
                                         size={35}
                                         className="mx-auto text-slate-300"
@@ -815,20 +1042,21 @@ const Jobs = () => {
                                     </h3>
 
                                     <p className="mt-2 text-sm text-slate-400">
-                                        No candidates have applied for
-                                        this job yet.
+                                        No candidates have applied
+                                        for this job yet.
                                     </p>
                                 </div>
                             )}
                         </div>
-                    </div>
+                    </section>
                 </div>
             )}
 
+            {/* Edit job modal */}
             {showEditModal && selectedJob && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4">
-                    <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-                        <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 p-4">
+                    <section className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
+                        <header className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
                             <div>
                                 <p className="text-xs font-medium text-indigo-600">
                                     Hiring Management
@@ -841,6 +1069,7 @@ const Jobs = () => {
 
                             <button
                                 type="button"
+                                aria-label="Close edit job"
                                 onClick={() => {
                                     setShowEditModal(false);
                                     setSelectedJob(null);
@@ -849,7 +1078,7 @@ const Jobs = () => {
                             >
                                 <X size={20} />
                             </button>
-                        </div>
+                        </header>
 
                         <div className="space-y-5 p-6">
                             <div>
@@ -860,9 +1089,9 @@ const Jobs = () => {
                                 <input
                                     type="text"
                                     name="title"
-                                    value={selectedJob.title}
+                                    value={selectedJob.title || ""}
                                     onChange={handleEditChange}
-                                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                    className={inputClass}
                                 />
                             </div>
 
@@ -874,9 +1103,9 @@ const Jobs = () => {
 
                                     <select
                                         name="category"
-                                        value={selectedJob.category}
+                                        value={selectedJob.category || ""}
                                         onChange={handleEditChange}
-                                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                        className={inputClass}
                                     >
                                         {categories.map((category) => (
                                             <option
@@ -898,12 +1127,11 @@ const Jobs = () => {
                                         name="status"
                                         value={selectedJob.status}
                                         onChange={handleEditChange}
-                                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                        className={inputClass}
                                     >
                                         <option value="Active">
                                             Active
                                         </option>
-
                                         <option value="Closed">
                                             Closed
                                         </option>
@@ -920,9 +1148,9 @@ const Jobs = () => {
                                     <input
                                         type="text"
                                         name="location"
-                                        value={selectedJob.location}
+                                        value={selectedJob.location || ""}
                                         onChange={handleEditChange}
-                                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                        className={inputClass}
                                     />
                                 </div>
 
@@ -933,22 +1161,19 @@ const Jobs = () => {
 
                                     <select
                                         name="type"
-                                        value={selectedJob.type}
+                                        value={selectedJob.type || "Full Time"}
                                         onChange={handleEditChange}
-                                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                        className={inputClass}
                                     >
                                         <option value="Full Time">
                                             Full Time
                                         </option>
-
                                         <option value="Part Time">
                                             Part Time
                                         </option>
-
                                         <option value="Contract">
                                             Contract
                                         </option>
-
                                         <option value="Internship">
                                             Internship
                                         </option>
@@ -963,24 +1188,13 @@ const Jobs = () => {
 
                                 <select
                                     name="workMode"
-                                    value={
-                                        selectedJob.workMode ||
-                                        "Hybrid"
-                                    }
+                                    value={selectedJob.workMode || "Hybrid"}
                                     onChange={handleEditChange}
-                                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                    className={inputClass}
                                 >
-                                    <option value="Remote">
-                                        Remote
-                                    </option>
-
-                                    <option value="Hybrid">
-                                        Hybrid
-                                    </option>
-
-                                    <option value="Onsite">
-                                        Onsite
-                                    </option>
+                                    <option value="Remote">Remote</option>
+                                    <option value="Hybrid">Hybrid</option>
+                                    <option value="Onsite">Onsite</option>
                                 </select>
                             </div>
 
@@ -991,41 +1205,46 @@ const Jobs = () => {
 
                                 <textarea
                                     name="description"
-                                    value={selectedJob.description}
+                                    value={Array.isArray(selectedJob.description)
+                                        ? selectedJob.description.join("\n")
+                                        : selectedJob.description || ""}
                                     onChange={handleEditChange}
                                     rows={5}
-                                    className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                    className={`${inputClass} resize-y leading-6`}
                                 />
                             </div>
 
                             <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
                                 <button
                                     type="button"
+                                    disabled={saving}
                                     onClick={() => {
                                         setShowEditModal(false);
                                         setSelectedJob(null);
                                     }}
-                                    className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                                    className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
                                 >
                                     Cancel
                                 </button>
 
                                 <button
                                     type="button"
+                                    disabled={saving}
                                     onClick={handleSaveEdit}
-                                    className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                                    className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
                                 >
-                                    Save Changes
+                                    {saving ? "Saving..." : "Save Changes"}
                                 </button>
                             </div>
                         </div>
-                    </div>
+                    </section>
                 </div>
             )}
 
+            {/* Delete confirmation modal */}
             {showDeleteModal && selectedJob && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4">
-                    <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 p-4">
+                    <section className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
                         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-500">
                             <Trash2 size={21} />
                         </div>
@@ -1045,27 +1264,29 @@ const Jobs = () => {
                         <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                             <button
                                 type="button"
+                                disabled={saving}
                                 onClick={() => {
                                     setShowDeleteModal(false);
                                     setSelectedJob(null);
                                 }}
-                                className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                                className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
                             >
                                 Cancel
                             </button>
 
                             <button
                                 type="button"
+                                disabled={saving}
                                 onClick={confirmDelete}
-                                className="rounded-xl bg-red-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-600"
+                                className="rounded-xl bg-red-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-60"
                             >
-                                Delete Job
+                                {saving ? "Deleting..." : "Delete Job"}
                             </button>
                         </div>
-                    </div>
+                    </section>
                 </div>
             )}
-        </div>
+        </main>
     );
 };
 

@@ -4,6 +4,7 @@ import {
     Skill,
 } from "../models/index.js";
 import {
+    MESSAGES,
     STATUS_CODES,
 } from "../utils/setConstants.js";
 
@@ -20,7 +21,7 @@ const getCandidateSkills = async (userId) => {
 
     if (!candidate) {
         const error = new Error(
-            "Candidate profile not found"
+            MESSAGES.PROFILE_NOT_FOUND
         );
 
         error.statusCode =
@@ -73,7 +74,7 @@ const addCandidateSkill = async (
 
     if (!candidate) {
         const error = new Error(
-            "Candidate profile not found"
+           MESSAGES.PROFILE_IMAGE_UPLOADED
         );
 
         error.statusCode =
@@ -88,7 +89,7 @@ const addCandidateSkill = async (
 
     if (!skill) {
         const error = new Error(
-            "Skill not found"
+            MESSAGES.SKILL_NOT_FOUND
         );
 
         error.statusCode =
@@ -111,7 +112,7 @@ const addCandidateSkill = async (
 
     if (existingSkill) {
         const error = new Error(
-            "Skill already added"
+            MESSAGES.SKILL_ALREADY_EXISTS
         );
 
         error.statusCode =
@@ -147,7 +148,7 @@ const removeCandidateSkill = async (
 
     if (!candidate) {
         const error = new Error(
-            "Candidate profile not found"
+            MESSAGES.PROFILE_NOT_FOUND
         );
 
         error.statusCode =
@@ -185,7 +186,7 @@ const removeCandidateSkill = async (
 
     return {
         skillId,
-        message: "Skill removed successfully",
+        message: MESSAGES.SKILL_REMOVED,
     };
 };
 

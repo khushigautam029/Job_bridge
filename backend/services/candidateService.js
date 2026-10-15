@@ -8,7 +8,7 @@ import {
     User,
 } from "../models/index.js";
 
-import { STATUS_CODES } from "../utils/setConstants.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 // PROFILE COMPLETION HELPER
 const isFieldCompleted = (value) => {
@@ -634,7 +634,7 @@ const deleteCandidateResume = async (userId) => {
     await candidateProfile.save();
 
     return {
-        message: "Resume deleted successfully",
+        message: MESSAGES.RESUME_DELETED,
     };
 };
 
@@ -651,7 +651,7 @@ const uploadCandidateProfileImage = async (
 
     if (!candidateProfile) {
         const error = new Error(
-            "Candidate profile not found"
+            MESSAGES.PROFILE_NOT_FOUND
         );
 
         error.statusCode =
@@ -662,7 +662,7 @@ const uploadCandidateProfileImage = async (
 
     if (!file) {
         const error = new Error(
-            "Profile image is required"
+            MESSAGES.PROFILE_IMAGE_REQUIRED
         );
 
         error.statusCode =
@@ -694,7 +694,7 @@ const uploadCandidateProfileImage = async (
 
     return {
         profileImage: imagePath,
-        message: "Profile image uploaded successfully",
+        message: MESSAGES.PROFILE_IMAGE_UPLOADED,
     };
 };
 
@@ -708,7 +708,7 @@ const deleteCandidateProfileImage = async (userId) => {
 
     if (!candidateProfile) {
         const error = new Error(
-            "Candidate profile not found"
+            MESSAGES.PROFILE_NOT_FOUND
         );
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
@@ -716,7 +716,7 @@ const deleteCandidateProfileImage = async (userId) => {
 
     if (!candidateProfile.profileImage) {
         const error = new Error(
-            "Profile image not found"
+            MESSAGES.PROFILE_IMAGE_NOT_FOUND
         );
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
@@ -746,7 +746,7 @@ const deleteCandidateProfileImage = async (userId) => {
     await candidateProfile.save();
 
     return {
-        message: "Profile image deleted successfully",
+        message: MESSAGES.PROFILE_IMAGE_DELETED,
     };
 };
 
