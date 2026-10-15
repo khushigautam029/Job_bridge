@@ -32,8 +32,19 @@ const emptyForm = {
     interviewType: "ONLINE",
     meetingLink: "",
     location: "",
-    notes: "",
 };
+
+const getCandidateAssetUrl = (path) => {
+    if (!path) return "";
+    if (/^https?:\/\//i.test(path)) return path;
+
+    const apiUrl = (import.meta.env.VITE_API_URL || "http://localhost:5000/api")
+        .replace(/\/api\/?$/, "");
+    return `${apiUrl}/${String(path).replace(/^[\\/]+/, "").replaceAll("\\", "/")}`;
+};
+
+const normalizeCandidateLink = (url) =>
+    /^https?:\/\//i.test(url) ? url : `https://${url}`;
 
 const RecruiterInterviews = () => {
     const [interviews, setInterviews] = useState([]);
@@ -212,6 +223,16 @@ const RecruiterInterviews = () => {
         interview?.application?.Candidate ||
         null;
 
+    const getCandidateProfileLabel = (interview) => {
+        const profile = getCandidateFromInterview(interview);
+        const details = [];
+        if (profile?.location) details.push(profile.location);
+        if (profile?.experienceYears !== undefined && profile?.experienceYears !== null) {
+            details.push(`${profile.experienceYears} years experience`);
+        }
+        return details.join(" · ");
+    };
+
     const getCandidateName = (interview) => {
         const candidate = getCandidateFromInterview(interview);
 
@@ -349,7 +370,6 @@ const RecruiterInterviews = () => {
             interviewType: interview.interviewType || "ONLINE",
             meetingLink: interview.meetingLink || "",
             location: interview.location || "",
-            notes: interview.notes || "",
         });
 
         setSelectedInterview(interview);
@@ -450,7 +470,6 @@ const RecruiterInterviews = () => {
         const payload = {
             scheduledAt: form.scheduledAt,
             interviewType: form.interviewType,
-            notes: form.notes.trim(),
         };
 
         if (form.interviewType === "ONLINE") {
@@ -585,6 +604,10 @@ const RecruiterInterviews = () => {
         setTypeFilter("All");
         setCategoryFilter("All");
     };
+
+    const selectedCandidateProfile = selectedInterview
+        ? getCandidateFromInterview(selectedInterview)
+        : null;
 
     return (
         <div className="min-w-0">
@@ -789,7 +812,10 @@ const RecruiterInterviews = () => {
                         {filteredInterviews.map((interview) => {
                             const candidateName = getCandidateName(interview);
                             const candidateEmail = getCandidateEmail(interview);
+                            const candidateProfile = getCandidateFromInterview(interview);
+                            const candidateProfileLabel = getCandidateProfileLabel(interview);
                             const jobTitle = getJobTitle(interview);
+                            const category = getJobCategory(interview);
                             const isActionLoading =
                                 actionLoadingId === interview.id;
 
@@ -812,9 +838,19 @@ const RecruiterInterviews = () => {
                                                 <p className="mt-1 break-words text-sm text-indigo-600">
                                                     {jobTitle}
                                                 </p>
+                                                {category !== "Uncategorized" && (
+                                                    <p className="mt-1 text-xs text-slate-400">
+                                                        {category}
+                                                    </p>
+                                                )}
                                                 {candidateEmail && (
                                                     <p className="mt-1 break-all text-xs text-slate-400">
                                                         {candidateEmail}
+                                                    </p>
+                                                )}
+                                                {candidateProfileLabel && (
+                                                    <p className="mt-1 break-words text-xs text-slate-500">
+                                                        {candidateProfileLabel}
                                                     </p>
                                                 )}
                                             </div>
@@ -937,21 +973,22 @@ const RecruiterInterviews = () => {
                                         )}
                                     </div>
 
-                                    {/* NOTES */}
-                                    {interview.notes && (
-                                        <div className="mt-4 rounded-xl bg-slate-50 px-3 py-3">
-                                            <div className="flex items-start gap-2">
-                                                <FileText
-                                                    size={15}
-                                                    className="mt-0.5 shrink-0 text-slate-400"
-                                                />
-                                                <p className="break-words text-xs leading-5 text-slate-500">
-                                                    {interview.notes}
-                                                </p>
-                                            </div>
+                                    {candidateProfile?.skills?.length > 0 && (
+                                        <div className="mt-4 flex flex-wrap gap-1.5">
+                                            {candidateProfile.skills.slice(0, 4).map((skill) => (
+                                                <span key={skill.id || skill.name} className="rounded-md bg-indigo-50 px-2 py-1 text-[10px] font-medium text-indigo-600">
+                                                    {skill.name || skill}
+                                                </span>
+                                            ))}
+                                            {candidateProfile.skills.length > 4 && (
+                                                <span className="rounded-md bg-slate-50 px-2 py-1 text-[10px] text-slate-500">
+                                                    +{candidateProfile.skills.length - 4} more
+                                                </span>
+                                            )}
                                         </div>
                                     )}
 
+                        
                                     {/* ACTIONS */}
                                     <div className="mt-auto flex flex-wrap gap-2 border-t border-slate-100 pt-4">
                                         <button
@@ -1106,13 +1143,22 @@ const RecruiterInterviews = () => {
                                                         application.job?.title ||
                                                         application.Job?.title ||
                                                         "Job Position";
+                                                    const profileDetail = [
+                                                        candidate?.location,
+                                                        candidate?.experienceYears !== undefined && candidate?.experienceYears !== null
+                                                            ? `${candidate.experienceYears}y`
+                                                            : "",
+                                                    ].filter(Boolean).join(", ");
+                                                    const category =
+                                                        application.job?.category?.name ||
+                                                        application.job?.Category?.name;
 
                                                     return (
                                                         <option
                                                             key={application.id}
                                                             value={application.id}
                                                         >
-                                                            {candidateName} - {jobTitle} (
+                                                            {candidateName} - {jobTitle}{category ? ` · ${category}` : ""}{profileDetail ? ` · ${profileDetail}` : ""} (
                                                             {application.status})
                                                         </option>
                                                     );
@@ -1265,20 +1311,6 @@ const RecruiterInterviews = () => {
                                 </div>
                             )}
 
-                            <div className="mt-5">
-                                <label className="text-xs font-semibold text-slate-700">
-                                    Notes
-                                </label>
-                                <textarea
-                                    name="notes"
-                                    value={form.notes}
-                                    onChange={handleFormChange}
-                                    rows={4}
-                                    placeholder="Add interview instructions, topics or notes..."
-                                    className="mt-2 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-5 text-slate-700 outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
-                                />
-                            </div>
-
                             {formError && (
                                 <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                                     {formError}
@@ -1391,6 +1423,136 @@ const RecruiterInterviews = () => {
                                 </span>
                             </div>
 
+                            {selectedCandidateProfile && (
+                                <section className="mt-5 rounded-2xl border border-slate-100 p-4">
+                                    <h4 className="text-sm font-semibold text-slate-900">
+                                        Candidate Profile
+                                    </h4>
+
+                                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                                        <div>
+                                            <p className="text-[11px] text-slate-400">Location</p>
+                                            <p className="mt-1 text-sm text-slate-700">
+                                                {selectedCandidateProfile.location || "Not provided"}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[11px] text-slate-400">Experience</p>
+                                            <p className="mt-1 text-sm text-slate-700">
+                                                {selectedCandidateProfile.experienceYears !== undefined && selectedCandidateProfile.experienceYears !== null
+                                                    ? `${selectedCandidateProfile.experienceYears} years`
+                                                    : "Not provided"}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {selectedCandidateProfile.bio && (
+                                        <p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-600">
+                                            {selectedCandidateProfile.bio}
+                                        </p>
+                                    )}
+
+                                    {selectedCandidateProfile.skills?.length > 0 && (
+                                        <div className="mt-4">
+                                            <p className="text-[11px] font-medium text-slate-400">Skills</p>
+                                            <div className="mt-2 flex flex-wrap gap-2">
+                                                {selectedCandidateProfile.skills.map((skill) => (
+                                                    <span key={skill.id || skill.name} className="rounded-lg bg-indigo-50 px-2.5 py-1.5 text-xs font-medium text-indigo-600">
+                                                        {skill.name || skill}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {selectedCandidateProfile.experiences?.length > 0 && (
+                                        <div className="mt-4">
+                                            <p className="text-[11px] font-medium text-slate-400">Work Experience</p>
+                                            <div className="mt-2 space-y-2">
+                                                {selectedCandidateProfile.experiences.map((experience) => (
+                                                    <div key={experience.id} className="rounded-xl bg-slate-50 p-3">
+                                                        <p className="text-sm font-medium text-slate-700">
+                                                            {[experience.jobTitle, experience.companyName].filter(Boolean).join(" · ") || "Position"}
+                                                        </p>
+                                                        {(experience.startDate || experience.endDate || experience.currentlyWorking) && (
+                                                            <p className="mt-1 text-xs text-slate-500">
+                                                                {experience.startDate || ""} – {experience.currentlyWorking ? "Present" : experience.endDate || ""}
+                                                            </p>
+                                                        )}
+                                                        {experience.description && <p className="mt-2 whitespace-pre-line text-xs leading-5 text-slate-500">{experience.description}</p>}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {selectedCandidateProfile.educations?.length > 0 && (
+                                        <div className="mt-4">
+                                            <p className="text-[11px] font-medium text-slate-400">Education</p>
+                                            <div className="mt-2 space-y-2">
+                                                {selectedCandidateProfile.educations.map((education) => (
+                                                    <div key={education.id} className="rounded-xl bg-slate-50 p-3">
+                                                        <p className="text-sm font-medium text-slate-700">
+                                                            {[education.degree, education.fieldOfStudy].filter(Boolean).join(" · ") || "Education"}
+                                                        </p>
+                                                        <p className="mt-1 text-xs text-slate-500">{education.institution || "Institution not provided"}</p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {selectedCandidateProfile.projects?.length > 0 && (
+                                        <div className="mt-4">
+                                            <p className="text-[11px] font-medium text-slate-400">Projects</p>
+                                            <div className="mt-2 space-y-2">
+                                                {selectedCandidateProfile.projects.map((project) => (
+                                                    <div key={project.id} className="rounded-xl bg-slate-50 p-3">
+                                                        <p className="text-sm font-medium text-slate-700">{project.title}</p>
+                                                        {project.description && <p className="mt-1 whitespace-pre-line text-xs leading-5 text-slate-500">{project.description}</p>}
+                                                        {Array.isArray(project.technologies) && project.technologies.length > 0 && (
+                                                            <p className="mt-2 text-xs text-slate-500">{project.technologies.join(" · ")}</p>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {(selectedCandidateProfile.linkedinUrl || selectedCandidateProfile.githubUrl || selectedCandidateProfile.portfolioUrl) && (
+                                        <div className="mt-4 flex flex-wrap gap-2">
+                                            {[
+                                                ["LinkedIn", selectedCandidateProfile.linkedinUrl],
+                                                ["GitHub", selectedCandidateProfile.githubUrl],
+                                                ["Portfolio", selectedCandidateProfile.portfolioUrl],
+                                            ].filter(([, url]) => url).map(([label, url]) => (
+                                                <a
+                                                    key={label}
+                                                    href={normalizeCandidateLink(url)}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 hover:bg-indigo-50 hover:text-indigo-600"
+                                                >
+                                                    {label}
+                                                </a>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {(selectedCandidateProfile.resume || selectedInterview.application?.resume) && (
+                                        <a
+                                            href={getCandidateAssetUrl(selectedCandidateProfile.resume || selectedInterview.application.resume)}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="mt-4 inline-flex items-center gap-2 rounded-lg border border-indigo-100 px-3 py-2 text-xs font-semibold text-indigo-600 hover:bg-indigo-50"
+                                        >
+                                            <FileText size={14} />
+                                            View Resume
+                                        </a>
+                                    )}
+                                </section>
+                            )}
+
                             <div className="mt-5 grid gap-3 sm:grid-cols-2">
                                 <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
                                     <div className="flex items-center gap-3">
@@ -1492,16 +1654,7 @@ const RecruiterInterviews = () => {
                                 </div>
                             )}
 
-                            {selectedInterview.notes && (
-                                <div className="mt-5">
-                                    <h4 className="text-sm font-semibold text-slate-900">
-                                        Notes
-                                    </h4>
-                                    <p className="mt-2 whitespace-pre-wrap break-words rounded-2xl bg-slate-50 p-4 text-sm leading-6 text-slate-500">
-                                        {selectedInterview.notes}
-                                    </p>
-                                </div>
-                            )}
+                           
 
                             <div className="mt-6 flex flex-wrap gap-2 border-t border-slate-100 pt-5">
                                 {(selectedInterview.status === "SCHEDULED" ||

@@ -40,7 +40,7 @@ export const cancelInterview = async (interviewId) =>
 export const getInterview = async (interviewId) =>
     getData(
         await api.get(`/interviews/${interviewId}`)
-    );
+    ).interview;
 
 export const updateInterview = async (
     interviewId,

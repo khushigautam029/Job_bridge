@@ -3,17 +3,90 @@ import { Op } from "sequelize";
 import {
     Application,
     ApplicationStatusHistory,
+    CandidateEducation,
+    CandidateExperience,
     CandidateProfile,
+    CandidateProject,
     Company,
     Interview,
     Job,
     JobCategory,
     RecruiterProfile,
+    Skill,
     User,
+    UserPreference,
 } from "../models/index.js";
 
 import createNotification from "../utils/createNotification.js";
 import { STATUS_CODES } from "../utils/setConstants.js";
+
+const applyCandidatePrivacyToInterviews = async (interviews) => {
+    const isList = Array.isArray(interviews);
+    const rows = (isList ? interviews : [interviews]).map((interview) =>
+        interview?.toJSON ? interview.toJSON() : interview
+    );
+    const userIds = rows
+        .map((interview) => interview?.application?.candidate?.user?.id)
+        .filter(Boolean);
+
+    if (!userIds.length) return isList ? rows : rows[0];
+
+    const preferences = await UserPreference.findAll({
+        where: { userId: [...new Set(userIds)] },
+    });
+    const preferencesByUserId = new Map(
+        preferences.map((preference) => [preference.userId, preference])
+    );
+
+    const sanitizedRows = rows.map((interview) => {
+        const application = interview?.application;
+        const candidate = application?.candidate;
+        if (!candidate) return interview;
+
+        const settings = preferencesByUserId.get(candidate.user?.id);
+        if (settings?.privacySettings?.profileVisibility === false) {
+            candidate.bio = null;
+            candidate.location = null;
+            candidate.experienceYears = null;
+            candidate.linkedinUrl = null;
+            candidate.githubUrl = null;
+            candidate.portfolioUrl = null;
+            candidate.skills = [];
+            candidate.educations = [];
+            candidate.experiences = [];
+            candidate.projects = [];
+            if (candidate.user) {
+                candidate.user.name = "Candidate";
+                candidate.user.email = null;
+                candidate.user.phone = null;
+            }
+        }
+        if (settings?.privacySettings?.resumeVisibility === false) {
+            candidate.resume = null;
+            application.resume = null;
+        }
+        return interview;
+    });
+
+    return isList ? sanitizedRows : sanitizedRows[0];
+};
+
+const candidateProfileIncludes = [
+    {
+        model: User,
+        as: "user",
+        attributes: ["id", "name", "email", "phone"],
+    },
+    {
+        model: Skill,
+        as: "skills",
+        attributes: ["id", "name"],
+        through: { attributes: [] },
+    },
+    { model: CandidateEducation, as: "educations" },
+    { model: CandidateExperience, as: "experiences" },
+    { model: CandidateProject, as: "projects" },
+];
 
 
 /*
@@ -390,7 +463,7 @@ const getRecruiterInterviews = async (
     }
 
 
-    return Interview.findAll({
+    const interviews = await Interview.findAll({
         include: [
             {
                 model: Application,
@@ -428,20 +501,7 @@ const getRecruiterInterviews = async (
                     {
                         model: CandidateProfile,
                         as: "candidate",
-
-                        include: [
-                            {
-                                model: User,
-                                as: "user",
-
-                                attributes: [
-                                    "id",
-                                    "name",
-                                    "email",
-                                    "phone",
-                                ],
-                            },
-                        ],
+                        include: candidateProfileIncludes,
                     },
                 ],
             },
@@ -462,6 +522,8 @@ const getRecruiterInterviews = async (
             ["scheduledAt", "ASC"],
         ],
     });
+
+    return applyCandidatePrivacyToInterviews(interviews);
 };
 
 
@@ -486,25 +548,24 @@ const getInterviewById = async (
                             {
                                 model: CandidateProfile,
                                 as: "candidate",
-
-                                include: [
-                                    {
-                                        model: User,
-                                        as: "user",
-
-                                        attributes: [
-                                            "id",
-                                            "name",
-                                            "email",
-                                            "phone",
-                                        ],
-                                    },
-                                ],
+                                include: candidateProfileIncludes,
                             },
 
                             {
                                 model: Job,
                                 as: "job",
+                                include: [
+                                    {
+                                        model: JobCategory,
+                                        as: "category",
+                                        attributes: ["id", "name"],
+                                    },
+                                    {
+                                        model: Company,
+                                        as: "company",
+                                        attributes: ["id", "name", "location"],
+                                    },
+                                ],
                             },
                         ],
                     },
@@ -572,7 +633,7 @@ const getInterviewById = async (
     }
 
 
-    return interview;
+    return applyCandidatePrivacyToInterviews(interview);
 };
 
 

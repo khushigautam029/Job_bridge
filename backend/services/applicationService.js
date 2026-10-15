@@ -350,7 +350,11 @@ const applyCandidatePrivacySettings = async (applications) => {
             candidate.experienceYears = null;
             candidate.linkedinUrl = null;
             candidate.githubUrl = null;
+            candidate.portfolioUrl = null;
             candidate.skills = [];
+            candidate.educations = [];
+            candidate.experiences = [];
+            candidate.projects = [];
             if (candidate.user) {
                 candidate.user.name = "Candidate";
                 candidate.user.email = null;
@@ -359,6 +363,7 @@ const applyCandidatePrivacySettings = async (applications) => {
         }
         if (privacy.resumeVisibility === false) {
             application.resume = null;
+            if (candidate) candidate.resume = null;
         }
         return application;
     });
