@@ -4,6 +4,7 @@ import {
     getAllJobs,
     getJobById,
     getJobCategories,
+    getRecruiterJobCategories,
     getRecruiterJobs,
     updateJob,
 } from "../services/jobService.js";
@@ -118,6 +119,19 @@ const getCategories = asyncHandler(
     }
 );
 
+const getMyCategories = asyncHandler(
+    async (req, res) => {
+        const categories = await getRecruiterJobCategories(req.user.id);
+
+        return sendSuccess(
+            res,
+            STATUS_CODES.OK,
+            MESSAGES.JOB_CATEGORIES_FETCHED,
+            { categories }
+        );
+    }
+);
+
 // GET RECRUITER'S JOBS
 const getMine = asyncHandler(
     async (req, res) => {
@@ -216,7 +230,7 @@ const remove = asyncHandler(
 );
 
 export {
-    create, getAll, getCategories, getMine,
+    create, getAll, getCategories, getMine, getMyCategories,
     getOne,
     remove,
     update

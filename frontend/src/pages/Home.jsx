@@ -27,6 +27,7 @@ import NotificationDropdown from "../pages/Notification";
 import {
     formatJobCard,
     getJobCategories,
+    getMyJobCategories,
     getJobs,
 } from "../services/jobService";
 import {
@@ -78,7 +79,9 @@ const Home = () => {
 
         Promise.all([
             getJobs({ limit: 50 }),
-            getJobCategories(),
+            isLoggedIn && userRole === "RECRUITER"
+                ? getMyJobCategories()
+                : getJobCategories(),
         ])
             .then(([jobResult, categoryResult]) => {
                 if (!active) return;
@@ -487,7 +490,7 @@ const Home = () => {
                         className="flex shrink-0 items-center gap-2 cursor-pointer"
                     >
                         <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-sm">
-                                <BriefcaseBusiness size={19} />
+                            <BriefcaseBusiness size={19} />
                         </div>
                         <span className="text-lg font-bold tracking-tight text-slate-900">
                             Job
@@ -622,8 +625,8 @@ const Home = () => {
                                     )
                                 }
                                 className={`flex items-center gap-2 rounded-lg px-2 py-1.5 transition ${profileMenuOpen
-                                        ? "bg-slate-100"
-                                        : "hover:bg-slate-50"
+                                    ? "bg-slate-100"
+                                    : "hover:bg-slate-50"
                                     }`}
                             >
                                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
@@ -651,8 +654,8 @@ const Home = () => {
                                 <ChevronDown
                                     size={15}
                                     className={`hidden text-slate-400 transition-transform sm:block ${profileMenuOpen
-                                            ? "rotate-180"
-                                            : ""
+                                        ? "rotate-180"
+                                        : ""
                                         }`}
                                 />
                             </button>
@@ -1055,8 +1058,8 @@ const Home = () => {
                                         className={`flex shrink-0 items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition ${savedJobIds.includes(
                                             String(job.id)
                                         )
-                                                ? "border-indigo-200 bg-indigo-50 text-indigo-600"
-                                                : "border-slate-200 bg-white text-slate-500 hover:border-indigo-200 hover:text-indigo-600"
+                                            ? "border-indigo-200 bg-indigo-50 text-indigo-600"
+                                            : "border-slate-200 bg-white text-slate-500 hover:border-indigo-200 hover:text-indigo-600"
                                             }`}
                                     >
                                         <Bookmark
@@ -1255,81 +1258,126 @@ const Home = () => {
                 </section>
             )}
 
-            {/* FOOTER */}
-            <footer className="border-t border-slate-200 bg-white">
-                <div className="mx-auto flex max-w-[1400px] flex-col gap-4 px-5 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-7 lg:px-8">
-                    <div className="flex items-center gap-2">
-                        <div className="flex h-7 w-7 items-center justify-center rounded-md bg-indigo-600 text-white">
-                            <BriefcaseBusiness size={15} />
+        
+            <footer className="mt-auto border-t border-slate-200 bg-white">
+                <div className="mx-auto w-full max-w-[1400px] px-5 py-10 sm:px-7 lg:px-8">
+                    <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+
+                        {/* BRAND SECTION */}
+                        <div className="sm:col-span-2 lg:col-span-2">
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm">
+                                    <BriefcaseBusiness size={21} />
+                                </div>
+
+                                <span className="text-xl font-extrabold tracking-tight text-slate-900">
+                                    Job<span className="text-indigo-600">Bridge</span>
+                                </span>
+                            </div>
+
+                            <p className="mt-4 max-w-md text-sm leading-6 text-slate-500">
+                                Connecting talented people with meaningful career
+                                opportunities. Find jobs, discover companies, and take
+                                the next step in your professional journey with JobBridge.
+                            </p>
                         </div>
 
-                        <span className="text-sm font-bold text-slate-900">
-                            Job
-                            <span className="text-indigo-600">
-                                Bridge
-                            </span>
-                        </span>
+                        {/* QUICK LINKS */}
+                        <div>
+                            <h3 className="text-sm font-bold text-slate-900">
+                                Quick Links
+                            </h3>
+
+                            <ul className="mt-4 space-y-3 text-sm text-slate-500">
+                                <li>
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            document.getElementById("features")?.scrollIntoView({
+                                                behavior: "smooth",
+                                            })
+                                        }
+                                        className="transition-colors hover:text-indigo-600"
+                                    >
+                                        About Us
+                                    </button>
+                                </li>
+
+                                <li>
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            document.getElementById("features")?.scrollIntoView({
+                                                behavior: "smooth",
+                                            })
+                                        }
+                                        className="transition-colors hover:text-indigo-600"
+                                    >
+                                        Our Features
+                                    </button>
+                                </li>
+
+                                <li>
+                                    <a
+                                        href="/"
+                                        className="transition-colors hover:text-indigo-600"
+                                    >
+                                        Home
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+
+                        {/* SUPPORT */}
+                        <div>
+                            <h3 className="text-sm font-bold text-slate-900">
+                                Support
+                            </h3>
+
+                            <ul className="mt-4 space-y-3 text-sm text-slate-500">
+                                <li>
+                                    <a
+                                        href="mailto:support@jobbridge.com"
+                                        className="transition-colors hover:text-indigo-600"
+                                    >
+                                        Contact Us
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a
+                                        href="/privacy"
+                                        className="transition-colors hover:text-indigo-600"
+                                    >
+                                        Privacy Policy
+                                    </a>
+                                </li>
+
+                                <li>
+                                    <a
+                                        href="/terms"
+                                        className="transition-colors hover:text-indigo-600"
+                                    >
+                                        Terms &amp; Conditions
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
 
-                    <p className="text-xs text-slate-500">
-                        © 2026 JobBridge. All rights reserved.
-                    </p>
+                    {/* BOTTOM BAR */}
+                    <div className="mt-9 flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
+                        <p className="text-xs text-slate-500">
+                            © {new Date().getFullYear()} JobBridge. All rights reserved.
+                        </p>
 
-                    <div className="flex gap-4 text-xs font-medium text-slate-500">
-                        <button
-                            type="button"
-                            onClick={() =>
-                                document
-                                    .getElementById(
-                                        "features"
-                                    )
-                                    ?.scrollIntoView({
-                                        behavior:
-                                            "smooth",
-                                    })
-                            }
-                            className="transition hover:text-indigo-600"
-                        >
-                            About
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={() =>
-                                document
-                                    .getElementById(
-                                        "features"
-                                    )
-                                    ?.scrollIntoView({
-                                        behavior:
-                                            "smooth",
-                                    })
-                            }
-                            className="transition hover:text-indigo-600"
-                        >
-                            Contact
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={() =>
-                                document
-                                    .getElementById(
-                                        "features"
-                                    )
-                                    ?.scrollIntoView({
-                                        behavior:
-                                            "smooth",
-                                    })
-                            }
-                            className="transition hover:text-indigo-600"
-                        >
-                            Privacy
-                        </button>
+                        <p className="text-xs text-slate-500">
+                            Built to connect talent with opportunity.
+                        </p>
                     </div>
                 </div>
             </footer>
-
+            
             {/* AUTH MODAL */}
             {showAuthModal && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/50 px-4 backdrop-blur-sm">

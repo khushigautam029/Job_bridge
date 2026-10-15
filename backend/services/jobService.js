@@ -230,6 +230,30 @@ const getJobCategories = async () =>
         order: [["name", "ASC"]],
     });
 
+const getRecruiterJobCategories = async (userId) => {
+    const recruiterProfile = await getRecruiterProfile(userId);
+
+    return JobCategory.findAll({
+        attributes: [
+            "id",
+            "name",
+            [sequelize.fn("COUNT", sequelize.col("jobs.id")), "jobCount"],
+        ],
+        include: [{
+            model: Job,
+            as: "jobs",
+            attributes: [],
+            where: {
+                status: "OPEN",
+                recruiterId: recruiterProfile.id,
+            },
+            required: false,
+        }],
+        group: ["JobCategory.id", "JobCategory.name"],
+        order: [["name", "ASC"]],
+    });
+};
+
 const getRecruiterJobs = async (userId) => {
     const recruiterProfile =
         await getRecruiterProfile(userId);
@@ -420,7 +444,7 @@ const deleteJob = async (
 export {
     createJob,
     deleteJob,
-    getAllJobs, getJobById, getJobCategories, getRecruiterJobs,
+    getAllJobs, getJobById, getJobCategories, getRecruiterJobCategories, getRecruiterJobs,
     updateJob
 };
 

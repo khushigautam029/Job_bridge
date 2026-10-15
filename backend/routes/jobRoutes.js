@@ -4,6 +4,7 @@ import {
     getAll,
     getCategories,
     getMine,
+    getMyCategories,
     getOne,
     remove,
     update,
@@ -15,6 +16,7 @@ const router = express.Router();
 // Public
 router.get("/categories", getCategories);
 router.get("/",  getAll);
+router.get("/my/categories", protect, authorize("RECRUITER"), getMyCategories);
 router.get("/my", protect, authorize("RECRUITER"), getMine);
 router.get( "/:id", getOne);
 

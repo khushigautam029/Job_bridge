@@ -64,6 +64,9 @@ export const getMyJobs = async () =>
 export const getJobCategories = async () =>
     (await api.get("/jobs/categories")).data.data.categories;
 
+export const getMyJobCategories = async () =>
+    (await api.get("/jobs/my/categories")).data.data.categories;
+
 export const createJob = async (job) =>
     getData(await api.post("/jobs", job));
 
