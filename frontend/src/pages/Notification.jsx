@@ -17,70 +17,12 @@ import {
     markNotificationRead,
 } from "../services/notificationService";
 
-const candidateNotifications = [
-    {
-        id: 1,
-        type: "APPLICATION",
-        title: "Application submitted",
-        message: "Your application for Frontend Developer was submitted successfully.",
-        time: "10 minutes ago",
-        read: false,
-    },
-    {
-        id: 2,
-        type: "INTERVIEW",
-        title: "Interview scheduled",
-        message: "Your interview for React Developer is scheduled for tomorrow.",
-        time: "1 hour ago",
-        read: false,
-    },
-    {
-        id: 3,
-        type: "JOB",
-        title: "New job recommendation",
-        message: "A new React Developer position matches your profile.",
-        time: "3 hours ago",
-        read: true,
-    },
-];
-
-const recruiterNotifications = [
-    {
-        id: 1,
-        type: "APPLICATION",
-        title: "New application received",
-        message: "A candidate applied for your Frontend Developer position.",
-        time: "15 minutes ago",
-        read: false,
-    },
-    {
-        id: 2,
-        type: "INTERVIEW",
-        title: "Interview reminder",
-        message: "You have an interview scheduled for tomorrow.",
-        time: "2 hours ago",
-        read: false,
-    },
-    {
-        id: 3,
-        type: "JOB",
-        title: "Job performance update",
-        message: "Your job listing received 25 new views today.",
-        time: "5 hours ago",
-        read: true,
-    },
-];
-
 const NotificationDropdown = ({ role = "CANDIDATE" }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    const [notifications, setNotifications] = useState(
-        role === "RECRUITER"
-            ? recruiterNotifications
-            : candidateNotifications
-    );
+    const [notifications, setNotifications] = useState([]);
 
     const dropdownRef = useRef(null);
     const unreadCount = notifications.filter(

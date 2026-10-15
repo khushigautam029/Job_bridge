@@ -25,6 +25,7 @@ import {
     getMyJobs,
     updateJob,
 } from "../../services/jobService";
+import { getSkills } from "../../services/skillService";
 
 const formatRecruiterJob = (job) => ({
     ...formatJobCard(job),
@@ -68,6 +69,7 @@ const Jobs = () => {
 
     const [jobs, setJobs] = useState([]);
     const [categories, setCategories] = useState([]);
+    const [skillCatalog, setSkillCatalog] = useState([]);
     const [remoteApplications, setRemoteApplications] = useState({});
     const [applicationsLoading, setApplicationsLoading] = useState(false);
 
@@ -78,12 +80,13 @@ const Jobs = () => {
     useEffect(() => {
         let active = true;
 
-        Promise.all([getMyJobs(), getJobCategories()])
-            .then(([myJobs, jobCategories]) => {
+        Promise.all([getMyJobs(), getJobCategories(), getSkills()])
+            .then(([myJobs, jobCategories, availableSkills]) => {
                 if (!active) return;
 
                 setJobs(myJobs.map(formatRecruiterJob));
                 setCategories(jobCategories);
+                setSkillCatalog(availableSkills);
                 setError("");
             })
             .catch((loadError) => {
@@ -114,10 +117,7 @@ const Jobs = () => {
             (job) => job.id === Number(editJobId)
         );
 
-        if (selected) {
-            setSelectedJob({ ...selected });
-            setShowEditModal(true);
-        }
+        if (selected) handleEdit(selected);
 
         navigate(location.pathname, {
             replace: true,
@@ -212,7 +212,23 @@ const Jobs = () => {
     };
 
     const handleEdit = (job) => {
-        setSelectedJob({ ...job });
+        setSelectedJob({
+            ...job,
+            minSalary: job.minSalary ?? "",
+            maxSalary: job.maxSalary ?? "",
+            experienceMin: job.experienceMin ?? 0,
+            experienceMax: job.experienceMax ?? "",
+            deadline: job.applicationDeadline
+                ? String(job.applicationDeadline).slice(0, 10)
+                : "",
+            responsibilities: Array.isArray(job.responsibilities)
+                ? job.responsibilities.join("\n")
+                : job.responsibilities || "",
+            requirements: Array.isArray(job.requirements)
+                ? job.requirements.join("\n")
+                : job.requirements || "",
+            skills: job.skills || [],
+        });
         setShowEditModal(true);
     };
 
@@ -240,14 +256,26 @@ const Jobs = () => {
                     .replaceAll(" ", "_"),
                 workMode: (selectedJob.workMode || "Hybrid")
                     .toUpperCase()
+                    .replaceAll("-", "")
                     .replaceAll(" ", "_"),
-                status:
-                    selectedJob.status === "Active"
-                        ? "OPEN"
-                        : "CLOSED",
+                status: ({ Active: "OPEN", Closed: "CLOSED", Draft: "DRAFT" })[
+                    selectedJob.status
+                ] || selectedJob.status,
                 description: Array.isArray(selectedJob.description)
                     ? selectedJob.description.join("\n")
                     : selectedJob.description,
+                responsibilities: selectedJob.responsibilities || "",
+                requirements: selectedJob.requirements || "",
+                minSalary: selectedJob.minSalary === "" ? null : Number(selectedJob.minSalary),
+                maxSalary: selectedJob.maxSalary === "" ? null : Number(selectedJob.maxSalary),
+                experienceMin: Number(selectedJob.experienceMin || 0),
+                experienceMax: selectedJob.experienceMax === ""
+                    ? null
+                    : Number(selectedJob.experienceMax),
+                applicationDeadline: selectedJob.deadline || null,
+                skillIds: skillCatalog
+                    .filter((skill) => selectedJob.skills.includes(skill.name))
+                    .map((skill) => skill.id),
             });
 
             const updatedJob = formatRecruiterJob(response.job);
@@ -777,6 +805,7 @@ const Jobs = () => {
                                     >
                                         <option value="Active">Active</option>
                                         <option value="Closed">Closed</option>
+                                        <option value="Draft">Draft</option>
                                     </select>
                                 </div>
                             </div>
@@ -811,6 +840,7 @@ const Jobs = () => {
                                         <option value="Part Time">Part Time</option>
                                         <option value="Contract">Contract</option>
                                         <option value="Internship">Internship</option>
+                                        <option value="Freelance">Freelance</option>
                                     </select>
                                 </div>
                             </div>
@@ -832,6 +862,29 @@ const Jobs = () => {
                                 </select>
                             </div>
 
+                            <div className="grid gap-5 sm:grid-cols-2">
+                                <div>
+                                    <label className="mb-2 block text-sm font-medium text-slate-700">Minimum Experience (years)</label>
+                                    <input type="number" min="0" max="99" name="experienceMin" value={selectedJob.experienceMin ?? 0} onChange={handleEditChange} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100" />
+                                </div>
+                                <div>
+                                    <label className="mb-2 block text-sm font-medium text-slate-700">Maximum Experience (years, optional)</label>
+                                    <input type="number" min="0" max="99" name="experienceMax" value={selectedJob.experienceMax ?? ""} onChange={handleEditChange} placeholder="No maximum" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100" />
+                                </div>
+                                <div>
+                                    <label className="mb-2 block text-sm font-medium text-slate-700">Minimum Salary (annual, ₹)</label>
+                                    <input type="number" min="1" name="minSalary" value={selectedJob.minSalary ?? ""} onChange={handleEditChange} placeholder="Not disclosed" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100" />
+                                </div>
+                                <div>
+                                    <label className="mb-2 block text-sm font-medium text-slate-700">Maximum Salary (annual, ₹)</label>
+                                    <input type="number" min="1" name="maxSalary" value={selectedJob.maxSalary ?? ""} onChange={handleEditChange} placeholder="Not disclosed" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100" />
+                                </div>
+                                <div className="sm:col-span-2">
+                                    <label className="mb-2 block text-sm font-medium text-slate-700">Application Deadline</label>
+                                    <input type="date" name="deadline" value={selectedJob.deadline || ""} onChange={handleEditChange} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100" />
+                                </div>
+                            </div>
+
                             <div>
                                 <label className="mb-2 block text-sm font-medium text-slate-700">
                                     Description
@@ -848,6 +901,32 @@ const Jobs = () => {
                                     rows={5}
                                     className="w-full resize-y rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
                                 />
+                            </div>
+
+                            <div>
+                                <label className="mb-2 block text-sm font-medium text-slate-700">Key Responsibilities</label>
+                                <textarea name="responsibilities" value={selectedJob.responsibilities || ""} onChange={handleEditChange} rows={5} className="w-full resize-y rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100" />
+                            </div>
+
+                            <div>
+                                <label className="mb-2 block text-sm font-medium text-slate-700">Requirements & Qualifications</label>
+                                <textarea name="requirements" value={selectedJob.requirements || ""} onChange={handleEditChange} rows={6} className="w-full resize-y rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100" />
+                            </div>
+
+                            <div>
+                                <label className="mb-2 block text-sm font-medium text-slate-700">Required Skills</label>
+                                <select
+                                    multiple
+                                    value={selectedJob.skills || []}
+                                    onChange={(event) => setSelectedJob((prev) => ({
+                                        ...prev,
+                                        skills: Array.from(event.target.selectedOptions, (option) => option.value),
+                                    }))}
+                                    className="min-h-36 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                >
+                                    {skillCatalog.map((skill) => <option key={skill.id} value={skill.name}>{skill.name}</option>)}
+                                </select>
+                                <p className="mt-1 text-xs text-slate-400">Select multiple skills with Ctrl (Windows) or Command (Mac).</p>
                             </div>
 
                             <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">

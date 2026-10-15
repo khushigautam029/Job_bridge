@@ -1,10 +1,10 @@
+import sequelize from "../config/database.js";
 import {
     CandidateProfile,
     Company,
     RecruiterProfile,
     User,
 } from "../models/index.js";
-import sequelize from "../config/database.js";
 import {
     comparePassword,
     hashPassword,
@@ -20,8 +20,7 @@ const registerUser = async ({
     companyName,
     companyType,
 }) => {
-    const normalizedEmail =
-        email.trim().toLowerCase();
+    const normalizedEmail = email.trim().toLowerCase();
 
     const existingUser =
         await User.findOne({

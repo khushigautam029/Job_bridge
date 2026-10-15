@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import {
     createJob,
     getJobCategories,
+    getMyJobs,
 } from "../../services/jobService";
 import { getSkills } from "../../services/skillService";
 
@@ -31,6 +32,7 @@ const PostJob = () => {
         salary: "",
         deadline: "",
         description: "",
+        responsibilities: "",
         requirements: "",
     });
     const [skills, setSkills] = useState([]);
@@ -41,6 +43,7 @@ const PostJob = () => {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [loading, setLoading] = useState(false);
+    const [possibleDuplicate, setPossibleDuplicate] = useState(null);
 
     useEffect(() => {
         Promise.all([getJobCategories(), getSkills()])
@@ -92,8 +95,9 @@ const PostJob = () => {
         );
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async (e, allowDuplicate = false) => {
+        e?.preventDefault();
+        if (allowDuplicate) setPossibleDuplicate(null);
         setError("");
         setSuccess("");
         if (!formData.title.trim()) {
@@ -154,6 +158,24 @@ const PostJob = () => {
         try {
             setLoading(true);
 
+            if (!allowDuplicate) {
+                const normalize = (value) => (value || "")
+                    .trim()
+                    .toLocaleLowerCase()
+                    .replace(/\s+/g, " ");
+                const existingJobs = await getMyJobs();
+                const duplicate = existingJobs.find((job) =>
+                    normalize(job.title) === normalize(formData.title) &&
+                    normalize(job.location) === normalize(formData.location) &&
+                    normalize(job.requirements) === normalize(formData.requirements)
+                );
+
+                if (duplicate) {
+                    setPossibleDuplicate(duplicate);
+                    return;
+                }
+            }
+
             const matchedSkills = skills.map((name) =>
                 skillCatalog.find(
                     (skill) =>
@@ -187,6 +209,7 @@ const PostJob = () => {
                 skillIds: matchedSkills.map((skill) => skill.id),
                 title: formData.title.trim(),
                 description: formData.description.trim(),
+                responsibilities: formData.responsibilities.trim(),
                 requirements: formData.requirements.trim(),
                 jobType,
                 workMode,
@@ -201,6 +224,7 @@ const PostJob = () => {
                 status: "OPEN",
             });
 
+            setPossibleDuplicate(null);
             setSuccess("Job posted successfully!");
             setTimeout(() => {
                 navigate("/recruiter/jobs");
@@ -565,6 +589,22 @@ const PostJob = () => {
                             />
                         </div>
 
+                        {/* Responsibilities */}
+                        <div>
+                            <label className="mb-2 block text-sm font-medium text-slate-700">
+                                Key Responsibilities
+                            </label>
+
+                            <textarea
+                                name="responsibilities"
+                                value={formData.responsibilities}
+                                onChange={handleChange}
+                                rows={5}
+                                placeholder="List the main responsibilities for this role..."
+                                className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                            />
+                        </div>
+
                         {/* Requirements */}
                         <div>
                             <label className="mb-2 block text-sm font-medium text-slate-700">
@@ -677,6 +717,25 @@ const PostJob = () => {
                     </button>
                 </section>
             </form>
+
+            {possibleDuplicate && (
+                <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/40 p-4" role="dialog" aria-modal="true" aria-labelledby="possible-duplicate-title">
+                    <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
+                        <h2 id="possible-duplicate-title" className="text-lg font-bold text-slate-900">Possible duplicate job</h2>
+                        <p className="mt-2 text-sm leading-6 text-slate-600">
+                            You already have a job with the same title, company, location, and requirements: <span className="font-semibold text-slate-800">{possibleDuplicate.title}</span> in <span className="font-semibold text-slate-800">{possibleDuplicate.location || "unspecified location"}</span>. Do you want to post another one?
+                        </p>
+                        <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                            <button type="button" onClick={() => setPossibleDuplicate(null)} className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
+                                Go back and edit
+                            </button>
+                            <button type="button" onClick={(event) => handleSubmit(event, true)} disabled={loading} className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-60">
+                                {loading ? "Posting..." : "Post another job"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

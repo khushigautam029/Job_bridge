@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import useRoleHeaderData from "../../hooks/useRoleHeaderData";
 
 const RecruiterLayout = () => {
     const navigate = useNavigate();
@@ -23,57 +24,19 @@ const RecruiterLayout = () => {
     const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
     const notificationRef = useRef(null);
+    const {
+        user,
+        profile,
+        notifications,
+        unreadCount,
+        refreshNotifications,
+        markAsRead,
+        markAllAsRead,
+    } = useRoleHeaderData("RECRUITER");
 
-    const storedUser = JSON.parse(
-        localStorage.getItem("user") || "null"
-    );
-
-    const userName = storedUser?.name || "Recruiter";
-    const userEmail = storedUser?.email || "";
-
-    // NOTIFICATIONS
-    const notifications = [
-        {
-            id: 1,
-            title: "New Application Received",
-            message:
-                "Rahul Sharma has applied for your Senior React Developer position.",
-            time: "15 min ago",
-            icon: FileText,
-        },
-        {
-            id: 2,
-            title: "New Application Received",
-            message:
-                "Khushi Gautam has applied for your MERN Stack Developer position.",
-            time: "1 hour ago",
-            icon: FileText,
-        },
-        {
-            id: 3,
-            title: "Interview Scheduled",
-            message:
-                "An interview has been scheduled with Rahul Sharma for Senior React Developer.",
-            time: "3 hours ago",
-            icon: CalendarDays,
-        },
-        {
-            id: 4,
-            title: "Job Closing Soon",
-            message:
-                "Your Backend Developer job posting will reach its application deadline in 2 days.",
-            time: "Yesterday",
-            icon: BriefcaseBusiness,
-        },
-        {
-            id: 5,
-            title: "New Candidate Activity",
-            message:
-                "A candidate who applied to your job has updated their profile and resume.",
-            time: "2 days ago",
-            icon: Users,
-        },
-    ];
+    const userName = profile?.user?.name || user?.name || "Recruiter";
+    const userEmail = profile?.user?.email || user?.email || "";
+    const avatarUrl = profile?.company?.logo || user?.recruiterProfile?.company?.logo;
 
     // CLOSE NOTIFICATION WHEN CLICKING OUTSIDE
     useEffect(() => {
@@ -131,6 +94,8 @@ const RecruiterLayout = () => {
     const handleLogout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("user");
 
         closeMenus();
 
@@ -205,9 +170,11 @@ const RecruiterLayout = () => {
                         <div ref={notificationRef} className="relative">
                             <button
                                 type="button"
-                                onClick={() =>
-                                    setNotificationOpen((previous) => !previous)
-                                }
+                                onClick={async () => {
+                                    const opening = !notificationOpen;
+                                    setNotificationOpen(opening);
+                                    if (opening) await refreshNotifications().catch(() => {});
+                                }}
                                 className={`relative rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 ${notificationOpen
                                         ? "bg-slate-100 text-indigo-600"
                                         : ""
@@ -217,7 +184,11 @@ const RecruiterLayout = () => {
                             >
                                 <Bell size={19} />
 
-                                <span className="absolute right-1.5 top-1.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-indigo-600" />
+                                {unreadCount > 0 && (
+                                    <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ring-2 ring-white">
+                                        {unreadCount > 99 ? "99+" : unreadCount}
+                                    </span>
+                                )}
                             </button>
 
                             {/* NOTIFICATION DROPDOWN */}
@@ -228,47 +199,21 @@ const RecruiterLayout = () => {
                                         <h3 className="text-sm font-bold text-slate-900">
                                             Notifications
                                         </h3>
-
-                                        <button
-                                            type="button"
-                                            onClick={() => setNotificationOpen(false)}
-                                            className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-                                            aria-label="Close notifications"
-                                        >
-                                            <X size={16} />
-                                        </button>
+                                        <div className="flex items-center gap-2">
+                                            {unreadCount > 0 && <button type="button" onClick={() => markAllAsRead().catch(() => {})} className="text-xs font-medium text-indigo-600 hover:text-indigo-700">Mark all read</button>}
+                                            <button type="button" onClick={() => setNotificationOpen(false)} className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600" aria-label="Close notifications"><X size={16} /></button>
+                                        </div>
                                     </div>
 
                                     <div className="max-h-[420px] overflow-y-auto">
-                                        {notifications.map((notification) => {
-                                            const Icon = notification.icon;
-
-                                            return (
-                                                <div
-                                                    key={notification.id}
-                                                    className="flex gap-3 border-b border-slate-100 px-4 py-3 transition last:border-b-0 hover:bg-slate-50"
-                                                >
-                                                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                                                        <Icon size={17} />
-                                                    </div>
-
-                                                    <div className="min-w-0 flex-1">
-                                                        <h4 className="text-xs font-semibold text-slate-800">
-                                                            {notification.title}
-                                                        </h4>
-
-                                                        <p className="mt-1 text-xs leading-5 text-slate-500">
-                                                            {notification.message}
-                                                        </p>
-
-                                                        <p className="mt-1.5 text-[10px] font-medium text-slate-400">
-                                                            {notification.time}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
+                                        {notifications.length === 0 ? <p className="px-4 py-8 text-center text-sm text-slate-500">No notifications yet.</p> : notifications.slice(0, 6).map((notification) => (
+                                            <button key={notification.id} type="button" onClick={async () => { if (!notification.isRead) await markAsRead(notification.id).catch(() => {}); setNotificationOpen(false); navigate("/recruiter/notifications"); }} className={`flex w-full gap-3 border-b border-slate-100 px-4 py-3 text-left transition last:border-b-0 hover:bg-slate-50 ${notification.isRead ? "" : "bg-indigo-50/50"}`}>
+                                                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600"><Bell size={17} /></span>
+                                                <span className="min-w-0 flex-1"><span className="block text-xs font-semibold text-slate-800">{notification.title}</span><span className="mt-1 block text-xs leading-5 text-slate-500">{notification.message}</span><span className="mt-1.5 block text-[10px] font-medium text-slate-400">{notification.createdAt ? new Date(notification.createdAt).toLocaleString() : ""}</span></span>
+                                            </button>
+                                        ))}
                                     </div>
+                                    <button type="button" onClick={() => { setNotificationOpen(false); navigate("/recruiter/notifications"); }} className="w-full border-t border-slate-100 px-4 py-3 text-sm font-semibold text-indigo-600 hover:bg-slate-50">View all notifications</button>
                                 </div>
                             )}
                         </div>
@@ -285,8 +230,8 @@ const RecruiterLayout = () => {
                                         : "hover:bg-slate-50"
                                     }`}
                             >
-                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
-                                    <User size={17} />
+                                    <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-indigo-100 text-indigo-600">
+                                    {avatarUrl ? <img src={avatarUrl} alt="" className="h-full w-full object-cover" /> : <User size={17} />}
                                 </div>
 
                                 <div className="hidden text-left sm:block">
