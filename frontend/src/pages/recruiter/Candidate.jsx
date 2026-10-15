@@ -60,9 +60,10 @@ const formatDetails = (value) => {
                         return [
                             item.degree,
                             item.fieldOfStudy,
-                            item.institution || item.university || item.college,
-                            item.startYear,
-                            item.endYear,
+                            item.institution || item.university || item.college || item.companyName,
+                            item.startYear || item.startDate,
+                            item.endYear || item.endDate,
+                            item.jobTitle,
                         ]
                             .filter(Boolean)
                             .join(" • ");
@@ -79,9 +80,10 @@ const formatDetails = (value) => {
         return [
             value.degree,
             value.fieldOfStudy,
-            value.institution || value.university || value.college,
-            value.startYear,
-            value.endYear,
+            value.institution || value.university || value.college || value.companyName,
+            value.startYear || value.startDate,
+            value.endYear || value.endDate,
+            value.jobTitle,
         ]
             .filter(Boolean)
             .join(" • ") || "Not provided";
@@ -94,6 +96,7 @@ const Candidates = () => {
     const [search, setSearch] = useState("");
     const [experienceFilter, setExperienceFilter] = useState("All");
     const [locationFilter, setLocationFilter] = useState("All");
+    const [categoryFilter, setCategoryFilter] = useState("All");
 
     const [selectedCandidate, setSelectedCandidate] = useState(null);
     const [modalType, setModalType] = useState(null);
@@ -111,7 +114,7 @@ const Candidates = () => {
                 setError("");
 
                 const applications = await getRecruiterApplications();
-                const uniqueCandidates = new Map();
+                const candidateApplications = new Map();
 
                 applications.forEach((application) => {
                     const profile = application.candidate;
@@ -119,36 +122,23 @@ const Candidates = () => {
                     if (!profile) return;
 
                     const user = profile.user || {};
-                    const candidateId = profile.id ?? user.id;
+                    const candidateId = profile.id ?? application.candidateId ?? user.id;
 
                     if (candidateId == null) return;
 
                     const job = application.job || {};
-                    const existing = uniqueCandidates.get(candidateId);
+                    const applicationKey = application.id ?? `${candidateId}-${job.id ?? "job"}`;
 
                     const jobTitle = job.title || "";
-                    const appliedJobs = existing
-                        ? [...existing.appliedJobs]
-                        : [];
+                    const category = job.category?.name || "Uncategorized";
+                    const appliedJobs = [];
+                    const appliedCategories = [];
 
                     if (jobTitle && !appliedJobs.includes(jobTitle)) {
                         appliedJobs.push(jobTitle);
                     }
-
-                    // A candidate can apply to multiple jobs.
-                    // Keep one profile and aggregate their applications.
-                    if (existing) {
-                        existing.applicationCount += 1;
-                        existing.appliedJobs = appliedJobs;
-
-                        if (
-                            application.resume &&
-                            !existing.resume
-                        ) {
-                            existing.resume = application.resume;
-                        }
-
-                        return;
+                    if (category && !appliedCategories.includes(category)) {
+                        appliedCategories.push(category);
                     }
 
                     const rawSkills = profile.skills || [];
@@ -161,23 +151,29 @@ const Candidates = () => {
                         )
                         .filter(Boolean);
 
-                    const education = firstAvailable(
-                        profile.education,
-                        profile.educationDetails,
-                        profile.educationHistory,
-                        profile.degree,
-                        profile.educationLevel
-                    );
+                    const education = profile.educations?.length
+                        ? profile.educations
+                        : firstAvailable(
+                            profile.education,
+                            profile.educationDetails,
+                            profile.educationHistory,
+                            profile.degree,
+                            profile.educationLevel
+                        );
 
-                    const experienceDetails = firstAvailable(
-                        profile.experienceDetails,
-                        profile.workExperience,
-                        profile.experienceHistory,
-                        profile.employmentHistory
-                    );
+                    const experienceDetails = profile.experiences?.length
+                        ? profile.experiences
+                        : firstAvailable(
+                            profile.experienceDetails,
+                            profile.workExperience,
+                            profile.experienceHistory,
+                            profile.employmentHistory
+                        );
 
-                    uniqueCandidates.set(candidateId, {
-                        id: candidateId,
+                    candidateApplications.set(applicationKey, {
+                        id: applicationKey,
+                        candidateProfileId: candidateId,
+                        applicationId: application.id,
 
                         name: user.name || "Candidate",
                         email: user.email || "",
@@ -189,7 +185,8 @@ const Candidates = () => {
                                 profile.currentPosition,
                                 profile.jobTitle,
                                 profile.headline,
-                                profile.preferredJobTitle
+                                profile.preferredJobTitle,
+                                profile.experiences?.[0]?.jobTitle
                             ) || "Candidate",
 
                         location:
@@ -203,7 +200,8 @@ const Candidates = () => {
                             firstAvailable(
                                 profile.currentCompany,
                                 profile.companyName,
-                                profile.company
+                                profile.company,
+                                profile.experiences?.[0]?.companyName
                             ) || "Not provided",
 
                         education: formatDetails(education),
@@ -212,7 +210,8 @@ const Candidates = () => {
                             firstAvailable(
                                 profile.university,
                                 profile.institution,
-                                profile.college
+                                profile.college,
+                                profile.educations?.[0]?.institution
                             ) || "",
 
                         experienceDetails: formatDetails(
@@ -252,11 +251,12 @@ const Candidates = () => {
 
                         applicationCount: 1,
                         appliedJobs,
+                        appliedCategories: category ? [category] : [],
                     });
                 });
 
                 if (active) {
-                    setCandidates([...uniqueCandidates.values()]);
+                    setCandidates([...candidateApplications.values()]);
                 }
             } catch (loadError) {
                 if (active) {
@@ -310,10 +310,15 @@ const Candidates = () => {
                 locationFilter === "All" ||
                 candidate.location === locationFilter;
 
+            const matchesCategory =
+                categoryFilter === "All" ||
+                candidate.appliedCategories.includes(categoryFilter);
+
             return (
                 matchesSearch &&
                 matchesExperience &&
-                matchesLocation
+                matchesLocation &&
+                matchesCategory
             );
         });
     }, [
@@ -321,7 +326,13 @@ const Candidates = () => {
         search,
         experienceFilter,
         locationFilter,
+        categoryFilter,
     ]);
+
+    const categoryOptions = useMemo(
+        () => [...new Set(candidates.flatMap((candidate) => candidate.appliedCategories))].sort(),
+        [candidates]
+    );
 
     const experienceOptions = useMemo(
         () =>
@@ -365,6 +376,7 @@ const Candidates = () => {
         setSearch("");
         setExperienceFilter("All");
         setLocationFilter("All");
+        setCategoryFilter("All");
     };
 
     const openExternalLink = (url) => {
@@ -456,7 +468,7 @@ const Candidates = () => {
 
                     <div>
                         <p className="text-xs text-slate-400">
-                            Unique Candidates
+                            Candidate Applications
                         </p>
 
                         <p className="text-lg font-bold text-slate-800">
@@ -468,7 +480,7 @@ const Candidates = () => {
 
             {/* SEARCH AND FILTERS */}
             <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_200px_200px]">
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_200px_200px_200px]">
                     <div className="relative">
                         <Search
                             size={18}
@@ -484,6 +496,20 @@ const Candidates = () => {
                             placeholder="Search name, email, skills or job..."
                             className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
                         />
+                    </div>
+
+                    <div className="relative">
+                        <select
+                            value={categoryFilter}
+                            onChange={(event) => setCategoryFilter(event.target.value)}
+                            className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-10 text-sm text-slate-600 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                        >
+                            <option value="All">All Categories</option>
+                            {categoryOptions.map((category) => (
+                                <option key={category} value={category}>{category}</option>
+                            ))}
+                        </select>
+                        <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     </div>
 
                     <div className="relative">
@@ -539,21 +565,22 @@ const Candidates = () => {
                 <div className="flex flex-wrap items-end justify-between gap-3">
                     <div>
                         <h2 className="text-lg font-semibold text-slate-900">
-                            Candidate Pool
+                            Candidate Applications
                         </h2>
 
                         <p className="mt-1 text-xs text-slate-400">
                             {filteredCandidates.length}{" "}
                             {filteredCandidates.length === 1
-                                ? "candidate"
-                                : "candidates"}{" "}
+                                ? "application"
+                                : "applications"}{" "}
                             found
                         </p>
                     </div>
 
                     {(search ||
                         experienceFilter !== "All" ||
-                        locationFilter !== "All") && (
+                        locationFilter !== "All" ||
+                        categoryFilter !== "All") && (
                         <button
                             type="button"
                             onClick={clearFilters}

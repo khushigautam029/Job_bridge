@@ -7,6 +7,7 @@ import {
     Company,
     Interview,
     Job,
+    JobCategory,
     RecruiterProfile,
     User,
 } from "../models/index.js";
@@ -406,6 +407,11 @@ const getRecruiterInterviews = async (
                         },
 
                         include: [
+                            {
+                                model: JobCategory,
+                                as: "category",
+                                attributes: ["id", "name"],
+                            },
                             {
                                 model: Company,
                                 as: "company",
