@@ -546,6 +546,11 @@ const getRecruiterApplications = async (userId) => {
                 },
                 include: [
                     {
+                        model: JobCategory,
+                        as: "category",
+                        attributes: ["id", "name"],
+                    },
+                    {
                         model: Company,
                         as: "company",
                         attributes: ["id", "name", "location", "logo"],

@@ -29,6 +29,7 @@ const RecruiterApplications = () => {
 
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("All");
+    const [categoryFilter, setCategoryFilter] = useState("All");
 
     // Selected candidate/application
     const [selectedCandidate, setSelectedCandidate] = useState(null);
@@ -68,6 +69,8 @@ const RecruiterApplications = () => {
                         email: candidate.user?.email || "",
                         phone: candidate.user?.phone || "",
                         jobTitle: job.title || "Job",
+                        categoryId: job.categoryId || job.category?.id,
+                        category: job.category?.name || "Uncategorized",
                         location: candidate.location || job.location || "",
                         experience: candidate.experienceYears
                             ? `${candidate.experienceYears} Years`
@@ -110,6 +113,12 @@ const RecruiterApplications = () => {
         );
     }, [applications, currentJobId]);
 
+    const categories = useMemo(() => {
+        return [...new Set(jobApplications.map((application) => application.category))]
+            .filter(Boolean)
+            .sort((first, second) => first.localeCompare(second));
+    }, [jobApplications]);
+
     // Filter Applications
     const filteredApplications = useMemo(() => {
         const searchValue = search.trim().toLowerCase();
@@ -139,15 +148,21 @@ const RecruiterApplications = () => {
                 statusFilter === "All" ||
                 application.status === statusFilter;
 
+            const matchesCategory =
+                categoryFilter === "All" ||
+                application.category === categoryFilter;
+
             return (
                 matchesSearch &&
-                matchesStatus
+                matchesStatus &&
+                matchesCategory
             );
         });
     }, [
         jobApplications,
         search,
         statusFilter,
+        categoryFilter,
     ]);
 
     // Status Classes
@@ -211,6 +226,7 @@ const RecruiterApplications = () => {
     const clearFilters = () => {
         setSearch("");
         setStatusFilter("All");
+        setCategoryFilter("All");
     };
 
     /* Open Candidate Modal */
@@ -452,7 +468,7 @@ const RecruiterApplications = () => {
 
             {/* FILTERS */}
             <section className="mt-7 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div className="grid gap-4 md:grid-cols-[1fr_auto]">
+                <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(10rem,auto)_minmax(10rem,auto)]">
                     {/* Search */}
 
                     <div className="relative">
@@ -469,6 +485,26 @@ const RecruiterApplications = () => {
                             }
                             placeholder="Search candidate, email, location or skill..."
                             className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                        />
+                    </div>
+
+                    {/* Category */}
+                    <div className="relative">
+                        <select
+                            value={categoryFilter}
+                            onChange={(e) => setCategoryFilter(e.target.value)}
+                            className="w-full min-w-40 appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-10 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                        >
+                            <option value="All">All Categories</option>
+                            {categories.map((category) => (
+                                <option key={category} value={category}>
+                                    {category}
+                                </option>
+                            ))}
+                        </select>
+                        <ChevronDown
+                            size={16}
+                            className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
                         />
                     </div>
 
