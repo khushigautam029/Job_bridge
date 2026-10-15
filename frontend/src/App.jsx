@@ -1,4 +1,5 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { useLayoutEffect } from "react";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 
 import Home from "./pages/Home";
 import HomeJobs from "./pages/HomeJobs";
@@ -25,9 +26,20 @@ import RecruiterLayout from "./pages/recruiter/RecruiterLayout";
 import RecruiterProfile from "./pages/recruiter/RecruiterProfile";
 import RecruiterSetting from "./pages/recruiter/RecruiterSetting";
 
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useLayoutEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+};
+
 const App = () => {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         {/* Public */}
         <Route path="/" element={<Home />} />

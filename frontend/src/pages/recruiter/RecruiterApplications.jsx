@@ -1,4 +1,5 @@
 ﻿import {
+    ArrowLeft,
     BriefcaseBusiness,
     CalendarDays,
     ChevronDown,
@@ -372,9 +373,10 @@ const RecruiterApplications = () => {
             <button
                 type="button"
                 onClick={handleBack}
-                className="mt-5 text-sm font-semibold text-indigo-600 hover:text-indigo-700"
+                className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 transition-colors hover:text-indigo-800"
             >
-                â† Back to Job
+                <ArrowLeft size={18} />
+                Back to Job
             </button>
 
             {/* SUMMARY CARDS */}
@@ -1111,9 +1113,9 @@ const RecruiterApplications = () => {
                                                             )
                                                         }
                                                         className={`rounded-xl border px-4 py-3 text-left text-sm font-medium transition ${selectedCandidate.status ===
-                                                                status
-                                                                ? "border-indigo-300 bg-indigo-50 text-indigo-600"
-                                                                : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                                                            status
+                                                            ? "border-indigo-300 bg-indigo-50 text-indigo-600"
+                                                            : "border-slate-200 text-slate-600 hover:bg-slate-50"
                                                             }`}
                                                     >
                                                         {
