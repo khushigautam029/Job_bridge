@@ -54,7 +54,6 @@ const addJobSkill = async (
         throw error;
     }
 
-
     const recruiterProfile =
         await RecruiterProfile.findOne({
             where: {
@@ -143,7 +142,6 @@ const removeJobSkill = async (
         throw error;
     }
 
-
     const recruiterProfile =
         await RecruiterProfile.findOne({
             where: {
@@ -159,7 +157,6 @@ const removeJobSkill = async (
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
-
 
     if (
         job.recruiterId !== recruiterProfile.id

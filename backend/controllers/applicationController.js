@@ -85,7 +85,7 @@ const getOne = asyncHandler(
         return sendSuccess(
             res,
             STATUS_CODES.OK,
-            "Application retrieved successfully",
+            MESSAGES.APPLICATION_RETRIEVED,
             {
                 application,
             }

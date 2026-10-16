@@ -178,6 +178,7 @@ export const MESSAGES = {
     PROFILE_IMAGE_REQUIRED:"Profile image is required",
     PROFILE_IMAGE_UPLOADED:"Profile image uploaded successfully",
     PROFILE_IMAGE_NOT_FOUND:"Profile image not found",
-    PROFILE_IMAGE_DELETED:"Profile image deleted successfully"
+    PROFILE_IMAGE_DELETED:"Profile image deleted successfully",
+    APPLICATION_RETRIEVED:"Application retrieved successfully"
 
 };

@@ -23,8 +23,7 @@ const findCandidateProfile = async (
             "Candidate profile not found"
         );
 
-        error.statusCode =
-            STATUS_CODES.NOT_FOUND;
+        error.statusCode = STATUS_CODES.NOT_FOUND;
 
         throw error;
     }

@@ -114,7 +114,6 @@ const loginUser = async ({
             where: { userId: user.id },
         });
 
-        // Repair recruiter accounts created before profile creation was atomic.
         if (!recruiterProfile) {
             await sequelize.transaction(async (transaction) => {
                 const company = await Company.create({

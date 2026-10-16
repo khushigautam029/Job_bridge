@@ -30,7 +30,6 @@ const getCandidateSkills = async (userId) => {
         throw error;
     }
 
-
     const skills = await Skill.findAll({
         include: [
             {
@@ -74,7 +73,7 @@ const addCandidateSkill = async (
 
     if (!candidate) {
         const error = new Error(
-           MESSAGES.PROFILE_IMAGE_UPLOADED
+            MESSAGES.PROFILE_IMAGE_UPLOADED
         );
 
         error.statusCode =
