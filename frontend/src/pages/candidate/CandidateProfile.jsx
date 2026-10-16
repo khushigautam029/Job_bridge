@@ -3228,7 +3228,7 @@ const CandidateProfile = () => {
                 {/* PERSONAL DETAILS MODAL */}
             {editingHeader && (
 
-                <div className="fixed inset-0 z-[9999] grid place-items-center overflow-hidden bg-slate-900/45 p-3 sm:p-4">
+                <div className="fixed inset-0 z-[9999] grid place-items-center overflow-hidden bg-slate-900/45 p-3 backdrop-blur-sm sm:p-4">
 
                     <div className="my-auto w-full max-w-lg overflow-y-auto rounded-2xl border-0 bg-gradient-to-br from-white via-blue-50/70 to-purple-50/80 p-5 sm:p-6" style={{ border: "none", outline: "0", boxShadow: "0 18px 50px rgba(37, 54, 95, 0.18)", maxHeight: "calc(100dvh - 2rem)", overscrollBehavior: "contain", boxSizing: "border-box" }}>
 
@@ -3529,7 +3529,7 @@ const CandidateProfile = () => {
                 {/* CAREER PREFERENCES MODAL */}
             {editingPref && (
 
-                <div className="fixed inset-0 z-[9999] grid place-items-center overflow-hidden bg-slate-900/45 p-3 sm:p-4">
+                <div className="fixed inset-0 z-[9999] grid place-items-center overflow-hidden bg-slate-900/45 p-3 backdrop-blur-sm sm:p-4">
 
                     <div className="my-auto w-full max-w-md overflow-y-auto rounded-2xl border-0 bg-gradient-to-br from-white via-blue-50/70 to-purple-50/80 p-5 sm:p-6" style={{ border: "none", outline: "0", boxShadow: "0 18px 50px rgba(37, 54, 95, 0.18)", maxHeight: "calc(100dvh - 2rem)", overscrollBehavior: "contain", boxSizing: "border-box" }}>
 
@@ -3731,7 +3731,7 @@ const CandidateProfile = () => {
                 {/* EDUCATION MODAL */}
             {showEducationModal && (
 
-                <div className="fixed inset-0 z-[9999] grid place-items-center overflow-hidden bg-slate-900/45 p-3 sm:p-4">
+                <div className="fixed inset-0 z-[9999] grid place-items-center overflow-hidden bg-slate-900/45 p-3 backdrop-blur-sm sm:p-4">
 
                     <div className="my-auto w-full max-w-lg overflow-y-auto rounded-2xl border-0 bg-gradient-to-br from-white via-blue-50/70 to-purple-50/80 p-5 sm:p-6" style={{ border: "none", outline: "0", boxShadow: "0 18px 50px rgba(37, 54, 95, 0.18)", maxHeight: "calc(100dvh - 2rem)", overscrollBehavior: "contain", boxSizing: "border-box" }}>
 
@@ -4038,7 +4038,7 @@ const CandidateProfile = () => {
                 {/* EXPERIENCE MODAL */}
             {showExperienceModal && (
 
-                <div className="fixed inset-0 z-[9999] grid place-items-center overflow-hidden bg-slate-900/45 p-3 sm:p-4">
+                <div className="fixed inset-0 z-[9999] grid place-items-center overflow-hidden bg-slate-900/45 p-3 backdrop-blur-sm sm:p-4">
 
                     <div className="my-auto w-full max-w-lg overflow-y-auto rounded-2xl border-0 bg-gradient-to-br from-white via-blue-50/70 to-purple-50/80 p-5 sm:p-6" style={{ border: "none", outline: "0", boxShadow: "0 18px 50px rgba(37, 54, 95, 0.18)", maxHeight: "calc(100dvh - 2rem)", overscrollBehavior: "contain", boxSizing: "border-box" }}>
 
@@ -4406,7 +4406,7 @@ const CandidateProfile = () => {
                 {/* PROJECT MODAL */}
             {showProjectModal && (
 
-                <div className="fixed inset-0 z-[9999] grid place-items-center overflow-hidden bg-slate-900/45 p-3 sm:p-4">
+                <div className="fixed inset-0 z-[9999] grid place-items-center overflow-hidden bg-slate-900/45 p-3 backdrop-blur-sm sm:p-4">
 
                     <div className="my-auto w-full max-w-lg overflow-y-auto rounded-2xl border-0 bg-gradient-to-br from-white via-blue-50/70 to-purple-50/80 p-5 sm:p-6" style={{ border: "none", outline: "0", boxShadow: "0 18px 50px rgba(37, 54, 95, 0.18)", maxHeight: "calc(100dvh - 2rem)", overscrollBehavior: "contain", boxSizing: "border-box" }}>
 
@@ -4750,7 +4750,7 @@ const CandidateProfile = () => {
                 {/* PROFILE SUMMARY MODAL */}
             {editingBio && (
 
-                <div className="fixed inset-0 z-[9999] grid place-items-center overflow-hidden bg-slate-900/45 p-3 sm:p-4">
+                <div className="fixed inset-0 z-[9999] grid place-items-center overflow-hidden bg-slate-900/45 p-3 backdrop-blur-sm sm:p-4">
 
                     <div className="my-auto bg-gradient-to-br from-white via-blue-50/70 to-purple-50/80 rounded-2xl border-0 max-w-lg w-full max-h-[calc(100dvh-2rem)] p-6 shadow-xl" style={{ border: "none", outline: "none", boxShadow: "0 18px 50px rgba(37, 54, 95, 0.18)", maxHeight: "calc(100dvh - 2rem)", overflowY: "auto", overscrollBehavior: "contain" }}>
 

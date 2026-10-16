@@ -208,7 +208,7 @@ const RecruiterLayout = () => {
 
             {/* HEADER */}
 
-            <header className="recruiter-header sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
+            <header className="recruiter-header sticky top-0 z-10 border-b border-slate-200 bg-white/95 backdrop-blur">
                 <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-5 sm:px-7 lg:px-8">
                     {/* LOGO */}
                     <button

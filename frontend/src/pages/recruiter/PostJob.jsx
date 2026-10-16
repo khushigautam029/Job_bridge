@@ -719,7 +719,7 @@ const PostJob = () => {
             </form>
 
             {possibleDuplicate && (
-                <div className="fixed inset-0 z-[110] flex items-center justify-center overflow-hidden bg-slate-900/40 p-3 sm:p-4" role="dialog" aria-modal="true" aria-labelledby="possible-duplicate-title">
+                <div className="fixed inset-0 z-[110] flex items-center justify-center overflow-hidden bg-slate-900/40 p-3 backdrop-blur-sm sm:p-4" role="dialog" aria-modal="true" aria-labelledby="possible-duplicate-title">
                     <div className="w-full max-w-lg rounded-2xl border-0 bg-white p-6 shadow-2xl">
                         <h2 id="possible-duplicate-title" className="text-lg font-bold text-slate-900">Possible duplicate job</h2>
                         <p className="mt-2 text-sm leading-6 text-slate-600">
