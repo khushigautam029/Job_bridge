@@ -300,7 +300,7 @@ const RecruiterLayout = () => {
                                             </button>
                                         ))}
                                     </div>
-                                    <button type="button" onClick={() => { setNotificationOpen(false); navigate("/recruiter/notifications"); }} className="w-full border-t border-slate-100 px-4 py-3 text-sm font-semibold text-indigo-600 hover:bg-slate-50">View all notifications</button>
+                                    {/* <button type="button" onClick={() => { setNotificationOpen(false); navigate("/recruiter/notifications"); }} className="w-full border-t border-slate-100 px-4 py-3 text-sm font-semibold text-indigo-600 hover:bg-slate-50">View all notifications</button> */}
                                 </div>
                             )}
                         </div>
