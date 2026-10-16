@@ -2344,68 +2344,6 @@ const CandidateProfile = () => {
 
                         {/* QUICK ADD */}
 
-                        <div className="w-full lg:w-1/3 bg-amber-50/60 rounded-xl p-4 border border-amber-100 space-y-3">
-
-                            <button
-                                type="button"
-                                onClick={
-                                    openAddProject
-                                }
-                                className="w-full flex items-center justify-between text-xs font-semibold text-gray-700 hover:text-blue-600"
-                            >
-
-                                <span className="flex items-center gap-2">
-
-                                    <Briefcase
-                                        size={16}
-                                        className="text-amber-600"
-                                    />
-
-                                    Add project
-
-                                </span>
-
-                                <Plus size={15} />
-
-                            </button>
-
-
-                            <button
-                                type="button"
-                                onClick={
-                                    openAddExperience
-                                }
-                                className="w-full flex items-center justify-between text-xs font-semibold text-gray-700 hover:text-blue-600"
-                            >
-
-                                <span className="flex items-center gap-2">
-
-                                    <GraduationCap
-                                        size={16}
-                                        className="text-amber-600"
-                                    />
-
-                                    Add experience
-
-                                </span>
-
-                                <Plus size={15} />
-
-                            </button>
-
-
-                            <button
-                                type="button"
-                                onClick={
-                                    openHeaderEdit
-                                }
-                                className="w-full mt-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold text-xs py-2.5 rounded-lg transition shadow-sm"
-                            >
-                                Add missing details
-                            </button>
-
-                        </div>
-
                     </div>
 
                 </div>
