@@ -40,3 +40,22 @@ form label:has(+ div:has(textarea[required]))::after {
     font-size: 0.8rem;
     line-height: 1.25rem;
 }
+
+
+
+@keyframes savePop {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+
+    70% {
+        opacity: 1;
+        transform: scale(1.15);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

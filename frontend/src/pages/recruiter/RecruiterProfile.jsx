@@ -50,13 +50,9 @@ const whitespaceError = (value) => {
 
 const validateField = (section, name, value) => {
     const fieldValue = String(value ?? "");
-
     const whitespace = whitespaceError(fieldValue);
 
-    // Whitespace errors should be displayed before other errors.
-    if (whitespace) {
-        return whitespace;
-    }
+    if (whitespace) return whitespace;
 
     if (name === "email") {
         if (
@@ -70,9 +66,7 @@ const validateField = (section, name, value) => {
     }
 
     if (name === "name" && section === "profile") {
-        if (!fieldValue) {
-            return "Full name is required.";
-        }
+        if (!fieldValue) return "Full name is required.";
 
         if (fieldValue.length < 2 || fieldValue.length > 80) {
             return "Name must contain 2–80 characters.";
@@ -90,12 +84,8 @@ const validateField = (section, name, value) => {
     }
 
     if (name === "phone") {
-        if (!fieldValue) {
-            return "Phone number is required.";
-        }
+        if (!fieldValue) return "Phone number is required.";
 
-        // Accepts a 10-digit Indian mobile number, optionally
-        // prefixed with 91 or +91. Spaces and hyphens are rejected.
         if (!/^(?:(?:\+91|91))?[6-9]\d{9}$/.test(fieldValue)) {
             return "Enter a valid Indian mobile number, e.g. 9876543210 or +919876543210.";
         }
@@ -104,9 +94,7 @@ const validateField = (section, name, value) => {
     }
 
     if (name === "designation") {
-        if (!fieldValue) {
-            return "Designation is required.";
-        }
+        if (!fieldValue) return "Designation is required.";
 
         if (fieldValue.length < 2 || fieldValue.length > 100) {
             return "Designation must contain 2–100 characters.";
@@ -124,9 +112,7 @@ const validateField = (section, name, value) => {
     }
 
     if (name === "name" && section === "company") {
-        if (!fieldValue) {
-            return "Company name is required.";
-        }
+        if (!fieldValue) return "Company name is required.";
 
         if (fieldValue.length < 2 || fieldValue.length > 150) {
             return "Company name must contain 2–150 characters.";
@@ -144,9 +130,7 @@ const validateField = (section, name, value) => {
     }
 
     if (name === "description") {
-        if (!fieldValue) {
-            return "Company description is required.";
-        }
+        if (!fieldValue) return "Company description is required.";
 
         if (fieldValue.length < 10) {
             return "Description must contain at least 10 characters.";
@@ -168,10 +152,7 @@ const validateField = (section, name, value) => {
     }
 
     if (name === "website" || name === "logo") {
-        // These two fields are optional.
-        if (!fieldValue) {
-            return "";
-        }
+        if (!fieldValue) return "";
 
         try {
             const url = new URL(fieldValue);
@@ -192,9 +173,7 @@ const validateField = (section, name, value) => {
     }
 
     if (name === "location") {
-        if (!fieldValue) {
-            return "Company location is required.";
-        }
+        if (!fieldValue) return "Company location is required.";
 
         if (fieldValue.length < 2 || fieldValue.length > 150) {
             return "Location must contain 2–150 characters.";
@@ -217,11 +196,9 @@ const validateField = (section, name, value) => {
 const RecruiterProfile = () => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
     const [fieldErrors, setFieldErrors] = useState({});
-
     const [profile, setProfile] = useState(initialProfile);
     const [company, setCompany] = useState(initialCompany);
 
@@ -240,11 +217,8 @@ const RecruiterProfile = () => {
                     getMyCompany(),
                 ]);
 
-            const recruiter =
-                recruiterResponse.data.recruiter;
-
-            const companyData =
-                companyResponse.data.company;
+            const recruiter = recruiterResponse.data.recruiter;
+            const companyData = companyResponse.data.company;
 
             setProfile({
                 name: recruiter.user?.name || "",
@@ -290,8 +264,6 @@ const RecruiterProfile = () => {
 
         const key = `${section}.${name}`;
 
-        // Validate a field while editing if it has already
-        // displayed an error.
         if (Object.prototype.hasOwnProperty.call(fieldErrors, key)) {
             setFieldErrors((previous) => ({
                 ...previous,
@@ -315,31 +287,15 @@ const RecruiterProfile = () => {
 
     const validateAllFields = () => {
         const values = {
-            "profile.name": validateField(
-                "profile",
-                "name",
-                profile.name
-            ),
-            "profile.email": validateField(
-                "profile",
-                "email",
-                profile.email
-            ),
-            "profile.phone": validateField(
-                "profile",
-                "phone",
-                profile.phone
-            ),
+            "profile.name": validateField("profile", "name", profile.name),
+            "profile.email": validateField("profile", "email", profile.email),
+            "profile.phone": validateField("profile", "phone", profile.phone),
             "profile.designation": validateField(
                 "profile",
                 "designation",
                 profile.designation
             ),
-            "company.name": validateField(
-                "company",
-                "name",
-                company.name
-            ),
+            "company.name": validateField("company", "name", company.name),
             "company.description": validateField(
                 "company",
                 "description",
@@ -355,15 +311,10 @@ const RecruiterProfile = () => {
                 "location",
                 company.location
             ),
-            "company.logo": validateField(
-                "company",
-                "logo",
-                company.logo
-            ),
+            "company.logo": validateField("company", "logo", company.logo),
         };
 
         setFieldErrors(values);
-
         return Object.values(values).every((value) => !value);
     };
 
@@ -374,9 +325,7 @@ const RecruiterProfile = () => {
         setError("");
 
         if (!validateAllFields()) {
-            setError(
-                "Please correct the highlighted fields before saving."
-            );
+            setError("Please correct the highlighted fields before saving.");
             return;
         }
 
@@ -411,13 +360,13 @@ const RecruiterProfile = () => {
 
     if (loading) {
         return (
-            <div className="flex min-h-[calc(100vh-4rem)] w-full items-center justify-center bg-slate-50">
-                <div className="flex flex-col items-center gap-3">
+            <div className="flex min-h-[70vh] w-full items-center justify-center bg-slate-50">
+                <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
                     <Loader2
-                        size={34}
+                        size={22}
                         className="animate-spin text-indigo-600"
                     />
-                    <p className="text-sm font-medium text-slate-500">
+                    <p className="text-sm font-medium text-slate-600">
                         Loading recruiter profile...
                     </p>
                 </div>
@@ -427,17 +376,34 @@ const RecruiterProfile = () => {
 
     return (
         <div className="-mx-5 -my-6 min-h-[calc(100vh-4rem)] w-auto bg-slate-50 sm:-mx-7 lg:-mx-10">
-            <div className="w-full px-5 py-5 sm:px-7 lg:px-8">
-                {/* Feedback messages */}
+            <div className="w-full px-4 py-4 sm:px-6 lg:px-8">
+                {/* Compact page heading */}
+                <div className="mb-4 flex flex-col justify-between gap-3 border-b border-slate-200 pb-4 sm:flex-row sm:items-center">
+                    <div className="flex items-center gap-3">
+                        <div>
+                            <h1 className="text-xl font-bold tracking-tight text-slate-900">
+                                Recruiter Profile
+                            </h1>
+                            <p className="mt-0.5 text-xs text-slate-500">
+                                Manage your details and company information.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 self-start rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1.5 sm:self-auto">
+                        <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                        <span className="text-xs font-semibold text-indigo-700">
+                            Recruiter Account
+                        </span>
+                    </div>
+                </div>
+
                 {message && (
                     <div
                         role="status"
-                        className="mb-5 flex items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800"
+                        className="mb-4 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2.5 text-sm text-emerald-800"
                     >
-                        <CheckCircle2
-                            size={19}
-                            className="mt-0.5 shrink-0"
-                        />
+                        <CheckCircle2 size={18} className="shrink-0" />
                         <p>{message}</p>
                     </div>
                 )}
@@ -445,35 +411,33 @@ const RecruiterProfile = () => {
                 {error && (
                     <div
                         role="alert"
-                        className="mb-5 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                        className="mb-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-700"
                     >
-                        <AlertCircle
-                            size={19}
-                            className="mt-0.5 shrink-0"
-                        />
+                        <AlertCircle size={18} className="mt-0.5 shrink-0" />
                         <p>{error}</p>
                     </div>
                 )}
 
                 <form onSubmit={handleSave} noValidate>
-                    <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-2">
+                    <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[0.9fr_1.1fr]">
                         {/* Recruiter details */}
                         <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                            <div className="flex items-center gap-3 border-b border-slate-200 px-5 py-4">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
-                                    <UserRound size={20} />
+                            <div className="flex items-center gap-3 border-b border-indigo-100 bg-gradient-to-r from-indigo-50 to-white px-4 py-3">
+                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700">
+                                    <UserRound size={19} />
                                 </div>
+
                                 <div>
-                                    <h2 className="text-base font-semibold text-slate-900">
-                                        Recruiter Information
+                                    <h2 className="text-sm font-bold text-slate-900">
+                                        Personal Information
                                     </h2>
                                     <p className="mt-0.5 text-xs text-slate-500">
-                                        Your personal and professional details.
+                                        Your contact and professional details
                                     </p>
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 gap-x-5 gap-y-4 p-5 md:grid-cols-2">
+                            <div className="grid grid-cols-1 gap-x-4 gap-y-3 p-4 md:grid-cols-2">
                                 <InputField
                                     label="Full Name"
                                     name="name"
@@ -485,7 +449,7 @@ const RecruiterProfile = () => {
                                         handleFieldBlur("profile", e)
                                     }
                                     error={fieldErrors["profile.name"]}
-                                    icon={<UserRound size={17} />}
+                                    icon={<UserRound size={16} />}
                                     placeholder="Enter your full name"
                                     required
                                     maxLength={80}
@@ -502,15 +466,15 @@ const RecruiterProfile = () => {
                                         handleFieldBlur("profile", e)
                                     }
                                     error={fieldErrors["profile.email"]}
-                                    icon={<Mail size={17} />}
+                                    icon={<Mail size={16} />}
                                     disabled
                                     required
                                     autoComplete="email"
-                                    hint="Email address cannot be changed here."
+                                    hint="Read-only account email"
                                 />
 
                                 <InputField
-                                    label="Indian Mobile Number"
+                                    label="Mobile Number"
                                     name="phone"
                                     type="tel"
                                     value={profile.phone}
@@ -521,7 +485,7 @@ const RecruiterProfile = () => {
                                         handleFieldBlur("profile", e)
                                     }
                                     error={fieldErrors["profile.phone"]}
-                                    icon={<Phone size={17} />}
+                                    icon={<Phone size={16} />}
                                     placeholder="9876543210"
                                     required
                                     maxLength={13}
@@ -539,31 +503,48 @@ const RecruiterProfile = () => {
                                         handleFieldBlur("profile", e)
                                     }
                                     error={fieldErrors["profile.designation"]}
-                                    icon={<BriefcaseBusiness size={17} />}
+                                    icon={<BriefcaseBusiness size={16} />}
                                     placeholder="e.g. HR Manager"
                                     required
                                     maxLength={100}
                                 />
+
+                                <div className="rounded-lg border border-indigo-100 bg-indigo-50/70 p-3 md:col-span-2">
+                                    <div className="flex items-start gap-2.5">
+                                        <div className="mt-0.5 text-indigo-600">
+                                            <CheckCircle2 size={17} />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-semibold text-indigo-900">
+                                                Account information
+                                            </p>
+                                            <p className="mt-1 text-xs leading-5 text-indigo-800/80">
+                                                Your email is linked to your account and cannot be edited here. Update your contact details when they change.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </section>
 
                         {/* Company details */}
                         <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                            <div className="flex items-center gap-3 border-b border-slate-200 px-5 py-4">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-50 text-violet-600">
-                                    <Building2 size={20} />
+                            <div className="flex items-center gap-3 border-b border-violet-100 bg-gradient-to-r from-violet-50 to-white px-4 py-3">
+                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-100 text-violet-700">
+                                    <Building2 size={19} />
                                 </div>
+
                                 <div>
-                                    <h2 className="text-base font-semibold text-slate-900">
+                                    <h2 className="text-sm font-bold text-slate-900">
                                         Company Information
                                     </h2>
                                     <p className="mt-0.5 text-xs text-slate-500">
-                                        Information candidates see about your company.
+                                        Details visible to job candidates
                                     </p>
                                 </div>
                             </div>
 
-                            <div className="space-y-4 p-5">
+                            <div className="space-y-3 p-4">
                                 <InputField
                                     label="Company Name"
                                     name="name"
@@ -575,7 +556,7 @@ const RecruiterProfile = () => {
                                         handleFieldBlur("company", e)
                                     }
                                     error={fieldErrors["company.name"]}
-                                    icon={<Building2 size={17} />}
+                                    icon={<Building2 size={16} />}
                                     placeholder="Enter company name"
                                     required
                                     maxLength={150}
@@ -593,12 +574,12 @@ const RecruiterProfile = () => {
                                     }
                                     error={fieldErrors["company.description"]}
                                     placeholder="Describe your company, its work, and its culture..."
-                                    rows={4}
+                                    rows={3}
                                     maxLength={2000}
                                     required
                                 />
 
-                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                                     <InputField
                                         label="Company Website"
                                         name="website"
@@ -611,7 +592,7 @@ const RecruiterProfile = () => {
                                             handleFieldBlur("company", e)
                                         }
                                         error={fieldErrors["company.website"]}
-                                        icon={<Globe size={17} />}
+                                        icon={<Globe size={16} />}
                                         placeholder="https://example.com"
                                         maxLength={2048}
                                         hint="Optional"
@@ -628,7 +609,7 @@ const RecruiterProfile = () => {
                                             handleFieldBlur("company", e)
                                         }
                                         error={fieldErrors["company.location"]}
-                                        icon={<MapPin size={17} />}
+                                        icon={<MapPin size={16} />}
                                         placeholder="Delhi, India"
                                         required
                                         maxLength={150}
@@ -647,54 +628,60 @@ const RecruiterProfile = () => {
                                         handleFieldBlur("company", e)
                                     }
                                     error={fieldErrors["company.logo"]}
-                                    icon={<FileText size={17} />}
+                                    icon={<FileText size={16} />}
                                     placeholder="https://example.com/logo.png"
                                     maxLength={2048}
                                     hint="Optional — use a publicly accessible image URL."
                                 />
 
-                                {company.logo && !fieldErrors["company.logo"] && (
-                                    <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
-                                        <img
-                                            src={company.logo}
-                                            alt="Company logo preview"
-                                            className="h-12 w-12 rounded-lg border border-slate-200 bg-white object-contain"
-                                            onError={(e) => {
-                                                e.currentTarget.style.display = "none";
-                                            }}
-                                        />
-                                        <div className="min-w-0">
-                                            <p className="text-sm font-medium text-slate-700">
-                                                Logo preview
-                                            </p>
-                                            <p className="break-all text-xs text-slate-500">
-                                                Check that the image URL is publicly accessible.
-                                            </p>
+                                {company.logo &&
+                                    !fieldErrors["company.logo"] && (
+                                        <div className="flex items-center gap-3 rounded-lg border border-violet-100 bg-violet-50/60 p-3">
+                                            <img
+                                                src={company.logo}
+                                                alt="Company logo preview"
+                                                className="h-12 w-12 shrink-0 rounded-lg border border-slate-200 bg-white object-contain p-1"
+                                                onError={(e) => {
+                                                    e.currentTarget.style.display =
+                                                        "none";
+                                                }}
+                                            />
+                                            <div className="min-w-0">
+                                                <p className="text-xs font-semibold text-slate-800">
+                                                    Company logo preview
+                                                </p>
+                                                <p className="mt-1 break-all text-xs text-slate-500">
+                                                    Confirm that the image URL is publicly accessible.
+                                                </p>
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
                             </div>
                         </section>
                     </div>
 
-                    {/* Footer actions */}
-                    <div className="mt-5 flex flex-col-reverse gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                        <p className="text-xs leading-5 text-slate-500">
-                            Check the highlighted fields before saving your changes.
-                        </p>
+                    {/* Compact save footer */}
+                    <div className="mt-4 flex flex-col gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex items-center gap-2 text-xs text-slate-500">
+                            <CheckCircle2
+                                size={16}
+                                className="shrink-0 text-emerald-600"
+                            />
+                            Your personal and company details are saved together.
+                        </div>
 
                         <button
                             type="submit"
                             disabled={saving}
-                            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             {saving ? (
                                 <Loader2
-                                    size={18}
+                                    size={17}
                                     className="animate-spin"
                                 />
                             ) : (
-                                <Save size={18} />
+                                <Save size={17} />
                             )}
 
                             {saving ? "Saving changes..." : "Save Profile"}
@@ -730,7 +717,7 @@ const InputField = ({
         <div className="min-w-0">
             <label
                 htmlFor={name}
-                className="mb-1.5 block text-sm font-medium text-slate-700"
+                className="mb-1.5 block text-xs font-semibold text-slate-700"
             >
                 {label}
                 {required && (
@@ -759,16 +746,18 @@ const InputField = ({
                     maxLength={maxLength}
                     autoComplete={autoComplete}
                     aria-invalid={invalid}
-                    aria-describedby={[
-                        invalid ? errorId : "",
-                        hint ? hintId : "",
-                    ]
-                        .filter(Boolean)
-                        .join(" ") || undefined}
-                    className={`h-11 w-full rounded-lg border bg-white pl-10 pr-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 ${
+                    aria-describedby={
+                        [
+                            invalid ? errorId : "",
+                            hint ? hintId : "",
+                        ]
+                            .filter(Boolean)
+                            .join(" ") || undefined
+                    }
+                    className={`h-10 w-full rounded-lg border bg-white pl-9 pr-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 ${
                         invalid
-                            ? "border-red-500 ring-1 ring-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200"
-                            : "border-slate-300 hover:border-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                            ? "border-red-500 ring-1 ring-red-500 focus:ring-2 focus:ring-red-200"
+                            : "border-slate-200 hover:border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                     } ${
                         disabled
                             ? "cursor-not-allowed bg-slate-100 text-slate-500"
@@ -780,10 +769,10 @@ const InputField = ({
             {invalid && (
                 <p
                     id={errorId}
-                    className="mt-1.5 flex items-start gap-1.5 text-xs leading-5 text-red-600"
+                    className="mt-1.5 flex items-start gap-1 text-xs leading-4 text-red-600"
                 >
                     <AlertCircle
-                        size={14}
+                        size={13}
                         className="mt-0.5 shrink-0"
                     />
                     <span>{error}</span>
@@ -793,7 +782,7 @@ const InputField = ({
             {!invalid && hint && (
                 <p
                     id={hintId}
-                    className="mt-1.5 text-xs leading-5 text-slate-500"
+                    className="mt-1 text-[11px] leading-4 text-slate-500"
                 >
                     {hint}
                 </p>
@@ -809,7 +798,7 @@ const TextareaField = ({
     onChange,
     onBlur,
     placeholder,
-    rows = 4,
+    rows = 3,
     maxLength,
     error = "",
     required = false,
@@ -822,7 +811,7 @@ const TextareaField = ({
             <div className="mb-1.5 flex items-center justify-between gap-3">
                 <label
                     htmlFor={name}
-                    className="block text-sm font-medium text-slate-700"
+                    className="block text-xs font-semibold text-slate-700"
                 >
                     {label}
                     {required && (
@@ -830,7 +819,7 @@ const TextareaField = ({
                     )}
                 </label>
 
-                <span className="shrink-0 text-xs text-slate-400">
+                <span className="shrink-0 text-[11px] text-slate-400">
                     {value.length}/{maxLength}
                 </span>
             </div>
@@ -846,20 +835,20 @@ const TextareaField = ({
                 maxLength={maxLength}
                 aria-invalid={invalid}
                 aria-describedby={invalid ? errorId : undefined}
-                className={`w-full resize-y rounded-lg border bg-white px-3.5 py-3 text-sm leading-6 text-slate-800 outline-none transition placeholder:text-slate-400 ${
+                className={`w-full resize-y rounded-lg border bg-white px-3 py-2.5 text-sm leading-5 text-slate-800 outline-none transition placeholder:text-slate-400 ${
                     invalid
-                        ? "border-red-500 ring-1 ring-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200"
-                        : "border-slate-300 hover:border-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                        ? "border-red-500 ring-1 ring-red-500 focus:ring-2 focus:ring-red-200"
+                        : "border-slate-200 hover:border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
                 }`}
             />
 
             {invalid && (
                 <p
                     id={errorId}
-                    className="mt-1.5 flex items-start gap-1.5 text-xs leading-5 text-red-600"
+                    className="mt-1.5 flex items-start gap-1 text-xs leading-4 text-red-600"
                 >
                     <AlertCircle
-                        size={14}
+                        size={13}
                         className="mt-0.5 shrink-0"
                     />
                     <span>{error}</span>
