@@ -492,7 +492,6 @@ const Applications = () => {
                     >
                         <option>All Applications</option>
                         <option>Applied</option>
-                        <option>Under Review</option>
                         <option>Interview</option>
                         <option>Rejected</option>
                     </select>

@@ -13,11 +13,12 @@ import {
     X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import useRoleHeaderData from "../../hooks/useRoleHeaderData";
 
 const RecruiterLayout = () => {
     const navigate = useNavigate();
+    const location = useLocation();
 
     const [notificationOpen, setNotificationOpen] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -59,7 +60,7 @@ const RecruiterLayout = () => {
         };
     }, []);
 
-    // NAVIGATION
+    // RECRUITER NAVIGATION
     const navigation = [
         {
             title: "Jobs",
@@ -117,23 +118,109 @@ const RecruiterLayout = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-800">
+        <div className="recruiter-layout min-h-screen bg-slate-50 text-slate-800">
+            <style>{`
+                @keyframes recruiterHeaderIn {
+                    from { opacity: 0; transform: translateY(-16px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                @keyframes recruiterPageIn {
+                    from { opacity: 0; transform: translateY(14px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                @keyframes recruiterDropdownIn {
+                    from { opacity: 0; transform: translateY(-7px) scale(.985); }
+                    to { opacity: 1; transform: translateY(0) scale(1); }
+                }
+                @keyframes recruiterLogoGlow {
+                    0%, 100% { box-shadow: 0 4px 12px rgba(79, 70, 229, .16); }
+                    50% { box-shadow: 0 5px 20px rgba(79, 70, 229, .34); }
+                }
+                @keyframes recruiterBadgePulse {
+                    0%, 100% { box-shadow: 0 0 0 2px white; }
+                    50% { box-shadow: 0 0 0 3px white, 0 0 0 5px rgba(239, 68, 68, .12); }
+                }
+                @keyframes recruiterShimmer {
+                    0% { background-position: 200% 0; }
+                    100% { background-position: -200% 0; }
+                }
+                .recruiter-header {
+                    animation: recruiterHeaderIn .55s cubic-bezier(.2,.75,.25,1) both;
+                }
+                .recruiter-logo-mark {
+                    animation: recruiterLogoGlow 3.2s ease-in-out infinite;
+                    transition: transform .28s ease, border-radius .28s ease;
+                }
+                .recruiter-logo:hover .recruiter-logo-mark {
+                    transform: rotate(-7deg) scale(1.07);
+                    border-radius: 13px;
+                }
+                .recruiter-logo-word {
+                    background: linear-gradient(100deg, #0f172a 10%, #4f46e5 45%, #0f172a 75%);
+                    background-size: 220% auto;
+                    background-clip: text;
+                    -webkit-background-clip: text;
+                    color: transparent;
+                    transition: background-position .4s ease;
+                }
+                .recruiter-logo:hover .recruiter-logo-word { background-position: right center; }
+                .recruiter-nav-link { position: relative; overflow: hidden; transition: color .22s ease, background .22s ease, transform .22s ease; }
+                .recruiter-nav-link::after {
+                    content: "";
+                    position: absolute;
+                    left: 13px;
+                    right: 13px;
+                    bottom: 4px;
+                    height: 2px;
+                    border-radius: 99px;
+                    background: #6366f1;
+                    transform: scaleX(0);
+                    transform-origin: left;
+                    transition: transform .24s ease;
+                }
+                .recruiter-nav-link:hover { transform: translateY(-1px); }
+                .recruiter-nav-link:hover::after, .recruiter-nav-link.is-active::after { transform: scaleX(1); }
+                .recruiter-nav-link.is-active::after { opacity: .75; }
+                .recruiter-icon-button { transition: transform .2s ease, background .2s ease, color .2s ease; }
+                .recruiter-icon-button:hover { transform: translateY(-2px); }
+                .recruiter-icon-button:active { transform: scale(.94); }
+                .recruiter-dropdown { transform-origin: top right; animation: recruiterDropdownIn .2s cubic-bezier(.2,.8,.2,1) both; }
+                .recruiter-dropdown-item { transition: background .18s ease, transform .18s ease, padding-left .18s ease; }
+                .recruiter-dropdown-item:hover { transform: translateX(2px); }
+                .recruiter-avatar { transition: transform .25s ease, box-shadow .25s ease; }
+                .recruiter-profile-trigger:hover .recruiter-avatar { transform: scale(1.07); box-shadow: 0 0 0 3px rgba(99,102,241,.12); }
+                .recruiter-unread-badge { animation: recruiterBadgePulse 2.2s ease-in-out infinite; }
+                .recruiter-mobile-menu { animation: recruiterDropdownIn .22s ease-out both; transform-origin: top; }
+                .recruiter-page-content { animation: recruiterPageIn .42s cubic-bezier(.2,.7,.2,1) both; }
+                .recruiter-layout button:focus-visible, .recruiter-layout a:focus-visible {
+                    outline: 3px solid rgba(99,102,241,.35);
+                    outline-offset: 3px;
+                }
+                @media (prefers-reduced-motion: reduce) {
+                    .recruiter-layout *, .recruiter-layout *::before, .recruiter-layout *::after {
+                        animation-duration: .01ms !important;
+                        animation-iteration-count: 1 !important;
+                        scroll-behavior: auto !important;
+                        transition-duration: .01ms !important;
+                    }
+                }
+            `}</style>
+
             {/* HEADER */}
 
-            <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
+            <header className="recruiter-header sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
                 <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-5 sm:px-7 lg:px-8">
-
                     {/* LOGO */}
                     <button
                         type="button"
                         onClick={() => navigate("/", { replace: true })}
-                        className="flex shrink-0 items-center gap-2"
+                        className="recruiter-logo flex shrink-0 items-center gap-2"
                     >
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-sm">
+                        <div className="recruiter-logo-mark flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-sm">
                             <BriefcaseBusiness size={19} />
                         </div>
 
-                        <span className="text-lg font-bold tracking-tight text-slate-900">
+                        <span className="recruiter-logo-word text-lg font-bold tracking-tight">
                             Job
                             <span className="text-indigo-600">Bridge</span>
                         </span>
@@ -150,8 +237,8 @@ const RecruiterLayout = () => {
                                     to={item.path}
                                     end={item.path === "/recruiter/jobs"}
                                     className={({ isActive }) =>
-                                        `flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition ${isActive
-                                            ? "bg-indigo-50 text-indigo-600"
+                                        `recruiter-nav-link flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium ${isActive
+                                            ? "is-active bg-indigo-50 text-indigo-600"
                                             : "text-slate-600 hover:bg-slate-50 hover:text-indigo-600"
                                         }`
                                     }
@@ -175,7 +262,7 @@ const RecruiterLayout = () => {
                                     setNotificationOpen(opening);
                                     if (opening) await refreshNotifications().catch(() => {});
                                 }}
-                                className={`relative rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 ${notificationOpen
+                                className={`recruiter-icon-button relative rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 ${notificationOpen
                                         ? "bg-slate-100 text-indigo-600"
                                         : ""
                                     }`}
@@ -185,7 +272,7 @@ const RecruiterLayout = () => {
                                 <Bell size={19} />
 
                                 {unreadCount > 0 && (
-                                    <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ring-2 ring-white">
+                                    <span className="recruiter-unread-badge absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ring-2 ring-white">
                                         {unreadCount > 99 ? "99+" : unreadCount}
                                     </span>
                                 )}
@@ -193,7 +280,7 @@ const RecruiterLayout = () => {
 
                             {/* NOTIFICATION DROPDOWN */}
                             {notificationOpen && (
-                                <div className="absolute right-0 top-12 z-50 w-[360px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl shadow-slate-200/60">
+                                <div className="recruiter-dropdown absolute right-0 top-12 z-50 w-[360px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl shadow-slate-200/60">
 
                                     <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
                                         <h3 className="text-sm font-bold text-slate-900">
@@ -218,19 +305,19 @@ const RecruiterLayout = () => {
                             )}
                         </div>
 
-                        {/* PROFILE MENU */}
+                        {/* PROFILE */}
                         <div className="relative">
                             <button
                                 type="button"
                                 onClick={() =>
                                     setProfileMenuOpen((previous) => !previous)
                                 }
-                                className={`flex items-center gap-2 rounded-lg px-2 py-1.5 transition ${profileMenuOpen
+                                className={`recruiter-profile-trigger flex items-center gap-2 rounded-lg px-2 py-1.5 transition ${profileMenuOpen
                                         ? "bg-slate-100"
                                         : "hover:bg-slate-50"
                                     }`}
                             >
-                                    <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-indigo-100 text-indigo-600">
+                                <div className="recruiter-avatar flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-indigo-100 text-indigo-600">
                                     {avatarUrl ? <img src={avatarUrl} alt="" className="h-full w-full object-cover" /> : <User size={17} />}
                                 </div>
 
@@ -253,7 +340,7 @@ const RecruiterLayout = () => {
 
                             {/* PROFILE DROPDOWN */}
                             {profileMenuOpen && (
-                                <div className="absolute right-0 top-11 z-50 w-60 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl shadow-slate-200/70">
+                                <div className="recruiter-dropdown absolute right-0 top-11 z-50 w-60 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl shadow-slate-200/70">
 
                                     <div className="border-b border-slate-100 px-4 py-3">
                                         <div className="flex items-center gap-3">
@@ -277,7 +364,7 @@ const RecruiterLayout = () => {
                                         <button
                                             type="button"
                                             onClick={handleProfile}
-                                            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
+                                            className="recruiter-dropdown-item flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
                                         >
                                             <UserCircle size={17} />
                                             View and Update profile
@@ -286,7 +373,7 @@ const RecruiterLayout = () => {
                                         <button
                                             type="button"
                                             onClick={handleSettings}
-                                            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
+                                            className="recruiter-dropdown-item flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
                                         >
                                             <Settings size={17} />
                                             Settings
@@ -297,7 +384,7 @@ const RecruiterLayout = () => {
                                         <button
                                             type="button"
                                             onClick={handleLogout}
-                                            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-50"
+                                            className="recruiter-dropdown-item flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-50"
                                         >
                                             <LogOut size={17} />
                                             Logout
@@ -313,7 +400,7 @@ const RecruiterLayout = () => {
                             onClick={() =>
                                 setMobileMenuOpen((previous) => !previous)
                             }
-                            className="rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 lg:hidden"
+                            className="recruiter-icon-button rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 lg:hidden"
                             aria-label="Toggle navigation menu"
                         >
                             {mobileMenuOpen ? (
@@ -325,9 +412,9 @@ const RecruiterLayout = () => {
                     </div>
                 </div>
 
-                {/* MOBILE NAVIGATION */}
+                {/* MOBILE MENU */}
                 {mobileMenuOpen && (
-                    <div className="border-t border-slate-100 bg-white lg:hidden">
+                    <div className="recruiter-mobile-menu border-t border-slate-100 bg-white lg:hidden">
                         <nav className="mx-auto max-w-[1400px] px-5 py-3 sm:px-7 lg:px-8">
                             <div className="space-y-1">
                                 {navigation.map((item) => {
@@ -355,16 +442,16 @@ const RecruiterLayout = () => {
                         </nav>
                     </div>
                 )}
-
             </header>
 
 
             {/* PAGE CONTENT */}
             <main className="mx-auto max-w-[1440px] px-5 py-6 sm:px-7 lg:px-10">
-                <section>
+                <section key={location.pathname} className="recruiter-page-content">
                     <Outlet />
                 </section>
             </main>
+
         </div>
     );
 };

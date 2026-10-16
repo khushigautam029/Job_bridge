@@ -14,11 +14,12 @@ import {
     X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import useRoleHeaderData from "../../hooks/useRoleHeaderData";
 
 const CandidateLayout = () => {
     const navigate = useNavigate();
+    const location = useLocation();
 
     const [notificationOpen, setNotificationOpen] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -118,23 +119,109 @@ const CandidateLayout = () => {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-800">
+        <div className="candidate-layout min-h-screen bg-slate-50 text-slate-800">
+            <style>{`
+                @keyframes candidateHeaderIn {
+                    from { opacity: 0; transform: translateY(-16px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                @keyframes candidatePageIn {
+                    from { opacity: 0; transform: translateY(14px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                @keyframes candidateDropdownIn {
+                    from { opacity: 0; transform: translateY(-7px) scale(.985); }
+                    to { opacity: 1; transform: translateY(0) scale(1); }
+                }
+                @keyframes candidateLogoGlow {
+                    0%, 100% { box-shadow: 0 4px 12px rgba(79, 70, 229, .16); }
+                    50% { box-shadow: 0 5px 20px rgba(79, 70, 229, .34); }
+                }
+                @keyframes candidateBadgePulse {
+                    0%, 100% { box-shadow: 0 0 0 2px white; }
+                    50% { box-shadow: 0 0 0 3px white, 0 0 0 5px rgba(239, 68, 68, .12); }
+                }
+                @keyframes candidateShimmer {
+                    0% { background-position: 200% 0; }
+                    100% { background-position: -200% 0; }
+                }
+                .candidate-header {
+                    animation: candidateHeaderIn .55s cubic-bezier(.2,.75,.25,1) both;
+                }
+                .candidate-logo-mark {
+                    animation: candidateLogoGlow 3.2s ease-in-out infinite;
+                    transition: transform .28s ease, border-radius .28s ease;
+                }
+                .candidate-logo:hover .candidate-logo-mark {
+                    transform: rotate(-7deg) scale(1.07);
+                    border-radius: 13px;
+                }
+                .candidate-logo-word {
+                    background: linear-gradient(100deg, #0f172a 10%, #4f46e5 45%, #0f172a 75%);
+                    background-size: 220% auto;
+                    background-clip: text;
+                    -webkit-background-clip: text;
+                    color: transparent;
+                    transition: background-position .4s ease;
+                }
+                .candidate-logo:hover .candidate-logo-word { background-position: right center; }
+                .candidate-nav-link { position: relative; overflow: hidden; transition: color .22s ease, background .22s ease, transform .22s ease; }
+                .candidate-nav-link::after {
+                    content: "";
+                    position: absolute;
+                    left: 13px;
+                    right: 13px;
+                    bottom: 4px;
+                    height: 2px;
+                    border-radius: 99px;
+                    background: #6366f1;
+                    transform: scaleX(0);
+                    transform-origin: left;
+                    transition: transform .24s ease;
+                }
+                .candidate-nav-link:hover { transform: translateY(-1px); }
+                .candidate-nav-link:hover::after, .candidate-nav-link.is-active::after { transform: scaleX(1); }
+                .candidate-nav-link.is-active::after { opacity: .75; }
+                .candidate-icon-button { transition: transform .2s ease, background .2s ease, color .2s ease; }
+                .candidate-icon-button:hover { transform: translateY(-2px); }
+                .candidate-icon-button:active { transform: scale(.94); }
+                .candidate-dropdown { transform-origin: top right; animation: candidateDropdownIn .2s cubic-bezier(.2,.8,.2,1) both; }
+                .candidate-dropdown-item { transition: background .18s ease, transform .18s ease, padding-left .18s ease; }
+                .candidate-dropdown-item:hover { transform: translateX(2px); }
+                .candidate-avatar { transition: transform .25s ease, box-shadow .25s ease; }
+                .candidate-profile-trigger:hover .candidate-avatar { transform: scale(1.07); box-shadow: 0 0 0 3px rgba(99,102,241,.12); }
+                .candidate-unread-badge { animation: candidateBadgePulse 2.2s ease-in-out infinite; }
+                .candidate-mobile-menu { animation: candidateDropdownIn .22s ease-out both; transform-origin: top; }
+                .candidate-page-content { animation: candidatePageIn .42s cubic-bezier(.2,.7,.2,1) both; }
+                .candidate-layout button:focus-visible, .candidate-layout a:focus-visible {
+                    outline: 3px solid rgba(99,102,241,.35);
+                    outline-offset: 3px;
+                }
+                @media (prefers-reduced-motion: reduce) {
+                    .candidate-layout *, .candidate-layout *::before, .candidate-layout *::after {
+                        animation-duration: .01ms !important;
+                        animation-iteration-count: 1 !important;
+                        scroll-behavior: auto !important;
+                        transition-duration: .01ms !important;
+                    }
+                }
+            `}</style>
 
             {/* HEADER */}
 
-            <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
+            <header className="candidate-header sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
                 <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-5 sm:px-7 lg:px-8">
                     {/* LOGO */}
                     <button
                         type="button"
                         onClick={() => navigate("/", { replace: true })}
-                        className="flex shrink-0 items-center gap-2"
+                        className="candidate-logo flex shrink-0 items-center gap-2"
                     >
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-sm">
+                        <div className="candidate-logo-mark flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-white shadow-sm">
                             <BriefcaseBusiness size={19} />
                         </div>
 
-                        <span className="text-lg font-bold tracking-tight text-slate-900">
+                        <span className="candidate-logo-word text-lg font-bold tracking-tight">
                             Job
                             <span className="text-indigo-600">Bridge</span>
                         </span>
@@ -151,8 +238,8 @@ const CandidateLayout = () => {
                                     to={item.path}
                                     end={item.path === "/candidate/jobs"}
                                     className={({ isActive }) =>
-                                        `flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition ${isActive
-                                            ? "bg-indigo-50 text-indigo-600"
+                                        `candidate-nav-link flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium ${isActive
+                                            ? "is-active bg-indigo-50 text-indigo-600"
                                             : "text-slate-600 hover:bg-slate-50 hover:text-indigo-600"
                                         }`
                                     }
@@ -176,7 +263,7 @@ const CandidateLayout = () => {
                                     setNotificationOpen(opening);
                                     if (opening) await refreshNotifications().catch(() => {});
                                 }}
-                                className={`relative rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 ${notificationOpen
+                                className={`candidate-icon-button relative rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 ${notificationOpen
                                         ? "bg-slate-100 text-indigo-600"
                                         : ""
                                     }`}
@@ -186,7 +273,7 @@ const CandidateLayout = () => {
                                 <Bell size={19} />
 
                                 {unreadCount > 0 && (
-                                    <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ring-2 ring-white">
+                                    <span className="candidate-unread-badge absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ring-2 ring-white">
                                         {unreadCount > 99 ? "99+" : unreadCount}
                                     </span>
                                 )}
@@ -194,7 +281,7 @@ const CandidateLayout = () => {
 
                             {/* NOTIFICATION DROPDOWN */}
                             {notificationOpen && (
-                                <div className="absolute right-0 top-12 z-50 w-[360px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl shadow-slate-200/60">
+                                <div className="candidate-dropdown absolute right-0 top-12 z-50 w-[360px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl shadow-slate-200/60">
 
                                     <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
                                         <h3 className="text-sm font-bold text-slate-900">
@@ -226,12 +313,12 @@ const CandidateLayout = () => {
                                 onClick={() =>
                                     setProfileMenuOpen((previous) => !previous)
                                 }
-                                className={`flex items-center gap-2 rounded-lg px-2 py-1.5 transition ${profileMenuOpen
+                                className={`candidate-profile-trigger flex items-center gap-2 rounded-lg px-2 py-1.5 transition ${profileMenuOpen
                                         ? "bg-slate-100"
                                         : "hover:bg-slate-50"
                                     }`}
                             >
-                                <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-indigo-100 text-indigo-600">
+                                <div className="candidate-avatar flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-indigo-100 text-indigo-600">
                                     {avatarUrl ? <img src={avatarUrl} alt="" className="h-full w-full object-cover" /> : <User size={17} />}
                                 </div>
 
@@ -258,7 +345,7 @@ const CandidateLayout = () => {
 
                             {/* PROFILE DROPDOWN */}
                             {profileMenuOpen && (
-                                <div className="absolute right-0 top-11 z-50 w-60 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl shadow-slate-200/70">
+                                <div className="candidate-dropdown absolute right-0 top-11 z-50 w-60 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl shadow-slate-200/70">
 
                                     <div className="border-b border-slate-100 px-4 py-3">
                                         <div className="flex items-center gap-3">
@@ -286,7 +373,7 @@ const CandidateLayout = () => {
                                         <button
                                             type="button"
                                             onClick={handleProfileClick}
-                                            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
+                                            className="candidate-dropdown-item flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
                                         >
                                             <UserCircle size={17} />
                                             View and Update profile
@@ -295,7 +382,7 @@ const CandidateLayout = () => {
                                         <button
                                             type="button"
                                             onClick={handleSettingsClick}
-                                            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
+                                            className="candidate-dropdown-item flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
                                         >
                                             <Settings size={17} />
                                             Settings
@@ -306,7 +393,7 @@ const CandidateLayout = () => {
                                         <button
                                             type="button"
                                             onClick={handleLogout}
-                                            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-50"
+                                            className="candidate-dropdown-item flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-50"
                                         >
                                             <LogOut size={17} />
                                             Logout
@@ -322,7 +409,7 @@ const CandidateLayout = () => {
                             onClick={() =>
                                 setMobileMenuOpen((previous) => !previous)
                             }
-                            className="rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 lg:hidden"
+                            className="candidate-icon-button rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 lg:hidden"
                             aria-label="Toggle navigation menu"
                         >
                             {mobileMenuOpen ? (
@@ -336,7 +423,7 @@ const CandidateLayout = () => {
 
                 {/* MOBILE MENU */}
                 {mobileMenuOpen && (
-                    <div className="border-t border-slate-100 bg-white lg:hidden">
+                    <div className="candidate-mobile-menu border-t border-slate-100 bg-white lg:hidden">
                         <nav className="mx-auto max-w-[1400px] px-5 py-3 sm:px-7 lg:px-8">
                             <div className="space-y-1">
                                 {navigation.map((item) => {
@@ -369,11 +456,9 @@ const CandidateLayout = () => {
 
             {/* PAGE CONTENT */}
             <main className="mx-auto max-w-[1440px] px-5 py-6 sm:px-7 lg:px-10">
-
-                <section>
+                <section key={location.pathname} className="candidate-page-content">
                     <Outlet />
                 </section>
-
             </main>
 
         </div>

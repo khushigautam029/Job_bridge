@@ -345,12 +345,8 @@ const RecruiterApplications = () => {
                         Applications
                     </h1>
                     <p className="mt-2 text-sm text-slate-500">
-                        Review and manage candidates who
-                        applied for{" "}
-                        <span className="font-semibold text-slate-700">
-                            {currentJobTitle}
-                        </span>
-                        .
+                        Review and manage candidates who have
+                        applied.
                     </p>
                 </div>
 
