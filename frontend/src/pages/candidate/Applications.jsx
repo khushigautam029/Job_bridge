@@ -643,14 +643,14 @@ const Applications = () => {
             {/* APPLICATION DETAILS MODAL */}
             {selectedApplication && (
                 <div
-                    className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm"
+                    className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-slate-900/60 p-4 backdrop-blur-sm"
                     onMouseDown={(e) => {
                         if (e.target === e.currentTarget) {
                             closeDetails();
                         }
                     }}
                 >
-                    <div className="relative flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl">
+                    <div className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border-0 bg-white shadow-2xl">
                         {/* Modal Header */}
                         <div className="flex items-start justify-between border-b border-slate-200 px-6 py-5 sm:px-7">
                             <div className="flex min-w-0 gap-4">
@@ -691,7 +691,7 @@ const Applications = () => {
                         </div>
 
                         {/* Modal Content */}
-                        <div className="overflow-y-auto px-6 py-6 sm:px-7">
+                        <div className="min-h-0 overflow-y-auto overscroll-contain px-6 py-6 sm:px-7">
                             {/* Status */}
                             <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-5 sm:flex-row sm:items-center sm:justify-between">
                                 <div>

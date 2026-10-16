@@ -45,7 +45,6 @@ import {
 
 import { getSkills as getSkillCatalog } from "../../services/skillService";
 
-
 const CandidateProfile = () => {
     // BASIC STATES
     const [loading, setLoading] = useState(true);
@@ -98,14 +97,12 @@ const CandidateProfile = () => {
         projects: [],
     });
 
-
     // EDIT MODAL STATES
     const [editingHeader, setEditingHeader] =
         useState(false);
 
     const [headerForm, setHeaderForm] =
         useState({});
-
 
     const [editingPref, setEditingPref] =
         useState(false);
@@ -116,7 +113,6 @@ const CandidateProfile = () => {
             preferredLocation: [],
             availability: "",
         });
-
 
     const [editingBio, setEditingBio] =
         useState(false);
@@ -143,7 +139,6 @@ const CandidateProfile = () => {
             description: "",
         });
 
-
     // EXPERIENCE MODAL
     const [showExperienceModal, setShowExperienceModal] =
         useState(false);
@@ -163,7 +158,6 @@ const CandidateProfile = () => {
             description: "",
             skills: [],
         });
-
 
     // PROJECT MODAL
     const [showProjectModal, setShowProjectModal] =
@@ -185,7 +179,6 @@ const CandidateProfile = () => {
             role: "",
         });
 
-
     // SKILLS
     const [newSkill, setNewSkill] =
         useState("");
@@ -196,12 +189,10 @@ const CandidateProfile = () => {
     const [showSkillInput, setShowSkillInput] =
         useState(false);
 
-
     // HELPER FUNCTIONS
     const getResponseData = (response) => {
         return response?.data || {};
     };
-
 
     const getAssetUrl = (filePath) => {
 
@@ -226,7 +217,6 @@ const CandidateProfile = () => {
             }`;
     };
 
-
     const getFileName = (filePath) => {
 
         if (!filePath) {
@@ -237,7 +227,6 @@ const CandidateProfile = () => {
             .split("/")
             .pop();
     };
-
 
     const formatDate = (date) => {
 
@@ -259,7 +248,6 @@ const CandidateProfile = () => {
         }
     };
 
-
     const splitCommaValues = (value) => {
 
         if (Array.isArray(value)) {
@@ -271,7 +259,6 @@ const CandidateProfile = () => {
             .map((item) => item.trim())
             .filter(Boolean);
     };
-
 
     const normalizeSkillOptions = (response) => {
 
@@ -294,12 +281,10 @@ const CandidateProfile = () => {
         return [];
     };
 
-
     const showSuccess = (text) => {
         setMessage(text);
         setError("");
     };
-
 
     const showError = (text) => {
         setError(text);
@@ -310,7 +295,6 @@ const CandidateProfile = () => {
     useEffect(() => {
         loadProfile();
     }, []);
-
 
     const loadProfile = async () => {
 
@@ -335,38 +319,31 @@ const CandidateProfile = () => {
                 getSkillCatalog(),
             ]);
 
-
             const candidate =
                 profileResponse?.data?.candidate ||
                 {};
-
 
             const skills =
                 skillsResponse?.data?.skills ||
                 [];
 
-
             const educations =
                 educationResponse?.data?.educations ||
                 [];
-
 
             const experiences =
                 experienceResponse?.data?.experiences ||
                 [];
 
-
             const projects =
                 projectsResponse?.data?.projects ||
                 [];
-
 
             setSkillOptions(
                 normalizeSkillOptions(
                     catalogResponse
                 )
             );
-
 
             setProfile({
 
@@ -462,17 +439,13 @@ const CandidateProfile = () => {
                         "",
                 },
 
-
                 skills,
-
 
                 education:
                     educations,
 
-
                 internships:
                     experiences,
-
 
                 projects,
             });
@@ -506,12 +479,10 @@ const CandidateProfile = () => {
             setMessage("");
             setError("");
 
-
             const newProfileData = {
                 ...profile,
                 ...updatedFields,
             };
-
 
             const payload = {
 
@@ -572,16 +543,13 @@ const CandidateProfile = () => {
                     "",
             };
 
-
             const response =
                 await updateCandidateProfile(
                     payload
                 );
 
-
             const updatedCandidate =
                 response?.data?.candidate;
-
 
             if (updatedCandidate) {
 
@@ -673,7 +641,6 @@ const CandidateProfile = () => {
                 );
             }
 
-
             showSuccess(
                 "Profile updated successfully."
             );
@@ -744,10 +711,8 @@ const CandidateProfile = () => {
                 profile.portfolioUrl,
         });
 
-
         setEditingHeader(true);
     };
-
 
     const handleHeaderSubmit = async (e) => {
 
@@ -788,15 +753,12 @@ const CandidateProfile = () => {
                 "",
         });
 
-
         setEditingPref(true);
     };
-
 
     const handlePrefSubmit = async (e) => {
 
         e.preventDefault();
-
 
         const success =
             await handleSaveProfileData({
@@ -815,12 +777,10 @@ const CandidateProfile = () => {
 
             });
 
-
         if (success) {
             setEditingPref(false);
         }
     };
-
 
     // BIO
     const openBioEdit = () => {
@@ -832,11 +792,9 @@ const CandidateProfile = () => {
         setEditingBio(true);
     };
 
-
     const handleBioSubmit = async (e) => {
 
         e.preventDefault();
-
 
         const success =
             await handleSaveProfileData({
@@ -844,7 +802,6 @@ const CandidateProfile = () => {
                 bio: bioText,
 
             });
-
 
         if (success) {
             setEditingBio(false);
@@ -861,23 +818,19 @@ const CandidateProfile = () => {
             return;
         }
 
-
         try {
 
             setUploading(true);
             setMessage("");
             setError("");
 
-
             const response =
                 await uploadCandidateResume(
                     file
                 );
 
-
             const candidate =
                 response?.data?.candidate;
-
 
             setProfile((prev) => ({
 
@@ -897,7 +850,6 @@ const CandidateProfile = () => {
                     prev.profileCompletionPercentage,
 
             }));
-
 
             showSuccess(
                 "Resume uploaded successfully."
@@ -932,14 +884,11 @@ const CandidateProfile = () => {
             setMessage("");
             setError("");
 
-
             const response =
                 await deleteCandidateResume();
 
-
             const candidate =
                 response?.data?.candidate;
-
 
             setProfile((prev) => ({
 
@@ -953,7 +902,6 @@ const CandidateProfile = () => {
                     candidate?.profileCompletionPercentage ??
                     prev.profileCompletionPercentage,
             }));
-
 
             showSuccess(
                 "Resume removed successfully."
@@ -989,28 +937,23 @@ const CandidateProfile = () => {
             return;
         }
 
-
         try {
 
             setUploadingImage(true);
             setMessage("");
             setError("");
 
-
             const response =
                 await uploadCandidateProfileImage(
                     file
                 );
 
-
             const candidate =
                 response?.data?.candidate;
-
 
             const imagePath =
                 candidate?.profileImage ||
                 response?.data?.profileImage;
-
 
             setProfile((prev) => ({
 
@@ -1024,7 +967,6 @@ const CandidateProfile = () => {
                     prev.profileCompletionPercentage,
 
             }));
-
 
             showSuccess(
                 "Profile image uploaded successfully."
@@ -1050,7 +992,6 @@ const CandidateProfile = () => {
         }
     };
 
-
     // PROFILE IMAGE DELETE
     const handleDeleteProfileImage =
         async () => {
@@ -1061,14 +1002,11 @@ const CandidateProfile = () => {
                 setMessage("");
                 setError("");
 
-
                 const response =
                     await deleteCandidateProfileImage();
 
-
                 const candidate =
                     response?.data?.candidate;
-
 
                 setProfile((prev) => ({
 
@@ -1081,7 +1019,6 @@ const CandidateProfile = () => {
                         prev.profileCompletionPercentage,
 
                 }));
-
 
                 showSuccess(
                     "Profile image removed successfully."
@@ -1105,7 +1042,6 @@ const CandidateProfile = () => {
             }
         };
 
-
     // EDUCATION
     const resetEducationForm = () => {
 
@@ -1125,14 +1061,12 @@ const CandidateProfile = () => {
         setEditingEducationId(null);
     };
 
-
     const openAddEducation = () => {
 
         resetEducationForm();
 
         setShowEducationModal(true);
     };
-
 
     const openEditEducation = (education) => {
 
@@ -1174,7 +1108,6 @@ const CandidateProfile = () => {
 
         });
 
-
         setEditingEducationId(
             education.id
         );
@@ -1182,12 +1115,10 @@ const CandidateProfile = () => {
         setShowEducationModal(true);
     };
 
-
     const handleEducationSubmit =
         async (e) => {
 
             e.preventDefault();
-
 
             try {
 
@@ -1195,9 +1126,7 @@ const CandidateProfile = () => {
                 setMessage("");
                 setError("");
 
-
                 let response;
-
 
                 if (editingEducationId) {
 
@@ -1215,10 +1144,8 @@ const CandidateProfile = () => {
                         );
                 }
 
-
                 const education =
                     response?.data?.education;
-
 
                 if (editingEducationId) {
 
@@ -1263,10 +1190,8 @@ const CandidateProfile = () => {
                     }));
                 }
 
-
                 setShowEducationModal(false);
                 resetEducationForm();
-
 
                 showSuccess(
                     editingEducationId
@@ -1292,7 +1217,6 @@ const CandidateProfile = () => {
             }
         };
 
-
     const handleDeleteEducation =
         async (educationId) => {
 
@@ -1304,16 +1228,13 @@ const CandidateProfile = () => {
                 return;
             }
 
-
             try {
 
                 setSaving(true);
 
-
                 await deleteCandidateEducation(
                     educationId
                 );
-
 
                 setProfile((prev) => ({
 
@@ -1327,7 +1248,6 @@ const CandidateProfile = () => {
                         ),
 
                 }));
-
 
                 showSuccess(
                     "Education removed successfully."
@@ -1366,14 +1286,12 @@ const CandidateProfile = () => {
         setEditingExperienceId(null);
     };
 
-
     const openAddExperience = () => {
 
         resetExperienceForm();
 
         setShowExperienceModal(true);
     };
-
 
     const openEditExperience =
         (experience) => {
@@ -1430,7 +1348,6 @@ const CandidateProfile = () => {
 
             });
 
-
             setEditingExperienceId(
                 experience.id
             );
@@ -1438,19 +1355,16 @@ const CandidateProfile = () => {
             setShowExperienceModal(true);
         };
 
-
     const handleExperienceSubmit =
         async (e) => {
 
             e.preventDefault();
-
 
             try {
 
                 setSaving(true);
                 setMessage("");
                 setError("");
-
 
                 const payload = {
 
@@ -1473,9 +1387,7 @@ const CandidateProfile = () => {
 
                 };
 
-
                 let response;
-
 
                 if (editingExperienceId) {
 
@@ -1493,10 +1405,8 @@ const CandidateProfile = () => {
                         );
                 }
 
-
                 const experience =
                     response?.data?.experience;
-
 
                 if (editingExperienceId) {
 
@@ -1541,10 +1451,8 @@ const CandidateProfile = () => {
                     }));
                 }
 
-
                 setShowExperienceModal(false);
                 resetExperienceForm();
-
 
                 showSuccess(
                     editingExperienceId
@@ -1570,7 +1478,6 @@ const CandidateProfile = () => {
             }
         };
 
-
     const handleDeleteExperience =
         async (experienceId) => {
 
@@ -1582,16 +1489,13 @@ const CandidateProfile = () => {
                 return;
             }
 
-
             try {
 
                 setSaving(true);
 
-
                 await deleteCandidateExperience(
                     experienceId
                 );
-
 
                 setProfile((prev) => ({
 
@@ -1605,7 +1509,6 @@ const CandidateProfile = () => {
                         ),
 
                 }));
-
 
                 showSuccess(
                     "Experience removed successfully."
@@ -1644,14 +1547,12 @@ const CandidateProfile = () => {
         setEditingProjectId(null);
     };
 
-
     const openAddProject = () => {
 
         resetProjectForm();
 
         setShowProjectModal(true);
     };
-
 
     const openEditProject = (project) => {
 
@@ -1704,7 +1605,6 @@ const CandidateProfile = () => {
 
         });
 
-
         setEditingProjectId(
             project.id
         );
@@ -1712,19 +1612,16 @@ const CandidateProfile = () => {
         setShowProjectModal(true);
     };
 
-
     const handleProjectSubmit =
         async (e) => {
 
             e.preventDefault();
-
 
             try {
 
                 setSaving(true);
                 setMessage("");
                 setError("");
-
 
                 const payload = {
 
@@ -1747,9 +1644,7 @@ const CandidateProfile = () => {
 
                 };
 
-
                 let response;
-
 
                 if (editingProjectId) {
 
@@ -1767,10 +1662,8 @@ const CandidateProfile = () => {
                         );
                 }
 
-
                 const project =
                     response?.data?.project;
-
 
                 if (editingProjectId) {
 
@@ -1815,10 +1708,8 @@ const CandidateProfile = () => {
                     }));
                 }
 
-
                 setShowProjectModal(false);
                 resetProjectForm();
-
 
                 showSuccess(
                     editingProjectId
@@ -1844,7 +1735,6 @@ const CandidateProfile = () => {
             }
         };
 
-
     const handleDeleteProject =
         async (projectId) => {
 
@@ -1856,16 +1746,13 @@ const CandidateProfile = () => {
                 return;
             }
 
-
             try {
 
                 setSaving(true);
 
-
                 await deleteCandidateProject(
                     projectId
                 );
-
 
                 setProfile((prev) => ({
 
@@ -1879,7 +1766,6 @@ const CandidateProfile = () => {
                         ),
 
                 }));
-
 
                 showSuccess(
                     "Project removed successfully."
@@ -1903,21 +1789,17 @@ const CandidateProfile = () => {
 
         e.preventDefault();
 
-
         const requestedName =
             newSkill.trim();
-
 
         if (!requestedName) {
             return;
         }
 
-
         try {
 
             setSaving(true);
             setError("");
-
 
             const match =
                 skillOptions.find(
@@ -1925,7 +1807,6 @@ const CandidateProfile = () => {
                         item.name?.toLowerCase() ===
                         requestedName.toLowerCase()
                 );
-
 
             if (!match) {
 
@@ -1935,7 +1816,6 @@ const CandidateProfile = () => {
 
                 return;
             }
-
 
             if (
                 profile.skills.some(
@@ -1952,17 +1832,14 @@ const CandidateProfile = () => {
                 return;
             }
 
-
             const response =
                 await addCandidateSkill(
                     match.id
                 );
 
-
             const addedSkill =
                 response?.data?.skill ||
                 match;
-
 
             setProfile((prev) => ({
 
@@ -1975,10 +1852,8 @@ const CandidateProfile = () => {
 
             }));
 
-
             setNewSkill("");
             setShowSkillInput(false);
-
 
             showSuccess(
                 "Skill added successfully."
@@ -1997,7 +1872,6 @@ const CandidateProfile = () => {
         }
     };
 
-
     const handleDeleteSkill =
         async (skillToDelete) => {
 
@@ -2005,11 +1879,9 @@ const CandidateProfile = () => {
 
                 setSaving(true);
 
-
                 await deleteCandidateSkill(
                     skillToDelete.id
                 );
-
 
                 setProfile((prev) => ({
 
@@ -2023,7 +1895,6 @@ const CandidateProfile = () => {
                         ),
 
                 }));
-
 
                 showSuccess(
                     "Skill removed successfully."
@@ -2058,14 +1929,12 @@ const CandidateProfile = () => {
         );
     }
 
-
     // UI
     return (
 
-        <div className="min-h-screen bg-white text-gray-800 w-full p-4 md:p-8">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 text-gray-800 w-full p-4 md:p-8">
 
             <div className="w-full max-w-7xl mx-auto space-y-6">
-
 
                     {/* NOTIFICATIONS */}
                 {message && (
@@ -2087,7 +1956,6 @@ const CandidateProfile = () => {
                     </div>
                 )}
 
-
                 {error && (
 
                     <div className="bg-red-50 text-red-800 border border-red-200 rounded-lg px-4 py-3 flex items-center justify-between">
@@ -2096,7 +1964,7 @@ const CandidateProfile = () => {
                             {error}
                         </span>
 
-                        <button
+                        <button className="focus:outline-none"
                             onClick={() =>
                                 setError("")
                             }
@@ -2107,18 +1975,15 @@ const CandidateProfile = () => {
                     </div>
                 )}
 
-
                     {/* TOP PROFILE CARD */}
 
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+                <div className="bg-gradient-to-r from-white via-blue-50/70 to-purple-50/70 rounded-2xl shadow-sm border border-blue-100/80 p-6 md:p-8">
 
                     <div className="flex flex-col lg:flex-row items-center lg:items-start justify-between gap-6">
-
 
                         {/* PROFILE */}
 
                         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 w-full lg:w-2/3">
-
 
                             {/* IMAGE */}
 
@@ -2128,7 +1993,7 @@ const CandidateProfile = () => {
                                     onClick={() =>
                                         profileImageInputRef.current?.click()
                                     }
-                                    className="relative w-28 h-28 flex items-center justify-center rounded-full border-4 border-amber-400 bg-gray-100 flex-shrink-0 group cursor-pointer overflow-hidden"
+                                    className="relative w-28 h-28 flex items-center justify-center rounded-full border-4 border-amber-400 bg-gray-100 flex-shrink-0 group cursor-pointer overflow-hidden focus:outline-none"
                                 >
 
                                     {profile.profileImage ? (
@@ -2161,7 +2026,6 @@ const CandidateProfile = () => {
 
                                 </div>
 
-
                                 <input
                                     ref={
                                         profileImageInputRef
@@ -2174,7 +2038,6 @@ const CandidateProfile = () => {
                                     className="hidden"
                                 />
 
-
                                 {profile.profileImage && (
 
                                     <button
@@ -2185,7 +2048,7 @@ const CandidateProfile = () => {
                                         disabled={
                                             uploadingImage
                                         }
-                                        className="absolute -right-1 -top-1 bg-white border border-gray-200 rounded-full p-1.5 text-gray-500 hover:text-red-600 shadow-sm"
+                                        className="absolute -right-1 -top-1 bg-white border border-gray-200 rounded-full p-1.5 text-gray-500 hover:text-red-600 shadow-sm focus:outline-none"
                                         title="Delete profile image"
                                     >
 
@@ -2206,7 +2069,6 @@ const CandidateProfile = () => {
                                     </button>
                                 )}
 
-
                                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap">
 
                                     {profile.profileCompletionPercentage}%
@@ -2214,7 +2076,6 @@ const CandidateProfile = () => {
                                 </div>
 
                             </div>
-
 
                             {/* IDENTITY */}
 
@@ -2232,14 +2093,13 @@ const CandidateProfile = () => {
                                         onClick={
                                             openHeaderEdit
                                         }
-                                        className="text-gray-400 hover:text-blue-600 transition"
+                                        className="text-gray-400 hover:text-blue-600 transition focus:outline-none"
                                         title="Edit Profile Info"
                                     >
                                         <Pencil size={18} />
                                     </button>
 
                                 </div>
-
 
                                 <p className="text-sm font-semibold text-gray-700">
 
@@ -2248,7 +2108,6 @@ const CandidateProfile = () => {
 
                                 </p>
 
-
                                 <p className="text-sm text-gray-500">
 
                                     {profile.college ||
@@ -2256,9 +2115,7 @@ const CandidateProfile = () => {
 
                                 </p>
 
-
                                 <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4 text-xs sm:text-sm text-gray-600 border-t border-gray-100 mt-3">
-
 
                                     <div className="flex items-center gap-2 justify-center sm:justify-start">
 
@@ -2273,7 +2130,6 @@ const CandidateProfile = () => {
                                         </span>
 
                                     </div>
-
 
                                     <div className="flex items-center gap-2 justify-center sm:justify-start">
 
@@ -2297,7 +2153,6 @@ const CandidateProfile = () => {
 
                                     </div>
 
-
                                     <div className="flex items-center gap-2 justify-center sm:justify-start">
 
                                         <User
@@ -2311,7 +2166,6 @@ const CandidateProfile = () => {
                                         </span>
 
                                     </div>
-
 
                                     <div className="flex items-center gap-2 justify-center sm:justify-start overflow-hidden">
 
@@ -2341,7 +2195,6 @@ const CandidateProfile = () => {
 
                         </div>
 
-
                         {/* QUICK ADD */}
 
                     </div>
@@ -2370,7 +2223,6 @@ const CandidateProfile = () => {
                             View & Edit
                         </button>
 
-
                         <button
                             type="button"
                             onClick={() =>
@@ -2378,7 +2230,7 @@ const CandidateProfile = () => {
                                     "activity"
                                 )
                             }
-                            className={`pb-3 text-sm font-semibold border-b-2 transition ${
+                            className={`pb-3 text-sm font-semibold border-b-2 transition focus:outline-none ${
                                 activeTab ===
                                 "activity"
                                     ? "border-blue-600 text-blue-600"
@@ -2397,9 +2249,8 @@ const CandidateProfile = () => {
 
                     <div className="w-full space-y-6">
 
-
                         {/*CAREER PREFERENCES */}
-                        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                        <div className="bg-gradient-to-br from-white to-blue-50/40 rounded-xl border border-blue-100/80 p-6 shadow-sm">
 
                             <div className="flex items-center justify-between mb-4">
 
@@ -2412,14 +2263,13 @@ const CandidateProfile = () => {
                                     onClick={
                                         openPreferenceEdit
                                     }
-                                    className="text-gray-400 hover:text-blue-600 transition"
+                                    className="text-gray-400 hover:text-blue-600 transition focus:outline-none"
                                     title="Edit career preferences"
                                 >
                                     <Pencil size={16} />
                                 </button>
 
                             </div>
-
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
 
@@ -2443,7 +2293,6 @@ const CandidateProfile = () => {
 
                                 </div>
 
-
                                 <div>
 
                                     <p className="text-xs text-gray-400 font-medium">
@@ -2459,7 +2308,6 @@ const CandidateProfile = () => {
                                     </p>
 
                                 </div>
-
 
                                 <div className="md:col-span-2">
 
@@ -2486,7 +2334,7 @@ const CandidateProfile = () => {
                         </div>
 
                             {/* EDUCATION */}
-                        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                        <div className="bg-gradient-to-br from-white to-blue-50/40 rounded-xl border border-blue-100/80 p-6 shadow-sm">
 
                             <div className="flex items-center justify-between mb-4">
 
@@ -2499,7 +2347,7 @@ const CandidateProfile = () => {
                                     onClick={
                                         openAddEducation
                                     }
-                                    className="text-blue-600 hover:underline text-sm font-semibold flex items-center gap-1"
+                                    className="text-blue-600 hover:underline text-sm font-semibold flex items-center gap-1 focus:outline-none"
                                 >
 
                                     <Plus size={16} />
@@ -2509,7 +2357,6 @@ const CandidateProfile = () => {
                                 </button>
 
                             </div>
-
 
                             {profile.education.length >
                                 0 ? (
@@ -2583,7 +2430,6 @@ const CandidateProfile = () => {
 
                                                     </div>
 
-
                                                     <div className="flex items-center gap-2">
 
                                                         <button
@@ -2593,7 +2439,7 @@ const CandidateProfile = () => {
                                                                     edu
                                                                 )
                                                             }
-                                                            className="text-gray-400 hover:text-blue-600"
+                                                            className="text-gray-400 hover:text-blue-600 focus:outline-none"
                                                             title="Edit education"
                                                         >
                                                             <Pencil
@@ -2603,7 +2449,6 @@ const CandidateProfile = () => {
                                                             />
                                                         </button>
 
-
                                                         <button
                                                             type="button"
                                                             onClick={() =>
@@ -2611,7 +2456,7 @@ const CandidateProfile = () => {
                                                                     edu.id
                                                                 )
                                                             }
-                                                            className="text-gray-400 hover:text-red-600"
+                                                            className="text-gray-400 hover:text-red-600 focus:outline-none"
                                                             title="Delete education"
                                                         >
                                                             <Trash2
@@ -2649,7 +2494,7 @@ const CandidateProfile = () => {
                                         onClick={
                                             openAddEducation
                                         }
-                                        className="mt-3 text-blue-600 text-sm font-semibold hover:underline"
+                                        className="mt-3 text-blue-600 text-sm font-semibold hover:underline focus:outline-none"
                                     >
                                         + Add education
                                     </button>
@@ -2659,9 +2504,8 @@ const CandidateProfile = () => {
 
                         </div>
 
-
                         {/* SKILLS */}
-                        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                        <div className="bg-gradient-to-br from-white to-blue-50/40 rounded-xl border border-blue-100/80 p-6 shadow-sm">
 
                             <div className="flex items-center justify-between mb-4">
 
@@ -2676,7 +2520,7 @@ const CandidateProfile = () => {
                                             !showSkillInput
                                         )
                                     }
-                                    className="text-blue-600 hover:underline text-sm font-semibold flex items-center gap-1"
+                                    className="text-blue-600 hover:underline text-sm font-semibold flex items-center gap-1 focus:outline-none"
                                 >
 
                                     <Plus size={16} />
@@ -2686,7 +2530,6 @@ const CandidateProfile = () => {
                                 </button>
 
                             </div>
-
 
                             {showSkillInput && (
 
@@ -2714,7 +2557,6 @@ const CandidateProfile = () => {
                                         className="px-3 py-2 text-sm border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 flex-1"
                                     />
 
-
                                     <datalist id="candidate-skill-options">
 
                                         {skillOptions.map(
@@ -2733,17 +2575,15 @@ const CandidateProfile = () => {
 
                                     </datalist>
 
-
                                     <button
                                         type="submit"
                                         disabled={
                                             saving
                                         }
-                                        className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+                                        className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg text-sm font-medium hover:from-blue-600 hover:to-purple-600 disabled:opacity-50 focus:outline-none"
                                     >
                                         Add
                                     </button>
-
 
                                     <button
                                         type="button"
@@ -2753,14 +2593,13 @@ const CandidateProfile = () => {
                                             );
                                             setNewSkill("");
                                         }}
-                                        className="p-2 text-gray-400 hover:text-gray-700"
+                                        className="p-2 text-gray-400 hover:text-gray-700 focus:outline-none"
                                     >
                                         <X size={18} />
                                     </button>
 
                                 </form>
                             )}
-
 
                             <div className="flex flex-wrap gap-2">
 
@@ -2781,7 +2620,6 @@ const CandidateProfile = () => {
 
                                                 {skill.name}
 
-
                                                 <button
                                                     type="button"
                                                     onClick={() =>
@@ -2789,7 +2627,7 @@ const CandidateProfile = () => {
                                                             skill
                                                         )
                                                     }
-                                                    className="hover:text-red-500 transition"
+                                                    className="hover:text-red-500 transition focus:outline-none"
                                                 >
 
                                                     <X
@@ -2815,9 +2653,8 @@ const CandidateProfile = () => {
 
                         </div>
 
-
                             {/* EXPERIENCE */}
-                        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                        <div className="bg-gradient-to-br from-white to-blue-50/40 rounded-xl border border-blue-100/80 p-6 shadow-sm">
 
                             <div className="flex items-center justify-between mb-4">
 
@@ -2830,7 +2667,7 @@ const CandidateProfile = () => {
                                     onClick={
                                         openAddExperience
                                     }
-                                    className="text-blue-600 hover:underline text-sm font-semibold flex items-center gap-1"
+                                    className="text-blue-600 hover:underline text-sm font-semibold flex items-center gap-1 focus:outline-none"
                                 >
 
                                     <Plus size={16} />
@@ -2840,7 +2677,6 @@ const CandidateProfile = () => {
                                 </button>
 
                             </div>
-
 
                             {profile.internships.length >
                                 0 ? (
@@ -2870,7 +2706,6 @@ const CandidateProfile = () => {
                                                         />
 
                                                     </div>
-
 
                                                     <div>
 
@@ -2923,7 +2758,6 @@ const CandidateProfile = () => {
 
                                                 </div>
 
-
                                                 <div className="flex items-center gap-2">
 
                                                     <button
@@ -2933,7 +2767,7 @@ const CandidateProfile = () => {
                                                                 intern
                                                             )
                                                         }
-                                                        className="text-gray-400 hover:text-blue-600"
+                                                        className="text-gray-400 hover:text-blue-600 focus:outline-none"
                                                         title="Edit experience"
                                                     >
                                                         <Pencil
@@ -2943,7 +2777,6 @@ const CandidateProfile = () => {
                                                         />
                                                     </button>
 
-
                                                     <button
                                                         type="button"
                                                         onClick={() =>
@@ -2951,7 +2784,7 @@ const CandidateProfile = () => {
                                                                 intern.id
                                                             )
                                                         }
-                                                        className="text-gray-400 hover:text-red-600"
+                                                        className="text-gray-400 hover:text-red-600 focus:outline-none"
                                                         title="Delete experience"
                                                     >
                                                         <Trash2
@@ -2987,7 +2820,7 @@ const CandidateProfile = () => {
                                         onClick={
                                             openAddExperience
                                         }
-                                        className="mt-3 text-blue-600 text-sm font-semibold hover:underline"
+                                        className="mt-3 text-blue-600 text-sm font-semibold hover:underline focus:outline-none"
                                     >
                                         + Add experience
                                     </button>
@@ -2997,10 +2830,8 @@ const CandidateProfile = () => {
 
                         </div>
 
-
-                        
                             {/* PROJECTS */}
-                        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                        <div className="bg-gradient-to-br from-white to-blue-50/40 rounded-xl border border-blue-100/80 p-6 shadow-sm">
 
                             <div className="flex items-center justify-between mb-2">
 
@@ -3013,7 +2844,7 @@ const CandidateProfile = () => {
                                     onClick={
                                         openAddProject
                                     }
-                                    className="text-blue-600 hover:underline text-sm font-semibold flex items-center gap-1"
+                                    className="text-blue-600 hover:underline text-sm font-semibold flex items-center gap-1 focus:outline-none"
                                 >
 
                                     <Plus size={16} />
@@ -3024,13 +2855,11 @@ const CandidateProfile = () => {
 
                             </div>
 
-
                             <p className="text-xs text-gray-500 mb-5">
 
                                 Talk about your projects that made you proud and contributed to your learnings.
 
                             </p>
-
 
                             {profile.projects.length >
                                 0 ? (
@@ -3070,7 +2899,6 @@ const CandidateProfile = () => {
 
                                                     </div>
 
-
                                                     <div className="flex items-center gap-2">
 
                                                         <button
@@ -3080,7 +2908,7 @@ const CandidateProfile = () => {
                                                                     project
                                                                 )
                                                             }
-                                                            className="text-gray-400 hover:text-blue-600"
+                                                            className="text-gray-400 hover:text-blue-600 focus:outline-none"
                                                         >
                                                             <Pencil
                                                                 size={
@@ -3089,7 +2917,6 @@ const CandidateProfile = () => {
                                                             />
                                                         </button>
 
-
                                                         <button
                                                             type="button"
                                                             onClick={() =>
@@ -3097,7 +2924,7 @@ const CandidateProfile = () => {
                                                                     project.id
                                                                 )
                                                             }
-                                                            className="text-gray-400 hover:text-red-600"
+                                                            className="text-gray-400 hover:text-red-600 focus:outline-none"
                                                         >
                                                             <Trash2
                                                                 size={
@@ -3110,7 +2937,6 @@ const CandidateProfile = () => {
 
                                                 </div>
 
-
                                                 {project.description && (
 
                                                     <p className="text-xs text-gray-600 mt-2 leading-relaxed">
@@ -3119,7 +2945,6 @@ const CandidateProfile = () => {
 
                                                     </p>
                                                 )}
-
 
                                                 {Array.isArray(
                                                     project.technologies
@@ -3175,7 +3000,7 @@ const CandidateProfile = () => {
                                         onClick={
                                             openAddProject
                                         }
-                                        className="mt-3 text-blue-600 text-sm font-semibold hover:underline"
+                                        className="mt-3 text-blue-600 text-sm font-semibold hover:underline focus:outline-none"
                                     >
                                         + Add project
                                     </button>
@@ -3186,7 +3011,7 @@ const CandidateProfile = () => {
                         </div>
 
                             {/* PROFILE SUMMARY */}
-                        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                        <div className="bg-gradient-to-br from-white to-blue-50/40 rounded-xl border border-blue-100/80 p-6 shadow-sm">
 
                             <div className="flex items-center justify-between mb-2">
 
@@ -3199,7 +3024,7 @@ const CandidateProfile = () => {
                                     onClick={
                                         openBioEdit
                                     }
-                                    className="text-blue-600 hover:underline text-sm font-semibold flex items-center gap-1"
+                                    className="text-blue-600 hover:underline text-sm font-semibold flex items-center gap-1 focus:outline-none"
                                 >
 
                                     {profile.bio ? (
@@ -3219,7 +3044,6 @@ const CandidateProfile = () => {
                                 </button>
 
                             </div>
-
 
                             {profile.bio ? (
 
@@ -3255,7 +3079,6 @@ const CandidateProfile = () => {
 
                             </div>
 
-
                             {profile.resume && (
 
                                 <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg border border-gray-200">
@@ -3289,7 +3112,6 @@ const CandidateProfile = () => {
 
                                     </div>
 
-
                                     <div className="flex items-center gap-2">
 
                                         <a
@@ -3306,7 +3128,6 @@ const CandidateProfile = () => {
                                             />
                                         </a>
 
-
                                         <button
                                             type="button"
                                             onClick={
@@ -3315,7 +3136,7 @@ const CandidateProfile = () => {
                                             disabled={
                                                 uploading
                                             }
-                                            className="p-2 text-gray-500 hover:text-red-600 rounded-lg hover:bg-white transition"
+                                            className="p-2 text-gray-500 hover:text-red-600 rounded-lg hover:bg-white transition focus:outline-none"
                                             title="Delete Resume"
                                         >
 
@@ -3340,7 +3161,6 @@ const CandidateProfile = () => {
                                 </div>
                             )}
 
-
                             <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center space-y-3 bg-gray-50/50">
 
                                 <label className="inline-flex items-center gap-2 px-6 py-2.5 bg-white border border-blue-600 text-blue-600 rounded-full font-semibold text-sm hover:bg-blue-50 cursor-pointer transition shadow-sm">
@@ -3363,7 +3183,6 @@ const CandidateProfile = () => {
                                         ? "Uploading..."
                                         : "Update resume"}
 
-
                                     <input
                                         type="file"
                                         accept=".pdf,.doc,.docx"
@@ -3374,7 +3193,6 @@ const CandidateProfile = () => {
                                     />
 
                                 </label>
-
 
                                 <p className="text-xs text-gray-400">
 
@@ -3392,7 +3210,7 @@ const CandidateProfile = () => {
                     {/* ACTIVITY */}
                 {activeTab === "activity" && (
 
-                    <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                    <div className="bg-gradient-to-br from-white to-blue-50/40 rounded-xl border border-blue-100/80 p-6 shadow-sm">
 
                         <h2 className="text-base font-bold text-gray-900">
                             Activity insights
@@ -3410,9 +3228,9 @@ const CandidateProfile = () => {
                 {/* PERSONAL DETAILS MODAL */}
             {editingHeader && (
 
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[9999] grid place-items-center overflow-hidden bg-slate-900/45 p-3 sm:p-4">
 
-                    <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 shadow-xl">
+                    <div className="my-auto w-full max-w-lg overflow-y-auto rounded-2xl border-0 bg-gradient-to-br from-white via-blue-50/70 to-purple-50/80 p-5 sm:p-6" style={{ border: "none", outline: "0", boxShadow: "0 18px 50px rgba(37, 54, 95, 0.18)", maxHeight: "calc(100dvh - 2rem)", overscrollBehavior: "contain", boxSizing: "border-box" }}>
 
                         <div className="flex justify-between items-center border-b pb-3 mb-4">
 
@@ -3430,12 +3248,11 @@ const CandidateProfile = () => {
                             >
                                 <X
                                     size={20}
-                                    className="text-gray-400"
+                                    className="text-gray-400 focus:outline-none"
                                 />
                             </button>
 
                         </div>
-
 
                         <form
                             onSubmit={
@@ -3522,7 +3339,6 @@ const CandidateProfile = () => {
                                 )
                             )}
 
-
                             <div>
 
                                 <label className="block text-xs font-semibold text-gray-600 mb-1">
@@ -3545,11 +3361,10 @@ const CandidateProfile = () => {
                                             }
                                         )
                                     }
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                 />
 
                             </div>
-
 
                             <div>
 
@@ -3576,11 +3391,10 @@ const CandidateProfile = () => {
                                             }
                                         )
                                     }
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                 />
 
                             </div>
-
 
                             <div>
 
@@ -3606,11 +3420,10 @@ const CandidateProfile = () => {
                                         )
                                     }
                                     placeholder="https://linkedin.com/in/..."
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                 />
 
                             </div>
-
 
                             <div>
 
@@ -3636,11 +3449,10 @@ const CandidateProfile = () => {
                                         )
                                     }
                                     placeholder="https://github.com/..."
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                 />
 
                             </div>
-
 
                             <div>
 
@@ -3666,11 +3478,10 @@ const CandidateProfile = () => {
                                         )
                                     }
                                     placeholder="https://yourportfolio.com"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                 />
 
                             </div>
-
 
                             <div className="flex justify-end gap-2 pt-3 border-t">
 
@@ -3681,18 +3492,17 @@ const CandidateProfile = () => {
                                             false
                                         )
                                     }
-                                    className="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-50"
+                                    className="px-4 py-2 border border-blue-100 rounded-lg text-gray-600 bg-white/80 hover:bg-purple-50 hover:border-purple-200 focus:outline-none"
                                 >
                                     Cancel
                                 </button>
-
 
                                 <button
                                     type="submit"
                                     disabled={
                                         saving
                                     }
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
+                                    className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 shadow-sm flex items-center gap-2 disabled:opacity-50 focus:outline-none"
                                 >
 
                                     {saving && (
@@ -3719,9 +3529,9 @@ const CandidateProfile = () => {
                 {/* CAREER PREFERENCES MODAL */}
             {editingPref && (
 
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[9999] grid place-items-center overflow-hidden bg-slate-900/45 p-3 sm:p-4">
 
-                    <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
+                    <div className="my-auto w-full max-w-md overflow-y-auto rounded-2xl border-0 bg-gradient-to-br from-white via-blue-50/70 to-purple-50/80 p-5 sm:p-6" style={{ border: "none", outline: "0", boxShadow: "0 18px 50px rgba(37, 54, 95, 0.18)", maxHeight: "calc(100dvh - 2rem)", overscrollBehavior: "contain", boxSizing: "border-box" }}>
 
                         <div className="flex justify-between items-center border-b pb-3 mb-4">
 
@@ -3739,12 +3549,11 @@ const CandidateProfile = () => {
                             >
                                 <X
                                     size={20}
-                                    className="text-gray-400"
+                                    className="text-gray-400 focus:outline-none"
                                 />
                             </button>
 
                         </div>
-
 
                         <form
                             onSubmit={
@@ -3780,7 +3589,7 @@ const CandidateProfile = () => {
                                         )
                                     }
                                     placeholder="Jobs, Internships"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                 />
 
                                 <p className="text-[11px] text-gray-400 mt-1">
@@ -3788,7 +3597,6 @@ const CandidateProfile = () => {
                                 </p>
 
                             </div>
-
 
                             <div>
 
@@ -3811,7 +3619,7 @@ const CandidateProfile = () => {
                                             }
                                         )
                                     }
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                 >
 
                                     <option value="">
@@ -3842,7 +3650,6 @@ const CandidateProfile = () => {
 
                             </div>
 
-
                             <div>
 
                                 <label className="block text-xs font-semibold text-gray-600 mb-1">
@@ -3870,7 +3677,7 @@ const CandidateProfile = () => {
                                         )
                                     }
                                     placeholder="Gurgaon, Mumbai, Pune"
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                 />
 
                                 <p className="text-[11px] text-gray-400 mt-1">
@@ -3878,7 +3685,6 @@ const CandidateProfile = () => {
                                 </p>
 
                             </div>
-
 
                             <div className="flex justify-end gap-2 pt-3 border-t">
 
@@ -3889,18 +3695,17 @@ const CandidateProfile = () => {
                                             false
                                         )
                                     }
-                                    className="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-50"
+                                    className="px-4 py-2 border border-blue-100 rounded-lg text-gray-600 bg-white/80 hover:bg-purple-50 hover:border-purple-200 focus:outline-none"
                                 >
                                     Cancel
                                 </button>
-
 
                                 <button
                                     type="submit"
                                     disabled={
                                         saving
                                     }
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
+                                    className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 shadow-sm flex items-center gap-2 disabled:opacity-50 focus:outline-none"
                                 >
 
                                     {saving && (
@@ -3926,9 +3731,9 @@ const CandidateProfile = () => {
                 {/* EDUCATION MODAL */}
             {showEducationModal && (
 
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[9999] grid place-items-center overflow-hidden bg-slate-900/45 p-3 sm:p-4">
 
-                    <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 shadow-xl">
+                    <div className="my-auto w-full max-w-lg overflow-y-auto rounded-2xl border-0 bg-gradient-to-br from-white via-blue-50/70 to-purple-50/80 p-5 sm:p-6" style={{ border: "none", outline: "0", boxShadow: "0 18px 50px rgba(37, 54, 95, 0.18)", maxHeight: "calc(100dvh - 2rem)", overscrollBehavior: "contain", boxSizing: "border-box" }}>
 
                         <div className="flex justify-between items-center border-b pb-3 mb-4">
 
@@ -3949,12 +3754,11 @@ const CandidateProfile = () => {
                             >
                                 <X
                                     size={20}
-                                    className="text-gray-400"
+                                    className="text-gray-400 focus:outline-none"
                                 />
                             </button>
 
                         </div>
-
 
                         <form
                             onSubmit={
@@ -3988,11 +3792,10 @@ const CandidateProfile = () => {
                                             )
                                         }
                                         placeholder="B.Tech"
-                                        className="form-input"
+                                        className="form-input w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                     />
 
                                 </div>
-
 
                                 <div>
 
@@ -4016,11 +3819,10 @@ const CandidateProfile = () => {
                                             )
                                         }
                                         placeholder="Computer Science"
-                                        className="form-input"
+                                        className="form-input w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                     />
 
                                 </div>
-
 
                                 <div className="md:col-span-2">
 
@@ -4045,11 +3847,10 @@ const CandidateProfile = () => {
                                             )
                                         }
                                         placeholder="Banasthali Vidyapith"
-                                        className="form-input"
+                                        className="form-input w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                     />
 
                                 </div>
-
 
                                 <div>
 
@@ -4073,11 +3874,10 @@ const CandidateProfile = () => {
                                             )
                                         }
                                         placeholder="Jaipur"
-                                        className="form-input"
+                                        className="form-input w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                     />
 
                                 </div>
-
 
                                 <div>
 
@@ -4101,11 +3901,10 @@ const CandidateProfile = () => {
                                             )
                                         }
                                         placeholder="8.5 CGPA"
-                                        className="form-input"
+                                        className="form-input w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                     />
 
                                 </div>
-
 
                                 <div>
 
@@ -4129,11 +3928,10 @@ const CandidateProfile = () => {
                                                 }
                                             )
                                         }
-                                        className="form-input"
+                                        className="form-input w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                     />
 
                                 </div>
-
 
                                 <div>
 
@@ -4157,11 +3955,10 @@ const CandidateProfile = () => {
                                                 }
                                             )
                                         }
-                                        className="form-input"
+                                        className="form-input w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                     />
 
                                 </div>
-
 
                                 <div className="md:col-span-2">
 
@@ -4186,13 +3983,12 @@ const CandidateProfile = () => {
                                             )
                                         }
                                         placeholder="Describe your education..."
-                                        className="form-input"
+                                        className="form-input w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                     />
 
                                 </div>
 
                             </div>
-
 
                             <div className="flex justify-end gap-2 pt-3 border-t">
 
@@ -4204,18 +4000,17 @@ const CandidateProfile = () => {
                                         );
                                         resetEducationForm();
                                     }}
-                                    className="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-50"
+                                    className="px-4 py-2 border border-blue-100 rounded-lg text-gray-600 bg-white/80 hover:bg-purple-50 hover:border-purple-200 focus:outline-none"
                                 >
                                     Cancel
                                 </button>
-
 
                                 <button
                                     type="submit"
                                     disabled={
                                         saving
                                     }
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
+                                    className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 shadow-sm flex items-center gap-2 disabled:opacity-50 focus:outline-none"
                                 >
 
                                     {saving && (
@@ -4240,13 +4035,12 @@ const CandidateProfile = () => {
                 </div>
             )}
 
-
                 {/* EXPERIENCE MODAL */}
             {showExperienceModal && (
 
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[9999] grid place-items-center overflow-hidden bg-slate-900/45 p-3 sm:p-4">
 
-                    <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 shadow-xl">
+                    <div className="my-auto w-full max-w-lg overflow-y-auto rounded-2xl border-0 bg-gradient-to-br from-white via-blue-50/70 to-purple-50/80 p-5 sm:p-6" style={{ border: "none", outline: "0", boxShadow: "0 18px 50px rgba(37, 54, 95, 0.18)", maxHeight: "calc(100dvh - 2rem)", overscrollBehavior: "contain", boxSizing: "border-box" }}>
 
                         <div className="flex justify-between items-center border-b pb-3 mb-4">
 
@@ -4267,12 +4061,11 @@ const CandidateProfile = () => {
                             >
                                 <X
                                     size={20}
-                                    className="text-gray-400"
+                                    className="text-gray-400 focus:outline-none"
                                 />
                             </button>
 
                         </div>
-
 
                         <form
                             onSubmit={
@@ -4304,11 +4097,10 @@ const CandidateProfile = () => {
                                         )
                                     }
                                     placeholder="Pratham Software"
-                                    className="form-input"
+                                    className="form-input w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                 />
 
                             </div>
-
 
                             <div>
 
@@ -4333,11 +4125,10 @@ const CandidateProfile = () => {
                                         )
                                     }
                                     placeholder="Software Developer Intern"
-                                    className="form-input"
+                                    className="form-input w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                 />
 
                             </div>
-
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
@@ -4362,7 +4153,7 @@ const CandidateProfile = () => {
                                                 }
                                             )
                                         }
-                                        className="form-input"
+                                        className="form-input w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                     >
 
                                         <option value="INTERNSHIP">
@@ -4389,7 +4180,6 @@ const CandidateProfile = () => {
 
                                 </div>
 
-
                                 <div>
 
                                     <label className="form-label">
@@ -4412,13 +4202,12 @@ const CandidateProfile = () => {
                                             )
                                         }
                                         placeholder="Remote / Jaipur"
-                                        className="form-input"
+                                        className="form-input w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                     />
 
                                 </div>
 
                             </div>
-
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
@@ -4444,11 +4233,10 @@ const CandidateProfile = () => {
                                                 }
                                             )
                                         }
-                                        className="form-input"
+                                        className="form-input w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                     />
 
                                 </div>
-
 
                                 <div>
 
@@ -4475,13 +4263,12 @@ const CandidateProfile = () => {
                                                 }
                                             )
                                         }
-                                        className="form-input disabled:bg-gray-100"
+                                        className="form-input w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100 disabled:bg-gray-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                     />
 
                                 </div>
 
                             </div>
-
 
                             <label className="flex items-center gap-2 text-sm text-gray-700">
 
@@ -4507,7 +4294,6 @@ const CandidateProfile = () => {
                                 I currently work here
 
                             </label>
-
 
                             <div>
 
@@ -4539,11 +4325,10 @@ const CandidateProfile = () => {
                                         )
                                     }
                                     placeholder="React, JavaScript, Spring Boot"
-                                    className="form-input"
+                                    className="form-input w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                 />
 
                             </div>
-
 
                             <div>
 
@@ -4568,11 +4353,10 @@ const CandidateProfile = () => {
                                         )
                                     }
                                     placeholder="Describe your responsibilities and achievements..."
-                                    className="form-input"
+                                    className="form-input w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                 />
 
                             </div>
-
 
                             <div className="flex justify-end gap-2 pt-3 border-t">
 
@@ -4584,18 +4368,17 @@ const CandidateProfile = () => {
                                         );
                                         resetExperienceForm();
                                     }}
-                                    className="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-50"
+                                    className="px-4 py-2 border border-blue-100 rounded-lg text-gray-600 bg-white/80 hover:bg-purple-50 hover:border-purple-200 focus:outline-none"
                                 >
                                     Cancel
                                 </button>
-
 
                                 <button
                                     type="submit"
                                     disabled={
                                         saving
                                     }
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
+                                    className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 shadow-sm flex items-center gap-2 disabled:opacity-50 focus:outline-none"
                                 >
 
                                     {saving && (
@@ -4620,13 +4403,12 @@ const CandidateProfile = () => {
                 </div>
             )}
 
-
                 {/* PROJECT MODAL */}
             {showProjectModal && (
 
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[9999] grid place-items-center overflow-hidden bg-slate-900/45 p-3 sm:p-4">
 
-                    <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6 shadow-xl">
+                    <div className="my-auto w-full max-w-lg overflow-y-auto rounded-2xl border-0 bg-gradient-to-br from-white via-blue-50/70 to-purple-50/80 p-5 sm:p-6" style={{ border: "none", outline: "0", boxShadow: "0 18px 50px rgba(37, 54, 95, 0.18)", maxHeight: "calc(100dvh - 2rem)", overscrollBehavior: "contain", boxSizing: "border-box" }}>
 
                         <div className="flex justify-between items-center border-b pb-3 mb-4">
 
@@ -4647,12 +4429,11 @@ const CandidateProfile = () => {
                             >
                                 <X
                                     size={20}
-                                    className="text-gray-400"
+                                    className="text-gray-400 focus:outline-none"
                                 />
                             </button>
 
                         </div>
-
 
                         <form
                             onSubmit={
@@ -4684,11 +4465,10 @@ const CandidateProfile = () => {
                                         )
                                     }
                                     placeholder="JobBridge"
-                                    className="form-input"
+                                    className="form-input w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                 />
 
                             </div>
-
 
                             <div>
 
@@ -4712,11 +4492,10 @@ const CandidateProfile = () => {
                                         )
                                     }
                                     placeholder="Full Stack Developer"
-                                    className="form-input"
+                                    className="form-input w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                 />
 
                             </div>
-
 
                             <div>
 
@@ -4748,11 +4527,10 @@ const CandidateProfile = () => {
                                         )
                                     }
                                     placeholder="React, Node.js, MySQL"
-                                    className="form-input"
+                                    className="form-input w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                 />
 
                             </div>
-
 
                             <div>
 
@@ -4777,11 +4555,10 @@ const CandidateProfile = () => {
                                         )
                                     }
                                     placeholder="Describe your project..."
-                                    className="form-input"
+                                    className="form-input w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                 />
 
                             </div>
-
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
@@ -4807,11 +4584,10 @@ const CandidateProfile = () => {
                                                 }
                                             )
                                         }
-                                        className="form-input"
+                                        className="form-input w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                     />
 
                                 </div>
-
 
                                 <div>
 
@@ -4838,13 +4614,12 @@ const CandidateProfile = () => {
                                                 }
                                             )
                                         }
-                                        className="form-input disabled:bg-gray-100"
+                                        className="form-input w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100 disabled:bg-gray-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                     />
 
                                 </div>
 
                             </div>
-
 
                             <label className="flex items-center gap-2 text-sm text-gray-700">
 
@@ -4871,7 +4646,6 @@ const CandidateProfile = () => {
 
                             </label>
 
-
                             <div>
 
                                 <label className="form-label">
@@ -4895,11 +4669,10 @@ const CandidateProfile = () => {
                                         )
                                     }
                                     placeholder="https://..."
-                                    className="form-input"
+                                    className="form-input w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                 />
 
                             </div>
-
 
                             <div>
 
@@ -4924,11 +4697,10 @@ const CandidateProfile = () => {
                                         )
                                     }
                                     placeholder="https://github.com/..."
-                                    className="form-input"
+                                    className="form-input w-full rounded-lg border border-blue-200 bg-white px-3 py-2 text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100" style={{ border: "1px solid #cbd5e1", outline: "none", boxSizing: "border-box" }}
                                 />
 
                             </div>
-
 
                             <div className="flex justify-end gap-2 pt-3 border-t">
 
@@ -4940,18 +4712,17 @@ const CandidateProfile = () => {
                                         );
                                         resetProjectForm();
                                     }}
-                                    className="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-50"
+                                    className="px-4 py-2 border border-blue-100 rounded-lg text-gray-600 bg-white/80 hover:bg-purple-50 hover:border-purple-200 focus:outline-none"
                                 >
                                     Cancel
                                 </button>
-
 
                                 <button
                                     type="submit"
                                     disabled={
                                         saving
                                     }
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
+                                    className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 shadow-sm flex items-center gap-2 disabled:opacity-50 focus:outline-none"
                                 >
 
                                     {saving && (
@@ -4979,9 +4750,9 @@ const CandidateProfile = () => {
                 {/* PROFILE SUMMARY MODAL */}
             {editingBio && (
 
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[9999] grid place-items-center overflow-hidden bg-slate-900/45 p-3 sm:p-4">
 
-                    <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl">
+                    <div className="my-auto bg-gradient-to-br from-white via-blue-50/70 to-purple-50/80 rounded-2xl border-0 max-w-lg w-full max-h-[calc(100dvh-2rem)] p-6 shadow-xl" style={{ border: "none", outline: "none", boxShadow: "0 18px 50px rgba(37, 54, 95, 0.18)", maxHeight: "calc(100dvh - 2rem)", overflowY: "auto", overscrollBehavior: "contain" }}>
 
                         <div className="flex justify-between items-center border-b pb-3 mb-4">
 
@@ -4999,12 +4770,11 @@ const CandidateProfile = () => {
                             >
                                 <X
                                     size={20}
-                                    className="text-gray-400"
+                                    className="text-gray-400 focus:outline-none"
                                 />
                             </button>
 
                         </div>
-
 
                         <form
                             onSubmit={
@@ -5027,7 +4797,6 @@ const CandidateProfile = () => {
                                 className="w-full p-3 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
                             />
 
-
                             <div className="flex justify-end gap-2 pt-3 border-t">
 
                                 <button
@@ -5037,18 +4806,17 @@ const CandidateProfile = () => {
                                             false
                                         )
                                     }
-                                    className="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-50"
+                                    className="px-4 py-2 border border-blue-100 rounded-lg text-gray-600 bg-white/80 hover:bg-purple-50 hover:border-purple-200 focus:outline-none"
                                 >
                                     Cancel
                                 </button>
-
 
                                 <button
                                     type="submit"
                                     disabled={
                                         saving
                                     }
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 disabled:opacity-50"
+                                    className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:from-blue-600 hover:to-purple-600 shadow-sm flex items-center gap-2 disabled:opacity-50 focus:outline-none"
                                 >
 
                                     {saving && (
@@ -5074,6 +4842,5 @@ const CandidateProfile = () => {
         </div>
     );
 };
-
 
 export default CandidateProfile;
