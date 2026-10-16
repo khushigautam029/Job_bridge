@@ -830,11 +830,11 @@ const Candidates = () => {
             {/* PROFILE AND CONTACT MODALS */}
             {selectedCandidate && modalType && (
                 <div
-                    className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm"
+                    className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-slate-900/50 p-3 backdrop-blur-sm sm:p-4"
                     onClick={closeModal}
                 >
                     <div
-                        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white shadow-2xl"
+                        className="max-h-[calc(100dvh-1.5rem)] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-3xl border-0 bg-white shadow-2xl"
                         onClick={(event) => event.stopPropagation()}
                     >
                         {/* Modal header */}

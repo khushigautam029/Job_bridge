@@ -1082,11 +1082,11 @@ const RecruiterInterviews = () => {
             {/* SCHEDULE / RESCHEDULE MODAL */}
             {scheduleModalOpen && (
                 <div
-                    className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm"
+                    className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-slate-900/50 p-3 backdrop-blur-sm sm:p-4"
                     onClick={closeScheduleModal}
                 >
                     <div
-                        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white shadow-2xl"
+                        className="max-h-[calc(100dvh-1.5rem)] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-3xl border-0 bg-white shadow-2xl"
                         onClick={(event) => event.stopPropagation()}
                     >
                         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-6 py-5">
@@ -1353,11 +1353,11 @@ const RecruiterInterviews = () => {
             {/* VIEW INTERVIEW MODAL */}
             {viewModalOpen && selectedInterview && (
                 <div
-                    className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm"
+                    className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-slate-900/50 p-3 backdrop-blur-sm sm:p-4"
                     onClick={closeViewModal}
                 >
                     <div
-                        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white shadow-2xl"
+                        className="max-h-[calc(100dvh-1.5rem)] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-3xl border-0 bg-white shadow-2xl"
                         onClick={(event) => event.stopPropagation()}
                     >
                         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-100 bg-white px-6 py-5">

@@ -125,8 +125,8 @@ const RecruiterLayout = () => {
                     to { opacity: 1; transform: translateY(0); }
                 }
                 @keyframes recruiterPageIn {
-                    from { opacity: 0; transform: translateY(14px); }
-                    to { opacity: 1; transform: translateY(0); }
+                    from { opacity: 0; }
+                    to { opacity: 1; }
                 }
                 @keyframes recruiterDropdownIn {
                     from { opacity: 0; transform: translateY(-7px) scale(.985); }

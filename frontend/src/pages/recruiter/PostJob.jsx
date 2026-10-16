@@ -242,12 +242,12 @@ const PostJob = () => {
 
     return (
         <div>
-            <section className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-start gap-3">
                     <button
                         type="button"
                         onClick={() => navigate("/recruiter/jobs")}
-                        className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-indigo-600"
+                        className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 hover:text-indigo-600"
                     >
                         <ArrowLeft size={18} />
                     </button>
@@ -257,11 +257,11 @@ const PostJob = () => {
                             Hiring Management
                         </p>
 
-                        <h1 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">
+                        <h1 className="mt-1 text-xl font-bold text-slate-900 sm:text-2xl">
                             Post a Job
                         </h1>
 
-                        <p className="mt-2 text-sm text-slate-500">
+                        <p className="mt-1 text-xs text-slate-500 sm:text-sm">
                             Create a new job posting and find the right
                             candidate for your company.
                         </p>
@@ -280,12 +280,12 @@ const PostJob = () => {
                 </div>
             )}
 
-            <form onSubmit={handleSubmit} className="mt-7">
-                <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-                    <div className="border-b border-slate-200 px-6 py-5">
+            <form onSubmit={handleSubmit} className="mt-4 grid gap-3 lg:grid-cols-12 lg:items-stretch">
+                <section className="rounded-xl border-0 bg-white shadow-sm lg:col-span-12">
+                    <div className="border-b border-slate-200 px-4 py-3">
                         <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                                <BriefcaseBusiness size={19} />
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                                <BriefcaseBusiness size={17} />
                             </div>
 
                             <div>
@@ -300,10 +300,10 @@ const PostJob = () => {
                         </div>
                     </div>
 
-                    <div className="grid gap-5 p-6 md:grid-cols-2">
+                    <div className="grid gap-x-3 gap-y-2 p-4 sm:grid-cols-2 lg:grid-cols-4">
                         {/* Job Title */}
-                        <div className="md:col-span-2">
-                            <label className="mb-2 block text-sm font-medium text-slate-700">
+                        <div className="sm:col-span-2">
+                            <label className="mb-1 block text-xs font-medium text-slate-700">
                                 Job Title
                             </label>
 
@@ -314,13 +314,13 @@ const PostJob = () => {
                                 value={formData.title}
                                 onChange={handleChange}
                                 placeholder="e.g. Senior React Developer"
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
                             />
                         </div>
 
                         {/* Category */}
                         <div>
-                            <label className="mb-2 block text-sm font-medium text-slate-700">
+                            <label className="mb-1 block text-xs font-medium text-slate-700">
                                 Job Category
                             </label>
 
@@ -330,7 +330,7 @@ const PostJob = () => {
                                     required
                                     value={formData.category}
                                     onChange={handleChange}
-                                    className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-10 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                    className="w-full appearance-none rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 pr-9 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
                                 >
                                     <option value="">
                                         Select category
@@ -355,7 +355,7 @@ const PostJob = () => {
 
                         {/* Job Type */}
                         <div>
-                            <label className="mb-2 block text-sm font-medium text-slate-700">
+                            <label className="mb-1 block text-xs font-medium text-slate-700">
                                 Job Type
                             </label>
 
@@ -365,7 +365,7 @@ const PostJob = () => {
                                     required
                                     value={formData.type}
                                     onChange={handleChange}
-                                    className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-10 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                    className="w-full appearance-none rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 pr-9 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
                                 >
                                     <option value="">
                                         Select job type
@@ -397,7 +397,7 @@ const PostJob = () => {
 
                         {/* Work Mode */}
                         <div>
-                            <label className="mb-2 block text-sm font-medium text-slate-700">
+                            <label className="mb-1 block text-xs font-medium text-slate-700">
                                 Work Mode
                             </label>
 
@@ -407,7 +407,7 @@ const PostJob = () => {
                                     required
                                     value={formData.workMode}
                                     onChange={handleChange}
-                                    className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-10 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                    className="w-full appearance-none rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 pr-9 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
                                 >
                                     <option value="">
                                         Select work mode
@@ -435,7 +435,7 @@ const PostJob = () => {
 
                         {/* Location */}
                         <div>
-                            <label className="mb-2 block text-sm font-medium text-slate-700">
+                            <label className="mb-1 block text-xs font-medium text-slate-700">
                                 Location
                             </label>
 
@@ -452,14 +452,14 @@ const PostJob = () => {
                                     value={formData.location}
                                     onChange={handleChange}
                                     placeholder="e.g. Delhi, India"
-                                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                    className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
                                 />
                             </div>
                         </div>
 
                         {/* Experience */}
                         <div>
-                            <label className="mb-2 block text-sm font-medium text-slate-700">
+                            <label className="mb-1 block text-xs font-medium text-slate-700">
                                 Experience
                             </label>
 
@@ -469,7 +469,7 @@ const PostJob = () => {
                                     required
                                     value={formData.experience}
                                     onChange={handleChange}
-                                    className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-10 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                    className="w-full appearance-none rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 pr-9 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
                                 >
                                     <option value="">
                                         Select experience
@@ -509,7 +509,7 @@ const PostJob = () => {
 
                         {/* Salary */}
                         <div>
-                            <label className="mb-2 block text-sm font-medium text-slate-700">
+                            <label className="mb-1 block text-xs font-medium text-slate-700">
                                 Salary
                             </label>
 
@@ -520,13 +520,13 @@ const PostJob = () => {
                                 value={formData.salary}
                                 onChange={handleChange}
                                 placeholder="e.g. ₹8 - ₹12 LPA"
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
                             />
                         </div>
 
                         {/* Deadline */}
                         <div>
-                            <label className="mb-2 block text-sm font-medium text-slate-700">
+                            <label className="mb-1 block text-xs font-medium text-slate-700">
                                 Application Deadline
                             </label>
 
@@ -543,17 +543,17 @@ const PostJob = () => {
                                     min={minimumDeadline}
                                     value={formData.deadline}
                                     onChange={handleChange}
-                                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                    className="w-full rounded-lg border border-slate-200 bg-slate-50 py-2 pl-9 pr-3 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
                                 />
                             </div>
                         </div>
                     </div>
                 </section>
-                <section className="mt-6 rounded-2xl border border-slate-200 bg-white shadow-sm">
-                    <div className="border-b border-slate-200 px-6 py-5">
+                <section className="rounded-xl border-0 bg-white shadow-sm lg:col-span-8">
+                    <div className="border-b border-slate-200 px-4 py-3">
                         <div className="flex items-center gap-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                                <FileText size={19} />
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                                <FileText size={17} />
                             </div>
 
                             <div>
@@ -569,10 +569,10 @@ const PostJob = () => {
                         </div>
                     </div>
 
-                    <div className="space-y-5 p-6">
+                    <div className="grid gap-3 p-4 md:grid-cols-3">
                         {/* Description */}
                         <div>
-                            <label className="mb-2 block text-sm font-medium text-slate-700">
+                            <label className="mb-1 block text-xs font-medium text-slate-700">
                                 Description
                             </label>
 
@@ -583,15 +583,15 @@ const PostJob = () => {
                                 title="Use only one space between words."
                                 value={formData.description}
                                 onChange={handleChange}
-                                rows={6}
+                                rows={3}
                                 placeholder="Describe the job role, responsibilities, team, and what the candidate will be working on..."
-                                className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                className="w-full resize-y rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs leading-5 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
                             />
                         </div>
 
                         {/* Responsibilities */}
                         <div>
-                            <label className="mb-2 block text-sm font-medium text-slate-700">
+                            <label className="mb-1 block text-xs font-medium text-slate-700">
                                 Key Responsibilities
                             </label>
 
@@ -599,15 +599,15 @@ const PostJob = () => {
                                 name="responsibilities"
                                 value={formData.responsibilities}
                                 onChange={handleChange}
-                                rows={5}
+                                rows={3}
                                 placeholder="List the main responsibilities for this role..."
-                                className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                className="w-full resize-y rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs leading-5 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
                             />
                         </div>
 
                         {/* Requirements */}
                         <div>
-                            <label className="mb-2 block text-sm font-medium text-slate-700">
+                            <label className="mb-1 block text-xs font-medium text-slate-700">
                                 Requirements
                             </label>
 
@@ -618,16 +618,16 @@ const PostJob = () => {
                                 title="Use only one space between words."
                                 value={formData.requirements}
                                 onChange={handleChange}
-                                rows={6}
+                                rows={3}
                                 placeholder="Mention education, experience, responsibilities, qualifications, and other requirements..."
-                                className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                className="w-full resize-y rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs leading-5 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
                             />
                         </div>
                     </div>
                 </section>
 
-                <section className="mt-6 rounded-2xl border border-slate-200 bg-white shadow-sm">
-                    <div className="border-b border-slate-200 px-6 py-5">
+                <section className="rounded-xl border-0 bg-white shadow-sm lg:col-span-4">
+                    <div className="border-b border-slate-200 px-4 py-3">
                         <h2 className="font-semibold text-slate-900">
                             Required Skills <span className="text-red-500">*</span>
                         </h2>
@@ -638,7 +638,7 @@ const PostJob = () => {
                         </p>
                     </div>
 
-                    <div className="p-6">
+                    <div className="p-4">
                         <div className="flex flex-col gap-3 sm:flex-row">
                             <input
                                 type="text"
@@ -654,13 +654,13 @@ const PostJob = () => {
                                     }
                                 }}
                                 placeholder="e.g. React, Node.js, MySQL"
-                                className={`flex-1 rounded-xl border ${skillsError ? "border-red-500 bg-red-50" : "border-slate-200 bg-slate-50"} px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100`}
+                                className={`min-w-0 flex-1 rounded-lg border ${skillsError ? "border-red-500 bg-red-50" : "border-slate-200 bg-slate-50"} px-3 py-2 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100`}
                             />
 
                             <button
                                 type="button"
                                 onClick={handleAddSkill}
-                                className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                                className="flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700"
                             >
                                 <Plus size={17} />
                                 Add Skill
@@ -672,11 +672,11 @@ const PostJob = () => {
                         )}
 
                         {skills.length > 0 && (
-                            <div className="mt-4 flex flex-wrap gap-2">
+                            <div className="mt-3 flex max-h-20 flex-wrap gap-2 overflow-y-auto">
                                 {skills.map((skill) => (
                                     <span
                                         key={skill}
-                                        className="flex items-center gap-2 rounded-lg bg-indigo-50 px-3 py-2 text-xs font-medium text-indigo-600"
+                                        className="flex items-center gap-2 rounded-lg bg-indigo-50 px-2.5 py-1.5 text-xs font-medium text-indigo-600"
                                     >
                                         {skill}
 
@@ -696,11 +696,11 @@ const PostJob = () => {
                     </div>
                 </section>
 
-                <section className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <section className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end lg:col-span-12">
                     <button
                         type="button"
                         onClick={() => navigate("/recruiter/jobs")}
-                        className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                        className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
                     >
                         <X size={17} />
                         Cancel
@@ -709,7 +709,7 @@ const PostJob = () => {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="flex items-center justify-center gap-2 rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                         <Save size={17} />
 
@@ -719,8 +719,8 @@ const PostJob = () => {
             </form>
 
             {possibleDuplicate && (
-                <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/40 p-4" role="dialog" aria-modal="true" aria-labelledby="possible-duplicate-title">
-                    <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl">
+                <div className="fixed inset-0 z-[110] flex items-center justify-center overflow-hidden bg-slate-900/40 p-3 sm:p-4" role="dialog" aria-modal="true" aria-labelledby="possible-duplicate-title">
+                    <div className="w-full max-w-lg rounded-2xl border-0 bg-white p-6 shadow-2xl">
                         <h2 id="possible-duplicate-title" className="text-lg font-bold text-slate-900">Possible duplicate job</h2>
                         <p className="mt-2 text-sm leading-6 text-slate-600">
                             You already have a job with the same title, company, location, and requirements: <span className="font-semibold text-slate-800">{possibleDuplicate.title}</span> in <span className="font-semibold text-slate-800">{possibleDuplicate.location || "unspecified location"}</span>. Do you want to post another one?

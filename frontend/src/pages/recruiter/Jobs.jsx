@@ -646,8 +646,8 @@ const Jobs = () => {
 
             {/* Applications Modal: Candidate name and email only */}
             {showApplications && selectedJob && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4">
-                    <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-slate-900/40 p-3 sm:p-4">
+                    <div className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border-0 bg-white shadow-2xl">
                         <div className="flex items-start justify-between border-b border-slate-200 px-5 py-5 sm:px-6">
                             <div>
                                 <p className="text-xs font-medium text-indigo-600">
@@ -677,7 +677,7 @@ const Jobs = () => {
                             </button>
                         </div>
 
-                        <div className="overflow-y-auto p-5 sm:p-6">
+                        <div className="min-h-0 overflow-y-auto overscroll-contain p-5 sm:p-6">
                             {applicationsLoading ? (
                                 <p className="py-10 text-center text-sm text-slate-500">
                                     Loading applications...
@@ -728,8 +728,8 @@ const Jobs = () => {
 
             {/* Edit Job Modal */}
             {showEditModal && selectedJob && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4">
-                    <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-slate-900/40 p-3 sm:p-4">
+                    <div className="max-h-[calc(100dvh-1.5rem)] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-2xl border-0 bg-white shadow-2xl">
                         <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
                             <div>
                                 <p className="text-xs font-medium text-indigo-600">
@@ -956,8 +956,8 @@ const Jobs = () => {
 
             {/* Delete Confirmation Modal */}
             {showDeleteModal && selectedJob && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 p-4">
-                    <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-slate-900/40 p-3 sm:p-4">
+                    <div className="w-full max-w-md rounded-2xl border-0 bg-white p-6 shadow-2xl">
                         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-500">
                             <Trash2 size={21} />
                         </div>
