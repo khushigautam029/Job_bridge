@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { getRecruiterApplications } from "../../services/applicationService";
+import Pagination, { usePagination } from "../../components/Pagination.jsx";
 
 const getInitials = (name = "Candidate") =>
     name
@@ -328,6 +329,9 @@ const Candidates = () => {
         locationFilter,
         categoryFilter,
     ]);
+    const paginationResetKey = JSON.stringify([search, experienceFilter, locationFilter, categoryFilter]);
+    const { pageItems: pageCandidates, currentPage, setCurrentPage, pageCount } =
+        usePagination(filteredCandidates, paginationResetKey);
 
     const categoryOptions = useMemo(
         () => [...new Set(candidates.flatMap((candidate) => candidate.appliedCategories))].sort(),
@@ -613,8 +617,9 @@ const Candidates = () => {
                      * 2 columns on medium/large screens
                      * 3 columns on extra-large screens
                      */
+                    <>
                     <div className="mt-5 grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
-                        {filteredCandidates.map((candidate) => (
+                        {pageCandidates.map((candidate) => (
                             <article
                                 key={candidate.id}
                                 className="flex min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-indigo-200 hover:shadow-md"
@@ -799,6 +804,8 @@ const Candidates = () => {
                             </article>
                         ))}
                     </div>
+                    <Pagination totalItems={filteredCandidates.length} currentPage={currentPage} pageCount={pageCount} onPageChange={setCurrentPage} />
+                    </>
                 ) : (
                     <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
                         <Users

@@ -25,6 +25,7 @@ import {
     updateInterview,
     updateInterviewStatus,
 } from "../../services/interviewService";
+import Pagination, { usePagination } from "../../components/Pagination.jsx";
 
 const emptyForm = {
     applicationId: "",
@@ -319,6 +320,9 @@ const RecruiterInterviews = () => {
             );
         });
     }, [interviews, search, statusFilter, typeFilter, categoryFilter]);
+    const paginationResetKey = JSON.stringify([search, statusFilter, typeFilter, categoryFilter]);
+    const { pageItems: pageInterviews, currentPage, setCurrentPage, pageCount } =
+        usePagination(filteredInterviews, paginationResetKey);
 
     const statistics = useMemo(
         () => ({
@@ -808,8 +812,9 @@ const RecruiterInterviews = () => {
                      * Small screens: 2 cards per row
                      * Extra-large screens: 3 cards per row
                      */
+                    <>
                     <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                        {filteredInterviews.map((interview) => {
+                        {pageInterviews.map((interview) => {
                             const candidateName = getCandidateName(interview);
                             const candidateEmail = getCandidateEmail(interview);
                             const candidateProfile = getCandidateFromInterview(interview);
@@ -1057,6 +1062,8 @@ const RecruiterInterviews = () => {
                             );
                         })}
                     </div>
+                    <Pagination totalItems={filteredInterviews.length} currentPage={currentPage} pageCount={pageCount} onPageChange={setCurrentPage} />
+                    </>
                 ) : (
                     <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
                         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-slate-400">

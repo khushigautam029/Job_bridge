@@ -21,6 +21,7 @@ import {
     getRecruiterApplications,
     updateApplicationStatus as updateApplicationStatusRequest,
 } from "../../services/applicationService";
+import Pagination, { usePagination } from "../../components/Pagination.jsx";
 
 const RecruiterApplications = () => {
     const { jobId } = useParams();
@@ -165,6 +166,9 @@ const RecruiterApplications = () => {
         statusFilter,
         categoryFilter,
     ]);
+    const paginationResetKey = JSON.stringify([search, statusFilter, categoryFilter, currentJobId]);
+    const { pageItems: pageApplications, currentPage, setCurrentPage, pageCount } =
+        usePagination(filteredApplications, paginationResetKey);
 
     // Status Classes
     const getStatusClasses = (status) => {
@@ -582,8 +586,9 @@ const RecruiterApplications = () => {
 
                 {/* APPLICATION LIST */}
                 {filteredApplications.length > 0 ? (
+                    <>
                     <div className="mt-5 space-y-4">
-                        {filteredApplications.map(
+                        {pageApplications.map(
                             (application) => (
                                 <div
                                     key={
@@ -788,6 +793,8 @@ const RecruiterApplications = () => {
                             )
                         )}
                     </div>
+                    <Pagination totalItems={filteredApplications.length} currentPage={currentPage} pageCount={pageCount} onPageChange={setCurrentPage} />
+                    </>
                 ) : (
 
                     /* Empty State */

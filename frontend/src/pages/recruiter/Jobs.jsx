@@ -26,6 +26,7 @@ import {
     updateJob,
 } from "../../services/jobService";
 import { getSkills } from "../../services/skillService";
+import Pagination, { usePagination } from "../../components/Pagination.jsx";
 
 const formatRecruiterJob = (job) => ({
     ...formatJobCard(job),
@@ -154,6 +155,8 @@ const Jobs = () => {
             );
         });
     }, [jobs, search, statusFilter, categoryFilter]);
+    const { pageItems: pageJobs, currentPage, setCurrentPage, pageCount } =
+        usePagination(filteredJobs, JSON.stringify([search, statusFilter, categoryFilter]));
 
     const getStatusClasses = (status) => {
         if (status === "Active") {
@@ -167,6 +170,10 @@ const Jobs = () => {
     const selectedApplications = selectedJob
         ? remoteApplications[selectedJob.id] || []
         : [];
+    const applicationPagination = usePagination(
+        selectedApplications,
+        selectedJob?.id || "no-job-selected"
+    );
 
     const handleViewJob = (job) => {
         navigate(`/recruiter/jobs/${job.id}`, {
@@ -487,8 +494,9 @@ const Jobs = () => {
 
             {/* Responsive Job Grid: 3 jobs per row on large screens */}
             {filteredJobs.length > 0 ? (
-                <section className="grid w-full grid-cols-1 items-stretch gap-5 md:grid-cols-2 xl:grid-cols-3">
-                    {filteredJobs.map((job) => (
+                <>
+                    <section className="grid w-full grid-cols-1 items-stretch gap-5 md:grid-cols-2 xl:grid-cols-3">
+                    {pageJobs.map((job) => (
                         <article
                             key={job.id}
                             className="flex min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-indigo-200 hover:shadow-md sm:p-5"
@@ -618,7 +626,9 @@ const Jobs = () => {
                             </div>
                         </article>
                     ))}
-                </section>
+                    </section>
+                    <Pagination totalItems={filteredJobs.length} currentPage={currentPage} pageCount={pageCount} onPageChange={setCurrentPage} />
+                </>
             ) : (
                 <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
                     <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-slate-400">
@@ -683,8 +693,9 @@ const Jobs = () => {
                                     Loading applications...
                                 </p>
                             ) : selectedApplications.length > 0 ? (
+                                <>
                                 <div className="space-y-3">
-                                    {selectedApplications.map((application) => (
+                                    {applicationPagination.pageItems.map((application) => (
                                         <div
                                             key={application.id}
                                             className="flex min-w-0 items-start gap-3 rounded-xl border border-slate-200 p-4"
@@ -705,6 +716,13 @@ const Jobs = () => {
                                         </div>
                                     ))}
                                 </div>
+                                <Pagination
+                                    totalItems={selectedApplications.length}
+                                    currentPage={applicationPagination.currentPage}
+                                    pageCount={applicationPagination.pageCount}
+                                    onPageChange={applicationPagination.setCurrentPage}
+                                />
+                                </>
                             ) : (
                                 <div className="py-12 text-center">
                                     <Users
