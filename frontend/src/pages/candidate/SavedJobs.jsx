@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Pagination, { usePagination } from "../../components/Pagination";
 import { formatJobCard } from "../../services/jobService";
 import {
     getSavedJobs,
@@ -111,6 +112,8 @@ const SavedJobs = () => {
 
         return jobs;
     }, [savedJobs, search, sortBy]);
+    const { pageItems: pageJobs, currentPage, setCurrentPage, pageCount } =
+        usePagination(filteredJobs, JSON.stringify([search, sortBy]));
 
     const remoteJobs = savedJobs.filter(
         (job) => job.workMode === "Remote"
@@ -346,7 +349,7 @@ const SavedJobs = () => {
                 {/* Saved Jobs Grid */}
                 {filteredJobs.length > 0 && (
                     <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                        {filteredJobs.map((job) => (
+                        {pageJobs.map((job) => (
                             <div
                                 key={job.id}
                                 className="group flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-md"
@@ -462,6 +465,12 @@ const SavedJobs = () => {
                         ))}
                     </div>
                 )}
+                <Pagination
+                    totalItems={filteredJobs.length}
+                    currentPage={currentPage}
+                    pageCount={pageCount}
+                    onPageChange={setCurrentPage}
+                />
             </section>
 
             {/* Bottom CTA */}

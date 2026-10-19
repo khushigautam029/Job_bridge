@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Pagination, { usePagination } from "../../components/Pagination";
 import { getApplications } from "../../services/applicationService";
 
 const Applications = () => {
@@ -303,6 +304,8 @@ const Applications = () => {
             (application) => application.status === filterStatus
         );
     }, [applications, filterStatus]);
+    const { pageItems: pageApplications, currentPage, setCurrentPage, pageCount } =
+        usePagination(filteredApplications, filterStatus);
 
     const totalApplications = applications.length;
 
@@ -499,8 +502,9 @@ const Applications = () => {
 
                 {/* Application List */}
                 {filteredApplications.length > 0 ? (
-                    <div className="divide-y divide-slate-100">
-                        {filteredApplications.map((application) => {
+                    <>
+                        <div className="divide-y divide-slate-100">
+                            {pageApplications.map((application) => {
                             const StatusIcon = application.statusIcon;
 
                             return (
@@ -585,8 +589,15 @@ const Applications = () => {
                                     </div>
                                 </div>
                             );
-                        })}
-                    </div>
+                            })}
+                        </div>
+                        <Pagination
+                            totalItems={filteredApplications.length}
+                            currentPage={currentPage}
+                            pageCount={pageCount}
+                            onPageChange={setCurrentPage}
+                        />
+                    </>
                 ) : (
                     <div className="px-6 py-16 text-center">
                         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">

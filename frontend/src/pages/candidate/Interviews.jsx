@@ -17,6 +17,7 @@ import {
     cancelInterview as cancelInterviewRequest,
     getInterviews,
 } from "../../services/interviewService";
+import Pagination, { usePagination } from "../../components/Pagination";
 
 const Interviews = () => {
     const [interviews, setInterviews] = useState([]);
@@ -143,6 +144,16 @@ const Interviews = () => {
 
         return result;
     }, [interviews, search, statusFilter, sortBy]);
+
+    const filteredUpcoming = filteredInterviews.filter(
+        (interview) => interview.status === "Upcoming"
+    );
+    const filteredHistory = filteredInterviews.filter(
+        (interview) => interview.status !== "Upcoming"
+    );
+    const paginationResetKey = JSON.stringify([search, statusFilter, sortBy]);
+    const upcomingPagination = usePagination(filteredUpcoming, paginationResetKey);
+    const historyPagination = usePagination(filteredHistory, paginationResetKey);
 
     const cancelInterview = async (id) => {
         const confirmed = window.confirm(
@@ -405,9 +416,7 @@ const Interviews = () => {
             </section>
 
             {/* Upcoming Interviews */}
-            {filteredInterviews.filter(
-                (interview) => interview.status === "Upcoming"
-            ).length > 0 && (
+            {filteredUpcoming.length > 0 && (
                 <section>
                     <div className="mb-5">
                         <h3 className="font-semibold text-slate-900">
@@ -420,12 +429,7 @@ const Interviews = () => {
                     </div>
 
                     <div className="space-y-5">
-                        {filteredInterviews
-                            .filter(
-                                (interview) =>
-                                    interview.status === "Upcoming"
-                            )
-                            .map((interview) => (
+                        {upcomingPagination.pageItems.map((interview) => (
                                 <div
                                     key={interview.id}
                                     className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-indigo-200 hover:shadow-md"
@@ -531,6 +535,12 @@ const Interviews = () => {
                                 </div>
                             ))}
                     </div>
+                    <Pagination
+                        totalItems={filteredUpcoming.length}
+                        currentPage={upcomingPagination.currentPage}
+                        pageCount={upcomingPagination.pageCount}
+                        onPageChange={upcomingPagination.setCurrentPage}
+                    />
                 </section>
             )}
 
@@ -546,16 +556,9 @@ const Interviews = () => {
                     </p>
                 </div>
 
-                {filteredInterviews.filter(
-                    (interview) => interview.status !== "Upcoming"
-                ).length > 0 ? (
+                {filteredHistory.length > 0 ? (
                     <div className="divide-y divide-slate-100">
-                        {filteredInterviews
-                            .filter(
-                                (interview) =>
-                                    interview.status !== "Upcoming"
-                            )
-                            .map((interview) => (
+                        {historyPagination.pageItems.map((interview) => (
                                 <div
                                     key={interview.id}
                                     className="flex flex-col gap-4 px-6 py-5 lg:flex-row lg:items-center lg:justify-between"
@@ -644,6 +647,12 @@ const Interviews = () => {
                         </p>
                     </div>
                 )}
+                <Pagination
+                    totalItems={filteredHistory.length}
+                    currentPage={historyPagination.currentPage}
+                    pageCount={historyPagination.pageCount}
+                    onPageChange={historyPagination.setCurrentPage}
+                />
             </section>
 
             {/* Interview Tips */}

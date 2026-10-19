@@ -4,11 +4,11 @@ import {
     BriefcaseBusiness,
     ChevronDown,
     MapPin,
-    Search,
-    SlidersHorizontal,
+    Search
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import Pagination, { usePagination } from "../../components/Pagination";
 import {
     formatJobCard,
     getJobs,
@@ -37,10 +37,21 @@ const FindJobs = () => {
     useEffect(() => {
         let active = true;
 
-        getJobs({ limit: 50 })
-            .then((result) => {
+        getJobs({ limit: 50, page: 1 })
+            .then(async (result) => {
                 if (active) {
-                    const formattedJobs = (result.jobs || []).map(
+                    const totalPages = result.pagination?.totalPages || 1;
+                    const remainingPages = await Promise.all(
+                        Array.from({ length: totalPages - 1 }, (_, index) =>
+                            getJobs({ limit: 50, page: index + 2 })
+                        )
+                    );
+                    if (!active) return;
+                    const allJobs = [
+                        ...(result.jobs || []),
+                        ...remainingPages.flatMap((page) => page.jobs || []),
+                    ];
+                    const formattedJobs = allJobs.map(
                         (job) => ({
                             ...formatJobCard(job),
                             companyType:
@@ -156,6 +167,8 @@ const FindJobs = () => {
             matchesExperience
         );
     });
+    const { pageItems: pageJobs, currentPage, setCurrentPage, pageCount } =
+        usePagination(filteredJobs, JSON.stringify([search, location, jobType, experience, selectedCategory]));
 
     const toggleSavedJob = async (jobId) => {
         if (
@@ -279,6 +292,9 @@ const FindJobs = () => {
                             <option value="Part Time">
                                 Part Time
                             </option>
+                            <option value="Contract">
+                                Contract
+                            </option>
                             <option value="Internship">
                                 Internship
                             </option>
@@ -318,15 +334,6 @@ const FindJobs = () => {
                             className="pointer-events-none absolute right-3 top-3.5 text-slate-400"
                         />
                     </div>
-
-                    {/* Filter Button */}
-                    <button
-                        type="button"
-                        className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
-                    >
-                        <SlidersHorizontal size={17} />
-                        Filters
-                    </button>
                 </div>
             </div>
 
@@ -358,7 +365,7 @@ const FindJobs = () => {
                         Loading jobs...
                     </p>
                 ) : filteredJobs.length > 0 ? (
-                    filteredJobs.map((job) => {
+                        pageJobs.map((job) => {
                         const hiringInfo = getHiringInfo(
                             job.companyType
                         );
@@ -505,6 +512,12 @@ const FindJobs = () => {
                     </div>
                 )}
             </div>
+            <Pagination
+                totalItems={filteredJobs.length}
+                currentPage={currentPage}
+                pageCount={pageCount}
+                onPageChange={setCurrentPage}
+            />
         </div>
     );
 };
