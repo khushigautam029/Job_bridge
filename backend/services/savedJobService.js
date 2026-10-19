@@ -38,12 +38,10 @@ const saveJob = async (
     // Check whether job exists
     const job = await Job.findByPk(jobId);
 
-
     if (!job) {
         const error = new Error(
             "Job not found"
         );
-
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
@@ -58,7 +56,6 @@ const saveJob = async (
         error.statusCode = STATUS_CODES.BAD_REQUEST;
         throw error;
     }
-
 
     // Check whether already saved
     const existingSavedJob =

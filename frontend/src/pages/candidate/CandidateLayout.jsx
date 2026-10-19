@@ -174,7 +174,7 @@ const CandidateLayout = () => {
                     bottom: 4px;
                     height: 2px;
                     border-radius: 99px;
-                    background: #6366f1;
+                    background:  #4f46e5;
                     transform: scaleX(0);
                     transform-origin: left;
                     transition: transform .24s ease;
@@ -209,7 +209,7 @@ const CandidateLayout = () => {
 
             {/* HEADER */}
 
-            <header className="candidate-header sticky top-0 z-10 border-b border-slate-200 bg-white/95 backdrop-blur">
+            <header className="candidate-header relative z-50 border-b border-slate-200 bg-white-50">
                 <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-5 sm:px-7 lg:px-8">
                     {/* LOGO */}
                     <button
@@ -239,8 +239,9 @@ const CandidateLayout = () => {
                                     end={item.path === "/candidate/jobs"}
                                     className={({ isActive }) =>
                                         `candidate-nav-link flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium ${isActive
-                                            ? "is-active bg-indigo-50 text-indigo-600"
-                                            : "text-slate-600 hover:bg-slate-50 hover:text-indigo-600"
+                                            ? "is-active  bg-blue-50 text-indigo-700"
+                                            : " text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
+                                        
                                         }`
                                     }
                                 >
@@ -261,6 +262,7 @@ const CandidateLayout = () => {
                                 onClick={async () => {
                                     const opening = !notificationOpen;
                                     setNotificationOpen(opening);
+                                    setProfileMenuOpen(false);
                                     if (opening) await refreshNotifications().catch(() => {});
                                 }}
                                 className={`candidate-icon-button relative rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 ${notificationOpen
@@ -311,7 +313,10 @@ const CandidateLayout = () => {
                             <button
                                 type="button"
                                 onClick={() =>
-                                    setProfileMenuOpen((previous) => !previous)
+                                    setProfileMenuOpen((previous) => {
+                                        setNotificationOpen(false);
+                                        return !previous;
+                                    })
                                 }
                                 className={`candidate-profile-trigger flex items-center gap-2 rounded-lg px-2 py-1.5 transition ${profileMenuOpen
                                         ? "bg-slate-100"

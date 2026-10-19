@@ -3,12 +3,10 @@ import {
     Bookmark,
     BriefcaseBusiness,
     Building2,
-    CheckCircle2,
     Clock3,
     MapPin,
     Search,
     Trash2,
-    X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -21,9 +19,8 @@ import {
 
 const SavedJobs = () => {
     const navigate = useNavigate();
-    const [savedJobs, setSavedJobs] = useState([]);
 
-    const [selectedJob, setSelectedJob] = useState(null);
+    const [savedJobs, setSavedJobs] = useState([]);
     const [search, setSearch] = useState("");
     const [sortBy, setSortBy] = useState("recent");
     const [deletedJob, setDeletedJob] = useState(null);
@@ -32,14 +29,18 @@ const SavedJobs = () => {
 
     useEffect(() => {
         let active = true;
+
         getSavedJobs()
             .then((saved) => {
                 if (!active) return;
+
                 setSavedJobs(
                     saved.map((entry) => ({
                         ...formatJobCard(entry.job),
                         savedDate: entry.createdAt
-                            ? new Date(entry.createdAt).toLocaleDateString()
+                            ? new Date(
+                                  entry.createdAt
+                              ).toLocaleDateString()
                             : "",
                         description: entry.job.description || "",
                         applied: false,
@@ -47,13 +48,13 @@ const SavedJobs = () => {
                 );
             })
             .catch((loadError) => {
-                if (active) {
-                    setSavedJobs([]);
-                    setError(
-                        loadError.response?.data?.message ||
+                if (!active) return;
+
+                setSavedJobs([]);
+                setError(
+                    loadError.response?.data?.message ||
                         "Unable to load saved jobs."
-                    );
-                }
+                );
             })
             .finally(() => {
                 if (active) setLoading(false);
@@ -69,10 +70,10 @@ const SavedJobs = () => {
             const searchText = search.toLowerCase();
 
             return (
-                job.title.toLowerCase().includes(searchText) ||
-                job.company.toLowerCase().includes(searchText) ||
-                job.location.toLowerCase().includes(searchText) ||
-                job.skills.some((skill) =>
+                (job.title || "").toLowerCase().includes(searchText) ||
+                (job.company || "").toLowerCase().includes(searchText) ||
+                (job.location || "").toLowerCase().includes(searchText) ||
+                (job.skills || []).some((skill) =>
                     skill.toLowerCase().includes(searchText)
                 )
             );
@@ -81,22 +82,30 @@ const SavedJobs = () => {
         if (sortBy === "salaryHigh") {
             jobs = [...jobs].sort(
                 (a, b) =>
-                    parseInt(b.salary.match(/\d+/)?.[0] || 0) -
-                    parseInt(a.salary.match(/\d+/)?.[0] || 0)
+                    parseInt(b.salary?.match(/\d+/)?.[0] || 0, 10) -
+                    parseInt(a.salary?.match(/\d+/)?.[0] || 0, 10)
             );
         }
 
         if (sortBy === "salaryLow") {
             jobs = [...jobs].sort(
                 (a, b) =>
-                    parseInt(a.salary.match(/\d+/)?.[0] || 0) -
-                    parseInt(b.salary.match(/\d+/)?.[0] || 0)
+                    parseInt(a.salary?.match(/\d+/)?.[0] || 0, 10) -
+                    parseInt(b.salary?.match(/\d+/)?.[0] || 0, 10)
             );
         }
 
         if (sortBy === "company") {
             jobs = [...jobs].sort((a, b) =>
-                a.company.localeCompare(b.company)
+                (a.company || "").localeCompare(b.company || "")
+            );
+        }
+
+        if (sortBy === "recent") {
+            jobs = [...jobs].sort(
+                (a, b) =>
+                    new Date(b.savedDate || 0) -
+                    new Date(a.savedDate || 0)
             );
         }
 
@@ -111,6 +120,16 @@ const SavedJobs = () => {
         (job) => job.type === "Full Time"
     ).length;
 
+    // Open the individual job details page.
+    const viewJob = (job) => {
+        navigate(`/candidate/jobs/${job.id}`);
+    };
+
+    // Open the application page for the selected job.
+    const applyForJob = (job) => {
+        navigate(`/candidate/jobs/${job.id}/apply`);
+    };
+
     const removeJob = async (job) => {
         try {
             await unsaveJob(job.id);
@@ -118,7 +137,7 @@ const SavedJobs = () => {
         } catch (removeError) {
             setError(
                 removeError.response?.data?.message ||
-                "Unable to remove this saved job."
+                    "Unable to remove this saved job."
             );
             return;
         }
@@ -128,14 +147,6 @@ const SavedJobs = () => {
         );
 
         setDeletedJob(job);
-
-        if (selectedJob?.id === job.id) {
-            setSelectedJob(null);
-        }
-
-        setTimeout(() => {
-            setDeletedJob(null);
-        }, 4000);
     };
 
     const undoDelete = async () => {
@@ -146,7 +157,7 @@ const SavedJobs = () => {
         } catch (saveError) {
             setError(
                 saveError.response?.data?.message ||
-                "Unable to restore this saved job."
+                    "Unable to restore this saved job."
             );
             return;
         }
@@ -173,12 +184,23 @@ const SavedJobs = () => {
     }
 
     return (
-        <div className="relative">
+        <div className="relative w-full">
             {error && (
-                <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
-                    {error}
+                <div
+                    role="alert"
+                    className="mb-4 flex items-center justify-between gap-3 rounded-xl border border-red-100 bg-red-50 p-3 text-sm text-red-700"
+                >
+                    <span>{error}</span>
+                    <button
+                        type="button"
+                        onClick={() => setError("")}
+                        className="font-semibold hover:text-red-900"
+                    >
+                        Dismiss
+                    </button>
                 </div>
             )}
+
             {/* Page Header */}
             <section>
                 <p className="text-sm font-semibold uppercase tracking-wider text-indigo-600">
@@ -192,85 +214,40 @@ const SavedJobs = () => {
                         </h2>
 
                         <p className="mt-2 text-sm text-slate-500">
-                            Keep track of jobs you are interested in and apply
-                            when you're ready.
+                            Keep track of jobs you are interested in and
+                            apply when you're ready.
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-2 rounded-xl bg-indigo-50 px-4 py-2 text-sm font-medium text-indigo-600">
+                    <div className="flex w-fit items-center gap-2 rounded-xl bg-indigo-50 px-4 py-2 text-sm font-medium text-indigo-600">
                         <Bookmark size={17} />
                         {savedJobs.length} Saved
                     </div>
                 </div>
             </section>
 
-            {/* Summary */}
+            {/* Summary Cards */}
             <section className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-slate-500">
-                                Saved Jobs
-                            </p>
+                <SummaryCard
+                    label="Saved Jobs"
+                    value={savedJobs.length}
+                    description="Jobs in your shortlist"
+                    icon={<Bookmark size={21} />}
+                />
 
-                            <p className="mt-2 text-2xl font-bold text-slate-900">
-                                {savedJobs.length}
-                            </p>
+                <SummaryCard
+                    label="Full Time"
+                    value={fullTimeJobs}
+                    description="Full-time opportunities"
+                    icon={<BriefcaseBusiness size={21} />}
+                />
 
-                            <p className="mt-1 text-xs text-slate-400">
-                                Jobs in your shortlist
-                            </p>
-                        </div>
-
-                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                            <Bookmark size={21} />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-slate-500">
-                                Full Time
-                            </p>
-
-                            <p className="mt-2 text-2xl font-bold text-slate-900">
-                                {fullTimeJobs}
-                            </p>
-
-                            <p className="mt-1 text-xs text-slate-400">
-                                Full-time opportunities
-                            </p>
-                        </div>
-
-                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                            <BriefcaseBusiness size={21} />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-slate-500">
-                                Remote
-                            </p>
-
-                            <p className="mt-2 text-2xl font-bold text-slate-900">
-                                {remoteJobs}
-                            </p>
-
-                            <p className="mt-1 text-xs text-slate-400">
-                                Remote opportunities
-                            </p>
-                        </div>
-
-                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                            <MapPin size={21} />
-                        </div>
-                    </div>
-                </div>
+                <SummaryCard
+                    label="Remote"
+                    value={remoteJobs}
+                    description="Remote opportunities"
+                    icon={<MapPin size={21} />}
+                />
             </section>
 
             {/* Toolbar */}
@@ -287,7 +264,6 @@ const SavedJobs = () => {
                     </div>
 
                     <div className="flex flex-col gap-3 sm:flex-row">
-                        {/* Search */}
                         <div className="relative">
                             <Search
                                 size={17}
@@ -303,15 +279,12 @@ const SavedJobs = () => {
                             />
                         </div>
 
-                        {/* Sort */}
                         <select
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
                             className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 outline-none transition focus:border-indigo-400"
                         >
-                            <option value="recent">
-                                Recently Saved
-                            </option>
+                            <option value="recent">Recently Saved</option>
                             <option value="salaryHigh">
                                 Salary: High to Low
                             </option>
@@ -323,7 +296,7 @@ const SavedJobs = () => {
                     </div>
                 </div>
 
-                {/* Empty Search State */}
+                {/* No Search Results */}
                 {filteredJobs.length === 0 && savedJobs.length > 0 && (
                     <div className="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
                         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-400">
@@ -340,8 +313,8 @@ const SavedJobs = () => {
                     </div>
                 )}
 
-                {/* Completely Empty State */}
-                {!loading && savedJobs.length === 0 && (
+                {/* Empty Saved Jobs */}
+                {savedJobs.length === 0 && (
                     <div className="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
                         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-indigo-50 text-indigo-500">
                             <Bookmark size={28} />
@@ -352,14 +325,15 @@ const SavedJobs = () => {
                         </h3>
 
                         <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
-                            You haven't saved any jobs yet. Explore available
-                            opportunities and bookmark the ones you like.
+                            You haven't saved any jobs yet. Explore
+                            available opportunities and bookmark the ones
+                            you like.
                         </p>
 
                         <button
                             type="button"
                             onClick={() =>
-                                alert("Navigate to Find Jobs page")
+                                navigate("/candidate/jobs")
                             }
                             className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
                         >
@@ -375,9 +349,9 @@ const SavedJobs = () => {
                         {filteredJobs.map((job) => (
                             <div
                                 key={job.id}
-                                className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-md"
+                                className="group flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition duration-200 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-md"
                             >
-                                {/* Top */}
+                                {/* Card Header */}
                                 <div className="flex items-start justify-between gap-4">
                                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
                                         <Building2 size={22} />
@@ -388,6 +362,7 @@ const SavedJobs = () => {
                                         onClick={() => removeJob(job)}
                                         className="rounded-lg p-2 text-slate-400 transition hover:bg-red-50 hover:text-red-500"
                                         title="Remove from saved jobs"
+                                        aria-label={`Remove ${job.title} from saved jobs`}
                                     >
                                         <Trash2 size={18} />
                                     </button>
@@ -395,23 +370,21 @@ const SavedJobs = () => {
 
                                 {/* Job Information */}
                                 <div className="mt-5">
-                                    <div className="flex items-start justify-between gap-2">
-                                        <h4 className="text-lg font-semibold text-slate-900">
-                                            {job.title}
-                                        </h4>
-                                    </div>
+                                    <h4 className="text-lg font-semibold text-slate-900">
+                                        {job.title}
+                                    </h4>
 
                                     <p className="mt-1 text-sm font-medium text-slate-600">
                                         {job.company}
                                     </p>
                                 </div>
 
-                                {/* Details */}
+                                {/* Job Details */}
                                 <div className="mt-4 space-y-2 text-sm text-slate-500">
                                     <div className="flex items-center gap-2">
                                         <MapPin
                                             size={16}
-                                            className="text-slate-400"
+                                            className="shrink-0 text-slate-400"
                                         />
                                         <span>{job.location}</span>
                                     </div>
@@ -419,7 +392,7 @@ const SavedJobs = () => {
                                     <div className="flex items-center gap-2">
                                         <BriefcaseBusiness
                                             size={16}
-                                            className="text-slate-400"
+                                            className="shrink-0 text-slate-400"
                                         />
                                         <span>{job.type}</span>
                                     </div>
@@ -427,7 +400,7 @@ const SavedJobs = () => {
                                     <div className="flex items-center gap-2">
                                         <Clock3
                                             size={16}
-                                            className="text-slate-400"
+                                            className="shrink-0 text-slate-400"
                                         />
                                         <span>{job.experience}</span>
                                     </div>
@@ -442,7 +415,7 @@ const SavedJobs = () => {
 
                                 {/* Skills */}
                                 <div className="mt-5 flex flex-wrap gap-2">
-                                    {job.skills.map((skill) => (
+                                    {(job.skills || []).map((skill) => (
                                         <span
                                             key={skill}
                                             className="rounded-md bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-600"
@@ -453,10 +426,10 @@ const SavedJobs = () => {
                                 </div>
 
                                 {/* Footer */}
-                                <div className="mt-5 border-t border-slate-100 pt-4">
-                                    <div className="flex items-center justify-between">
+                                <div className="mt-auto pt-5">
+                                    <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
                                         <p className="text-xs text-slate-400">
-                                            Saved on {job.savedDate}
+                                            Saved on {job.savedDate || "—"}
                                         </p>
 
                                         <span className="text-xs font-medium text-slate-400">
@@ -464,16 +437,26 @@ const SavedJobs = () => {
                                         </span>
                                     </div>
 
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            setSelectedJob(job)
-                                        }
-                                        className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
-                                    >
-                                        View Job
-                                        <ArrowRight size={16} />
-                                    </button>
+                                    {/* View and Apply Buttons */}
+                                    <div className="mt-4 grid grid-cols-2 gap-3">
+                                        <button
+                                            type="button"
+                                            onClick={() => viewJob(job)}
+                                            className="flex items-center justify-center gap-2 rounded-xl border border-indigo-200 bg-white px-3 py-2.5 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-50"
+                                        >
+                                            View Job
+                                            <ArrowRight size={16} />
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => applyForJob(job)}
+                                            className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                                        >
+                                            Apply Now
+                                            <ArrowRight size={16} />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         ))}
@@ -497,9 +480,7 @@ const SavedJobs = () => {
 
                     <button
                         type="button"
-                        onClick={() =>
-                            alert("Navigate to Find Jobs page")
-                        }
+                        onClick={() => navigate("/candidate/jobs")}
                         className="flex w-fit items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
                     >
                         Find More Jobs
@@ -508,7 +489,7 @@ const SavedJobs = () => {
                 </div>
             </section>
 
-            {/* Delete Toast */}
+            {/* Undo Delete Toast */}
             {deletedJob && (
                 <div className="fixed bottom-6 left-1/2 z-50 flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 items-center justify-between gap-4 rounded-2xl bg-slate-900 px-4 py-3 text-white shadow-xl">
                     <div className="flex items-center gap-3">
@@ -534,183 +515,32 @@ const SavedJobs = () => {
                     </button>
                 </div>
             )}
-
-            {/* Job Details Modal */}
-            {selectedJob && (
-                <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm"
-                    onClick={() => setSelectedJob(null)}
-                >
-                    <div
-                        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl bg-white shadow-2xl"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        {/* Modal Header */}
-                        <div className="sticky top-0 z-10 flex items-start justify-between border-b border-slate-100 bg-white p-6">
-                            <div className="flex items-center gap-4">
-                                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
-                                    <Building2 size={25} />
-                                </div>
-
-                                <div>
-                                    <h2 className="text-xl font-bold text-slate-900">
-                                        {selectedJob.title}
-                                    </h2>
-
-                                    <p className="mt-1 text-sm font-medium text-slate-500">
-                                        {selectedJob.company}
-                                    </p>
-                                </div>
-                            </div>
-
-                            <button
-                                type="button"
-                                onClick={() => setSelectedJob(null)}
-                                className="rounded-xl p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-                            >
-                                <X size={20} />
-                            </button>
-                        </div>
-
-                        {/* Modal Content */}
-                        <div className="p-6">
-                            {/* Job Meta */}
-                            <div className="grid gap-3 sm:grid-cols-2">
-                                <div className="rounded-xl bg-slate-50 p-4">
-                                    <div className="flex items-center gap-2 text-xs font-medium text-slate-400">
-                                        <MapPin size={15} />
-                                        Location
-                                    </div>
-
-                                    <p className="mt-1 text-sm font-semibold text-slate-800">
-                                        {selectedJob.location}
-                                    </p>
-                                </div>
-
-                                <div className="rounded-xl bg-slate-50 p-4">
-                                    <div className="flex items-center gap-2 text-xs font-medium text-slate-400">
-                                        <BriefcaseBusiness size={15} />
-                                        Job Type
-                                    </div>
-
-                                    <p className="mt-1 text-sm font-semibold text-slate-800">
-                                        {selectedJob.type}
-                                    </p>
-                                </div>
-
-                                <div className="rounded-xl bg-slate-50 p-4">
-                                    <div className="text-xs font-medium text-slate-400">
-                                        Salary
-                                    </div>
-
-                                    <p className="mt-1 text-sm font-semibold text-slate-800">
-                                        {selectedJob.salary}
-                                    </p>
-                                </div>
-
-                                <div className="rounded-xl bg-slate-50 p-4">
-                                    <div className="text-xs font-medium text-slate-400">
-                                        Experience
-                                    </div>
-
-                                    <p className="mt-1 text-sm font-semibold text-slate-800">
-                                        {selectedJob.experience}
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Description */}
-                            <div className="mt-7">
-                                <h3 className="text-sm font-bold text-slate-900">
-                                    About the Job
-                                </h3>
-
-                                <p className="mt-2 text-sm leading-6 text-slate-600">
-                                    {selectedJob.description}
-                                </p>
-                            </div>
-
-                            {/* Skills */}
-                            <div className="mt-7">
-                                <h3 className="text-sm font-bold text-slate-900">
-                                    Required Skills
-                                </h3>
-
-                                <div className="mt-3 flex flex-wrap gap-2">
-                                    {selectedJob.skills.map((skill) => (
-                                        <span
-                                            key={skill}
-                                            className="rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-600"
-                                        >
-                                            {skill}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Job Information */}
-                            <div className="mt-7 rounded-2xl border border-slate-100 bg-slate-50 p-4">
-                                <div className="flex items-center justify-between">
-                                    <span className="text-sm text-slate-500">
-                                        Work Mode
-                                    </span>
-
-                                    <span className="text-sm font-semibold text-slate-800">
-                                        {selectedJob.workMode}
-                                    </span>
-                                </div>
-
-                                <div className="mt-3 flex items-center justify-between">
-                                    <span className="text-sm text-slate-500">
-                                        Posted
-                                    </span>
-
-                                    <span className="text-sm font-semibold text-slate-800">
-                                        {selectedJob.posted}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Actions */}
-                            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                                <button
-                                    type="button"
-                                    onClick={() => removeJob(selectedJob)}
-                                    className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-red-200 px-4 py-3 text-sm font-semibold text-red-500 transition hover:bg-red-50"
-                                >
-                                    <Trash2 size={17} />
-                                    Remove Saved Job
-                                </button>
-
-                                {selectedJob.applied ? (
-                                    <button
-                                        type="button"
-                                        disabled
-                                        className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-600"
-                                    >
-                                        <CheckCircle2 size={17} />
-                                        Application Submitted
-                                    </button>
-                                ) : (
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setSelectedJob(null);
-                                            navigate(`/candidate/jobs/${selectedJob.id}/apply`);
-                                        }}
-                                        className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
-                                    >
-                                        Apply Now
-                                        <ArrowRight size={17} />
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 };
+
+const SummaryCard = ({ label, value, description, icon }) => (
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
+        <div className="flex items-center justify-between">
+            <div>
+                <p className="text-sm font-medium text-slate-500">
+                    {label}
+                </p>
+
+                <p className="mt-2 text-2xl font-bold text-slate-900">
+                    {value}
+                </p>
+
+                <p className="mt-1 text-xs text-slate-400">
+                    {description}
+                </p>
+            </div>
+
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                {icon}
+            </div>
+        </div>
+    </div>
+);
 
 export default SavedJobs;

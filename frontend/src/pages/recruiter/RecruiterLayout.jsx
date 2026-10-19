@@ -137,7 +137,7 @@ const RecruiterLayout = () => {
                     50% { box-shadow: 0 5px 20px rgba(79, 70, 229, .34); }
                 }
                 @keyframes recruiterBadgePulse {
-                    0%, 100% { box-shadow: 0 0 0 2px white; }
+                    0%, 100% { box-shadow: 0 0 0 2px rgba(79, 70, 229, .16); }
                     50% { box-shadow: 0 0 0 3px white, 0 0 0 5px rgba(239, 68, 68, .12); }
                 }
                 @keyframes recruiterShimmer {
@@ -173,7 +173,7 @@ const RecruiterLayout = () => {
                     bottom: 4px;
                     height: 2px;
                     border-radius: 99px;
-                    background: #6366f1;
+                    background:  #4f46e5;
                     transform: scaleX(0);
                     transform-origin: left;
                     transition: transform .24s ease;
@@ -208,7 +208,7 @@ const RecruiterLayout = () => {
 
             {/* HEADER */}
 
-            <header className="recruiter-header sticky top-0 z-10 border-b border-slate-200 bg-white/95 backdrop-blur">
+            <header className="recruiter-header relative z-50 border-b border-slate-200 bg-white-50">
                 <div className="mx-auto flex h-16 max-w-[1400px] items-center justify-between px-5 sm:px-7 lg:px-8">
                     {/* LOGO */}
                     <button
@@ -238,8 +238,8 @@ const RecruiterLayout = () => {
                                     end={item.path === "/recruiter/jobs"}
                                     className={({ isActive }) =>
                                         `recruiter-nav-link flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium ${isActive
-                                            ? "is-active bg-indigo-50 text-indigo-600"
-                                            : "text-slate-600 hover:bg-slate-50 hover:text-indigo-600"
+                                            ? "is-active  bg-blue-50 text-indigo-700"
+                                            : " text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
                                         }`
                                     }
                                 >
@@ -260,11 +260,12 @@ const RecruiterLayout = () => {
                                 onClick={async () => {
                                     const opening = !notificationOpen;
                                     setNotificationOpen(opening);
-                                    if (opening) await refreshNotifications().catch(() => {});
+                                    setProfileMenuOpen(false);
+                                    if (opening) await refreshNotifications().catch(() => { });
                                 }}
                                 className={`recruiter-icon-button relative rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 ${notificationOpen
-                                        ? "bg-slate-100 text-indigo-600"
-                                        : ""
+                                    ? "bg-slate-100 text-indigo-600"
+                                    : ""
                                     }`}
                                 title="Notifications"
                                 aria-label="Notifications"
@@ -287,14 +288,14 @@ const RecruiterLayout = () => {
                                             Notifications
                                         </h3>
                                         <div className="flex items-center gap-2">
-                                            {unreadCount > 0 && <button type="button" onClick={() => markAllAsRead().catch(() => {})} className="text-xs font-medium text-indigo-600 hover:text-indigo-700">Mark all read</button>}
+                                            {unreadCount > 0 && <button type="button" onClick={() => markAllAsRead().catch(() => { })} className="text-xs font-medium text-indigo-600 hover:text-indigo-700">Mark all read</button>}
                                             <button type="button" onClick={() => setNotificationOpen(false)} className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600" aria-label="Close notifications"><X size={16} /></button>
                                         </div>
                                     </div>
 
                                     <div className="max-h-[420px] overflow-y-auto">
                                         {notifications.length === 0 ? <p className="px-4 py-8 text-center text-sm text-slate-500">No notifications yet.</p> : notifications.slice(0, 6).map((notification) => (
-                                            <button key={notification.id} type="button" onClick={async () => { if (!notification.isRead) await markAsRead(notification.id).catch(() => {}); setNotificationOpen(false); navigate("/recruiter/notifications"); }} className={`flex w-full gap-3 border-b border-slate-100 px-4 py-3 text-left transition last:border-b-0 hover:bg-slate-50 ${notification.isRead ? "" : "bg-indigo-50/50"}`}>
+                                            <button key={notification.id} type="button" onClick={async () => { if (!notification.isRead) await markAsRead(notification.id).catch(() => { }); setNotificationOpen(false); navigate("/recruiter/notifications"); }} className={`flex w-full gap-3 border-b border-slate-100 px-4 py-3 text-left transition last:border-b-0 hover:bg-slate-50 ${notification.isRead ? "" : "bg-indigo-50/50"}`}>
                                                 <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600"><Bell size={17} /></span>
                                                 <span className="min-w-0 flex-1"><span className="block text-xs font-semibold text-slate-800">{notification.title}</span><span className="mt-1 block text-xs leading-5 text-slate-500">{notification.message}</span><span className="mt-1.5 block text-[10px] font-medium text-slate-400">{notification.createdAt ? new Date(notification.createdAt).toLocaleString() : ""}</span></span>
                                             </button>
@@ -310,11 +311,14 @@ const RecruiterLayout = () => {
                             <button
                                 type="button"
                                 onClick={() =>
-                                    setProfileMenuOpen((previous) => !previous)
+                                    setProfileMenuOpen((previous) => {
+                                        setNotificationOpen(false);
+                                        return !previous;
+                                    })
                                 }
                                 className={`recruiter-profile-trigger flex items-center gap-2 rounded-lg px-2 py-1.5 transition ${profileMenuOpen
-                                        ? "bg-slate-100"
-                                        : "hover:bg-slate-50"
+                                    ? "bg-slate-100"
+                                    : "hover:bg-slate-50"
                                     }`}
                             >
                                 <div className="recruiter-avatar flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-indigo-100 text-indigo-600">
