@@ -1,5 +1,4 @@
 import {
-    Bell,
     Bookmark,
     BriefcaseBusiness,
     CalendarDays,
@@ -13,53 +12,23 @@ import {
     UserCircle,
     X,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import useRoleHeaderData from "../../hooks/useRoleHeaderData";
+import NotificationDropdown from "../Notification";
 
 const CandidateLayout = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const [notificationOpen, setNotificationOpen] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
-    const notificationRef = useRef(null);
-    const {
-        user,
-        profile,
-        notifications,
-        unreadCount,
-        refreshNotifications,
-        markAsRead,
-        markAllAsRead,
-    } = useRoleHeaderData("CANDIDATE");
+    const { user, profile } = useRoleHeaderData("CANDIDATE");
 
     const userName = profile?.user?.name || user?.name || "Candidate";
     const userRole = user?.role || "CANDIDATE";
     const avatarUrl = profile?.profileImage || user?.candidateProfile?.profileImage;
-
-    // CLOSE NOTIFICATION WHEN CLICKING OUTSIDE
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (
-                notificationRef.current &&
-                !notificationRef.current.contains(event.target)
-            ) {
-                setNotificationOpen(false);
-            }
-        };
-
-        document.addEventListener("mousedown", handleClickOutside);
-
-        return () => {
-            document.removeEventListener(
-                "mousedown",
-                handleClickOutside
-            );
-        };
-    }, []);
 
     // CANDIDATE NAVIGATION
     const navigation = [
@@ -89,7 +58,6 @@ const CandidateLayout = () => {
     const closeMenus = () => {
         setMobileMenuOpen(false);
         setProfileMenuOpen(false);
-        setNotificationOpen(false);
     };
 
     // LOGOUT
@@ -255,58 +223,10 @@ const CandidateLayout = () => {
                     {/* RIGHT SIDE */}
                     <div className="flex items-center gap-1.5">
 
-                        {/* NOTIFICATIONS */}
-                        <div ref={notificationRef} className="relative">
-                            <button
-                                type="button"
-                                onClick={async () => {
-                                    const opening = !notificationOpen;
-                                    setNotificationOpen(opening);
-                                    setProfileMenuOpen(false);
-                                    if (opening) await refreshNotifications().catch(() => {});
-                                }}
-                                className={`candidate-icon-button relative rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 ${notificationOpen
-                                        ? "bg-slate-100 text-indigo-600"
-                                        : ""
-                                    }`}
-                                title="Notifications"
-                                aria-label="Notifications"
-                            >
-                                <Bell size={19} />
-
-                                {unreadCount > 0 && (
-                                    <span className="candidate-unread-badge absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white ring-2 ring-white">
-                                        {unreadCount > 99 ? "99+" : unreadCount}
-                                    </span>
-                                )}
-                            </button>
-
-                            {/* NOTIFICATION DROPDOWN */}
-                            {notificationOpen && (
-                                <div className="candidate-dropdown absolute right-0 top-12 z-50 w-[360px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl shadow-slate-200/60">
-
-                                    <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-                                        <h3 className="text-sm font-bold text-slate-900">
-                                            Notifications
-                                        </h3>
-                                        <div className="flex items-center gap-2">
-                                            {unreadCount > 0 && <button type="button" onClick={() => markAllAsRead().catch(() => {})} className="text-xs font-medium text-indigo-600 hover:text-indigo-700">Mark all read</button>}
-                                            <button type="button" onClick={() => setNotificationOpen(false)} className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600" aria-label="Close notifications"><X size={16} /></button>
-                                        </div>
-                                    </div>
-
-                                    <div className="max-h-[420px] overflow-y-auto">
-                                        {notifications.length === 0 ? <p className="px-4 py-8 text-center text-sm text-slate-500">No notifications yet.</p> : notifications.slice(0, 6).map((notification) => (
-                                            <button key={notification.id} type="button" onClick={async () => { if (!notification.isRead) await markAsRead(notification.id).catch(() => {}); setNotificationOpen(false); navigate("/candidate/notifications"); }} className={`flex w-full gap-3 border-b border-slate-100 px-4 py-3 text-left transition last:border-b-0 hover:bg-slate-50 ${notification.isRead ? "" : "bg-indigo-50/50"}`}>
-                                                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600"><Bell size={17} /></span>
-                                                <span className="min-w-0 flex-1"><span className="block text-xs font-semibold text-slate-800">{notification.title}</span><span className="mt-1 block text-xs leading-5 text-slate-500">{notification.message}</span><span className="mt-1.5 block text-[10px] font-medium text-slate-400">{notification.createdAt ? new Date(notification.createdAt).toLocaleString() : ""}</span></span>
-                                            </button>
-                                        ))}
-                                    </div>
-                                    {/* <button type="button" onClick={() => { setNotificationOpen(false); navigate("/candidate/notifications"); }} className="w-full border-t border-slate-100 px-4 py-3 text-sm font-semibold text-indigo-600 hover:bg-slate-50">View all notifications</button> */}
-                                </div>
-                            )}
-                        </div>
+                        <NotificationDropdown
+                            onOpen={() => setProfileMenuOpen(false)}
+                            closeSignal={profileMenuOpen}
+                        />
 
                         {/* PROFILE */}
                         <div className="relative">
@@ -314,7 +234,6 @@ const CandidateLayout = () => {
                                 type="button"
                                 onClick={() =>
                                     setProfileMenuOpen((previous) => {
-                                        setNotificationOpen(false);
                                         return !previous;
                                     })
                                 }

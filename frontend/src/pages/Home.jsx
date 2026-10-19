@@ -856,7 +856,8 @@ const Home = () => {
 
                         {isLoggedIn && (
                             <NotificationDropdown
-                                role={userRole}
+                                onOpen={() => setProfileMenuOpen(false)}
+                                closeSignal={profileMenuOpen}
                             />
                         )}
 

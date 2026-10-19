@@ -17,7 +17,7 @@ import {
     markNotificationRead,
 } from "../services/notificationService";
 
-const NotificationDropdown = ({ role = "CANDIDATE" }) => {
+const NotificationDropdown = ({ onOpen, closeSignal = false }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -31,8 +31,10 @@ const NotificationDropdown = ({ role = "CANDIDATE" }) => {
 
     useEffect(() => {
         let active = true;
-        getNotifications()
-            .then((items) => {
+        const loadNotifications = async (showLoader = false) => {
+            if (showLoader) setLoading(true);
+            try {
+                const items = await getNotifications();
                 if (active) {
                     setNotifications(items.map((item) => ({
                         ...item,
@@ -41,20 +43,24 @@ const NotificationDropdown = ({ role = "CANDIDATE" }) => {
                             ? new Date(item.createdAt).toLocaleString()
                             : "",
                     })));
+                    setError("");
                 }
-            })
-            .catch((loadError) => {
+            } catch (loadError) {
                 if (active) {
-                    setNotifications([]);
                     setError(
                         loadError.response?.data?.message ||
                         "Unable to load notifications."
                     );
                 }
-            })
-            .finally(() => {
+            } finally {
                 if (active) setLoading(false);
-            });
+            }
+        };
+
+        loadNotifications(true);
+        const refreshTimer = window.setInterval(() => loadNotifications(), 30000);
+        const refreshOnFocus = () => loadNotifications();
+        window.addEventListener("focus", refreshOnFocus);
 
         const handleOutsideClick = (event) => {
             if (
@@ -72,12 +78,18 @@ const NotificationDropdown = ({ role = "CANDIDATE" }) => {
 
         return () => {
             active = false;
+            window.clearInterval(refreshTimer);
+            window.removeEventListener("focus", refreshOnFocus);
             document.removeEventListener(
                 "mousedown",
                 handleOutsideClick
             );
         };
-    }, [role]);
+    }, []);
+
+    useEffect(() => {
+        if (closeSignal) setIsOpen(false);
+    }, [closeSignal]);
 
     const markAsRead = async (id) => {
         try {
@@ -191,7 +203,11 @@ const NotificationDropdown = ({ role = "CANDIDATE" }) => {
             {/* Bell */}
             <button
                 type="button"
-                onClick={() => setIsOpen((prev) => !prev)}
+                onClick={() => setIsOpen((prev) => {
+                    const next = !prev;
+                    if (next) onOpen?.();
+                    return next;
+                })}
                 className="relative rounded-lg p-2.5 text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600"
                 title="Notifications"
             >

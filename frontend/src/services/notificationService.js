@@ -3,10 +3,6 @@ import api from "./api";
 export const getNotifications = async () =>
     (await api.get("/notifications")).data.data.notifications;
 
-export const getUnreadNotificationCount = async () =>
-    (await api.get("/notifications/unread-count"))
-        .data.data.unreadCount;
-
 export const markNotificationRead = async (notificationId) =>
     api.patch(`/notifications/${notificationId}/read`);
 

@@ -1,11 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
-import {
-    getNotifications,
-    getUnreadNotificationCount,
-    markAllNotificationsRead,
-    markNotificationRead,
-} from "../services/notificationService";
 import {
     getCandidateProfile,
     getRecruiterProfile,
@@ -25,25 +18,8 @@ const readStoredUser = () => {
 };
 
 const useRoleHeaderData = (role) => {
-    const { pathname } = useLocation();
     const [user, setUser] = useState(readStoredUser);
     const [profile, setProfile] = useState(null);
-    const [notifications, setNotifications] = useState([]);
-    const [unreadCount, setUnreadCount] = useState(0);
-
-    const refreshUnreadCount = useCallback(async () => {
-        try {
-            setUnreadCount(await getUnreadNotificationCount());
-        } catch {
-            // Keep the last known count when the API is temporarily unavailable.
-        }
-    }, []);
-
-    const refreshNotifications = useCallback(async () => {
-        const items = await getNotifications();
-        setNotifications(items);
-        await refreshUnreadCount();
-    }, [refreshUnreadCount]);
 
     const refreshProfile = useCallback(async () => {
         const profileRequest = role === "RECRUITER"
@@ -63,46 +39,18 @@ const useRoleHeaderData = (role) => {
     }, [role]);
 
     useEffect(() => {
-        let active = true;
         refreshProfile();
-
-        refreshUnreadCount();
-        const refreshTimer = window.setInterval(refreshUnreadCount, 30000);
-        const refreshOnFocus = () => refreshUnreadCount();
         const refreshAfterProfileUpdate = () => refreshProfile();
-        window.addEventListener("focus", refreshOnFocus);
         window.addEventListener("jobbridge:profile-updated", refreshAfterProfileUpdate);
 
         return () => {
-            active = false;
-            window.clearInterval(refreshTimer);
-            window.removeEventListener("focus", refreshOnFocus);
             window.removeEventListener("jobbridge:profile-updated", refreshAfterProfileUpdate);
         };
-    }, [role, pathname, refreshProfile, refreshUnreadCount]);
-
-    const markAsRead = async (id) => {
-        await markNotificationRead(id);
-        setNotifications((items) => items.map((item) =>
-            item.id === id ? { ...item, isRead: true } : item
-        ));
-        await refreshUnreadCount();
-    };
-
-    const markAllAsRead = async () => {
-        await markAllNotificationsRead();
-        setNotifications((items) => items.map((item) => ({ ...item, isRead: true })));
-        setUnreadCount(0);
-    };
+    }, [refreshProfile]);
 
     return {
         user: profile?.user || user,
         profile,
-        notifications,
-        unreadCount,
-        refreshNotifications,
-        markAsRead,
-        markAllAsRead,
     };
 };
 
