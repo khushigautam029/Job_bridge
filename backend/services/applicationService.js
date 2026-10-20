@@ -14,7 +14,7 @@ import {
     UserPreference,
 } from "../models/index.js";
 import createNotification from "../utils/createNotification.js";
-import { STATUS_CODES } from "../utils/setConstants.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 /*
     Candidate applies for a job
@@ -34,7 +34,7 @@ const applyForJob = async (
 
     if (!candidate) {
         const error = new Error(
-            "Candidate profile not found"
+            MESSAGES.PROFILE_NOT_FOUND
         );
 
         error.statusCode = STATUS_CODES.NOT_FOUND;
@@ -46,7 +46,7 @@ const applyForJob = async (
 
     if (!job) {
         const error = new Error(
-            "Job not found"
+            MESSAGES.JOB_NOT_FOUND
         );
 
         error.statusCode = STATUS_CODES.NOT_FOUND;
@@ -56,7 +56,7 @@ const applyForJob = async (
 
     if (job.status !== "OPEN") {
         const error = new Error(
-            "This job is not open for applications"
+            MESSAGES.JOB_NOT_OPEN
         );
 
         error.statusCode = STATUS_CODES.BAD_REQUEST;
@@ -70,7 +70,7 @@ const applyForJob = async (
         new Date()
     ) {
         const error = new Error(
-            "Application deadline has passed"
+            MESSAGES.JOB_DEADLINE_PASSED
         );
 
         error.statusCode = STATUS_CODES.BAD_REQUEST;
@@ -105,7 +105,7 @@ const applyForJob = async (
 
 
         const error = new Error(
-            "You have already applied for this job"
+            MESSAGES.ALREADY_APPLIED
         );
 
         error.statusCode = STATUS_CODES.CONFLICT;
@@ -169,7 +169,7 @@ const getMyApplications = async (
 
     if (!candidate) {
         const error = new Error(
-            "Candidate profile not found"
+            MESSAGES.PROFILE_NOT_FOUND
         );
 
         error.statusCode = STATUS_CODES.NOT_FOUND;
@@ -284,7 +284,7 @@ const getApplicationById = async (
 
     if (!application) {
         const error = new Error(
-            "Application not found"
+            MESSAGES.APPLICATION_NOT_FOUND
         );
 
         error.statusCode = STATUS_CODES.NOT_FOUND;
@@ -311,7 +311,7 @@ const getApplicationById = async (
         ) {
 
             const error = new Error(
-                "You are not authorized to view this application"
+                MESSAGES.APPLICATION_NOT_AUTHORIZED
             );
 
             error.statusCode = STATUS_CODES.FORBIDDEN;
@@ -388,7 +388,7 @@ const withdrawApplication = async (
 
     if (!candidate) {
         const error = new Error(
-            "Candidate profile not found"
+            MESSAGES.PROFILE_NOT_FOUND
         );
 
         error.statusCode = STATUS_CODES.NOT_FOUND;
@@ -407,7 +407,7 @@ const withdrawApplication = async (
 
     if (!application) {
         const error = new Error(
-            "Application not found"
+            MESSAGES.APPLICATION_NOT_FOUND
         );
 
         error.statusCode = STATUS_CODES.NOT_FOUND;
@@ -423,7 +423,7 @@ const withdrawApplication = async (
     ) {
 
         const error = new Error(
-            "This application cannot be withdrawn"
+            MESSAGES.CANNOT_WITHDRAW
         );
 
         error.statusCode = STATUS_CODES.BAD_REQUEST;
@@ -466,7 +466,7 @@ const getJobApplications = async (
 
     if (!recruiter) {
         const error = new Error(
-            "Recruiter profile not found"
+            MESSAGES.RECRUITER_PROFILE_NOT_FOUND
         );
 
         error.statusCode = STATUS_CODES.NOT_FOUND;
@@ -484,7 +484,7 @@ const getJobApplications = async (
 
     if (!job) {
         const error = new Error(
-            "Job not found or you are not authorized"
+            MESSAGES.JOB_NOT_FOUND_OR_UNAUTHORIZED
         );
 
         error.statusCode = STATUS_CODES.FORBIDDEN;
@@ -538,7 +538,7 @@ const getRecruiterApplications = async (userId) => {
 
     if (!recruiter) {
         const error = new Error(
-            "Recruiter profile not found"
+            MESSAGES.RECRUITER_PROFILE_NOT_FOUND
         );
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
@@ -617,7 +617,7 @@ const updateApplicationStatus = async (
 
     if (!recruiter) {
         const error = new Error(
-            "Recruiter profile not found"
+            MESSAGES.RECRUITER_PROFILE_NOT_FOUND
         );
 
         error.statusCode = STATUS_CODES.NOT_FOUND;
@@ -641,7 +641,7 @@ const updateApplicationStatus = async (
 
     if (!application) {
         const error = new Error(
-            "Application not found"
+            MESSAGES.APPLICATION_NOT_FOUND
         );
 
         error.statusCode = STATUS_CODES.NOT_FOUND;
@@ -654,7 +654,7 @@ const updateApplicationStatus = async (
         recruiter.id
     ) {
         const error = new Error(
-            "You are not authorized to update this application"
+            MESSAGES.NOT_AUTHORIZED_UPDATE
         );
 
         error.statusCode = STATUS_CODES.FORBIDDEN;
@@ -666,7 +666,7 @@ const updateApplicationStatus = async (
         application.status === "WITHDRAWN"
     ) {
         const error = new Error(
-            "Withdrawn applications cannot be updated"
+           MESSAGES.WITHDRAWN_CANNOT_UPDATE
         );
 
         error.statusCode = STATUS_CODES.BAD_REQUEST;

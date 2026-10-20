@@ -182,6 +182,7 @@ export const MESSAGES = {
     APPLICATION_RETRIEVED:"Application retrieved successfully",
     APPLICATIONS_RETRIEVED:"Applications retrieved successfully",
     JOB_APPLICATIONS_RETRIEVED:"Job applications retrieved successfully",
-    RECRUITER_APPLICATIONS_RETRIEVED:"Recruiter applications retrieved successfully"
+    RECRUITER_APPLICATIONS_RETRIEVED:"Recruiter applications retrieved successfully",
+    JOB_NOT_FOUND_OR_UNAUTHORIZED:"Job not found or you are not authorized"
 
 };
