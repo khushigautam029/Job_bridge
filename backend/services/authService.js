@@ -109,6 +109,16 @@ const loginUser = async ({
         throw error;
     }
 
+    if (user.role === "CANDIDATE") {
+        const candidateProfile = await CandidateProfile.findOne({
+            where: { userId: user.id },
+        });
+
+        if (!candidateProfile) {
+            await CandidateProfile.create({ userId: user.id });
+        }
+    }
+
     if (user.role === "RECRUITER") {
         const recruiterProfile = await RecruiterProfile.findOne({
             where: { userId: user.id },
