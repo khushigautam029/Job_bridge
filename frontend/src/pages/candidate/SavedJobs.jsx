@@ -23,7 +23,7 @@ const SavedJobs = () => {
 
     const [savedJobs, setSavedJobs] = useState([]);
     const [search, setSearch] = useState("");
-    const [sortBy, setSortBy] = useState("salaryHigh");
+    const [sortBy, setSortBy] = useState("salary");
     const [category, setCategory] = useState("");
     const [deletedJob, setDeletedJob] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -88,6 +88,8 @@ const SavedJobs = () => {
 
             return (!category || job.category === category) && matchesSearch;
         });
+
+        if (sortBy === "salary") return jobs;
 
         return jobs.sort((a, b) => {
             const salaryA = Number(
@@ -257,7 +259,7 @@ const SavedJobs = () => {
                         </p>
                     </div>
 
-                    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:flex-nowrap">
                         <div className="relative">
                             <Search
                                 size={17}
@@ -291,6 +293,7 @@ const SavedJobs = () => {
                             onChange={(e) => setSortBy(e.target.value)}
                             className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 outline-none transition focus:border-indigo-400"
                         >
+                            <option value="salary">Salary</option>
                             <option value="salaryHigh">
                                 Salary: High to Low
                             </option>

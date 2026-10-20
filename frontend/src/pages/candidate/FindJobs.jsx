@@ -374,7 +374,7 @@ const FindJobs = () => {
                         onChange={(e) => setSortBy(e.target.value)}
                         className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 outline-none focus:border-indigo-400"
                     >
-                    <option value="salary">Salary</option>
+                        <option value="salary">Salary</option>
                         <option value="salaryHigh">Salary: High to Low</option>
                         <option value="salaryLow">Salary: Low to High</option>
                     </select>
