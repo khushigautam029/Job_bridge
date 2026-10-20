@@ -7,7 +7,7 @@ import {
     Search
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Pagination, { usePagination } from "../../components/Pagination";
 import {
     formatJobCard,
@@ -24,16 +24,14 @@ const FindJobs = () => {
     const [location, setLocation] = useState("");
     const [jobType, setJobType] = useState("All");
     const [experience, setExperience] = useState("All");
+    const [sortBy, setSortBy] = useState("salary");
+    const [category, setCategory] = useState("");
     const [jobs, setJobs] = useState([]);
     const [savedJobs, setSavedJobs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
     const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
-
-    const selectedCategory = searchParams.get("category");
-
     useEffect(() => {
         let active = true;
 
@@ -125,11 +123,15 @@ const FindJobs = () => {
         return null;
     };
 
-    const filteredJobs = jobs.filter((job) => {
+    const categories = [
+        ...new Set(jobs.map((job) => job.category).filter(Boolean)),
+    ].sort((a, b) => a.localeCompare(b));
+
+    const matchingJobs = jobs.filter((job) => {
         const matchesCategory =
-            !selectedCategory ||
+            !category ||
             String(job.category || "").toLowerCase() ===
-                selectedCategory.toLowerCase();
+                category.toLowerCase();
 
         const searchTerm = search.toLowerCase();
 
@@ -167,8 +169,25 @@ const FindJobs = () => {
             matchesExperience
         );
     });
+    const filteredJobs = sortBy === "salary"
+        ? matchingJobs
+        : [...matchingJobs].sort((a, b) => {
+              const salaryA = Number(
+                  sortBy === "salaryLow"
+                      ? a.minSalary || a.maxSalary || 0
+                      : a.maxSalary || a.minSalary || 0
+              );
+              const salaryB = Number(
+                  sortBy === "salaryLow"
+                      ? b.minSalary || b.maxSalary || 0
+                      : b.maxSalary || b.minSalary || 0
+              );
+              return sortBy === "salaryLow"
+                  ? salaryA - salaryB
+                  : salaryB - salaryA;
+          });
     const { pageItems: pageJobs, currentPage, setCurrentPage, pageCount } =
-        usePagination(filteredJobs, JSON.stringify([search, location, jobType, experience, selectedCategory]));
+        usePagination(filteredJobs, JSON.stringify([search, location, jobType, experience, category, sortBy]));
 
     const toggleSavedJob = async (jobId) => {
         if (
@@ -217,27 +236,27 @@ const FindJobs = () => {
             {/* Page Heading */}
             <div>
                 <p className="text-sm font-semibold uppercase tracking-wider text-indigo-600">
-                    {selectedCategory
-                        ? `${selectedCategory} Jobs`
+                    {category
+                        ? `${category} Jobs`
                         : "Opportunities"}
                 </p>
 
                 <h2 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">
-                    {selectedCategory
-                        ? selectedCategory
+                    {category
+                        ? category
                         : "Find Jobs"}
                 </h2>
 
                 <p className="mt-2 text-sm text-slate-500">
-                    {selectedCategory
-                        ? `Explore ${selectedCategory.toLowerCase()} jobs that match your skills and career goals.`
+                    {category
+                        ? `Explore ${category.toLowerCase()} jobs that match your skills and career goals.`
                         : "Discover jobs that match your skills and career goals."}
                 </p>
             </div>
 
             {/* Search Area */}
             <div className="mt-7 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                <div className="grid gap-3 lg:grid-cols-[1.5fr_1fr_1fr_1fr_auto]">
+                <div className="grid gap-3 lg:grid-cols-6">
                     {/* Search */}
                     <div className="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3">
                         <Search
@@ -334,6 +353,31 @@ const FindJobs = () => {
                             className="pointer-events-none absolute right-3 top-3.5 text-slate-400"
                         />
                     </div>
+
+                    {/* Category */}
+                    <select
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 outline-none focus:border-indigo-400"
+                    >
+                        <option value="">All Categories</option>
+                        {categories.map((item) => (
+                            <option key={item} value={item}>
+                                {item}
+                            </option>
+                        ))}
+                    </select>
+
+                    {/* Salary order */}
+                    <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-600 outline-none focus:border-indigo-400"
+                    >
+                    <option value="salary">Salary</option>
+                        <option value="salaryHigh">Salary: High to Low</option>
+                        <option value="salaryLow">Salary: Low to High</option>
+                    </select>
                 </div>
             </div>
 
@@ -341,8 +385,8 @@ const FindJobs = () => {
             <div className="mt-7 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                 <div>
                     <h3 className="font-semibold text-slate-900">
-                        {selectedCategory
-                            ? `${selectedCategory} Jobs`
+                        {category
+                            ? `${category} Jobs`
                             : "Available Jobs"}
                     </h3>
 

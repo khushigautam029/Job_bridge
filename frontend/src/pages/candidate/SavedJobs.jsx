@@ -23,7 +23,8 @@ const SavedJobs = () => {
 
     const [savedJobs, setSavedJobs] = useState([]);
     const [search, setSearch] = useState("");
-    const [sortBy, setSortBy] = useState("recent");
+    const [sortBy, setSortBy] = useState("salaryHigh");
+    const [category, setCategory] = useState("");
     const [deletedJob, setDeletedJob] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -66,54 +67,44 @@ const SavedJobs = () => {
         };
     }, []);
 
+    const categories = useMemo(
+        () =>
+            [...new Set(savedJobs.map((job) => job.category).filter(Boolean))]
+                .sort((a, b) => a.localeCompare(b)),
+        [savedJobs]
+    );
+
     const filteredJobs = useMemo(() => {
         let jobs = savedJobs.filter((job) => {
             const searchText = search.toLowerCase();
 
-            return (
+            const matchesSearch =
                 (job.title || "").toLowerCase().includes(searchText) ||
                 (job.company || "").toLowerCase().includes(searchText) ||
                 (job.location || "").toLowerCase().includes(searchText) ||
                 (job.skills || []).some((skill) =>
                     skill.toLowerCase().includes(searchText)
-                )
-            );
+                );
+
+            return (!category || job.category === category) && matchesSearch;
         });
 
-        if (sortBy === "salaryHigh") {
-            jobs = [...jobs].sort(
-                (a, b) =>
-                    parseInt(b.salary?.match(/\d+/)?.[0] || 0, 10) -
-                    parseInt(a.salary?.match(/\d+/)?.[0] || 0, 10)
+        return jobs.sort((a, b) => {
+            const salaryA = Number(
+                sortBy === "salaryLow"
+                    ? a.minSalary || a.maxSalary || 0
+                    : a.maxSalary || a.minSalary || 0
             );
-        }
-
-        if (sortBy === "salaryLow") {
-            jobs = [...jobs].sort(
-                (a, b) =>
-                    parseInt(a.salary?.match(/\d+/)?.[0] || 0, 10) -
-                    parseInt(b.salary?.match(/\d+/)?.[0] || 0, 10)
+            const salaryB = Number(
+                sortBy === "salaryLow"
+                    ? b.minSalary || b.maxSalary || 0
+                    : b.maxSalary || b.minSalary || 0
             );
-        }
-
-        if (sortBy === "company") {
-            jobs = [...jobs].sort((a, b) =>
-                (a.company || "").localeCompare(b.company || "")
-            );
-        }
-
-        if (sortBy === "recent") {
-            jobs = [...jobs].sort(
-                (a, b) =>
-                    new Date(b.savedDate || 0) -
-                    new Date(a.savedDate || 0)
-            );
-        }
-
-        return jobs;
-    }, [savedJobs, search, sortBy]);
+            return sortBy === "salaryLow" ? salaryA - salaryB : salaryB - salaryA;
+        });
+    }, [savedJobs, search, category, sortBy]);
     const { pageItems: pageJobs, currentPage, setCurrentPage, pageCount } =
-        usePagination(filteredJobs, JSON.stringify([search, sortBy]));
+        usePagination(filteredJobs, JSON.stringify([search, category, sortBy]));
 
     const remoteJobs = savedJobs.filter(
         (job) => job.workMode === "Remote"
@@ -266,7 +257,7 @@ const SavedJobs = () => {
                         </p>
                     </div>
 
-                    <div className="flex flex-col gap-3 sm:flex-row">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                         <div className="relative">
                             <Search
                                 size={17}
@@ -283,18 +274,29 @@ const SavedJobs = () => {
                         </div>
 
                         <select
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
+                            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 outline-none transition focus:border-indigo-400"
+                        >
+                            <option value="">All Categories</option>
+                            {categories.map((item) => (
+                                <option key={item} value={item}>
+                                    {item}
+                                </option>
+                            ))}
+                        </select>
+
+                        <select
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
                             className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 outline-none transition focus:border-indigo-400"
                         >
-                            <option value="recent">Recently Saved</option>
                             <option value="salaryHigh">
                                 Salary: High to Low
                             </option>
                             <option value="salaryLow">
                                 Salary: Low to High
                             </option>
-                            <option value="company">Company</option>
                         </select>
                     </div>
                 </div>
