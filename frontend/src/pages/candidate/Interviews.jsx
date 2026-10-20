@@ -13,11 +13,11 @@
     XCircle,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import Pagination, { usePagination } from "../../components/Pagination";
 import {
     cancelInterview as cancelInterviewRequest,
     getInterviews,
 } from "../../services/interviewService";
-import Pagination, { usePagination } from "../../components/Pagination";
 
 const Interviews = () => {
     const [interviews, setInterviews] = useState([]);
@@ -401,16 +401,7 @@ const Interviews = () => {
                             <option value="CANCELLED">Cancelled</option>
                         </select>
 
-                        {/* Sort */}
-                        <select
-                            value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value)}
-                            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 outline-none transition focus:border-indigo-400"
-                        >
-                            <option value="recent">Recent</option>
-                            <option value="company">Company</option>
-                            <option value="position">Position</option>
-                        </select>
+                       
                     </div>
                 </div>
             </section>

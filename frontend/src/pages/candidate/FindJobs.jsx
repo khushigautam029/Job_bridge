@@ -351,11 +351,7 @@ const FindJobs = () => {
                     </p>
                 </div>
 
-                <select className="w-fit rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 outline-none">
-                    <option>Most Recent</option>
-                    <option>Salary: High to Low</option>
-                    <option>Salary: Low to High</option>
-                </select>
+                
             </div>
 
             {/* Job List */}
