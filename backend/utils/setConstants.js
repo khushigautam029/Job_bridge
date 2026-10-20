@@ -179,6 +179,9 @@ export const MESSAGES = {
     PROFILE_IMAGE_UPLOADED:"Profile image uploaded successfully",
     PROFILE_IMAGE_NOT_FOUND:"Profile image not found",
     PROFILE_IMAGE_DELETED:"Profile image deleted successfully",
-    APPLICATION_RETRIEVED:"Application retrieved successfully"
+    APPLICATION_RETRIEVED:"Application retrieved successfully",
+    APPLICATIONS_RETRIEVED:"Applications retrieved successfully",
+    JOB_APPLICATIONS_RETRIEVED:"Job applications retrieved successfully",
+    RECRUITER_APPLICATIONS_RETRIEVED:"Recruiter applications retrieved successfully"
 
 };

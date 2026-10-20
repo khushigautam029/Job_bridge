@@ -65,7 +65,7 @@ const getMine = asyncHandler(
         return sendSuccess(
             res,
             STATUS_CODES.OK,
-            "Applications retrieved successfully",
+            MESSAGES.APPLICATIONS_RETRIEVED,
             {
                 applications,
             }
@@ -120,7 +120,7 @@ const getForJob = asyncHandler(
         return sendSuccess(
             res,
             STATUS_CODES.OK,
-            "Job applications retrieved successfully",
+            MESSAGES.JOB_APPLICATIONS_RETRIEVED,
             {
                 applications,
             }
@@ -138,7 +138,7 @@ const getForRecruiter = asyncHandler(
         return sendSuccess(
             res,
             STATUS_CODES.OK,
-            "Recruiter applications retrieved successfully",
+            MESSAGES.RECRUITER_APPLICATIONS_RETRIEVED,
             {
                 applications,
             }
