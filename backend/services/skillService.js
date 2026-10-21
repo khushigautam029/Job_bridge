@@ -1,5 +1,6 @@
 import { Skill } from "../models/index.js";
 import {
+    MESSAGES,
     STATUS_CODES,
 } from "../utils/setConstants.js";
 
@@ -20,7 +21,7 @@ const getSkillById = async (skillId) => {
 
     if (!skill) {
         const error = new Error(
-            "Skill not found"
+            MESSAGES.SKILL_NOT_FOUND
         );
 
         error.statusCode =

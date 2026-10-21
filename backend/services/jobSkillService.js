@@ -4,7 +4,7 @@ import {
     RecruiterProfile,
     Skill,
 } from "../models/index.js";
-import { STATUS_CODES } from "../utils/setConstants.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 
 const getJobSkills = async (jobId) => {
@@ -12,7 +12,7 @@ const getJobSkills = async (jobId) => {
     const job = await Job.findByPk(jobId);
 
     if (!job) {
-        const error = new Error("Job not found");
+        const error = new Error( MESSAGES.JOB_NOT_FOUND );
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
@@ -49,7 +49,7 @@ const addJobSkill = async (
     const job = await Job.findByPk(jobId);
 
     if (!job) {
-        const error = new Error("Job not found");
+        const error = new Error( MESSAGES.JOB_NOT_FOUND );
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
@@ -63,7 +63,7 @@ const addJobSkill = async (
 
     if (!recruiterProfile) {
         const error = new Error(
-            "Recruiter profile not found"
+            MESSAGES.RECRUITER_PROFILE_NOT_FOUND
         );
 
         error.statusCode = STATUS_CODES.NOT_FOUND;
@@ -86,7 +86,7 @@ const addJobSkill = async (
     const skill = await Skill.findByPk(skillId);
 
     if (!skill) {
-        const error = new Error("Skill not found");
+        const error = new Error( MESSAGES.SKILL_NOT_FOUND);
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
@@ -102,7 +102,7 @@ const addJobSkill = async (
 
     if (existingJobSkill) {
         const error = new Error(
-            "Skill is already added to this job"
+            MESSAGES.SKILL_IS_ALREADY_ADDED
         );
 
         error.statusCode = STATUS_CODES.CONFLICT;
@@ -137,7 +137,7 @@ const removeJobSkill = async (
     const job = await Job.findByPk(jobId);
 
     if (!job) {
-        const error = new Error("Job not found");
+        const error = new Error(MESSAGES.JOB_NOT_FOUND);
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
@@ -151,7 +151,7 @@ const removeJobSkill = async (
 
     if (!recruiterProfile) {
         const error = new Error(
-            "Recruiter profile not found"
+            MESSAGES.RECRUITER_PROFILE_NOT_FOUND
         );
 
         error.statusCode = STATUS_CODES.NOT_FOUND;

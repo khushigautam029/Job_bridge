@@ -1,5 +1,5 @@
 import { Notification } from "../models/index.js";
-import { STATUS_CODES } from "../utils/setConstants.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 // Get all notifications for logged-in user
 const getMyNotifications = async (userId) => {
@@ -39,7 +39,7 @@ const markAsRead = async (
         });
     if (!notification) {
         const error = new Error(
-            "Notification not found"
+            MESSAGES.NOTIFICATIONS_NOT_FOUND
         );
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
@@ -78,7 +78,7 @@ const deleteNotification = async (
         });
     if (!notification) {
         const error = new Error(
-            "Notification not found"
+            MESSAGES.NOTIFICATIONS_NOT_FOUND
         );
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;

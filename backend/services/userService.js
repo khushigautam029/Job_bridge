@@ -9,7 +9,7 @@ import {
     comparePassword,
     hashPassword,
 } from "../utils/password.js";
-import { STATUS_CODES } from "../utils/setConstants.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 
 const getUserById = async (userId) => {
@@ -43,7 +43,7 @@ const getUserById = async (userId) => {
 
     if (!user) {
         const error = new Error(
-            "User not found"
+            MESSAGES.USER_NOT_FOUND
         );
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
@@ -54,7 +54,7 @@ const getUserById = async (userId) => {
 const updateUserProfile = async (userId, updates) => {
     const user = await User.findByPk(userId);
     if (!user) {
-        const error = new Error("User not found");
+        const error = new Error( MESSAGES.USER_NOT_FOUND );
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
@@ -116,7 +116,7 @@ const changePassword = async (
     const user = await User.findByPk(userId);
     if (!user) {
         const error = new Error(
-            "User not found"
+            MESSAGES.USER_NOT_FOUND
         );
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
@@ -130,7 +130,7 @@ const changePassword = async (
 
     if (!isPasswordValid) {
         const error = new Error(
-            "Current password is incorrect"
+            MESSAGES.USER_CURRENT_PASSWORD_INCORRECT
         );
         error.statusCode = STATUS_CODES.BAD_REQUEST;
         throw error;
@@ -151,7 +151,7 @@ const deleteAccount = async (userId) => {
     const user = await User.findByPk(userId);
     if (!user) {
         const error = new Error(
-            "User not found"
+            MESSAGES.USER_NOT_FOUND
         );
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;

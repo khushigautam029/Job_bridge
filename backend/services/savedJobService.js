@@ -6,7 +6,7 @@ import {
     SavedJob,
     Skill,
 } from "../models/index.js";
-import { STATUS_CODES } from "../utils/setConstants.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 
 /*
@@ -27,7 +27,7 @@ const saveJob = async (
 
     if (!candidate) {
         const error = new Error(
-            "Candidate profile not found"
+            MESSAGES.PROFILE_NOT_FOUND
         );
 
         error.statusCode = STATUS_CODES.NOT_FOUND;
@@ -40,7 +40,7 @@ const saveJob = async (
 
     if (!job) {
         const error = new Error(
-            "Job not found"
+            MESSAGES.JOB_NOT_FOUND
         );
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
@@ -69,7 +69,7 @@ const saveJob = async (
 
     if (existingSavedJob) {
         const error = new Error(
-            "Job is already saved"
+            MESSAGES.JOB_ALREADY_SAVED
         );
 
         error.statusCode = STATUS_CODES.CONFLICT;
@@ -106,7 +106,7 @@ const getMySavedJobs = async (
 
     if (!candidate) {
         const error = new Error(
-            "Candidate profile not found"
+            MESSAGES.PROFILE_NOT_FOUND
         );
 
         error.statusCode = STATUS_CODES.NOT_FOUND;
@@ -181,7 +181,7 @@ const isJobSaved = async (
 
     if (!candidate) {
         const error = new Error(
-            "Candidate profile not found"
+            MESSAGES.PROFILE_NOT_FOUND
         );
 
         error.statusCode = STATUS_CODES.NOT_FOUND;
@@ -218,7 +218,7 @@ const removeSavedJob = async (
 
     if (!candidate) {
         const error = new Error(
-            "Candidate profile not found"
+            MESSAGES.PROFILE_NOT_FOUND
         );
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
@@ -234,7 +234,7 @@ const removeSavedJob = async (
 
     if (!savedJob) {
         const error = new Error(
-            "Saved job not found"
+            MESSAGES.SAVED_JOB_NOT_FOUND
         );
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;

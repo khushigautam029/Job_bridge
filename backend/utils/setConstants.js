@@ -197,5 +197,6 @@ export const MESSAGES = {
 
     PASSWORD_RESET_EMAIL_SENT:"If an account with that email exists, a password reset link has been sent.",
     PASSWORD_RESET_SUCCESS:"Password reset successful. You can now log in with your new password.",
+    SKILL_IS_ALREADY_ADDED:"Skill is already added to this job"
 
 };

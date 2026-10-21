@@ -3,7 +3,7 @@ import {
     RecruiterProfile,
     User,
 } from "../models/index.js";
-import { STATUS_CODES } from "../utils/setConstants.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 
 const getRecruiterProfile = async (userId) => {
@@ -31,7 +31,7 @@ const getRecruiterProfile = async (userId) => {
 
     if (!recruiterProfile) {
         const error = new Error(
-            "Recruiter profile not found"
+            MESSAGES.RECRUITER_PROFILE_NOT_FOUND
         );
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
@@ -48,7 +48,7 @@ const updateRecruiterProfile = async (userId, data) => {
     });
 
     if (!recruiterProfile) {
-        const error = new Error("Recruiter profile not found");
+        const error = new Error( MESSAGES.RECRUITER_PROFILE_NOT_FOUND );
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
@@ -56,7 +56,7 @@ const updateRecruiterProfile = async (userId, data) => {
     const user = await User.findByPk(userId);
 
     if (!user) {
-        const error = new Error("User not found");
+        const error = new Error(MESSAGES.USER_NOT_FOUND);
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
