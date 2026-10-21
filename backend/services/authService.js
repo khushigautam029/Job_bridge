@@ -9,7 +9,7 @@ import {
     comparePassword,
     hashPassword,
 } from "../utils/password.js";
-import { STATUS_CODES } from "../utils/setConstants.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 const registerUser = async ({
     name,
@@ -31,7 +31,7 @@ const registerUser = async ({
 
     if (existingUser) {
         const error = new Error(
-            "Email is already registered"
+            MESSAGES.EMAIL_ALREADY_REGISTERED
         );
         error.statusCode = STATUS_CODES.CONFLICT;
         throw error;
@@ -81,7 +81,7 @@ const loginUser = async ({
 
     if (!user) {
         const error = new Error(
-            "Invalid email or password"
+            MESSAGES.INVALID_CREDENTIALS
         );
         error.statusCode = STATUS_CODES.UNAUTHORIZED;
         throw error;
@@ -89,7 +89,7 @@ const loginUser = async ({
 
     if (!user.isActive) {
         const error = new Error(
-            "Your account is inactive"
+            MESSAGES.ACCOUNT_INACTIVE
         );
         error.statusCode = STATUS_CODES.FORBIDDEN;
         throw error;
@@ -103,7 +103,7 @@ const loginUser = async ({
 
     if (!isPasswordValid) {
         const error = new Error(
-            "Invalid email or password"
+            MESSAGES.INVALID_CREDENTIALS
         );
         error.statusCode = STATUS_CODES.UNAUTHORIZED;
         throw error;

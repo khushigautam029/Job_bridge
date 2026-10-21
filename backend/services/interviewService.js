@@ -18,7 +18,7 @@ import {
 } from "../models/index.js";
 
 import createNotification from "../utils/createNotification.js";
-import { STATUS_CODES } from "../utils/setConstants.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 const applyCandidatePrivacyToInterviews = async (interviews) => {
     const isList = Array.isArray(interviews);
@@ -108,7 +108,7 @@ const scheduleInterview = async (
 
     if (!recruiter) {
         const error = new Error(
-            "Recruiter profile not found"
+            MESSAGES.RECRUITER_PROFILE_NOT_FOUND
         );
 
         error.statusCode =
@@ -138,7 +138,7 @@ const scheduleInterview = async (
 
     if (!application) {
         const error = new Error(
-            "Application not found"
+            MESSAGES.APPLICATION_NOT_FOUND
         );
 
         error.statusCode =
@@ -154,7 +154,7 @@ const scheduleInterview = async (
         recruiter.id
     ) {
         const error = new Error(
-            "You are not authorized to schedule an interview for this application"
+           MESSAGES.YOU_ARE_UNAUTHORIZED_TO_SCHEDULE_AN_INTERVIEW
         );
 
         error.statusCode =
@@ -191,7 +191,7 @@ const scheduleInterview = async (
         scheduledDate <= new Date()
     ) {
         const error = new Error(
-            "Interview date must be a valid future date"
+            MESSAGES.INTERVIEW_DATE_MUST_BE_VALID
         );
 
         error.statusCode =
@@ -214,7 +214,7 @@ const scheduleInterview = async (
         )
     ) {
         const error = new Error(
-            "Invalid interview type"
+           MESSAGES.INVALID_INTERVIEW_TYPE
         );
 
         error.statusCode =
@@ -372,7 +372,7 @@ const getMyInterviews = async (
 
     if (!candidate) {
         const error = new Error(
-            "Candidate profile not found"
+            MESSAGES.PROFILE_NOT_FOUND
         );
 
         error.statusCode =
@@ -453,7 +453,7 @@ const getRecruiterInterviews = async (
 
     if (!recruiter) {
         const error = new Error(
-            "Recruiter profile not found"
+            MESSAGES.RECRUITER_PROFILE_NOT_FOUND
         );
 
         error.statusCode =
@@ -587,7 +587,7 @@ const getInterviewById = async (
 
     if (!interview) {
         const error = new Error(
-            "Interview not found"
+            MESSAGES.INTERVIEW_NOT_FOUND
         );
 
         error.statusCode =
@@ -655,7 +655,7 @@ const updateInterview = async (
 
     if (!recruiter) {
         const error = new Error(
-            "Recruiter profile not found"
+            MESSAGES.RECRUITER_PROFILE_NOT_FOUND
         );
 
         error.statusCode =
@@ -688,7 +688,7 @@ const updateInterview = async (
 
     if (!interview) {
         const error = new Error(
-            "Interview not found"
+            MESSAGES.INTERVIEW_NOT_FOUND
         );
 
         error.statusCode =
@@ -847,7 +847,7 @@ const updateInterviewStatus = async (
 
     if (!recruiter) {
         const error = new Error(
-            "Recruiter profile not found"
+            MESSAGES.RECRUITER_PROFILE_NOT_FOUND
         );
 
         error.statusCode =
@@ -880,7 +880,7 @@ const updateInterviewStatus = async (
 
     if (!interview) {
         const error = new Error(
-            "Interview not found"
+            MESSAGES.INTERVIEW_NOT_FOUND
         );
 
         error.statusCode =
@@ -967,7 +967,7 @@ const cancelInterview = async (
 
     if (!interview) {
         const error = new Error(
-            "Interview not found"
+            MESSAGES.INTERVIEW_NOT_FOUND
         );
 
         error.statusCode =

@@ -3,6 +3,7 @@ import {
     CandidateProfile,
 } from "../models/index.js";
 import {
+    MESSAGES,
     STATUS_CODES,
 } from "../utils/setConstants.js";
 
@@ -20,7 +21,7 @@ const findCandidateProfile = async (
 
     if (!candidate) {
         const error = new Error(
-            "Candidate profile not found"
+            MESSAGES.PROFILE_NOT_FOUND
         );
 
         error.statusCode = STATUS_CODES.NOT_FOUND;
@@ -85,7 +86,7 @@ const getCandidateEducationById = async (
 
     if (!education) {
         const error = new Error(
-            "Education record not found"
+            MESSAGES.EDUCATION_RECORD_NOT_FOUND
         );
 
         error.statusCode =
@@ -170,7 +171,7 @@ const updateCandidateEducation = async (
 
     if (!education) {
         const error = new Error(
-            "Education record not found"
+            MESSAGES.EDUCATION_RECORD_NOT_FOUND
         );
 
         error.statusCode =
@@ -212,7 +213,7 @@ const deleteCandidateEducation = async (
 
     if (!education) {
         const error = new Error(
-            "Education record not found"
+            MESSAGES.EDUCATION_RECORD_NOT_FOUND
         );
 
         error.statusCode =

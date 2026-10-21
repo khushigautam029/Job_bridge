@@ -183,6 +183,16 @@ export const MESSAGES = {
     APPLICATIONS_RETRIEVED:"Applications retrieved successfully",
     JOB_APPLICATIONS_RETRIEVED:"Job applications retrieved successfully",
     RECRUITER_APPLICATIONS_RETRIEVED:"Recruiter applications retrieved successfully",
-    JOB_NOT_FOUND_OR_UNAUTHORIZED:"Job not found or you are not authorized"
+    JOB_NOT_FOUND_OR_UNAUTHORIZED:"Job not found or you are not authorized",
+    EDUCATION_RECORD_NOT_FOUND:"Education record not found",
+    EXPERIENCE_NOT_FOUND:"Experience not found",
+    EXPERIENCE_DELETED:"Experience deleted successfully",
+    RESUME_FILE_REQUIRED:"Resume file is required",
+    CANDIDATE_NOT_FOUND:"Candidate not found",
+    YOU_ARE_UNAUTHORIZED:"You are not authorized to view this candidate's resume",
+    CANDIDATE_HAS_NOT_UPLOADED_A_RESUME:"Candidate has not uploaded a resume",
+    SKILL_NOT_ADDED_TO_PROFILE:"Skill is not added to your profile",
+    YOU_ARE_UNAUTHORIZED_TO_SCHEDULE_AN_INTERVIEW:"You are not authorized to schedule an interview for this application",
+    INTERVIEW_DATE_MUST_BE_VALID:"Interview date must be a valid future date"
 
 };

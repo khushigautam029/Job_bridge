@@ -2,8 +2,8 @@ import {
     Company,
     RecruiterProfile,
 } from "../models/index.js";
-import { STATUS_CODES } from "../utils/setConstants.js";
 import { getHiddenCompanyIds } from "../utils/companyVisibility.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 
 const getMyCompany = async (userId) => {
@@ -23,7 +23,7 @@ const getMyCompany = async (userId) => {
 
     if (!recruiterProfile) {
         const error = new Error(
-            "Recruiter profile not found"
+            MESSAGES.RECRUITER_PROFILE_NOT_FOUND
         );
 
         error.statusCode = STATUS_CODES.NOT_FOUND;
@@ -33,7 +33,7 @@ const getMyCompany = async (userId) => {
 
     if (!recruiterProfile.company) {
         const error = new Error(
-            "Company not found"
+           MESSAGES.COMPANY_NOT_FOUND
         );
 
         error.statusCode = STATUS_CODES.NOT_FOUND;
@@ -59,7 +59,7 @@ const updateMyCompany = async (
 
     if (!recruiterProfile) {
         const error = new Error(
-            "Recruiter profile not found"
+            MESSAGES.RECRUITER_PROFILE_NOT_FOUND
         );
 
         error.statusCode = STATUS_CODES.NOT_FOUND;
@@ -73,7 +73,7 @@ const updateMyCompany = async (
 
     if (!company) {
         const error = new Error(
-            "Company not found"
+            MESSAGES.COMPANY_NOT_FOUND
         );
 
         error.statusCode = STATUS_CODES.NOT_FOUND;
@@ -94,7 +94,7 @@ const updateMyCompany = async (
 
         if (existingCompany) {
             const error = new Error(
-                "Company name already exists"
+                MESSAGES.COMPANY_NAME_EXISTS
             );
 
             error.statusCode = STATUS_CODES.CONFLICT;
@@ -126,7 +126,7 @@ const getCompanyById = async (companyId) => {
     );
     if (!company) {
         const error = new Error(
-            "Company not found"
+            MESSAGES.COMPANY_NOT_FOUND
         );
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;

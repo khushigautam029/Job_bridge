@@ -10,7 +10,7 @@ import {
     SavedJob,
 } from "../models/index.js";
 
-import { STATUS_CODES } from "../utils/setConstants.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 
 /*
@@ -26,7 +26,7 @@ const getCandidateDashboard = async (userId) => {
 
     if (!candidate) {
         const error = new Error(
-            "Candidate profile not found"
+            MESSAGES.PROFILE_NOT_FOUND
         );
 
         error.statusCode = STATUS_CODES.NOT_FOUND;
@@ -262,7 +262,7 @@ const getRecruiterDashboard = async (userId) => {
     if (!recruiter) {
 
         const error = new Error(
-            "Recruiter profile not found"
+            MESSAGES.RECRUITER_PROFILE_NOT_FOUND
         );
 
         error.statusCode =

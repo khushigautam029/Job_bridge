@@ -93,7 +93,7 @@ const getCandidateProfile = async (userId) => {
 
     if (!candidateProfile) {
         const error = new Error(
-            "Candidate profile not found"
+            MESSAGES.PROFILE_NOT_FOUND
         );
 
         error.statusCode =
@@ -119,7 +119,7 @@ const updateCandidateProfile = async (
 
     if (!candidateProfile) {
         const error = new Error(
-            "Candidate profile not found"
+            MESSAGES.PROFILE_NOT_FOUND
         );
 
         error.statusCode =
@@ -241,7 +241,7 @@ const uploadCandidateResume = async (
 ) => {
     if (!file) {
         const error = new Error(
-            "Resume file is required"
+            MESSAGES.RESUME_FILE_REQUIRED
         );
 
         error.statusCode =
@@ -260,7 +260,7 @@ const uploadCandidateResume = async (
 
     if (!candidateProfile) {
         const error = new Error(
-            "Candidate profile not found"
+            MESSAGES.PROFILE_NOT_FOUND
         );
 
         error.statusCode =
@@ -312,7 +312,7 @@ const getCandidateResumeForRecruiter = async (
 
     if (!recruiter) {
         const error = new Error(
-            "Recruiter profile not found"
+            MESSAGES.RECRUITER_PROFILE_NOT_FOUND
         );
 
         error.statusCode =
@@ -329,7 +329,7 @@ const getCandidateResumeForRecruiter = async (
 
     if (!candidate) {
         const error = new Error(
-            "Candidate not found"
+            MESSAGES.CANDIDATE_NOT_FOUND
         );
 
         error.statusCode =
@@ -370,7 +370,7 @@ const getCandidateResumeForRecruiter = async (
 
     if (!application) {
         const error = new Error(
-            "You are not authorized to view this candidate's resume"
+            MESSAGES.YOU_ARE_UNAUTHORIZED
         );
 
         error.statusCode =
@@ -386,7 +386,7 @@ const getCandidateResumeForRecruiter = async (
 
     if (!resumePath) {
         const error = new Error(
-            "Candidate has not uploaded a resume"
+           MESSAGES.CANDIDATE_HAS_NOT_UPLOADED_A_RESUME
         );
 
         error.statusCode =
@@ -426,7 +426,7 @@ const getCandidateProfileCompletion = async (
 
     if (!candidateProfile) {
         const error = new Error(
-            "Candidate profile not found"
+            MESSAGES.PROFILE_NOT_FOUND
         );
 
         error.statusCode =

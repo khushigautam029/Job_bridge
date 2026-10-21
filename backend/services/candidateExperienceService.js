@@ -3,7 +3,7 @@ import {
     CandidateProfile,
 } from "../models/index.js";
 
-import { STATUS_CODES } from "../utils/setConstants.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 const findCandidateProfile = async (userId) => {
     const candidateProfile = await CandidateProfile.findOne({
@@ -14,7 +14,7 @@ const findCandidateProfile = async (userId) => {
 
     if (!candidateProfile) {
         const error = new Error(
-            "Candidate profile not found"
+            MESSAGES.PROFILE_NOT_FOUND
         );
 
         error.statusCode =
@@ -65,7 +65,7 @@ const getCandidateExperienceById = async (
 
     if (!experience) {
         const error = new Error(
-            "Experience not found"
+            MESSAGES.EXPERIENCE_NOT_FOUND
         );
 
         error.statusCode =
@@ -138,7 +138,7 @@ const deleteCandidateExperience = async (
     return {
         experienceId: Number(experienceId),
         message:
-            "Experience deleted successfully",
+            MESSAGES.EXPERIENCE_DELETED,
     };
 };
 

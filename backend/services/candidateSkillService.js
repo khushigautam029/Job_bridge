@@ -170,7 +170,7 @@ const removeCandidateSkill = async (
 
     if (!candidateSkill) {
         const error = new Error(
-            "Skill is not added to your profile"
+            MESSAGES.SKILL_NOT_ADDED_TO_PROFILE
         );
 
         error.statusCode =
