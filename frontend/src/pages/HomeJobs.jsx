@@ -18,6 +18,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import {
     formatJobCard,
     getJobs,
+    normalizeLocationQuery,
 } from "../services/jobService";
 import LocationAutocomplete from "../components/LocationAutocomplete";
 import {
@@ -114,7 +115,7 @@ const HomeJobs = () => {
                     skill.toLowerCase().includes(searchValue)
                 );
 
-            const matchesLocation = !location || job.location?.toLowerCase().includes(location.trim().toLowerCase());
+            const matchesLocation = !location || job.location?.toLowerCase().includes(normalizeLocationQuery(location));
             return matchesCategory && matchesSearch && matchesLocation;
         });
     }, [category, jobs, location, search]);

@@ -38,10 +38,16 @@ const LocationAutocomplete = ({
                 const response = await fetch(`https://api.geoapify.com/v1/geocode/autocomplete?${params}`, { signal: controller.signal });
                 if (!response.ok) throw new Error("Location lookup failed");
                 const data = await response.json();
-                const results = (data.results || []).map((place) => ({
-                    label: place.formatted,
-                    key: `${place.place_id || place.formatted}-${place.lat}-${place.lon}`,
-                })).filter((place) => place.label);
+                const results = (data.results || []).map((place) => {
+                    const props = place.properties || place;
+                    const label = place.formatted || props.formatted;
+                    const value = props.city || props.town || props.village || props.municipality || label?.split(",")[0]?.trim();
+                    return {
+                        label,
+                        value,
+                        key: `${place.place_id || label}-${place.lat}-${place.lon}`,
+                    };
+                }).filter((place) => place.label && place.value);
                 setSuggestions(results);
                 setIsOpen(results.length > 0);
                 setActiveIndex(-1);
@@ -68,9 +74,9 @@ const LocationAutocomplete = ({
     }, []);
 
     const chooseSuggestion = (suggestion) => {
-        selectedValueRef.current = suggestion.label;
-        onChange({ target: { name, value: suggestion.label } });
-        onSelect?.(suggestion.label);
+        selectedValueRef.current = suggestion.value;
+        onChange({ target: { name, value: suggestion.value } });
+        onSelect?.(suggestion.value);
         setIsOpen(false);
         setSuggestions([]);
     };

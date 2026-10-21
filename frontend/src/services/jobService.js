@@ -2,6 +2,9 @@ import api from "./api";
 
 const getData = (response) => response.data.data;
 
+export const normalizeLocationQuery = (location) =>
+    String(location || "").split(",")[0].trim().toLowerCase();
+
 export const formatJobCard = (job) => {
     const minSalary = Number(job.minSalary || 0);
     const maxSalary = Number(job.maxSalary || 0);

@@ -111,8 +111,11 @@ const getAllJobs = async (filters = {}) => {
     }
     // Location filter
     if (location) {
+        // Job records commonly store only a city (for example, "Jaipur"),
+        // while autocomplete may submit a full address ("Jaipur, Rajasthan, India").
+        const cityOrLocality = String(location).split(",")[0].trim();
         where.location = {
-            [Op.like]: `%${location}%`,
+            [Op.like]: `%${cityOrLocality}%`,
         };
     }
     // Category filter

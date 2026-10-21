@@ -13,6 +13,7 @@ import Pagination, { usePagination } from "../../components/Pagination";
 import {
     formatJobCard,
     getJobs,
+    normalizeLocationQuery,
 } from "../../services/jobService";
 import {
     getSavedJobs,
@@ -153,7 +154,7 @@ const FindJobs = () => {
             !location ||
             String(job.location || "")
                 .toLowerCase()
-                .includes(location.toLowerCase());
+                .includes(normalizeLocationQuery(location));
 
         const matchesType =
             jobType === "All" || job.type === jobType;
