@@ -95,7 +95,45 @@ const loginSchema = Joi.object({
         }),
 });
 
+const forgotPasswordSchema = Joi.object({
+    email: Joi.string()
+        .trim()
+        .email()
+        .max(150)
+        .required()
+        .messages({
+            "string.empty": MESSAGES.EMAIL_REQUIRED,
+            "string.email": MESSAGES.PROVIDE_A_VALID_EMAIL,
+            "any.required": MESSAGES.EMAIL_REQUIRED,
+        }),
+});
+
+const resetPasswordSchema = Joi.object({
+    token: Joi.string()
+        .hex()
+        .length(64)
+        .required()
+        .messages({
+            "string.empty": "Reset token is required",
+            "string.hex": "Invalid reset token",
+            "string.length": "Invalid reset token",
+            "any.required": "Reset token is required",
+        }),
+
+    password: Joi.string()
+        .min(8)
+        .max(100)
+        .required()
+        .messages({
+            "string.empty": MESSAGES.PASSWORD_REQUIRED,
+            "string.min": "Password must be at least 8 characters",
+            "string.max": "Password cannot exceed 100 characters",
+            "any.required": MESSAGES.PASSWORD_REQUIRED,
+        }),
+});
+
 export {
-    loginSchema,
-    registerSchema
+    forgotPasswordSchema, loginSchema,
+    registerSchema, resetPasswordSchema
 };
+

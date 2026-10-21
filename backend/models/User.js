@@ -52,6 +52,16 @@ const User = sequelize.define(
             defaultValue: true,
             field: "is_active",
         },
+        resetPasswordTokenHash: {
+            type: DataTypes.STRING(64),
+            allowNull: true,
+            field: "reset_password_token_hash",
+        },
+        resetPasswordExpiresAt: {
+            type: DataTypes.DATE,
+            allowNull: true,
+            field: "reset_password_expires_at",
+        },
     },
     {
         tableName: "users",

@@ -11,6 +11,7 @@ import {
 } from "../utils/password.js";
 import { STATUS_CODES } from "../utils/setConstants.js";
 
+
 const getUserById = async (userId) => {
     const user = await User.findByPk(
         userId,
@@ -166,6 +167,6 @@ export {
     getUserById,
     getUserPreferences,
     updateUserPreferences,
-    updateUserProfile,
+    updateUserProfile
 };
 

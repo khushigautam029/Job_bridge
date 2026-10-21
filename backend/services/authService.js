@@ -1,3 +1,5 @@
+import crypto from "node:crypto";
+import { Op } from "sequelize";
 import sequelize from "../config/database.js";
 import {
     CandidateProfile,
@@ -5,6 +7,7 @@ import {
     RecruiterProfile,
     User,
 } from "../models/index.js";
+import { sendPasswordResetEmail } from "../utils/emailService.js";
 import {
     comparePassword,
     hashPassword,
@@ -141,8 +144,90 @@ const loginUser = async ({
     return user;
 };
 
+const requestPasswordReset = async ({ email }) => {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const user = await User.findOne({
+        where: {
+            email: normalizedEmail,
+        },
+    });
+
+    if (!user) {
+        return;
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    const resetTokenHash = crypto
+        .createHash("sha256")
+        .update(resetToken)
+        .digest("hex");
+
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+    await user.update({
+        resetPasswordTokenHash: resetTokenHash,
+        resetPasswordExpiresAt: expiresAt,
+    });
+
+    try {
+        await sendPasswordResetEmail({
+            email: user.email,
+            name: user.name,
+            token: resetToken,
+        });
+    } catch (error) {
+        await user.update({
+            resetPasswordTokenHash: null,
+            resetPasswordExpiresAt: null,
+        });
+
+        const emailError = new Error(
+            "Unable to send the password reset email. Please try again later."
+        );
+
+        emailError.statusCode = STATUS_CODES.SERVICE_UNAVAILABLE;
+        throw emailError;
+    }
+};
+
+const resetPassword = async ({ token, password }) => {
+    const resetTokenHash = crypto
+        .createHash("sha256")
+        .update(token)
+        .digest("hex");
+
+    const user = await User.findOne({
+        where: {
+            resetPasswordTokenHash: resetTokenHash,
+            resetPasswordExpiresAt: {
+                [Op.gt]: new Date(),
+            },
+        },
+    });
+
+    if (!user) {
+        const error = new Error(
+            "This password reset link is invalid or has expired."
+        );
+
+        error.statusCode = STATUS_CODES.BAD_REQUEST;
+        throw error;
+    }
+
+    const hashedPassword = await hashPassword(password);
+
+    await user.update({
+        password: hashedPassword,
+        resetPasswordTokenHash: null,
+        resetPasswordExpiresAt: null,
+    });
+};
+
+
 export {
     loginUser,
-    registerUser
+    registerUser, requestPasswordReset, resetPassword
 };
 

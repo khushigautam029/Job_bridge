@@ -8,8 +8,8 @@ import {
     RecruiterProfile,
     Skill,
 } from "../models/index.js";
-import { STATUS_CODES } from "../utils/setConstants.js";
 import { getHiddenCompanyIds } from "../utils/companyVisibility.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 const getRecruiterProfile = async (userId) => {
     const recruiterProfile =
@@ -20,7 +20,7 @@ const getRecruiterProfile = async (userId) => {
         });
     if (!recruiterProfile) {
         const error = new Error(
-            "Recruiter profile not found"
+            MESSAGES.RECRUITER_PROFILE_NOT_FOUND
         );
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
@@ -39,7 +39,7 @@ const createJob = async (
         );
     if (!category) {
         const error = new Error(
-            "Job category not found"
+            MESSAGES.JOB_CATEGORY_NOT_FOUND
         );
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
@@ -347,7 +347,7 @@ const getJobById = async (
 
     if (!job) {
         const error = new Error(
-            "Job not found"
+            MESSAGES.JOB_NOT_FOUND
         );
         error.statusCode =
             STATUS_CODES.NOT_FOUND;
@@ -369,7 +369,7 @@ const updateJob = async (
         await Job.findByPk(jobId);
     if (!job) {
         const error = new Error(
-            "Job not found"
+            MESSAGES.JOB_NOT_FOUND
         );
         error.statusCode =
             STATUS_CODES.NOT_FOUND;
@@ -394,7 +394,7 @@ const updateJob = async (
             );
         if (!category) {
             const error = new Error(
-                "Job category not found"
+                MESSAGES.JOB_CATEGORY_NOT_FOUND
             );
             error.statusCode =
                 STATUS_CODES.NOT_FOUND;
@@ -420,7 +420,7 @@ const deleteJob = async (
         await Job.findByPk(jobId);
     if (!job) {
         const error = new Error(
-            "Job not found"
+            MESSAGES.JOB_NOT_FOUND
         );
         error.statusCode =
             STATUS_CODES.NOT_FOUND;
