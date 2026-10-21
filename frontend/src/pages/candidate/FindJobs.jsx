@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import LocationAutocomplete from "../../components/LocationAutocomplete";
 import Pagination, { usePagination } from "../../components/Pagination";
 import {
     formatJobCard,
@@ -282,14 +283,14 @@ const FindJobs = () => {
                             className="shrink-0 text-slate-400"
                         />
 
-                        <input
-                            type="text"
+                        <LocationAutocomplete
                             value={location}
                             onChange={(e) =>
                                 setLocation(e.target.value)
                             }
                             placeholder="Location"
-                            className="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
+                            className="min-w-0 flex-1"
+                            inputClassName="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
                         />
                     </div>
 
@@ -533,12 +534,12 @@ const FindJobs = () => {
                         </h3>
 
                         <p className="mt-1 text-sm text-slate-500">
-                            {selectedCategory
-                                ? `There are currently no jobs available in ${selectedCategory}.`
+                            {category
+                                ? `There are currently no jobs available in ${category}.`
                                 : "Try changing your search or filters."}
                         </p>
 
-                        {selectedCategory && (
+                        {category && (
                             <button
                                 type="button"
                                 onClick={() =>

@@ -27,6 +27,7 @@ import {
 } from "../../services/jobService";
 import { getSkills } from "../../services/skillService";
 import Pagination, { usePagination } from "../../components/Pagination.jsx";
+import LocationAutocomplete from "../../components/LocationAutocomplete";
 
 const formatRecruiterJob = (job) => ({
     ...formatJobCard(job),
@@ -834,12 +835,13 @@ const Jobs = () => {
                                         Location
                                     </label>
 
-                                    <input
-                                        type="text"
+                                    <LocationAutocomplete
                                         name="location"
                                         value={selectedJob.location || ""}
                                         onChange={handleEditChange}
-                                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
+                                        placeholder="City, region, or address"
+                                        className="w-full"
+                                        inputClassName="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
                                     />
                                 </div>
 

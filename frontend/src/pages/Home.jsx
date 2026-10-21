@@ -24,6 +24,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import NotificationDropdown from "../pages/Notification";
+import LocationAutocomplete from "../components/LocationAutocomplete";
 import {
     formatJobCard,
     getJobCategories,
@@ -1098,8 +1099,7 @@ const Home = () => {
                                         LOCATION
                                     </p>
 
-                                    <input
-                                        type="text"
+                                    <LocationAutocomplete
                                         value={searchLocation}
                                         onChange={(event) =>
                                             setSearchLocation(
@@ -1115,7 +1115,8 @@ const Home = () => {
                                             }
                                         }}
                                         placeholder="City or Remote"
-                                        className="mt-0.5 w-full bg-transparent text-sm font-medium text-slate-700 outline-none placeholder:text-slate-400"
+                                        className="mt-0.5 w-full"
+                                        inputClassName="w-full bg-transparent text-sm font-medium text-slate-700 outline-none placeholder:text-slate-400"
                                     />
                                 </div>
                             </div>

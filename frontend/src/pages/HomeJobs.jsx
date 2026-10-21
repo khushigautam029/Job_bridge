@@ -19,6 +19,7 @@ import {
     formatJobCard,
     getJobs,
 } from "../services/jobService";
+import LocationAutocomplete from "../components/LocationAutocomplete";
 import {
     getSavedJobs,
     saveJob as saveJobRequest,
@@ -323,12 +324,12 @@ const HomeJobs = () => {
                             </button>
                         )}
                     </div>
-                    <input
-                        type="text"
+                    <LocationAutocomplete
                         value={location}
                         onChange={(event) => setLocation(event.target.value)}
                         placeholder="Filter by location"
-                        className="mt-3 w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-indigo-300"
+                        className="mt-3 w-full"
+                        inputClassName="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none placeholder:text-slate-400 focus:border-indigo-300"
                     />
                 </div>
             </section>

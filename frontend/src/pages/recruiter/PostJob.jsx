@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import LocationAutocomplete from "../../components/LocationAutocomplete";
 import {
     createJob,
     getJobCategories,
@@ -452,15 +453,15 @@ const PostJob = () => {
                                         size={17}
                                         className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
                                     />
-                                    <input
+                                    <LocationAutocomplete
                                         id="location"
-                                        type="text"
                                         name="location"
                                         required
                                         value={formData.location}
                                         onChange={handleChange}
                                         placeholder="e.g. Delhi, India"
-                                        className={`${inputClass} pl-11`}
+                                        className="w-full"
+                                        inputClassName={`${inputClass} pl-11`}
                                     />
                                 </div>
                             </div>
