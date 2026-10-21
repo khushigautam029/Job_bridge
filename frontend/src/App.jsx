@@ -1,19 +1,20 @@
 import { useLayoutEffect } from "react";
 import {
-  BrowserRouter,
-  Navigate,
-  Outlet,
-  Route,
-  Routes,
-  useLocation,
+    BrowserRouter,
+    Navigate,
+    Outlet,
+    Route,
+    Routes,
+    useLocation,
 } from "react-router-dom";
 
 import Home from "./pages/Home";
 import HomeJobs from "./pages/HomeJobs";
 import NotFound from "./pages/NotFound";
+import ForgotPassword from "./pages/auth/ForgotPassword";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
-
+import ResetPassword from "./pages/auth/ResetPassword";
 import Applications from "./pages/candidate/Applications";
 import ApplyJob from "./pages/candidate/ApplyJob";
 import CandidateLayout from "./pages/candidate/CandidateLayout";
@@ -120,6 +121,8 @@ const App = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/jobs" element={<HomeJobs />} />
+                <Route path="/forgot-password" element={<ForgotPassword />}/>
+                <Route path="/reset-password" element={<ResetPassword />}/>
 
                 {/* Candidate Routes: CANDIDATE role only */}
                 <Route

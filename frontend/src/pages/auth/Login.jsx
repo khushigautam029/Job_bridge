@@ -70,8 +70,8 @@ const Login = () => {
         } catch (error) {
             setError(
                 error?.response?.data?.message ||
-                    error?.message ||
-                    "Login failed. Please check your credentials."
+                error?.message ||
+                "Login failed. Please check your credentials."
             );
         } finally {
             setLoading(false);
@@ -235,6 +235,16 @@ const Login = () => {
                                         )}
                                     </button>
                                 </div>
+                            </div>
+
+                            <div className="flex justify-end">
+                                <button
+                                    type="button"
+                                    onClick={() => navigate("/forgot-password")}
+                                    className="text-sm font-semibold text-indigo-600 transition hover:text-indigo-700"
+                                >
+                                    Forgot password?
+                                </button>
                             </div>
 
                             {/* REMEMBER ME */}
