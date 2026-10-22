@@ -1,4 +1,3 @@
-
 const normalizeText = (value = "") =>
     String(value)
         .toLowerCase()
@@ -121,10 +120,10 @@ const calculateAtsScore = ({ resumeText, job }) => {
 
     const keywordScore = keywords.length
         ? (matchedKeywords.length / keywords.length) *
-          (jobSkills.length ? 30 : 100)
+        (jobSkills.length ? 30 : 100)
         : jobSkills.length
-          ? 30
-          : 0;
+            ? 30
+            : 0;
 
     const score = Math.round(
         Math.min(100, skillScore + keywordScore)

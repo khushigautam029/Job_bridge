@@ -4,10 +4,10 @@ import sequelize from "../config/database.js";
 const AtsAnalysis = sequelize.define(
     "AtsAnalysis",
     {
-        id:{
-            type:DataTypes.INTEGER,
-            primaryKey:true,
-            autoIncrement:true,
+        id: {
+            type: DataTypes.INTEGER,
+            primaryKey: true,
+            autoIncrement: true,
         },
         applicationId: {
             type: DataTypes.INTEGER,
@@ -29,30 +29,31 @@ const AtsAnalysis = sequelize.define(
                 max: 100,
             },
         },
-        matchedSkills:{
-            type:DataTypes.JSON,
+        matchedSkills: {
+            type: DataTypes.JSON,
             allowNull: false,
-            default:[]
+            defaultValue: [],
         },
-        missingSkills:{
-            type:DataTypes.JSON,
-            allowNull:false,
-            default:[]
+        missingSkills: {
+            type: DataTypes.JSON,
+            allowNull: false,
+            defaultValue: [],
         },
-        matchedKeywords:{
-            type:DataTypes.JSON,
-            allowNull:false,
-            default:[]
+        matchedKeywords: {
+            type: DataTypes.JSON,
+            allowNull: false,
+            defaultValue: [],
         },
-        missingKeywords:{
-            type:DataTypes.JSON,
-            allowNull:false,
-            default:[]
+        missingKeywords: {
+            type: DataTypes.JSON,
+            allowNull: false,
+            defaultValue: [],
         },
-        breakDown:{
-            type:DataTypes.JSON,
-            allowNull:false,
-            default:[]
+        breakDown: {
+            type: DataTypes.JSON,
+            allowNull: false,
+            defaultValue: {},
+            field: "break_down",
         },
         status: {
             type: DataTypes.ENUM(

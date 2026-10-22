@@ -1,4 +1,5 @@
 import {
+    analyzeJobApplicationsBatch,
     applyForJob,
     getApplicationAtsScore,
     getApplicationById,
@@ -204,11 +205,43 @@ const getAtsScore = asyncHandler(async (req, res) => {
 });
 
 
+const runJobAtsAnalysis = asyncHandler(async (req, res) => {
+    const jobId = Number(req.params.jobId);
+    const afterApplicationId = Number(
+        req.query.afterApplicationId ?? 0
+    );
+
+    if (
+        !Number.isSafeInteger(jobId) ||
+        jobId <= 0 ||
+        !Number.isSafeInteger(afterApplicationId) ||
+        afterApplicationId < 0
+    ) {
+        return sendError(
+            res,
+            STATUS_CODES.BAD_REQUEST,
+            "Invalid job ID or application cursor."
+        );
+    }
+
+    const result = await analyzeJobApplicationsBatch(
+        req.user.id,
+        jobId,
+        afterApplicationId
+    );
+
+    return sendSuccess(
+        res,
+        STATUS_CODES.OK,
+        "ATS batch processed successfully.",
+        result
+    );
+});
+
+
 export {
-    apply, getAtsScore, getForJob, getForRecruiter,
-    getMine,
-    getOne,
-    updateStatus,
+    apply, getAtsScore, getForJob, getForRecruiter, getMine,
+    getOne, runJobAtsAnalysis, updateStatus,
     withdraw
 };
 

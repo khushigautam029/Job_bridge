@@ -6,6 +6,7 @@ import {
     getForRecruiter,
     getMine,
     getOne,
+    runJobAtsAnalysis,
     updateStatus,
     withdraw
 } from "../controllers/applicationController.js";
@@ -21,6 +22,6 @@ router.get( "/applications/:id", protect, getOne);
 router.get( "/jobs/:jobId/applications", protect, getForJob);
 router.patch( "/applications/:id/status", protect, updateStatus);
 router.get("/applications/:id/ats-score", protect, getAtsScore);
-
+router.post("/jobs/:jobId/ats-analysis", protect,runJobAtsAnalysis);
 
 export default router;

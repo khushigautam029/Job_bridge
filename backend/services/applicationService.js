@@ -1,6 +1,8 @@
+import { Op } from "sequelize";
 import {
     Application,
     ApplicationStatusHistory,
+    AtsAnalysis,
     CandidateEducation,
     CandidateExperience,
     CandidateProfile,
@@ -11,7 +13,7 @@ import {
     RecruiterProfile,
     Skill,
     User,
-    UserPreference,
+    UserPreference
 } from "../models/index.js";
 import createNotification from "../utils/createNotification.js";
 import extractResumeText from "../utils/resumeParserService.js";
@@ -434,7 +436,7 @@ const withdrawApplication = async (
 
 
     application.status = "WITHDRAWN";
-    
+
 
     await application.save();
 
@@ -668,7 +670,7 @@ const updateApplicationStatus = async (
         application.status === "WITHDRAWN"
     ) {
         const error = new Error(
-           MESSAGES.WITHDRAWN_CANNOT_UPDATE
+            MESSAGES.WITHDRAWN_CANNOT_UPDATE
         );
 
         error.statusCode = STATUS_CODES.BAD_REQUEST;
@@ -717,7 +719,7 @@ const getApplicationAtsScore = async (userId, applicationId) => {
 
     if (!recruiter) {
         const error = new Error(
-            "Recruiter profile not found."
+            MESSAGES.RECRUITER_PROFILE_NOT_FOUND
         );
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
@@ -749,7 +751,7 @@ const getApplicationAtsScore = async (userId, applicationId) => {
     );
 
     if (!application) {
-        const error = new Error("Application not found.");
+        const error = new Error( MESSAGES.APPLICATION_NOT_FOUND );
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
@@ -810,6 +812,20 @@ const getApplicationAtsScore = async (userId, applicationId) => {
         job: application.job,
     });
 
+
+    await AtsAnalysis.upsert({
+        applicationId: application.id,
+        score: atsResult.score,
+        matchedSkills: atsResult.matchedSkills,
+        missingSkills: atsResult.missingSkills,
+        matchedKeywords: atsResult.matchedKeywords,
+        missingKeywords: atsResult.missingKeywords,
+        breakDown: atsResult.breakdown,
+        status: "COMPLETED",
+        errorMessage: null,
+        analyzedAt: new Date(),
+    });
+
     return {
         applicationId: application.id,
         jobId: application.job.id,
@@ -818,8 +834,225 @@ const getApplicationAtsScore = async (userId, applicationId) => {
     };
 };
 
+
+const analyzeJobApplicationsBatch = async (
+    userId,
+    jobId,
+    afterApplicationId = 0
+) => {
+    const BATCH_SIZE = 50;
+
+    // 1. Verify the logged-in recruiter's profile.
+    const recruiter = await RecruiterProfile.findOne({
+        where: { userId },
+    });
+
+    if (!recruiter) {
+        const error = new Error( MESSAGES.RECRUITER_PROFILE_NOT_FOUND );
+        error.statusCode = STATUS_CODES.NOT_FOUND;
+        throw error;
+    }
+
+    // 2. Verify job ownership and load its required skills.
+    const job = await Job.findOne({
+        where: {
+            id: jobId,
+            recruiterId: recruiter.id,
+        },
+        include: [
+            {
+                model: Skill,
+                as: "skills",
+                attributes: ["id", "name"],
+                through: { attributes: [] },
+            },
+        ],
+    });
+
+    if (!job) {
+        const error = new Error(
+            "Job not found or you are not authorized to analyze it."
+        );
+        error.statusCode = STATUS_CODES.NOT_FOUND;
+        throw error;
+    }
+
+    // 3. Fetch the next batch, plus one extra row to detect more work.
+    const rows = await Application.findAll({
+        where: {
+            jobId: job.id,
+            id: { [Op.gt]: afterApplicationId },
+        },
+        attributes: [
+            "id",
+            "jobId",
+            "candidateId",
+            "resume",
+        ],
+        order: [["id", "ASC"]],
+        limit: BATCH_SIZE + 1,
+    });
+
+    const hasMore = rows.length > BATCH_SIZE;
+    const applications = rows.slice(0, BATCH_SIZE);
+
+    const summary = {
+        total: applications.length,
+        completed: 0,
+        failed: 0,
+        skipped: 0,
+        results: [],
+    };
+
+    // 4. Process each application separately so one failure
+    //    doesn't stop the remaining applications.
+    for (const application of applications) {
+        const result = {
+            applicationId: application.id,
+            status: "FAILED",
+            message: "",
+        };
+
+        try {
+            // Check that the candidate profile exists.
+            const candidate = await CandidateProfile.findByPk(
+                application.candidateId
+            );
+
+            if (!candidate) {
+                throw new Error( MESSAGES.PROFILE_NOT_FOUND );
+            }
+
+            // Respect resume privacy settings.
+            const preferences = await UserPreference.findOne({
+                where: { userId: candidate.userId },
+            });
+
+            let privacySettings =
+                preferences?.privacySettings || {};
+
+            if (typeof privacySettings === "string") {
+                try {
+                    privacySettings = JSON.parse(privacySettings);
+                } catch {
+                    privacySettings = {};
+                }
+            }
+
+            if (privacySettings.resumeVisibility === false) {
+                summary.skipped++;
+
+                result.status = "SKIPPED";
+                result.message = "Resume privacy settings prevent analysis.";
+
+                // Record the skipped state without reading the resume.
+                await AtsAnalysis.upsert({
+                    applicationId: application.id,
+                    score: 0,
+                    matchedSkills: [],
+                    missingSkills: [],
+                    matchedKeywords: [],
+                    missingKeywords: [],
+                    breakDown: {},
+                    status: "FAILED",
+                    errorMessage: result.message,
+                    analyzedAt: null,
+                });
+
+                summary.results.push(result);
+                continue;
+            }
+
+            if (!application.resume) {
+                throw new Error(
+                    "This application does not have an uploaded resume."
+                );
+            }
+
+            // Record that analysis has started.
+            await AtsAnalysis.upsert({
+                applicationId: application.id,
+                score: 0,
+                matchedSkills: [],
+                missingSkills: [],
+                matchedKeywords: [],
+                missingKeywords: [],
+                breakDown: {},
+                status: "PROCESSING",
+                errorMessage: null,
+                analyzedAt: null,
+            });
+
+            // Parse the resume attached to this application.
+            const parsedResume = await extractResumeText(
+                application.resume
+            );
+
+            // Calculate the ATS score using the existing scoring service.
+            const atsResult = calculateAtsScore({
+                resumeText: parsedResume.text,
+                job,
+            });
+
+            // Save the completed result.
+            await AtsAnalysis.upsert({
+                applicationId: application.id,
+                score: atsResult.score,
+                matchedSkills: atsResult.matchedSkills,
+                missingSkills: atsResult.missingSkills,
+                matchedKeywords: atsResult.matchedKeywords,
+                missingKeywords: atsResult.missingKeywords,
+                breakDown: atsResult.breakdown,
+                status: "COMPLETED",
+                errorMessage: null,
+                analyzedAt: new Date(),
+            });
+
+            summary.completed++;
+            result.status = "COMPLETED";
+            result.score = atsResult.score;
+            result.message = "ATS analysis completed successfully.";
+        } catch (error) {
+            summary.failed++;
+
+            result.status = "FAILED";
+            result.message = error.message || "ATS analysis failed.";
+
+            // Keep the failure so it can be inspected or retried.
+            await AtsAnalysis.upsert({
+                applicationId: application.id,
+                score: 0,
+                matchedSkills: [],
+                missingSkills: [],
+                matchedKeywords: [],
+                missingKeywords: [],
+                breakDown: {},
+                status: "FAILED",
+                errorMessage: result.message,
+                analyzedAt: null,
+            });
+        }
+
+        summary.results.push(result);
+    }
+
+    const nextCursor = applications.length
+        ? applications[applications.length - 1].id
+        : afterApplicationId;
+
+    return {
+        jobId: job.id,
+        jobTitle: job.title,
+        batchSize: BATCH_SIZE,
+        ...summary,
+        nextCursor,
+        hasMore,
+    };
+};
+
+
 export {
-    applyForJob, getApplicationAtsScore, getApplicationById,
+    analyzeJobApplicationsBatch, applyForJob, getApplicationAtsScore, getApplicationById,
     getJobApplications,
     getMyApplications,
     getRecruiterApplications,
