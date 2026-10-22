@@ -1,5 +1,6 @@
 import Application from "./Application.js";
 import ApplicationStatusHistory from "./ApplicationStatusHistory.js";
+import AtsAnalysis from "./AtsAnalysis.js";
 import CandidateEducation from "./CandidateEducation.js";
 import CandidateExperience from "./CandidateExperience.js";
 import CandidateProfile from "./CandidateProfile.js";
@@ -298,9 +299,21 @@ CandidateProject.belongsTo(
     }
 );
 
+// APPLICATION → ATS ANALYSIS
+Application.hasOne(AtsAnalysis, {
+    foreignKey: "applicationId",
+    as: "atsAnalysis",
+    onDelete: "CASCADE",
+});
+
+AtsAnalysis.belongsTo(Application, {
+    foreignKey: "applicationId",
+    as: "application",
+});
+
 
 export {
-    Application, ApplicationStatusHistory, CandidateEducation, CandidateExperience, CandidateProfile, CandidateProject,
+    Application, ApplicationStatusHistory, AtsAnalysis, CandidateEducation, CandidateExperience, CandidateProfile, CandidateProject,
     CandidateSkill, Company, Interview, Job, JobCategory, JobSkill, Notification, RecruiterProfile,
     SavedJob, Skill, User, UserPreference
 };

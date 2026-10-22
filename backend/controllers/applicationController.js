@@ -1,5 +1,6 @@
 import {
     applyForJob,
+    getApplicationAtsScore,
     getApplicationById,
     getJobApplications,
     getMyApplications,
@@ -187,10 +188,24 @@ const updateStatus = asyncHandler(
     }
 );
 
+
+const getAtsScore = asyncHandler(async (req, res) => {
+    const result = await getApplicationAtsScore(
+        req.user.id,
+        req.params.id
+    );
+
+    return sendSuccess(
+        res,
+        STATUS_CODES.OK,
+        "ATS score calculated successfully.",
+        result
+    );
+});
+
+
 export {
-    apply,
-    getForJob,
-    getForRecruiter,
+    apply, getAtsScore, getForJob, getForRecruiter,
     getMine,
     getOne,
     updateStatus,

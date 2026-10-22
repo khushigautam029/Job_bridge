@@ -14,7 +14,9 @@ import {
     UserPreference,
 } from "../models/index.js";
 import createNotification from "../utils/createNotification.js";
+import extractResumeText from "../utils/resumeParserService.js";
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
+import calculateAtsScore from "./atsScoringService.js";
 
 /*
     Candidate applies for a job
@@ -707,9 +709,117 @@ const updateApplicationStatus = async (
 };
 
 
+const getApplicationAtsScore = async (userId, applicationId) => {
+    // 1. Find the logged-in recruiter's profile.
+    const recruiter = await RecruiterProfile.findOne({
+        where: { userId },
+    });
+
+    if (!recruiter) {
+        const error = new Error(
+            "Recruiter profile not found."
+        );
+        error.statusCode = STATUS_CODES.NOT_FOUND;
+        throw error;
+    }
+
+    // 2. Load the application, its job, and the job's required skills.
+    const application = await Application.findByPk(
+        applicationId,
+        {
+            include: [
+                {
+                    model: Job,
+                    as: "job",
+                    include: [
+                        {
+                            model: Skill,
+                            as: "skills",
+                            attributes: ["id", "name"],
+                            through: { attributes: [] },
+                        },
+                    ],
+                },
+                {
+                    model: CandidateProfile,
+                    as: "candidate",
+                },
+            ],
+        }
+    );
+
+    if (!application) {
+        const error = new Error("Application not found.");
+        error.statusCode = STATUS_CODES.NOT_FOUND;
+        throw error;
+    }
+
+    // 3. Never allow a recruiter to score another recruiter's applicant.
+    if (application.job.recruiterId !== recruiter.id) {
+        const error = new Error(
+            "You are not authorized to access this application."
+        );
+        error.statusCode = STATUS_CODES.FORBIDDEN;
+        throw error;
+    }
+
+    // 4. Respect the candidate's resume privacy setting.
+    const preferences = await UserPreference.findOne({
+        where: {
+            userId: application.candidate.userId,
+        },
+    });
+
+    const privacySettings =
+        preferences?.privacySettings || {};
+
+    if (privacySettings.resumeVisibility === false) {
+        const error = new Error(
+            "ATS analysis is unavailable because the candidate's resume is hidden."
+        );
+        error.statusCode = STATUS_CODES.FORBIDDEN;
+        throw error;
+    }
+
+    // 5. Use the resume attached to this application only.
+    if (!application.resume) {
+        const error = new Error(
+            "This application does not have an uploaded resume."
+        );
+        error.statusCode = STATUS_CODES.BAD_REQUEST;
+        throw error;
+    }
+
+    // 6. Extract resume text and calculate the match score.
+    let parsedResume;
+
+    try {
+        parsedResume = await extractResumeText(
+            application.resume
+        );
+    } catch {
+        const error = new Error(
+            "The resume could not be parsed. Check that the file exists and is a supported PDF or DOCX."
+        );
+        error.statusCode = STATUS_CODES.BAD_REQUEST;
+        throw error;
+    }
+
+    const atsResult = calculateAtsScore({
+        resumeText: parsedResume.text,
+        job: application.job,
+    });
+
+    return {
+        applicationId: application.id,
+        jobId: application.job.id,
+        jobTitle: application.job.title,
+        ats: atsResult,
+    };
+};
+
 export {
-    applyForJob,
-    getApplicationById,
+    applyForJob, getApplicationAtsScore, getApplicationById,
     getJobApplications,
     getMyApplications,
     getRecruiterApplications,

@@ -1,12 +1,13 @@
 import express from "express";
 import {
     apply,
+    getAtsScore,
     getForJob,
     getForRecruiter,
     getMine,
     getOne,
     updateStatus,
-    withdraw,
+    withdraw
 } from "../controllers/applicationController.js";
 import protect from "../middleware/authMiddleware.js";
 
@@ -19,5 +20,7 @@ router.delete( "/applications/:id", protect, withdraw);
 router.get( "/applications/:id", protect, getOne);
 router.get( "/jobs/:jobId/applications", protect, getForJob);
 router.patch( "/applications/:id/status", protect, updateStatus);
+router.get("/applications/:id/ats-score", protect, getAtsScore);
+
 
 export default router;
