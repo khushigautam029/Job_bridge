@@ -532,6 +532,158 @@ const getJobApplications = async (
     return applyCandidatePrivacySettings(applications);
 };
 
+
+const getRankedJobApplications = async (
+    userId,
+    jobId,
+    page = 1,
+    limit = 20
+) => {
+    const { count, rows } = await (async () => {
+        // 1. Find the logged-in recruiter's profile.
+        const recruiter = await RecruiterProfile.findOne({
+            where: { userId },
+        });
+
+        if (!recruiter) {
+            const error = new Error(
+                MESSAGES.RECRUITER_PROFILE_NOT_FOUND
+            );
+            error.statusCode = STATUS_CODES.NOT_FOUND;
+            throw error;
+        }
+
+        // 2. Verify the recruiter owns this job.
+        const job = await Job.findOne({
+            where: {
+                id: jobId,
+                recruiterId: recruiter.id,
+            },
+        });
+
+        if (!job) {
+            const error = new Error(
+                MESSAGES.JOB_NOT_FOUND_OR_UNAUTHORIZED
+            );
+            error.statusCode = STATUS_CODES.FORBIDDEN;
+            throw error;
+        }
+
+        // 3. Fetch applications with saved ATS results.
+        return Application.findAndCountAll({
+            where: { jobId },
+            attributes: [
+                "id",
+                "jobId",
+                "candidateId",
+                "resume",
+                "coverLetter",
+                "status",
+                "appliedAt",
+            ],
+            include: [
+                {
+                    model: CandidateProfile,
+                    as: "candidate",
+                    include: [
+                        {
+                            model: User,
+                            as: "user",
+                            attributes: [
+                                "id",
+                                "name",
+                                "email",
+                                "phone",
+                            ],
+                            include: [
+                                {
+                                    model: UserPreference,
+                                    as: "preferences",
+                                    attributes: [
+                                        "privacySettings",
+                                    ],
+                                    required: false,
+                                },
+                            ],
+                        },
+                    ],
+                },
+                {
+                    model: AtsAnalysis,
+                    as: "atsAnalysis",
+                    attributes: [
+                        "score",
+                        "matchedSkills",
+                        "missingSkills",
+                        "matchedKeywords",
+                        "missingKeywords",
+                        "breakDown",
+                        "status",
+                        "errorMessage",
+                        "analyzedAt",
+                    ],
+                    required: false,
+                },
+            ],
+            order: [
+                [
+                    { model: AtsAnalysis, as: "atsAnalysis" },
+                    "score",
+                    "DESC",
+                ],
+                ["appliedAt", "DESC"],
+                ["id", "ASC"],
+            ],
+            limit,
+            offset: (page - 1) * limit,
+            distinct: true,
+        });
+    })();
+
+    // 4. Apply the same candidate privacy filtering as the existing API.
+    const safeApplications =
+        await applyCandidatePrivacySettings(rows);
+
+    // 5. Do not expose ATS details if resume visibility is disabled.
+    const applications = safeApplications.map((application) => {
+        const candidate = application.candidate;
+        const settings =
+            candidate?.user?.preferences?.privacySettings || {};
+
+        let privacySettings = settings;
+
+        if (typeof settings === "string") {
+            try {
+                privacySettings = JSON.parse(settings);
+            } catch {
+                privacySettings = {};
+            }
+        }
+
+        const plainApplication =
+            typeof application.toJSON === "function"
+                ? application.toJSON()
+                : { ...application };
+
+        if (privacySettings.resumeVisibility === false) {
+            plainApplication.atsAnalysis = null;
+        }
+
+        return plainApplication;
+    });
+
+    return {
+        applications,
+        pagination: {
+            total: count,
+            page,
+            limit,
+            totalPages: Math.ceil(count / limit),
+        },
+    };
+};
+
+
 const getRecruiterApplications = async (userId) => {
     const recruiter =
         await RecruiterProfile.findOne({
@@ -1054,9 +1206,7 @@ const analyzeJobApplicationsBatch = async (
 export {
     analyzeJobApplicationsBatch, applyForJob, getApplicationAtsScore, getApplicationById,
     getJobApplications,
-    getMyApplications,
-    getRecruiterApplications,
-    updateApplicationStatus,
-    withdrawApplication
+    getMyApplications, getRankedJobApplications, getRecruiterApplications,
+    updateApplicationStatus, withdrawApplication
 };
 

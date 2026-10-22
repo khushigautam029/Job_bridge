@@ -10,18 +10,61 @@
     MapPin,
     Phone,
     Search,
+    Sparkles,
     User,
     Users,
     X
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import Pagination, { usePagination } from "../../components/Pagination.jsx";
 import {
     getJobApplications,
+    getRankedJobApplications,
     getRecruiterApplications,
+    runJobAtsAnalysis,
     updateApplicationStatus as updateApplicationStatusRequest,
 } from "../../services/applicationService";
-import Pagination, { usePagination } from "../../components/Pagination.jsx";
+
+const statusLabels = {
+    APPLIED: "Applied",
+    UNDER_REVIEW: "Under Review",
+    SHORTLISTED: "Shortlisted",
+    INTERVIEW: "Interview",
+    SELECTED: "Selected",
+    REJECTED: "Rejected",
+};
+
+const mapApplication = (item) => {
+    const candidate = item.candidate || {};
+    const job = item.job || {};
+
+    return {
+        ...item,
+        jobId: item.jobId || job.id,
+        candidate: candidate.user?.name || "Candidate",
+        email: candidate.user?.email || "",
+        phone: candidate.user?.phone || "",
+        jobTitle: job.title || item.jobTitle || "Job",
+        categoryId: job.categoryId || job.category?.id,
+        category: job.category?.name || item.category || "Uncategorized",
+        location: candidate.location || job.location || "",
+        experience: candidate.experienceYears
+            ? `${candidate.experienceYears} Years`
+            : "Not specified",
+        status: statusLabels[item.status] || item.status,
+        appliedDate: item.appliedAt
+            ? new Date(item.appliedAt).toLocaleDateString()
+            : "",
+        skills: (candidate.skills || []).map((skill) =>
+            typeof skill === "string" ? skill : skill.name
+        ).filter(Boolean),
+        resume: item.resume || "",
+        education: candidate.education || "Not specified",
+        summary: candidate.bio || "No professional summary provided.",
+        atsAnalysis: item.atsAnalysis || null,
+    };
+};
 
 const RecruiterApplications = () => {
     const { jobId } = useParams();
@@ -40,8 +83,13 @@ const RecruiterApplications = () => {
     const [modalType, setModalType] = useState(null);
 
     const [applications, setApplications] = useState([]);
+    const [allApplications, setAllApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [atsRunning, setAtsRunning] = useState(false);
+    const [atsMessage, setAtsMessage] = useState("");
+    const [rankedMode, setRankedMode] = useState(false);
+    const [selectedAtsJobId, setSelectedAtsJobId] = useState("");
 
     useEffect(() => {
         let active = true;
@@ -52,41 +100,10 @@ const RecruiterApplications = () => {
         request
             .then((items) => {
                 if (!active) return;
-                const statusLabels = {
-                    APPLIED: "Applied",
-                    UNDER_REVIEW: "Under Review",
-                    SHORTLISTED: "Shortlisted",
-                    INTERVIEW: "Interview",
-                    SELECTED: "Selected",
-                    REJECTED: "Rejected",
-                };
-                setApplications(items.map((item) => {
-                    const candidate = item.candidate || {};
-                    const job = item.job || {};
-                    const status = statusLabels[item.status] || item.status;
-                    return {
-                        ...item,
-                        jobId: item.jobId || job.id,
-                        candidate: candidate.user?.name || "Candidate",
-                        email: candidate.user?.email || "",
-                        phone: candidate.user?.phone || "",
-                        jobTitle: job.title || "Job",
-                        categoryId: job.categoryId || job.category?.id,
-                        category: job.category?.name || "Uncategorized",
-                        location: candidate.location || job.location || "",
-                        experience: candidate.experienceYears
-                            ? `${candidate.experienceYears} Years`
-                            : "Not specified",
-                        status,
-                        appliedDate: item.appliedAt
-                            ? new Date(item.appliedAt).toLocaleDateString()
-                            : "",
-                        skills: (candidate.skills || []).map((skill) => skill.name),
-                        resume: item.resume || "",
-                        education: "",
-                        summary: candidate.bio || "",
-                    };
-                }));
+                const mappedItems = items.map(mapApplication);
+                setApplications(mappedItems);
+                setAllApplications(mappedItems);
+                setRankedMode(false);
                 setError("");
             })
             .catch((loadError) => {
@@ -120,6 +137,30 @@ const RecruiterApplications = () => {
             .filter(Boolean)
             .sort((first, second) => first.localeCompare(second));
     }, [jobApplications]);
+
+    // Unique jobs represented in the current application list. This lets recruiters
+    // run ATS analysis even when they opened the general Applications page.
+    const atsJobOptions = useMemo(() => {
+        const jobsById = new Map();
+
+        allApplications.forEach((application) => {
+            const id = Number(application.jobId);
+            if (!id || jobsById.has(id)) return;
+
+            jobsById.set(id, {
+                id,
+                title: application.jobTitle || `Job ${id}`,
+            });
+        });
+
+        return [...jobsById.values()].sort((a, b) => a.title.localeCompare(b.title));
+    }, [allApplications]);
+
+    const atsJobId = currentJobId || (
+        atsJobOptions.some((job) => job.id === Number(selectedAtsJobId))
+            ? Number(selectedAtsJobId)
+            : atsJobOptions[0]?.id || null
+    );
 
     // Filter Applications
     const filteredApplications = useMemo(() => {
@@ -192,7 +233,7 @@ const RecruiterApplications = () => {
 
     // Initials
     const getInitials = (name) => {
-        return name
+        return (name || "Candidate")
             .split(" ")
             .map((word) => word[0])
             .join("")
@@ -258,6 +299,7 @@ const RecruiterApplications = () => {
         newStatus
     ) => {
         const statusValues = {
+            Applied: "APPLIED",
             "Under Review": "UNDER_REVIEW",
             Shortlisted: "SHORTLISTED",
             Interview: "INTERVIEW",
@@ -301,6 +343,102 @@ const RecruiterApplications = () => {
                 }
                 : null
         );
+    };
+
+    /* Load ATS-ranked applicants for the selected job */
+    const loadRankedApplications = async () => {
+        if (!atsJobId) {
+            setError("There are no job applications available to rank yet.");
+            return;
+        }
+
+        setError("");
+        try {
+            const result = await getRankedJobApplications(atsJobId, 1, 100);
+            const items = result.applications || [];
+            setApplications(items.map(mapApplication));
+            setRankedMode(true);
+            setSearch("");
+            setStatusFilter("All");
+            setCategoryFilter("All");
+            if (!items.length) setAtsMessage("No applications were returned for this job.");
+        } catch (rankError) {
+            setError(
+                rankError.response?.data?.message ||
+                "Unable to load ATS-ranked applicants."
+            );
+        }
+    };
+
+    /* Return to the normal application list */
+    const handleShowAllApplications = async () => {
+        setLoading(true);
+        setError("");
+        try {
+            const items = currentJobId
+                ? await getJobApplications(currentJobId)
+                : await getRecruiterApplications();
+            const mappedItems = items.map(mapApplication);
+            setApplications(mappedItems);
+            setAllApplications(mappedItems);
+            setRankedMode(false);
+            setAtsMessage("");
+        } catch (loadError) {
+            setError(
+                loadError.response?.data?.message ||
+                "Unable to reload applications."
+            );
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    /* Analyze applications in batches of 50 */
+    const handleRunAtsAnalysis = async () => {
+        if (!atsJobId) {
+            setError("There are no job applications available to analyze yet.");
+            return;
+        }
+
+        setAtsRunning(true);
+        setAtsMessage("");
+        setError("");
+
+        try {
+            let cursor = 0;
+            let hasMore = true;
+            let completed = 0;
+            let failed = 0;
+            let skipped = 0;
+
+            while (hasMore) {
+                const result = await runJobAtsAnalysis(atsJobId, cursor);
+                completed += result.completed || 0;
+                failed += result.failed || 0;
+                skipped += result.skipped || 0;
+
+                const nextCursor = result.nextCursor;
+                hasMore = Boolean(result.hasMore);
+
+                if (hasMore && (nextCursor == null || nextCursor <= cursor)) {
+                    throw new Error("ATS batch cursor did not advance. Please try again.");
+                }
+                if (nextCursor != null) cursor = nextCursor;
+            }
+
+            setAtsMessage(
+                `ATS analysis finished — ${completed} completed, ${failed} failed, ${skipped} skipped.`
+            );
+            await loadRankedApplications();
+        } catch (atsError) {
+            setError(
+                atsError.response?.data?.message ||
+                atsError.message ||
+                "Unable to run ATS analysis."
+            );
+        } finally {
+            setAtsRunning(false);
+        }
     };
 
     /*  View Resume  */
@@ -369,15 +507,116 @@ const RecruiterApplications = () => {
                 </div>
             </section>
 
-            {/* BACK BUTTON */}
-            <button
-                type="button"
-                onClick={handleBack}
-                className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 transition-colors hover:text-indigo-800"
-            >
-                <ArrowLeft size={18} />
-                Back to Job
-            </button>
+            {/* BACK BUTTON — shown only when opened from a specific job */}
+            {currentJobId && (
+                <button
+                    type="button"
+                    onClick={handleBack}
+                    className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 transition-colors hover:text-indigo-800"
+                >
+                    <ArrowLeft size={18} />
+                    Back to Job
+                </button>
+            )}
+
+            {/* ATS RESUME SCANNER */}
+            {atsJobOptions.length > 0 && (
+                <section className="relative mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+                    <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-violet-500 to-sky-400" />
+                    <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.72fr)]">
+                        <div className="p-5 sm:p-7">
+                            <div className="flex items-center gap-2">
+                                <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                                    <Sparkles size={17} />
+                                </span>
+                                <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-indigo-600">Smart hiring tools</span>
+                                <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-700">Rule-based ATS</span>
+                            </div>
+                            <h2 className="mt-4 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Resume match scanner</h2>
+                            <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
+                                Screen resumes against a role's listed skills and keywords. Review match signals, spot skill gaps, and sort applicants to help plan your next hiring step.
+                            </p>
+
+                            <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                                <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-3">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-indigo-600 shadow-sm"><FileText size={16} /></div>
+                                    <p className="mt-3 text-xs font-semibold text-slate-800">Resume parsing</p>
+                                    <p className="mt-1 text-[11px] leading-4 text-slate-500">Reads supported resume files</p>
+                                </div>
+                                <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-3">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-emerald-600 shadow-sm"><Users size={16} /></div>
+                                    <p className="mt-3 text-xs font-semibold text-slate-800">Skill comparison</p>
+                                    <p className="mt-1 text-[11px] leading-4 text-slate-500">Highlights matches and gaps</p>
+                                </div>
+                                <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-3">
+                                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-violet-600 shadow-sm"><Search size={16} /></div>
+                                    <p className="mt-3 text-xs font-semibold text-slate-800">Candidate ranking</p>
+                                    <p className="mt-1 text-[11px] leading-4 text-slate-500">Sorts by calculated match score</p>
+                                </div>
+                            </div>
+
+                            {atsRunning && (
+                                <div className="mt-5 rounded-2xl border border-indigo-100 bg-indigo-50/70 p-4" role="status" aria-live="polite">
+                                    <div className="flex items-center gap-3">
+                                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-indigo-600"><Sparkles size={18} className="animate-pulse" /></span>
+                                        <div className="min-w-0 flex-1">
+                                            <p className="text-sm font-semibold text-indigo-950">Scanning resumes…</p>
+                                            <p className="mt-1 text-xs leading-5 text-indigo-700">Please keep this page open while the applications are processed in batches.</p>
+                                        </div>
+                                        <span className="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-indigo-200 border-t-indigo-600" />
+                                    </div>
+                                    <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-indigo-100"><div className="h-full w-2/3 animate-pulse rounded-full bg-indigo-500" /></div>
+                                </div>
+                            )}
+                            {atsMessage && (
+                                <div className="mt-4 flex items-start gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+                                    <span className="mt-0.5">✓</span><span>{atsMessage}</span>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="border-t border-slate-100 bg-slate-50/70 p-5 sm:p-7 lg:border-l lg:border-t-0">
+                            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Analysis workspace</p>
+                            <label className="mt-4 block text-xs font-semibold text-slate-700">Job to screen</label>
+                            {currentJobId ? (
+                                <div className="mt-2 flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3.5">
+                                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600"><BriefcaseBusiness size={18} /></span>
+                                    <div className="min-w-0"><p className="truncate text-sm font-semibold text-slate-900">{atsJobOptions.find((job) => job.id === currentJobId)?.title || currentJobTitle}</p><p className="mt-1 text-xs text-slate-500">Current job applications</p></div>
+                                </div>
+                            ) : (
+                                <div className="relative mt-2">
+                                    <BriefcaseBusiness size={17} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                                    <select
+                                        value={atsJobId || ""}
+                                        onChange={(event) => {
+                                            setSelectedAtsJobId(event.target.value);
+                                            setAtsMessage("");
+                                            setError("");
+                                            setRankedMode(false);
+                                        }}
+                                        disabled={atsRunning}
+                                        className="w-full appearance-none rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-10 text-sm font-medium text-slate-800 outline-none transition focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100 disabled:opacity-60"
+                                    >
+                                        {atsJobOptions.map((job) => <option key={job.id} value={job.id}>{job.title}</option>)}
+                                    </select>
+                                    <ChevronDown size={16} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                                </div>
+                            )}
+
+                            <button type="button" onClick={handleRunAtsAnalysis} disabled={atsRunning || !atsJobId} className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3.5 text-sm font-semibold text-white shadow-sm shadow-indigo-200 transition hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-100 disabled:cursor-not-allowed disabled:opacity-60">
+                                <Sparkles size={17} />{atsRunning ? "Scanning resumes…" : "Start resume screening"}
+                            </button>
+                            <button type="button" onClick={rankedMode ? handleShowAllApplications : loadRankedApplications} disabled={atsRunning || !atsJobId} className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50/60 disabled:cursor-not-allowed disabled:opacity-60">
+                                <Users size={16} />{rankedMode ? "Return to all applications" : "View ranked candidates"}
+                            </button>
+                            <div className="mt-4 flex items-start gap-2 border-t border-slate-200 pt-4 text-[11px] leading-5 text-slate-500">
+                                <span className="mt-0.5 text-indigo-500">ⓘ</span>
+                                <p>Scores are based on resume text and job keywords. Use them as decision support—not as the sole reason to reject a candidate.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* SUMMARY CARDS */}
             <section className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -729,6 +968,60 @@ const RecruiterApplications = () => {
                                                 )}
                                             </div>
                                         </div>
+                                    </div>
+
+                                    {/* ATS RESUME MATCH CARD */}
+                                    <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                                        <div className="flex flex-col gap-4 bg-gradient-to-r from-slate-50 via-white to-indigo-50/60 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+                                            <div className="flex items-start gap-3">
+                                                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-indigo-100 bg-white text-indigo-600 shadow-sm"><Sparkles size={18} /></span>
+                                                <div>
+                                                    <div className="flex flex-wrap items-center gap-2">
+                                                        <h4 className="text-sm font-bold text-slate-900">Resume match report</h4>
+                                                        {application.atsAnalysis?.status === "COMPLETED" && <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700">Analysis complete</span>}
+                                                        {application.atsAnalysis?.status === "FAILED" && <span className="rounded-full bg-rose-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-rose-700">Analysis failed</span>}
+                                                        {(!application.atsAnalysis || application.atsAnalysis.status === "PENDING" || application.atsAnalysis.status === "PROCESSING") && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-600">Awaiting scan</span>}
+                                                    </div>
+                                                    <p className="mt-1 text-xs leading-5 text-slate-500">Compared with the role's listed skills and keywords</p>
+                                                </div>
+                                            </div>
+                                            {application.atsAnalysis?.status === "COMPLETED" ? (
+                                                <div className="flex items-center gap-3 sm:justify-end">
+                                                    <div className="relative flex h-[76px] w-[76px] shrink-0 items-center justify-center rounded-full" style={{ background: `conic-gradient(${Number(application.atsAnalysis.score) >= 75 ? '#059669' : Number(application.atsAnalysis.score) >= 50 ? '#4f46e5' : '#d97706'} ${Math.max(0, Math.min(100, Number(application.atsAnalysis.score) || 0))}%, #e2e8f0 0)` }}>
+                                                        <div className="flex h-[62px] w-[62px] flex-col items-center justify-center rounded-full bg-white"><span className="text-xl font-extrabold leading-none text-slate-900">{application.atsAnalysis.score}%</span><span className="mt-1 text-[9px] font-semibold uppercase tracking-wide text-slate-400">match</span></div>
+                                                    </div>
+                                                    <div className="min-w-[100px]">
+                                                        <p className="text-xs font-semibold text-slate-700">{Number(application.atsAnalysis.score) >= 75 ? "Strong match" : Number(application.atsAnalysis.score) >= 50 ? "Partial match" : "Lower match"}</p>
+                                                        <p className="mt-1 text-[11px] leading-4 text-slate-500">Use this score alongside your review.</p>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs font-semibold text-slate-500">{application.atsAnalysis?.status === "FAILED" ? (application.atsAnalysis.errorMessage || "Could not analyze this resume") : application.atsAnalysis?.status === "PROCESSING" ? "Scanning resume…" : "Run screening to generate a match score"}</div>
+                                            )}
+                                        </div>
+
+                                        {application.atsAnalysis?.status === "COMPLETED" && (
+                                            <div className="grid border-t border-slate-100 md:grid-cols-2">
+                                                <div className="p-4 sm:p-5 md:border-r md:border-slate-100">
+                                                    <div className="mb-3 flex items-center justify-between gap-2">
+                                                        <p className="flex items-center gap-2 text-xs font-bold text-emerald-700"><span className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-50">✓</span>Matched skills</p>
+                                                        <span className="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700">{(application.atsAnalysis.matchedSkills || []).length} found</span>
+                                                    </div>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {(application.atsAnalysis.matchedSkills || []).length ? application.atsAnalysis.matchedSkills.map((skill) => <span key={skill} className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-100 bg-emerald-50/70 px-2.5 py-1.5 text-xs font-medium text-emerald-800"><span className="text-emerald-600">✓</span>{skill}</span>) : <span className="text-xs text-slate-400">No listed skills matched</span>}
+                                                    </div>
+                                                </div>
+                                                <div className="p-4 sm:p-5">
+                                                    <div className="mb-3 flex items-center justify-between gap-2">
+                                                        <p className="flex items-center gap-2 text-xs font-bold text-amber-700"><span className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-50">!</span>Skills to review</p>
+                                                        <span className="rounded-full bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-700">{(application.atsAnalysis.missingSkills || []).length} gaps</span>
+                                                    </div>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {(application.atsAnalysis.missingSkills || []).length ? application.atsAnalysis.missingSkills.map((skill) => <span key={skill} className="inline-flex items-center gap-1.5 rounded-lg border border-amber-100 bg-amber-50/70 px-2.5 py-1.5 text-xs font-medium text-amber-800"><span className="text-amber-600">−</span>{skill}</span>) : <span className="text-xs text-slate-400">No listed skill gaps detected</span>}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* ACTIONS */}

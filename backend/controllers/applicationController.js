@@ -5,9 +5,10 @@ import {
     getApplicationById,
     getJobApplications,
     getMyApplications,
+    getRankedJobApplications,
     getRecruiterApplications,
     updateApplicationStatus,
-    withdrawApplication,
+    withdrawApplication
 } from "../services/applicationService.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { sendError, sendSuccess } from "../utils/responseHandler.js";
@@ -239,9 +240,46 @@ const runJobAtsAnalysis = asyncHandler(async (req, res) => {
 });
 
 
+const getRankedApplicants = asyncHandler(async (req, res) => {
+    const jobId = Number(req.params.jobId);
+    const page = Number(req.query.page ?? 1);
+    const limit = Number(req.query.limit ?? 20);
+
+    if (
+        !Number.isSafeInteger(jobId) ||
+        jobId <= 0 ||
+        !Number.isSafeInteger(page) ||
+        page < 1 ||
+        !Number.isSafeInteger(limit) ||
+        limit < 1 ||
+        limit > 100
+    ) {
+        return sendError(
+            res,
+            STATUS_CODES.BAD_REQUEST,
+            "Invalid job ID or pagination parameters. Limit must be between 1 and 100."
+        );
+    }
+
+    const result = await getRankedJobApplications(
+        req.user.id,
+        jobId,
+        page,
+        limit
+    );
+
+    return sendSuccess(
+        res,
+        STATUS_CODES.OK,
+        "Ranked applicants fetched successfully.",
+        result
+    );
+});
+
+
 export {
     apply, getAtsScore, getForJob, getForRecruiter, getMine,
-    getOne, runJobAtsAnalysis, updateStatus,
+    getOne, getRankedApplicants, runJobAtsAnalysis, updateStatus,
     withdraw
 };
 

@@ -6,6 +6,7 @@ import {
     getForRecruiter,
     getMine,
     getOne,
+    getRankedApplicants,
     runJobAtsAnalysis,
     updateStatus,
     withdraw
@@ -23,5 +24,6 @@ router.get( "/jobs/:jobId/applications", protect, getForJob);
 router.patch( "/applications/:id/status", protect, updateStatus);
 router.get("/applications/:id/ats-score", protect, getAtsScore);
 router.post("/jobs/:jobId/ats-analysis", protect,runJobAtsAnalysis);
+router.get( "/jobs/:jobId/ats-ranked-applicants", protect,getRankedApplicants);
 
 export default router;
