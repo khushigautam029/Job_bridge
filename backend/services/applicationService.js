@@ -368,6 +368,7 @@ const applyCandidatePrivacySettings = async (applications) => {
         if (privacy.resumeVisibility === false) {
             application.resume = null;
             if (candidate) candidate.resume = null;
+            application.atsAnalysis = null;
         }
         return application;
     });
@@ -520,6 +521,11 @@ const getJobApplications = async (
                             ],
                         },
                     ],
+                },
+                {
+                    model: AtsAnalysis,
+                    as: "atsAnalysis",
+                    required: false,
                 },
             ],
 
@@ -747,6 +753,11 @@ const getRecruiterApplications = async (userId) => {
                     { model: CandidateExperience, as: "experiences" },
                     { model: CandidateProject, as: "projects" },
                 ],
+            },
+            {
+                model: AtsAnalysis,
+                as: "atsAnalysis",
+                required: false,
             },
         ],
         order: [["appliedAt", "DESC"]],

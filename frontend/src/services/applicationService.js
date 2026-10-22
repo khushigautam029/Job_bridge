@@ -54,7 +54,8 @@ export const runJobAtsAnalysis = async (
     getData(
         await api.post(
             `/jobs/${jobId}/ats-analysis`,
-            { afterApplicationId }
+            null,
+            { params: { afterApplicationId } }
         )
     );
 
