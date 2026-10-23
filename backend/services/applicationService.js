@@ -504,6 +504,18 @@ const getJobApplications = async (
 
             include: [
                 {
+                    model: Job,
+                    as: "job",
+                    attributes: ["id", "title", "categoryId"],
+                    include: [
+                        {
+                            model: JobCategory,
+                            as: "category",
+                            attributes: ["id", "name"],
+                        },
+                    ],
+                },
+                {
                     model: CandidateProfile,
                     as: "candidate",
 

@@ -131,12 +131,14 @@ const Candidates = () => {
                     const applicationKey = application.id ?? `${candidateId}-${job.id ?? "job"}`;
 
                     const jobTitle = job.title || "";
-                    const category = job.category?.name || "Uncategorized";
+                    const category = job.category?.name || job.Category?.name || job.categoryName || "Uncategorized";
                     const appliedJobs = [];
                     const appliedCategories = [];
+                    const appliedJobEntries = [];
 
                     if (jobTitle && !appliedJobs.includes(jobTitle)) {
                         appliedJobs.push(jobTitle);
+                        appliedJobEntries.push({ jobTitle, category });
                     }
                     if (category && !appliedCategories.includes(category)) {
                         appliedCategories.push(category);
@@ -253,6 +255,7 @@ const Candidates = () => {
                         applicationCount: 1,
                         appliedJobs,
                         appliedCategories: category ? [category] : [],
+                        appliedJobEntries,
                     });
                 });
 
@@ -754,12 +757,15 @@ const Candidates = () => {
                                         {candidate.appliedJobs.length > 0 ? (
                                             candidate.appliedJobs
                                                 .slice(0, 2)
-                                                .map((jobTitle) => (
+                                                .map((jobTitle, index) => (
                                                     <span
                                                         key={jobTitle}
                                                         className="max-w-full break-words rounded-lg bg-indigo-50 px-2.5 py-1 text-xs text-indigo-600"
                                                     >
-                                                        {jobTitle}
+                                                        <span className="font-semibold">{jobTitle}</span>
+                                                        {candidate.appliedJobEntries?.[index]?.category && candidate.appliedJobEntries[index].category !== "Uncategorized" && (
+                                                            <span className="text-indigo-500"> · {candidate.appliedJobEntries[index].category}</span>
+                                                        )}
                                                     </span>
                                                 ))
                                         ) : (
@@ -1052,12 +1058,15 @@ const Candidates = () => {
                                         <div className="mt-3 flex flex-wrap gap-2">
                                             {selectedCandidate.appliedJobs.length ? (
                                                 selectedCandidate.appliedJobs.map(
-                                                    (jobTitle) => (
+                                                    (jobTitle, index) => (
                                                         <span
                                                             key={jobTitle}
                                                             className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600"
                                                         >
-                                                            {jobTitle}
+                                                            <span className="font-semibold">{jobTitle}</span>
+                                                            {selectedCandidate.appliedJobEntries?.[index]?.category && selectedCandidate.appliedJobEntries[index].category !== "Uncategorized" && (
+                                                                <span className="text-indigo-600"> · {selectedCandidate.appliedJobEntries[index].category}</span>
+                                                            )}
                                                         </span>
                                                     )
                                                 )

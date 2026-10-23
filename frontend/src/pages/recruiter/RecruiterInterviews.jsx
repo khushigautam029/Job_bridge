@@ -276,6 +276,9 @@ const RecruiterInterviews = () => {
         interview?.application?.job?.category?.name ||
         interview?.application?.job?.Category?.name ||
         interview?.application?.job?.categoryName ||
+        interview?.application?.Job?.category?.name ||
+        interview?.application?.Job?.Category?.name ||
+        interview?.application?.Job?.categoryName ||
         "Uncategorized";
 
     const categoryOptions = useMemo(
@@ -844,7 +847,7 @@ const RecruiterInterviews = () => {
                                                     {jobTitle}
                                                 </p>
                                                 {category !== "Uncategorized" && (
-                                                    <p className="mt-1 text-xs text-slate-400">
+                                                    <p className="mt-1 inline-flex rounded-md bg-violet-50 px-2 py-1 text-xs font-medium text-violet-700">
                                                         {category}
                                                     </p>
                                                 )}

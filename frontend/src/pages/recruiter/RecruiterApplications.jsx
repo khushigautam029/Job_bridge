@@ -47,7 +47,7 @@ const mapApplication = (item) => {
         phone: candidate.user?.phone || "",
         jobTitle: job.title || item.jobTitle || "Job",
         categoryId: job.categoryId || job.category?.id,
-        category: job.category?.name || item.category || "Uncategorized",
+        category: job.category?.name || job.Category?.name || job.categoryName || item.category || "Uncategorized",
         location: candidate.location || job.location || "",
         experience: candidate.experienceYears
             ? `${candidate.experienceYears} Years`
@@ -895,6 +895,12 @@ const RecruiterApplications = () => {
                                                     }
                                                 </p>
 
+                                                {application.category && application.category !== "Uncategorized" && (
+                                                    <p className="mt-1 text-xs font-medium text-indigo-600">
+                                                        {application.category}
+                                                    </p>
+                                                )}
+
                                                 <p className="mt-1 text-xs text-slate-400">
                                                     Applied{" "}
                                                     {
@@ -1183,6 +1189,11 @@ const RecruiterApplications = () => {
                                                     selectedCandidate.jobTitle
                                                 }
                                             </p>
+                                            {selectedCandidate.category && selectedCandidate.category !== "Uncategorized" && (
+                                                <p className="mt-1 text-xs font-medium text-indigo-600">
+                                                    {selectedCandidate.category}
+                                                </p>
+                                            )}
                                         </div>
                                     </div>
 
