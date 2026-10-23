@@ -5,23 +5,19 @@ import {
     getCandidateExperiences,
     updateCandidateExperience,
 } from "../services/candidateExperienceService.js";
-
 import {
     sendSuccess,
 } from "../utils/responseHandler.js";
-
 import {
     MESSAGES,
     STATUS_CODES
 } from "../utils/setConstants.js";
-
 
 const getExperiences = async (req, res) => {
     const experiences =
         await getCandidateExperiences(
             req.user.id
         );
-
     return sendSuccess(
         res,
         STATUS_CODES.OK,
@@ -32,14 +28,12 @@ const getExperiences = async (req, res) => {
     );
 };
 
-
 const getExperience = async (req, res) => {
     const experience =
         await getCandidateExperienceById(
             req.user.id,
             req.params.experienceId
         );
-
     return sendSuccess(
         res,
         STATUS_CODES.OK,
@@ -50,14 +44,12 @@ const getExperience = async (req, res) => {
     );
 };
 
-
 const createExperience = async (req, res) => {
     const experience =
         await addCandidateExperience(
             req.user.id,
             req.body
         );
-
     return sendSuccess(
         res,
         STATUS_CODES.CREATED,
@@ -68,7 +60,6 @@ const createExperience = async (req, res) => {
     );
 };
 
-
 const updateExperience = async (req, res) => {
     const experience =
         await updateCandidateExperience(
@@ -76,7 +67,6 @@ const updateExperience = async (req, res) => {
             req.params.experienceId,
             req.body
         );
-
     return sendSuccess(
         res,
         STATUS_CODES.OK,
@@ -87,14 +77,12 @@ const updateExperience = async (req, res) => {
     );
 };
 
-
 const deleteExperience = async (req, res) => {
     const result =
         await deleteCandidateExperience(
             req.user.id,
             req.params.experienceId
         );
-
     return sendSuccess(
         res,
         STATUS_CODES.OK,
@@ -105,7 +93,6 @@ const deleteExperience = async (req, res) => {
         }
     );
 };
-
 
 export {
     createExperience, deleteExperience, getExperience, getExperiences, updateExperience

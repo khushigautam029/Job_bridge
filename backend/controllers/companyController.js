@@ -36,8 +36,7 @@ const getMyCompanyController = asyncHandler(
 );
 
 // Update My Company
-const updateMyCompanyController =
-    asyncHandler(
+const updateMyCompanyController = asyncHandler(
         async (req, res) => {
             const {
                 error,
@@ -49,7 +48,6 @@ const updateMyCompanyController =
                     stripUnknown: true,
                 }
             );
-
             if (error) {
                 return sendError(
                     res,
@@ -76,14 +74,13 @@ const updateMyCompanyController =
                 }
             );
         }
-    );
+);
 
 // Get All Companies
 const getCompanies = asyncHandler(
     async (req, res) => {
         const companies =
             await getAllCompanies();
-
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -102,7 +99,6 @@ const getCompany = asyncHandler(
             await getCompanyById(
                 req.params.id
             );
-
         return sendSuccess(
             res,
             STATUS_CODES.OK,

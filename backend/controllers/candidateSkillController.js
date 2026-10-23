@@ -15,18 +15,14 @@ import {
 // GET CANDIDATE SKILLS
 const getSkills = asyncHandler(
     async (req, res) => {
-
         const skills =
             await getCandidateSkills(
                 req.user.id
             );
-
-
         res.status(
             STATUS_CODES.OK
         ).json({
             success: true,
-
             data: {
                 skills,
             },
@@ -34,11 +30,9 @@ const getSkills = asyncHandler(
     }
 );
 
-
 // ADD CANDIDATE SKILL
 const addSkill = asyncHandler(
     async (req, res) => {
-
         const {
             error,
             value,
@@ -50,16 +44,12 @@ const addSkill = asyncHandler(
                     stripUnknown: true,
                 }
             );
-
-
         if (error) {
             return res.status(
                 STATUS_CODES.BAD_REQUEST
             ).json({
                 success: false,
-
                 message:MESSAGES.VALIDATION_FAILED,
-
                 errors:
                     error.details.map(
                         (detail) =>
@@ -67,23 +57,17 @@ const addSkill = asyncHandler(
                     ),
             });
         }
-
-
         const skill =
             await addCandidateSkill(
                 req.user.id,
                 value.skillId
             );
-
-
         res.status(
             STATUS_CODES.CREATED
         ).json({
             success: true,
-
             message:
                 MESSAGES.SKILL_ADDED,
-
             data: {
                 skill,
             },
@@ -92,31 +76,23 @@ const addSkill = asyncHandler(
 );
 
 
-
 // REMOVE CANDIDATE SKILL
 const removeSkill = asyncHandler(
     async (req, res) => {
-
         const {
             skillId,
         } = req.params;
-
-
         const result =
             await removeCandidateSkill(
                 req.user.id,
                 Number(skillId)
             );
-
-
         res.status(
             STATUS_CODES.OK
         ).json({
             success: true,
-
             message:
                 result.message,
-
             data: {
                 skillId:
                     result.skillId,
@@ -124,7 +100,6 @@ const removeSkill = asyncHandler(
         });
     }
 );
-
 
 export {
     addSkill, getSkills, removeSkill
