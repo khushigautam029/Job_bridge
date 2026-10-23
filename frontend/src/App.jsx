@@ -35,23 +35,17 @@ import RecruiterLayout from "./pages/recruiter/RecruiterLayout";
 import RecruiterProfile from "./pages/recruiter/RecruiterProfile";
 import RecruiterSetting from "./pages/recruiter/RecruiterSetting";
 
-// Read the existing authentication information.
 const getAuthData = () => {
     const storages = [localStorage, sessionStorage];
-
     for (const storage of storages) {
         const token = storage.getItem("token");
         const storedUser = storage.getItem("user");
 
         if (!token || !storedUser) continue;
-
         try {
             const user = JSON.parse(storedUser);
-
             if (!user || typeof user !== "object") continue;
-
             const role = String(user.role || "").toUpperCase();
-
             return {
                 token,
                 user,
@@ -61,7 +55,6 @@ const getAuthData = () => {
             // Ignore invalid stored user data and check the next storage.
         }
     }
-
     return null;
 };
 
@@ -69,7 +62,6 @@ const getAuthData = () => {
 const ProtectedRoute = ({ allowedRoles }) => {
     const location = useLocation();
     const auth = getAuthData();
-
     // Not logged in: redirect to login.
     if (!auth) {
         return (
@@ -80,21 +72,17 @@ const ProtectedRoute = ({ allowedRoles }) => {
             />
         );
     }
-
     // Logged in, but not authorized for this section.
     if (!allowedRoles.includes(auth.role)) {
         if (auth.role === "CANDIDATE") {
             return <Navigate to="/candidate/jobs" replace />;
         }
-
         if (auth.role === "RECRUITER") {
             return <Navigate to="/recruiter/jobs" replace />;
         }
-
         // Unknown or unsupported roles cannot access these sections.
         return <Navigate to="/login" replace />;
     }
-
     // Authentication and role are valid.
     return <Outlet />;
 };
@@ -102,11 +90,9 @@ const ProtectedRoute = ({ allowedRoles }) => {
 // Scroll to top whenever the URL changes.
 const ScrollToTop = () => {
     const { pathname } = useLocation();
-
     useLayoutEffect(() => {
         window.scrollTo(0, 0);
     }, [pathname]);
-
     return null;
 };
 
@@ -114,7 +100,6 @@ const App = () => {
     return (
         <BrowserRouter>
             <ScrollToTop />
-
             <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<Home />} />
@@ -123,127 +108,34 @@ const App = () => {
                 <Route path="/jobs" element={<HomeJobs />} />
                 <Route path="/forgot-password" element={<ForgotPassword />}/>
                 <Route path="/reset-password" element={<ResetPassword />}/>
-
                 {/* Candidate Routes: CANDIDATE role only */}
-                <Route
-                    element={
-                        <ProtectedRoute allowedRoles={["CANDIDATE"]} />
-                    }
-                >
-                    <Route
-                        path="/candidate"
-                        element={<CandidateLayout />}
-                    >
-                        <Route
-                            index
-                            element={
-                                <Navigate to="jobs" replace />
-                            }
-                        />
-
-                        <Route
-                            path="jobs"
-                            element={<FindJobs />}
-                        />
-
-                        <Route
-                            path="jobs/:jobId"
-                            element={<JobDetails />}
-                        />
-
-                        <Route
-                            path="jobs/:jobId/apply"
-                            element={<ApplyJob />}
-                        />
-
-                        <Route
-                            path="applications"
-                            element={<Applications />}
-                        />
-
-                        <Route
-                            path="saved-jobs"
-                            element={<SavedJobs />}
-                        />
-
-                        <Route
-                            path="interviews"
-                            element={<Interviews />}
-                        />
-
-                        <Route
-                            path="profile"
-                            element={<CandidateProfile />}
-                        />
-
-                        <Route
-                            path="settings"
-                            element={<CandidateSettings />}
-                        />
+                <Route element={ <ProtectedRoute allowedRoles={["CANDIDATE"]} />}>
+                    <Route path="/candidate" element={<CandidateLayout />}>
+                        <Route index element={ <Navigate to="jobs" replace />}/>
+                        <Route path="jobs" element={<FindJobs />}/>
+                        <Route path="jobs/:jobId" element={<JobDetails />}/>
+                        <Route path="jobs/:jobId/apply" element={<ApplyJob />}/>
+                        <Route path="applications" element={<Applications />}/>
+                        <Route path="saved-jobs" element={<SavedJobs />}/>
+                        <Route path="interviews" element={<Interviews />}/>
+                        <Route path="profile" element={<CandidateProfile />}/>
+                        <Route path="settings" element={<CandidateSettings />}/>
                     </Route>
                 </Route>
 
                 {/* Recruiter Routes: RECRUITER role only */}
-                <Route
-                    element={
-                        <ProtectedRoute allowedRoles={["RECRUITER"]} />
-                    }
-                >
-                    <Route
-                        path="/recruiter"
-                        element={<RecruiterLayout />}
-                    >
-                        <Route
-                            index
-                            element={
-                                <Navigate to="jobs" replace />
-                            }
-                        />
-
-                        <Route
-                            path="jobs"
-                            element={<Jobs />}
-                        />
-
-                        <Route
-                            path="jobs/:jobId"
-                            element={<RecruiterJobDetails />}
-                        />
-
-                        <Route
-                            path="jobs/:jobId/applications"
-                            element={<RecruiterApplications />}
-                        />
-
-                        <Route
-                            path="applications"
-                            element={<RecruiterApplications />}
-                        />
-
-                        <Route
-                            path="candidates"
-                            element={<Candidates />}
-                        />
-
-                        <Route
-                            path="interviews"
-                            element={<RecruiterInterviews />}
-                        />
-
-                        <Route
-                            path="post-job"
-                            element={<PostJob />}
-                        />
-
-                        <Route
-                            path="profile"
-                            element={<RecruiterProfile />}
-                        />
-
-                        <Route
-                            path="settings"
-                            element={<RecruiterSetting />}
-                        />
+                <Route element={ <ProtectedRoute allowedRoles={["RECRUITER"]} /> }>
+                    <Route path="/recruiter" element={<RecruiterLayout />}>
+                        <Route index element={<Navigate to="jobs" replace />}/>
+                        <Route path="jobs" element={<Jobs />} />
+                        <Route path="jobs/:jobId" element={<RecruiterJobDetails />}/>
+                        <Route path="jobs/:jobId/applications" element={<RecruiterApplications />}/>
+                        <Route path="applications" element={<RecruiterApplications />}/>
+                        <Route path="candidates" element={<Candidates />}/>
+                        <Route path="interviews" element={<RecruiterInterviews />}/>
+                        <Route path="post-job" element={<PostJob />}/>
+                        <Route path="profile" element={<RecruiterProfile />}/>
+                        <Route path="settings" element={<RecruiterSetting />}/>
                     </Route>
                 </Route>
 

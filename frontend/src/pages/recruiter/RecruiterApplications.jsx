@@ -53,6 +53,7 @@ const mapApplication = (item) => {
             ? `${candidate.experienceYears} Years`
             : "Not specified",
         status: statusLabels[item.status] || item.status,
+        applicationStatus: item.status,
         appliedDate: item.appliedAt
             ? new Date(item.appliedAt).toLocaleDateString()
             : "",
@@ -492,19 +493,7 @@ const RecruiterApplications = () => {
                     </p>
                 </div>
 
-                <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                        <FileText size={19} />
-                    </div>
-                    <div>
-                        <p className="text-xs text-slate-400">
-                            Total Applications
-                        </p>
-                        <p className="text-lg font-bold text-slate-800">
-                            {totalApplications}
-                        </p>
-                    </div>
-                </div>
+                
             </section>
 
             {/* BACK BUTTON — shown only when opened from a specific job */}
@@ -1001,7 +990,7 @@ const RecruiterApplications = () => {
                                                     {application.atsAnalysis?.status === "FAILED" ? (
                                                         <div className="flex flex-col gap-2 sm:items-end">
                                                             <span>{application.atsAnalysis.errorMessage || "Could not analyze this resume."}</span>
-                                                            <button type="button" onClick={handleRunAtsAnalysis} disabled={atsRunning} className="font-semibold text-indigo-700 underline decoration-indigo-300 underline-offset-2 disabled:opacity-50">{atsRunning ? "Retrying scan…" : "Retry failed scans"}</button>
+                                                            {["APPLIED", "UNDER_REVIEW"].includes(application.applicationStatus) && <button type="button" onClick={handleRunAtsAnalysis} disabled={atsRunning} className="font-semibold text-indigo-700 underline decoration-indigo-300 underline-offset-2 disabled:opacity-50">{atsRunning ? "Retrying scan…" : "Retry failed scan"}</button>}
                                                         </div>
                                                     ) : application.atsAnalysis?.status === "PROCESSING" ? "Scanning resume…" : "Run screening to generate a match score"}
                                                 </div>

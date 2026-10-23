@@ -230,9 +230,7 @@ const getMyApplications = async (
                 },
             ],
 
-            order: [
-                ["appliedAt", "DESC"],
-            ],
+            order: [["appliedAt", "DESC"]],
         });
 
 
@@ -530,6 +528,7 @@ const getJobApplications = async (
             ],
 
             order: [
+                [{ model: AtsAnalysis, as: "atsAnalysis" }, "score", "DESC"],
                 ["appliedAt", "DESC"],
             ],
         });
@@ -760,7 +759,10 @@ const getRecruiterApplications = async (userId) => {
                 required: false,
             },
         ],
-        order: [["appliedAt", "DESC"]],
+        order: [
+            [{ model: AtsAnalysis, as: "atsAnalysis" }, "score", "DESC"],
+            ["appliedAt", "DESC"],
+        ],
     });
     return applyCandidatePrivacySettings(applications);
 };
@@ -1045,6 +1047,7 @@ const analyzeJobApplicationsBatch = async (
         where: {
             jobId: job.id,
             id: { [Op.gt]: afterApplicationId },
+            status: { [Op.notIn]: ["WITHDRAWN", "SHORTLISTED", "INTERVIEW", "SELECTED", "REJECTED"] },
         },
         attributes: [
             "id",

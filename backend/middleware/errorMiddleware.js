@@ -8,7 +8,6 @@ import {
 
 const errorMiddleware = (err, req, res, next) => {
     console.error(err);
-    // Handle Sequelize unique constraint errors
     if (err.name === "SequelizeUniqueConstraintError") {
         // Duplicate phone number
         if (err.fields?.phone) {
