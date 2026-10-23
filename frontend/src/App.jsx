@@ -7,10 +7,10 @@ import {
     Routes,
     useLocation,
 } from "react-router-dom";
-
-import Home from "./pages/Home";
-import HomeJobs from "./pages/HomeJobs";
-import NotFound from "./pages/NotFound";
+import FreshersCareerGuide from "./career-resources/FreshersCareerGuide";
+import InterviewPreparation from "./career-resources/InterviewPreparation";
+import ResumeWritingTips from "./career-resources/ResumeWritingTips";
+import TechnicalInterviewTips from "./career-resources/TechnicalInterviewTips";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
@@ -24,6 +24,9 @@ import FindJobs from "./pages/candidate/FindJobs";
 import Interviews from "./pages/candidate/Interviews";
 import JobDetails from "./pages/candidate/JobDetails";
 import SavedJobs from "./pages/candidate/SavedJobs";
+import Home from "./pages/Home";
+import HomeJobs from "./pages/HomeJobs";
+import NotFound from "./pages/NotFound";
 
 import Candidates from "./pages/recruiter/Candidate";
 import Jobs from "./pages/recruiter/Jobs";
@@ -106,36 +109,40 @@ const App = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/jobs" element={<HomeJobs />} />
-                <Route path="/forgot-password" element={<ForgotPassword />}/>
-                <Route path="/reset-password" element={<ResetPassword />}/>
+                <Route path="/career-resources/resume-writing-tips" element={<ResumeWritingTips />} />
+                <Route path="/career-resources/interview-preparation" element={<InterviewPreparation />} />
+                <Route path="/career-resources/freshers-career-guide" element={<FreshersCareerGuide />} />
+                <Route path="/career-resources/technical-interview-tips" element={<TechnicalInterviewTips />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
                 {/* Candidate Routes: CANDIDATE role only */}
-                <Route element={ <ProtectedRoute allowedRoles={["CANDIDATE"]} />}>
+                <Route element={<ProtectedRoute allowedRoles={["CANDIDATE"]} />}>
                     <Route path="/candidate" element={<CandidateLayout />}>
-                        <Route index element={ <Navigate to="jobs" replace />}/>
-                        <Route path="jobs" element={<FindJobs />}/>
-                        <Route path="jobs/:jobId" element={<JobDetails />}/>
-                        <Route path="jobs/:jobId/apply" element={<ApplyJob />}/>
-                        <Route path="applications" element={<Applications />}/>
-                        <Route path="saved-jobs" element={<SavedJobs />}/>
-                        <Route path="interviews" element={<Interviews />}/>
-                        <Route path="profile" element={<CandidateProfile />}/>
-                        <Route path="settings" element={<CandidateSettings />}/>
+                        <Route index element={<Navigate to="jobs" replace />} />
+                        <Route path="jobs" element={<FindJobs />} />
+                        <Route path="jobs/:jobId" element={<JobDetails />} />
+                        <Route path="jobs/:jobId/apply" element={<ApplyJob />} />
+                        <Route path="applications" element={<Applications />} />
+                        <Route path="saved-jobs" element={<SavedJobs />} />
+                        <Route path="interviews" element={<Interviews />} />
+                        <Route path="profile" element={<CandidateProfile />} />
+                        <Route path="settings" element={<CandidateSettings />} />
                     </Route>
                 </Route>
 
                 {/* Recruiter Routes: RECRUITER role only */}
-                <Route element={ <ProtectedRoute allowedRoles={["RECRUITER"]} /> }>
+                <Route element={<ProtectedRoute allowedRoles={["RECRUITER"]} />}>
                     <Route path="/recruiter" element={<RecruiterLayout />}>
-                        <Route index element={<Navigate to="jobs" replace />}/>
+                        <Route index element={<Navigate to="jobs" replace />} />
                         <Route path="jobs" element={<Jobs />} />
-                        <Route path="jobs/:jobId" element={<RecruiterJobDetails />}/>
-                        <Route path="jobs/:jobId/applications" element={<RecruiterApplications />}/>
-                        <Route path="applications" element={<RecruiterApplications />}/>
-                        <Route path="candidates" element={<Candidates />}/>
-                        <Route path="interviews" element={<RecruiterInterviews />}/>
-                        <Route path="post-job" element={<PostJob />}/>
-                        <Route path="profile" element={<RecruiterProfile />}/>
-                        <Route path="settings" element={<RecruiterSetting />}/>
+                        <Route path="jobs/:jobId" element={<RecruiterJobDetails />} />
+                        <Route path="jobs/:jobId/applications" element={<RecruiterApplications />} />
+                        <Route path="applications" element={<RecruiterApplications />} />
+                        <Route path="candidates" element={<Candidates />} />
+                        <Route path="interviews" element={<RecruiterInterviews />} />
+                        <Route path="post-job" element={<PostJob />} />
+                        <Route path="profile" element={<RecruiterProfile />} />
+                        <Route path="settings" element={<RecruiterSetting />} />
                     </Route>
                 </Route>
 

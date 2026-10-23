@@ -6,10 +6,13 @@ import {
     CalendarDays,
     CheckCircle2,
     ChevronDown,
+    Code2,
     FileText,
+    GraduationCap,
     LogIn,
     LogOut,
     MapPin,
+    MessagesSquare,
     Search,
     Settings,
     ShieldCheck,
@@ -21,16 +24,15 @@ import {
 } from "lucide-react";
 
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-
-import NotificationDropdown from "../pages/Notification";
+import { Link, useNavigate } from "react-router-dom";
 import LocationAutocomplete from "../components/LocationAutocomplete";
+import NotificationDropdown from "../pages/Notification";
 import {
     formatJobCard,
     getJobCategories,
     getJobs,
-    getMyJobs,
     getMyJobCategories,
+    getMyJobs,
 } from "../services/jobService";
 import {
     getSavedJobs,
@@ -1386,6 +1388,9 @@ const Home = () => {
                                         ))}
                                 </div>
 
+
+
+
                                 {/* FOOTER */}
                                 <div className="mt-5 border-t border-slate-200 pt-4">
                                     <div className="flex items-end justify-between gap-3">
@@ -1428,57 +1433,6 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* FEATURES */}
-            <section
-                id="features"
-                className="mx-auto max-w-[1400px] px-5 py-14 sm:px-7 lg:px-8"
-            >
-                <div className="mx-auto max-w-2xl text-center">
-                    <p className="jb-section-kicker text-xs font-bold uppercase tracking-wider text-indigo-600">
-                        Why JobBridge?
-                    </p>
-
-                    <h2 className="mt-1.5 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-                        Your career journey, simplified
-                    </h2>
-
-                    <p className="mt-2 text-sm leading-6 text-slate-500">
-                        From discovering your next opportunity to tracking your applications, JobBridge keeps everything in one place.
-                    </p>
-                </div>
-
-                <div className="mt-8 grid gap-4 md:grid-cols-3">
-                    {features.map((feature) => {
-                        const Icon = feature.icon;
-
-                        return (
-                            <button
-                                key={feature.title}
-                                type="button"
-                                onClick={() =>
-                                    requireLogin(
-                                        "feature"
-                                    )
-                                }
-                                className="jb-card jb-reveal rounded-xl border border-slate-200 bg-white p-5 text-center shadow-sm"
-                            >
-                                <div className="jb-feature-icon mx-auto flex h-11 w-11 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
-                                    <Icon size={21} />
-                                </div>
-
-                                <h3 className="mt-4 text-base font-semibold text-slate-900">
-                                    {feature.title}
-                                </h3>
-
-                                <p className="mt-1.5 text-xs leading-5 text-slate-500">
-                                    {feature.description}
-                                </p>
-                            </button>
-                        );
-                    })}
-                </div>
-            </section>
-
             {/* CTA */}
             {!isLoggedIn && (
                 <section className="px-5 pb-14 sm:px-7 lg:px-8">
@@ -1509,7 +1463,184 @@ const Home = () => {
                 </section>
             )}
 
-        
+
+            {/* CAREER RESOURCES & HOW IT WORKS */}
+
+            <section
+                id="career-resources"
+                className="border-t border-slate-100 bg-white"
+            >
+                <div className="mx-auto max-w-[1400px] px-5 py-14 sm:px-7 lg:px-8">
+
+                    {/* HEADING */}
+                    <div className="mx-auto max-w-2xl text-center">
+                        <p className="jb-section-kicker text-xs font-bold uppercase tracking-wider text-indigo-600">
+                            Your career starts here
+                        </p>
+
+                        <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                            Your next career move starts here
+                        </h2>
+
+                        <p className="mt-2 text-sm leading-6 text-slate-500 sm:text-base">
+                            Discover opportunities, apply for jobs, and take
+                            the next step towards your career goals with JobBridge.
+                        </p>
+                    </div>
+
+                    {/* HOW IT WORKS */}
+                    <div className="mt-8 grid gap-4 md:grid-cols-3">
+                        {[
+                            {
+                                icon: Search,
+                                title: "Find the Right Job",
+                                description:
+                                    "Explore job openings by title, skills, category, and location.",
+                                number: "01",
+                            },
+                            {
+                                icon: FileText,
+                                title: "Apply with Confidence",
+                                description:
+                                    "Review job requirements and submit your application with your resume.",
+                                number: "02",
+                            },
+                            {
+                                icon: CalendarDays,
+                                title: "Track Your Progress",
+                                description:
+                                    "Keep track of your applications, interview schedules, and updates.",
+                                number: "03",
+                            },
+                        ].map((step) => {
+                            const Icon = step.icon;
+
+                            return (
+                                <div
+                                    key={step.number}
+                                    className="jb-card jb-reveal rounded-xl border border-slate-200 bg-slate-50 p-5 transition duration-300 hover:-translate-y-1 hover:border-indigo-200 hover:bg-white hover:shadow-md"
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                                            <Icon size={21} />
+                                        </div>
+
+                                        <span className="text-2xl font-bold text-indigo-100">
+                                            {step.number}
+                                        </span>
+                                    </div>
+
+                                    <h3 className="mt-4 text-base font-bold text-slate-900">
+                                        {step.title}
+                                    </h3>
+
+                                    <p className="mt-2 text-sm leading-6 text-slate-500">
+                                        {step.description}
+                                    </p>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* CAREER RESOURCES HEADING */}
+                    <div className="mt-14 flex flex-col justify-between gap-2 sm:flex-row sm:items-end">
+                        <div>
+                            <p className="jb-section-kicker text-xs font-bold uppercase tracking-wider text-indigo-600">
+                                Learn and grow
+                            </p>
+
+                            <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                                Career resources
+                            </h2>
+
+                            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                                Practical guidance, helpful examples, and checklists
+                                to help you prepare for your next opportunity.
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* RESOURCE CARDS */}
+                    <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        {[
+                            {
+                                icon: FileText,
+                                title: "Resume Writing Tips",
+                                description:
+                                    "Learn how to present your skills, education, internships, and projects in a professional resume.",
+                                action: "Explore resume tips",
+                                path: "/career-resources/resume-writing-tips",
+                                number: "01",
+                            },
+                            {
+                                icon: MessagesSquare,
+                                title: "Interview Preparation",
+                                description:
+                                    "Prepare for common HR questions and learn to communicate your experience confidently.",
+                                action: "Prepare for interviews",
+                                path: "/career-resources/interview-preparation",
+                                number: "02",
+                            },
+                            {
+                                icon: GraduationCap,
+                                title: "Fresher's Career Guide",
+                                description:
+                                    "Discover how to find your first job, build useful skills, and gain practical experience.",
+                                action: "Read the career guide",
+                                path: "/career-resources/freshers-career-guide",
+                                number: "03",
+                            },
+                            {
+                                icon: Code2,
+                                title: "Technical Interview Tips",
+                                description:
+                                    "Prepare for programming questions, DSA, OOP, SQL, and project-based discussions.",
+                                action: "Start preparing",
+                                path: "/career-resources/technical-interview-tips",
+                                number: "04",
+                            },
+                        ].map((resource) => {
+                            const Icon = resource.icon;
+
+                            return (
+                                <Link
+                                    key={resource.title}
+                                    to={resource.path}
+                                    className="jb-card jb-reveal group flex h-full flex-col rounded-xl border border-slate-200 bg-white p-5 transition duration-300 hover:-translate-y-1 hover:border-indigo-200 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className="jb-icon-tile flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition duration-300 group-hover:bg-indigo-600 group-hover:text-white">
+                                            <Icon size={21} />
+                                        </div>
+
+                                        <span className="text-sm font-bold text-slate-300 transition group-hover:text-indigo-300">
+                                            {resource.number}
+                                        </span>
+                                    </div>
+
+                                    <h3 className="mt-4 text-base font-bold text-slate-900 transition group-hover:text-indigo-600">
+                                        {resource.title}
+                                    </h3>
+
+                                    <p className="mt-2 flex-1 text-sm leading-6 text-slate-500">
+                                        {resource.description}
+                                    </p>
+
+                                    <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-indigo-600">
+                                        {resource.action}
+                                        <ArrowRight
+                                            size={15}
+                                            className="transition-transform group-hover:translate-x-1"
+                                        />
+                                    </span>
+                                </Link>
+                            );
+                        })}
+                    </div>
+
+                </div>
+            </section>
+
             <footer className="mt-auto border-t border-slate-200 bg-white">
                 <div className="mx-auto w-full max-w-[1400px] px-5 py-10 sm:px-7 lg:px-8">
                     <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
@@ -1628,7 +1759,7 @@ const Home = () => {
                     </div>
                 </div>
             </footer>
-            
+
             {/* AUTH MODAL */}
             {showAuthModal && (
                 <div className="jb-modal-backdrop fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/50 px-4 backdrop-blur-sm">
