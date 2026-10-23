@@ -19,23 +19,17 @@ import {
 // GET ALL EDUCATION
 const getEducations = asyncHandler(
     async (req, res) => {
-
         const educations =
             await getCandidateEducations(
                 req.user.id
             );
-
-
         res.status(
             STATUS_CODES.OK
         ).json({
-
             success: true,
-
             data: {
                 educations,
             },
-
         });
     }
 );
@@ -43,11 +37,9 @@ const getEducations = asyncHandler(
 // GET EDUCATION BY ID
 const getEducation = asyncHandler(
     async (req, res) => {
-
         const {
             educationId,
         } = req.params;
-
 
         const education =
             await getCandidateEducationById(
@@ -55,17 +47,13 @@ const getEducation = asyncHandler(
                 Number(educationId)
             );
 
-
         res.status(
             STATUS_CODES.OK
         ).json({
-
             success: true,
-
             data: {
                 education,
             },
-
         });
     }
 );
@@ -74,7 +62,6 @@ const getEducation = asyncHandler(
 // ADD EDUCATION
 const addEducation = asyncHandler(
     async (req, res) => {
-
         const {
             error,
             value,
@@ -86,47 +73,32 @@ const addEducation = asyncHandler(
                     stripUnknown: true,
                 }
             );
-
-
         if (error) {
-
             return res.status(
                 STATUS_CODES.BAD_REQUEST
             ).json({
-
                 success: false,
-
                 message:MESSAGES.VALIDATION_FAILED,
-
                 errors:
                     error.details.map(
                         (detail) =>
                             detail.message
                     ),
-
             });
         }
-
-
         const education =
             await addCandidateEducation(
                 req.user.id,
                 value
             );
-
-
         res.status(
             STATUS_CODES.CREATED
         ).json({
-
             success: true,
-
             message:MESSAGES.EDUCATION_ADDED,
-
             data: {
                 education,
             },
-
         });
     }
 );
@@ -134,11 +106,9 @@ const addEducation = asyncHandler(
 // UPDATE EDUCATION
 const updateEducation = asyncHandler(
     async (req, res) => {
-
         const {
             educationId,
         } = req.params;
-
 
         const {
             error,
@@ -152,26 +122,19 @@ const updateEducation = asyncHandler(
                 }
             );
 
-
         if (error) {
-
             return res.status(
                 STATUS_CODES.BAD_REQUEST
             ).json({
-
                 success: false,
-
                 message:MESSAGES.VALIDATION_FAILED,
-
                 errors:
                     error.details.map(
                         (detail) =>
                             detail.message
                     ),
-
             });
         }
-
 
         const education =
             await updateCandidateEducation(
@@ -180,19 +143,14 @@ const updateEducation = asyncHandler(
                 value
             );
 
-
         res.status(
             STATUS_CODES.OK
         ).json({
-
             success: true,
-
             message:MESSAGES.EDUCATION_UPDATED,
-
             data: {
                 education,
             },
-
         });
     }
 );
@@ -200,30 +158,21 @@ const updateEducation = asyncHandler(
 // DELETE EDUCATION
 const deleteEducation = asyncHandler(
     async (req, res) => {
-
         const {
             educationId,
         } = req.params;
-
-
         await deleteCandidateEducation(
             req.user.id,
             Number(educationId)
         );
-
-
         res.status(
             STATUS_CODES.OK
         ).json({
-
             success: true,
-
             message:MESSAGES.EDUCATION_DELETED,
-
         });
     }
 );
-
 
 export {
     addEducation, deleteEducation, getEducation, getEducations, updateEducation

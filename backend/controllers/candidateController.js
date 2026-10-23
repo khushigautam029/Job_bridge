@@ -24,17 +24,14 @@ const __filename = fileURLToPath(import.meta.url);
 
 const getProfile = asyncHandler(
     async (req, res) => {
-
         const candidate =
             await getCandidateProfile(
                 req.user.id
             );
-
         res.status(
             STATUS_CODES.OK
         ).json({
             success: true,
-
             data: {
                 candidate,
             },
@@ -42,10 +39,8 @@ const getProfile = asyncHandler(
     }
 );
 
-
 const updateProfile = asyncHandler(
     async (req, res) => {
-
         const {
             error,
             value,
@@ -59,15 +54,11 @@ const updateProfile = asyncHandler(
             );
 
         if (error) {
-
             return res.status(
                 STATUS_CODES.BAD_REQUEST
             ).json({
                 success: false,
-
-                message:
-                    MESSAGES.VALIDATION_FAILED,
-
+                message: MESSAGES.VALIDATION_FAILED,
                 errors:
                     error.details.map(
                         (detail) =>
@@ -76,23 +67,14 @@ const updateProfile = asyncHandler(
             });
         }
 
-
-        const candidate =
-            await updateCandidateProfile(
+        const candidate = await updateCandidateProfile(
                 req.user.id,
                 value
             );
-
-
-        res.status(
-            STATUS_CODES.OK
-        ).json({
-
+        res.status(STATUS_CODES.OK).json
+        ({
             success: true,
-
-            message:
-                MESSAGES.PROFILE_UPDATED,
-
+            message: MESSAGES.PROFILE_UPDATED,
             data: {
                 candidate,
             },
@@ -106,21 +88,16 @@ const updateProfile = asyncHandler(
 */
 const uploadResume = asyncHandler(
     async (req, res) => {
-
         const candidate =
             await uploadCandidateResume(
                 req.user.id,
                 req.file
             );
-
         res.status(
             STATUS_CODES.OK
         ).json({
-
             success: true,
-
             message:MESSAGES.RESUME_UPLOADED,
-
             data: {
                 candidate,
             },
@@ -134,19 +111,16 @@ const uploadResume = asyncHandler(
 */
 const getCandidateResume = asyncHandler(async (req, res) => {
     const { candidateId } = req.params;
-
     const resumePath = await getCandidateResumeForRecruiter(
         req.user.id,
         candidateId
     );
 
     const relativePath = resumePath.replace(/^[/\\]+/, "");
-
     const filePath = path.join(
         process.cwd(),
         relativePath
     );
-
     res.sendFile(filePath);
 });
 
@@ -156,20 +130,15 @@ const getCandidateResume = asyncHandler(async (req, res) => {
 const getProfileCompletion =
     asyncHandler(
         async (req, res) => {
-
             const completion =
                 await getCandidateProfileCompletion(
                     req.user.id
                 );
-
             res.status(
                 STATUS_CODES.OK
             ).json({
-
                 success: true,
-
                 message:MESSAGES.PROFILE_COMPLETION_FETCHED,
-
                 data: {
                     completion,
                 },
@@ -182,7 +151,6 @@ const deleteResume = async (req, res, next) => {
         const result = await deleteCandidateResume(
             req.user.id
         );
-
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -204,7 +172,6 @@ export const uploadProfileImage = async (
                 req.user.id,
                 req.file
             );
-
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -229,7 +196,6 @@ export const deleteProfileImage = async (
             await deleteCandidateProfileImage(
                 req.user.id
             );
-
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -239,8 +205,6 @@ export const deleteProfileImage = async (
         next(error);
     }
 };
-
-
 
 export {
     deleteResume, getCandidateResume, getProfile,
