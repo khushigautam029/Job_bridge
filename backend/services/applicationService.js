@@ -530,6 +530,15 @@ const getJobApplications = async (
                                 "phone",
                             ],
                         },
+                        {
+                            model: Skill,
+                            as: "skills",
+                            attributes: ["id", "name"],
+                            through: { attributes: [] },
+                        },
+                        { model: CandidateEducation, as: "educations" },
+                        { model: CandidateExperience, as: "experiences" },
+                        { model: CandidateProject, as: "projects" },
                     ],
                 },
                 {

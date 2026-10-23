@@ -15,8 +15,8 @@ import {
     X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { getRecruiterApplications } from "../../services/applicationService";
 import Pagination, { usePagination } from "../../components/Pagination.jsx";
+import { getRecruiterApplications } from "../../services/applicationService";
 
 const getInitials = (name = "Candidate") =>
     name
@@ -27,6 +27,26 @@ const getInitials = (name = "Candidate") =>
         .join("")
         .toUpperCase()
         .slice(0, 2);
+
+const applicationStatuses = [
+    ["SHORTLISTED", "Shortlisted"],
+    ["INTERVIEW", "Interview"],
+    ["REJECTED", "Rejected"],
+];
+
+const visibleCandidateStatuses = new Set(applicationStatuses.map(([value]) => value));
+
+const statusLabels = Object.fromEntries(applicationStatuses);
+
+const statusClasses = {
+    APPLIED: "bg-slate-100 text-slate-700",
+    UNDER_REVIEW: "bg-amber-50 text-amber-700",
+    SHORTLISTED: "bg-emerald-50 text-emerald-700",
+    INTERVIEW: "bg-indigo-50 text-indigo-700",
+    SELECTED: "bg-green-50 text-green-700",
+    REJECTED: "bg-red-50 text-red-700",
+    WITHDRAWN: "bg-slate-100 text-slate-500",
+};
 
 const firstAvailable = (...values) =>
     values.find(
@@ -98,6 +118,7 @@ const Candidates = () => {
     const [experienceFilter, setExperienceFilter] = useState("All");
     const [locationFilter, setLocationFilter] = useState("All");
     const [categoryFilter, setCategoryFilter] = useState("All");
+    const [statusFilter, setStatusFilter] = useState("All");
 
     const [selectedCandidate, setSelectedCandidate] = useState(null);
     const [modalType, setModalType] = useState(null);
@@ -118,6 +139,8 @@ const Candidates = () => {
                 const candidateApplications = new Map();
 
                 applications.forEach((application) => {
+                    if (!visibleCandidateStatuses.has(application.status)) return;
+
                     const profile = application.candidate;
 
                     if (!profile) return;
@@ -177,6 +200,8 @@ const Candidates = () => {
                         id: applicationKey,
                         candidateProfileId: candidateId,
                         applicationId: application.id,
+                        applicationStatus: application.status || "APPLIED",
+                        applicationStatusLabel: statusLabels[application.status] || "Applied",
 
                         name: user.name || "Candidate",
                         email: user.email || "",
@@ -296,6 +321,7 @@ const Candidates = () => {
                 candidate.summary,
                 ...candidate.skills,
                 ...candidate.appliedJobs,
+                candidate.applicationStatusLabel,
             ];
 
             const matchesSearch =
@@ -318,11 +344,16 @@ const Candidates = () => {
                 categoryFilter === "All" ||
                 candidate.appliedCategories.includes(categoryFilter);
 
+            const matchesStatus =
+                statusFilter === "All" ||
+                candidate.applicationStatus === statusFilter;
+
             return (
                 matchesSearch &&
                 matchesExperience &&
                 matchesLocation &&
-                matchesCategory
+                matchesCategory &&
+                matchesStatus
             );
         });
     }, [
@@ -331,8 +362,9 @@ const Candidates = () => {
         experienceFilter,
         locationFilter,
         categoryFilter,
+        statusFilter,
     ]);
-    const paginationResetKey = JSON.stringify([search, experienceFilter, locationFilter, categoryFilter]);
+    const paginationResetKey = JSON.stringify([search, experienceFilter, locationFilter, categoryFilter, statusFilter]);
     const { pageItems: pageCandidates, currentPage, setCurrentPage, pageCount } =
         usePagination(filteredCandidates, paginationResetKey);
 
@@ -384,6 +416,7 @@ const Candidates = () => {
         setExperienceFilter("All");
         setLocationFilter("All");
         setCategoryFilter("All");
+        setStatusFilter("All");
     };
 
     const openExternalLink = (url) => {
@@ -487,7 +520,7 @@ const Candidates = () => {
 
             {/* SEARCH AND FILTERS */}
             <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_200px_200px_200px]">
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_180px_180px_180px_180px]">
                     <div className="relative">
                         <Search
                             size={18}
@@ -564,6 +597,24 @@ const Candidates = () => {
                             className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
                         />
                     </div>
+
+                    <div className="relative">
+                        <select
+                            value={statusFilter}
+                            onChange={(event) => setStatusFilter(event.target.value)}
+                            aria-label="Filter candidates by application status"
+                            className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 pr-10 text-sm text-slate-600 outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
+                        >
+                            <option value="All">All Statuses</option>
+                            {applicationStatuses.map(([value, label]) => (
+                                <option key={value} value={value}>{label}</option>
+                            ))}
+                        </select>
+                        <ChevronDown
+                            size={16}
+                            className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                        />
+                    </div>
                 </div>
             </section>
 
@@ -587,7 +638,8 @@ const Candidates = () => {
                     {(search ||
                         experienceFilter !== "All" ||
                         locationFilter !== "All" ||
-                        categoryFilter !== "All") && (
+                        categoryFilter !== "All" ||
+                        statusFilter !== "All") && (
                         <button
                             type="button"
                             onClick={clearFilters}
@@ -637,6 +689,10 @@ const Candidates = () => {
                                         <h3 className="break-words font-semibold text-slate-900">
                                             {candidate.name}
                                         </h3>
+
+                                        <span className={`mt-1 inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold ${statusClasses[candidate.applicationStatus] || statusClasses.APPLIED}`}>
+                                            {candidate.applicationStatusLabel}
+                                        </span>
 
                                         <p className="mt-1 break-words text-sm text-indigo-600">
                                             {candidate.title}
@@ -891,6 +947,10 @@ const Candidates = () => {
                                     <p className="mt-1 text-sm text-indigo-600">
                                         {selectedCandidate.title}
                                     </p>
+
+                                    <span className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${statusClasses[selectedCandidate.applicationStatus] || statusClasses.APPLIED}`}>
+                                        Application status: {selectedCandidate.applicationStatusLabel}
+                                    </span>
 
                                     <p className="mt-1 break-all text-sm text-slate-500">
                                         {selectedCandidate.email}

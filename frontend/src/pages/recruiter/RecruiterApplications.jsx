@@ -35,6 +35,18 @@ const statusLabels = {
     REJECTED: "Rejected",
 };
 
+const formatProfileDate = (value) => {
+    if (!value) return "";
+    const date = new Date(`${value}T00:00:00`);
+    return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleDateString();
+};
+
+const formatDateRange = (startDate, endDate, isCurrent = false) => {
+    const start = formatProfileDate(startDate);
+    const end = isCurrent ? "Present" : formatProfileDate(endDate);
+    return [start, end].filter(Boolean).join(" – ");
+};
+
 const mapApplication = (item) => {
     const candidate = item.candidate || {};
     const job = item.job || {};
@@ -52,6 +64,11 @@ const mapApplication = (item) => {
         experience: candidate.experienceYears
             ? `${candidate.experienceYears} Years`
             : "Not specified",
+        profileImage: candidate.profileImage || "",
+        gender: candidate.gender || "",
+        dateOfBirth: candidate.dob || "",
+        degree: candidate.degree || "",
+        college: candidate.college || "",
         status: statusLabels[item.status] || item.status,
         applicationStatus: item.status,
         appliedDate: item.appliedAt
@@ -60,9 +77,14 @@ const mapApplication = (item) => {
         skills: (candidate.skills || []).map((skill) =>
             typeof skill === "string" ? skill : skill.name
         ).filter(Boolean),
-        resume: item.resume || "",
-        education: candidate.education || "Not specified",
+        resume: item.resume || candidate.resume || "",
+        educations: candidate.educations || [],
+        experiences: candidate.experiences || [],
+        projects: candidate.projects || [],
         summary: candidate.bio || "No professional summary provided.",
+        linkedin: candidate.linkedinUrl || "",
+        github: candidate.githubUrl || "",
+        portfolio: candidate.portfolioUrl || "",
         atsAnalysis: item.atsAnalysis || null,
     };
 };
@@ -1267,6 +1289,20 @@ const RecruiterApplications = () => {
                                         </div>
                                     </div>
 
+                                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                                        {[
+                                            ["Degree", selectedCandidate.degree],
+                                            ["College / University", selectedCandidate.college],
+                                            ["Gender", selectedCandidate.gender],
+                                            ["Date of birth", formatProfileDate(selectedCandidate.dateOfBirth)],
+                                        ].filter(([, value]) => value).map(([label, value]) => (
+                                            <div key={label} className="rounded-xl bg-slate-50 p-4">
+                                                <p className="text-xs text-slate-400">{label}</p>
+                                                <p className="mt-2 text-sm font-medium text-slate-700">{value}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+
                                     {/* Education */}
 
                                     <div className="mt-6">
@@ -1274,11 +1310,27 @@ const RecruiterApplications = () => {
                                             Education
                                         </h3>
 
-                                        <div className="mt-2 rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
-                                            {
-                                                selectedCandidate.education
-                                            }
-                                        </div>
+                                        {selectedCandidate.educations.length ? (
+                                            <div className="mt-3 space-y-3">
+                                                {selectedCandidate.educations.map((education) => (
+                                                    <article key={education.id} className="rounded-xl bg-slate-50 p-4">
+                                                        <h4 className="text-sm font-semibold text-slate-800">
+                                                            {[education.degree, education.fieldOfStudy].filter(Boolean).join(" · ") || "Education"}
+                                                        </h4>
+                                                        <p className="mt-1 text-sm text-slate-600">{education.institution || "Institution not provided"}</p>
+                                                        <p className="mt-1 text-xs text-slate-500">
+                                                            {[education.location, formatDateRange(education.startDate, education.endDate)].filter(Boolean).join(" · ")}
+                                                            {education.grade ? ` · ${education.grade}` : ""}
+                                                        </p>
+                                                        {education.description && <p className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-500">{education.description}</p>}
+                                                    </article>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="mt-2 rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
+                                                {[selectedCandidate.degree, selectedCandidate.college].filter(Boolean).join(" · ") || "Not specified"}
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Summary */}
@@ -1293,6 +1345,72 @@ const RecruiterApplications = () => {
                                             }
                                         </p>
                                     </div>
+
+                                    {/* Experience and internships */}
+                                    {[
+                                        {
+                                            title: "Work Experience",
+                                            entries: selectedCandidate.experiences.filter((entry) => !String(entry.employmentType || "").toUpperCase().includes("INTERN")),
+                                        },
+                                        {
+                                            title: "Internships",
+                                            entries: selectedCandidate.experiences.filter((entry) => String(entry.employmentType || "").toUpperCase().includes("INTERN")),
+                                        },
+                                    ].map(({ title, entries }) => (
+                                        <section key={title} className="mt-6">
+                                            <h3 className="text-sm font-semibold text-slate-900">{title}</h3>
+                                            {entries.length ? (
+                                                <div className="mt-3 space-y-3">
+                                                    {entries.map((entry) => (
+                                                        <article key={entry.id} className="rounded-xl bg-slate-50 p-4">
+                                                            <h4 className="text-sm font-semibold text-slate-800">{entry.jobTitle || "Position"}</h4>
+                                                            <p className="mt-1 text-sm text-slate-600">
+                                                                {[entry.companyName, entry.employmentType?.replaceAll("_", " ")].filter(Boolean).join(" · ")}
+                                                            </p>
+                                                            <p className="mt-1 text-xs text-slate-500">
+                                                                {[entry.location, formatDateRange(entry.startDate, entry.endDate, entry.currentlyWorking)].filter(Boolean).join(" · ")}
+                                                            </p>
+                                                            {entry.description && <p className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-500">{entry.description}</p>}
+                                                            {Array.isArray(entry.skills) && entry.skills.length > 0 && <p className="mt-2 text-xs text-indigo-600">Skills: {entry.skills.join(", ")}</p>}
+                                                        </article>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <p className="mt-2 rounded-xl bg-slate-50 p-4 text-sm text-slate-500">No {title.toLowerCase()} provided.</p>
+                                            )}
+                                        </section>
+                                    ))}
+
+                                    {/* Projects */}
+                                    <section className="mt-6">
+                                        <h3 className="text-sm font-semibold text-slate-900">Projects</h3>
+                                        {selectedCandidate.projects.length ? (
+                                            <div className="mt-3 space-y-3">
+                                                {selectedCandidate.projects.map((project) => {
+                                                    const technologies = Array.isArray(project.technologies)
+                                                        ? project.technologies
+                                                        : typeof project.technologies === "string"
+                                                            ? project.technologies.split(",").map((technology) => technology.trim()).filter(Boolean)
+                                                            : [];
+                                                    return (
+                                                        <article key={project.id} className="rounded-xl bg-slate-50 p-4">
+                                                            <h4 className="text-sm font-semibold text-slate-800">{project.title || "Project"}</h4>
+                                                            {project.role && <p className="mt-1 text-sm text-slate-600">{project.role}</p>}
+                                                            <p className="mt-1 text-xs text-slate-500">{formatDateRange(project.startDate, project.endDate, project.currentlyWorking)}</p>
+                                                            {project.description && <p className="mt-2 whitespace-pre-line text-sm leading-6 text-slate-500">{project.description}</p>}
+                                                            {technologies.length > 0 && <p className="mt-2 text-xs text-indigo-600">Technologies: {technologies.join(", ")}</p>}
+                                                            <div className="mt-3 flex flex-wrap gap-3 text-xs font-medium">
+                                                                {project.projectUrl && <a href={project.projectUrl} target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline">Project link</a>}
+                                                                {project.githubUrl && <a href={project.githubUrl} target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline">GitHub</a>}
+                                                            </div>
+                                                        </article>
+                                                    );
+                                                })}
+                                            </div>
+                                        ) : (
+                                            <p className="mt-2 rounded-xl bg-slate-50 p-4 text-sm text-slate-500">No projects provided.</p>
+                                        )}
+                                    </section>
 
                                     {/* Skills */}
 
