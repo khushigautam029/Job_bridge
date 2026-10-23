@@ -92,7 +92,7 @@ const HomeJobs = () => {
 
     // FILTER JOBS
     const filteredJobs = useMemo(() => {
-        const searchValue = search.trim().toLowerCase();
+            const searchTerms = search.trim().toLowerCase().split(/\s+/).filter(Boolean);
 
         return jobs.filter((job) => {
             const matchesCategory = category
@@ -100,20 +100,16 @@ const HomeJobs = () => {
                 category.toLowerCase()
                 : true;
 
-            const matchesSearch =
-                !searchValue ||
-                job.title
-                    ?.toLowerCase()
-                    .includes(searchValue) ||
-                job.company
-                    ?.toLowerCase()
-                    .includes(searchValue) ||
-                job.location
-                    ?.toLowerCase()
-                    .includes(searchValue) ||
-                job.skills?.some((skill) =>
-                    skill.toLowerCase().includes(searchValue)
-                );
+            const searchableText = [
+                job.title,
+                job.company,
+                job.location,
+                job.category,
+                job.description,
+                ...(job.skills || []),
+            ].join(" ").toLowerCase();
+            const matchesSearch = !searchTerms.length ||
+                searchTerms.some((term) => searchableText.includes(term));
 
             const matchesLocation = !location || job.location?.toLowerCase().includes(normalizeLocationQuery(location));
             return matchesCategory && matchesSearch && matchesLocation;

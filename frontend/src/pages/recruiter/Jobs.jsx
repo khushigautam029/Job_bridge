@@ -58,7 +58,7 @@ const Jobs = () => {
 
     const selectedCategory = searchParams.get("category");
 
-    const [search, setSearch] = useState("");
+    const [search, setSearch] = useState(searchParams.get("search") || "");
     const [statusFilter, setStatusFilter] = useState("All");
     const [categoryFilter, setCategoryFilter] = useState(
         selectedCategory || "All"
@@ -129,17 +129,18 @@ const Jobs = () => {
 
     // Search and filter the recruiter's jobs.
     const filteredJobs = useMemo(() => {
-        const searchValue = search.toLowerCase().trim();
+        const searchTerms = search.toLowerCase().trim().split(/\s+/).filter(Boolean);
 
         return jobs.filter((job) => {
-            const matchesSearch =
-                (job.title || "").toLowerCase().includes(searchValue) ||
-                (job.category || "").toLowerCase().includes(searchValue) ||
-                (job.location || "").toLowerCase().includes(searchValue) ||
-                (job.type || "").toLowerCase().includes(searchValue) ||
-                (job.skills || []).some((skill) =>
-                    skill.toLowerCase().includes(searchValue)
-                );
+            const searchableText = [
+                job.title,
+                job.category,
+                job.location,
+                job.type,
+                ...(job.skills || []),
+            ].join(" ").toLowerCase();
+            const matchesSearch = !searchTerms.length ||
+                searchTerms.some((term) => searchableText.includes(term));
 
             const matchesStatus =
                 statusFilter === "All" ||

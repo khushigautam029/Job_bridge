@@ -7,7 +7,7 @@ import {
     Search
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import LocationAutocomplete from "../../components/LocationAutocomplete";
 import Pagination, { usePagination } from "../../components/Pagination";
 import {
@@ -22,8 +22,9 @@ import {
 } from "../../services/savedJobService";
 
 const FindJobs = () => {
-    const [search, setSearch] = useState("");
-    const [location, setLocation] = useState("");
+    const [searchParams] = useSearchParams();
+    const [search, setSearch] = useState(searchParams.get("search") || "");
+    const [location, setLocation] = useState(searchParams.get("location") || "");
     const [jobType, setJobType] = useState("All");
     const [experience, setExperience] = useState("All");
     const [sortBy, setSortBy] = useState("salary");
@@ -135,20 +136,20 @@ const FindJobs = () => {
             String(job.category || "").toLowerCase() ===
                 category.toLowerCase();
 
-        const searchTerm = search.toLowerCase();
+        const searchTerms = search.toLowerCase().trim().split(/\s+/).filter(Boolean);
 
         const matchesSearch =
-            String(job.title || "")
-                .toLowerCase()
-                .includes(searchTerm) ||
-            String(job.company || "")
-                .toLowerCase()
-                .includes(searchTerm) ||
-            (job.skills || []).some((skill) =>
-                String(skill)
-                    .toLowerCase()
-                    .includes(searchTerm)
-            );
+            !searchTerms.length ||
+            searchTerms.some((term) => {
+                const searchableText = [
+                    job.title,
+                    job.company,
+                    job.category,
+                    job.description,
+                    ...(job.skills || []),
+                ].join(" ").toLowerCase();
+                return searchableText.includes(term);
+            });
 
         const matchesLocation =
             !location ||

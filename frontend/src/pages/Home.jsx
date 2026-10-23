@@ -29,6 +29,7 @@ import {
     formatJobCard,
     getJobCategories,
     getJobs,
+    getMyJobs,
     getMyJobCategories,
 } from "../services/jobService";
 import {
@@ -68,6 +69,7 @@ const Home = () => {
 
     const [searchKeyword, setSearchKeyword] = useState("");
     const [searchLocation, setSearchLocation] = useState("");
+    const [locationSuggestionsOpen, setLocationSuggestionsOpen] = useState(false);
 
     const [successMessage, setSuccessMessage] = useState("");
     const [featuredJobs, setFeaturedJobs] = useState([]);
@@ -78,16 +80,23 @@ const Home = () => {
     useEffect(() => {
         let active = true;
 
+        const isRecruiter = isLoggedIn && userRole === "RECRUITER";
+
         Promise.all([
-            getJobs({ limit: 50 }),
-            isLoggedIn && userRole === "RECRUITER"
+            isRecruiter
+                ? getMyJobs().then((jobs) => ({ jobs }))
+                : getJobs({ limit: 50 }),
+            isRecruiter
                 ? getMyJobCategories()
                 : getJobCategories(),
         ])
             .then(([jobResult, categoryResult]) => {
                 if (!active) return;
 
-                const jobs = (jobResult.jobs || []).map(
+                const recruiterJobs = (jobResult.jobs || []).filter(
+                    (job) => !isRecruiter || job.status === "OPEN"
+                );
+                const jobs = recruiterJobs.map(
                     formatJobCard
                 );
 
@@ -351,12 +360,6 @@ const Home = () => {
     };
 
     const handleSearch = () => {
-        if (!isLoggedIn) {
-            setAuthAction("jobs");
-            setShowAuthModal(true);
-            return;
-        }
-
         if (userRole === "ADMIN") {
             navigate("/admin/dashboard");
             return;
@@ -380,27 +383,22 @@ const Home = () => {
 
         const queryString = params.toString();
 
+        const jobsRoute = isLoggedIn ? getJobsRoute() : "/jobs";
         navigate(
             queryString
-                ? `${getJobsRoute()}?${queryString}`
-                : getJobsRoute()
+                ? `${jobsRoute}?${queryString}`
+                : jobsRoute
         );
     };
 
     const handlePopularSearch = (keyword) => {
-        if (!isLoggedIn) {
-            setAuthAction("jobs");
-            setShowAuthModal(true);
-            return;
-        }
-
         if (userRole === "ADMIN") {
             navigate("/admin/dashboard");
             return;
         }
 
         navigate(
-            `${getJobsRoute()}?search=${encodeURIComponent(
+            `${isLoggedIn ? getJobsRoute() : "/jobs"}?search=${encodeURIComponent(
                 keyword
             )}`
         );
@@ -1050,7 +1048,7 @@ const Home = () => {
                     </div>
 
                     {/* SEARCH */}
-                    <div className="jb-enter jb-delay-4 jb-search-panel mx-auto mt-8 max-w-5xl rounded-2xl border border-slate-200 bg-white p-2.5 shadow-lg shadow-slate-200/60">
+                    <div className={`jb-enter jb-delay-4 jb-search-panel relative z-20 mx-auto mt-8 max-w-5xl rounded-2xl border border-slate-200 bg-white p-2.5 shadow-lg shadow-slate-200/60 ${locationSuggestionsOpen ? "pb-[16rem]" : ""}`}>
                         <div className="grid gap-2.5 md:grid-cols-[1fr_1fr_auto]">
 
                             {/* KEYWORD */}
@@ -1101,6 +1099,7 @@ const Home = () => {
 
                                     <LocationAutocomplete
                                         value={searchLocation}
+                                        onSuggestionsOpenChange={setLocationSuggestionsOpen}
                                         onChange={(event) =>
                                             setSearchLocation(
                                                 event.target.value

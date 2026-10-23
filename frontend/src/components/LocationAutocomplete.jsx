@@ -7,6 +7,7 @@ const LocationAutocomplete = ({
     value,
     onChange,
     onSelect,
+    onSuggestionsOpenChange,
     className = "",
     inputClassName = "",
     placeholder = "Start typing a city or location",
@@ -22,6 +23,10 @@ const LocationAutocomplete = ({
     const [activeIndex, setActiveIndex] = useState(-1);
     const rootRef = useRef(null);
     const selectedValueRef = useRef("");
+
+    useEffect(() => {
+        onSuggestionsOpenChange?.(isOpen && suggestions.length > 0);
+    }, [isOpen, onSuggestionsOpenChange, suggestions.length]);
 
     useEffect(() => {
         const query = String(value || "").trim();

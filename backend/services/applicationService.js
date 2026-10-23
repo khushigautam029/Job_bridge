@@ -16,9 +16,34 @@ import {
     UserPreference
 } from "../models/index.js";
 import createNotification from "../utils/createNotification.js";
+import {
+    sendApplicationConfirmationEmail,
+} from "../utils/emailService.js";
 import extractResumeText from "../utils/resumeParserService.js";
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 import calculateAtsScore from "./atsScoringService.js";
+
+const sendApplicationEmails = async ({
+    candidateUserId,
+    jobTitle,
+}) => {
+    try {
+        const candidate = await User.findByPk(candidateUserId);
+
+        if (candidate?.email) {
+            await sendApplicationConfirmationEmail({
+                email: candidate.email,
+                name: candidate.name,
+                jobTitle,
+            });
+        }
+    } catch (error) {
+        console.error(
+            "Candidate application email failed:",
+            error.message
+        );
+    }
+};
 
 /*
     Candidate applies for a job
@@ -28,13 +53,11 @@ const applyForJob = async (
     jobId,
     data
 ) => {
-
-    const candidate =
-        await CandidateProfile.findOne({
-            where: {
-                userId,
-            },
-        });
+    const candidate = await CandidateProfile.findOne({
+        where: {
+            userId,
+        },
+    });
 
     if (!candidate) {
         const error = new Error(
@@ -44,7 +67,6 @@ const applyForJob = async (
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
-
 
     const job = await Job.findByPk(jobId);
 
@@ -57,7 +79,6 @@ const applyForJob = async (
         throw error;
     }
 
-
     if (job.status !== "OPEN") {
         const error = new Error(
             MESSAGES.JOB_NOT_OPEN
@@ -67,11 +88,9 @@ const applyForJob = async (
         throw error;
     }
 
-
     if (
         job.applicationDeadline &&
-        new Date(job.applicationDeadline) <
-        new Date()
+        new Date(job.applicationDeadline) < new Date()
     ) {
         const error = new Error(
             MESSAGES.JOB_DEADLINE_PASSED
@@ -81,7 +100,6 @@ const applyForJob = async (
         throw error;
     }
 
-
     const existingApplication =
         await Application.findOne({
             where: {
@@ -90,23 +108,37 @@ const applyForJob = async (
             },
         });
 
+    // Find the recruiter who owns this job.
+    const recruiter = await RecruiterProfile.findByPk(
+        job.recruiterId
+    );
 
+    // Handle reapplication after withdrawal.
     if (existingApplication) {
-
-        if (
-            existingApplication.status ===
-            "WITHDRAWN"
-        ) {
-
+        if (existingApplication.status === "WITHDRAWN") {
             await existingApplication.update({
                 ...data,
                 status: "APPLIED",
                 appliedAt: new Date(),
             });
 
+            await sendApplicationEmails({
+                candidateUserId: userId,
+                recruiterUserId: recruiter?.userId,
+                jobTitle: job.title,
+            });
+
+            if (recruiter) {
+                await createNotification({
+                    userId: recruiter.userId,
+                    title: "New Job Application",
+                    message: `A candidate has applied for your job: ${job.title}`,
+                    type: "APPLICATION",
+                });
+            }
+
             return existingApplication;
         }
-
 
         const error = new Error(
             MESSAGES.ALREADY_APPLIED
@@ -116,37 +148,25 @@ const applyForJob = async (
         throw error;
     }
 
+    // Create a new application.
+    const application = await Application.create({
+        jobId,
+        candidateId: candidate.id,
+        resume: data.resume || null,
+        coverLetter: data.coverLetter || null,
+        expectedSalary: data.expectedSalary || null,
+        noticePeriod: data.noticePeriod || null,
+    });
 
-    const application =
-        await Application.create({
-            jobId,
-            candidateId: candidate.id,
-            resume: data.resume || null,
-            coverLetter: data.coverLetter || null,
-            expectedSalary:
-                data.expectedSalary || null,
-            noticePeriod:
-                data.noticePeriod || null,
-        });
-
-
-    // Create initial status history
+    // Create initial application status history.
     await ApplicationStatusHistory.create({
         applicationId: application.id,
         status: "APPLIED",
         changedBy: userId,
     });
 
-
-    // Find recruiter who owns this job
-    const recruiter =
-        await RecruiterProfile.findByPk(
-            job.recruiterId
-        );
-
-
+    // Create the recruiter's in-app notification.
     if (recruiter) {
-
         await createNotification({
             userId: recruiter.userId,
             title: "New Job Application",
@@ -155,6 +175,12 @@ const applyForJob = async (
         });
     }
 
+    // Send emails to the candidate and recruiter.
+    await sendApplicationEmails({
+        candidateUserId: userId,
+        recruiterUserId: recruiter?.userId,
+        jobTitle: job.title,
+    });
 
     return application;
 };
@@ -1241,7 +1267,6 @@ const analyzeJobApplicationsBatch = async (
 export {
     analyzeJobApplicationsBatch, applyForJob, getApplicationAtsScore, getApplicationById,
     getJobApplications,
-    getMyApplications, getRankedJobApplications, getRecruiterApplications,
-    updateApplicationStatus, withdrawApplication
+    getMyApplications, getRankedJobApplications, getRecruiterApplications, sendApplicationEmails, updateApplicationStatus, withdrawApplication
 };
 
