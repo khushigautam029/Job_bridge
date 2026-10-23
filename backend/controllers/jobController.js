@@ -36,7 +36,6 @@ const create = asyncHandler(
                 stripUnknown: true,
             }
         );
-
         if (error) {
             return sendError(
                 res,
@@ -47,12 +46,10 @@ const create = asyncHandler(
                 )
             );
         }
-
         const job = await createJob(
             req.user.id,
             value
         );
-
         return sendSuccess(
             res,
             STATUS_CODES.CREATED,
@@ -89,10 +86,7 @@ const getAll = asyncHandler(
                 )
             );
         }
-
-        const result =
-            await getAllJobs(value);
-
+        const result = await getAllJobs(value);
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -105,9 +99,7 @@ const getAll = asyncHandler(
 // GET JOB CATEGORIES
 const getCategories = asyncHandler(
     async (req, res) => {
-        const categories =
-            await getJobCategories();
-
+        const categories = await getJobCategories();
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -122,7 +114,6 @@ const getCategories = asyncHandler(
 const getMyCategories = asyncHandler(
     async (req, res) => {
         const categories = await getRecruiterJobCategories(req.user.id);
-
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -139,7 +130,6 @@ const getMine = asyncHandler(
             await getRecruiterJobs(
                 req.user.id
             );
-
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -158,7 +148,6 @@ const getOne = asyncHandler(
             await getJobById(
                 req.params.id
             );
-
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -183,7 +172,6 @@ const update = asyncHandler(
                 stripUnknown: true,
             }
         );
-
         if (error) {
             return sendError(
                 res,
@@ -194,14 +182,12 @@ const update = asyncHandler(
                 )
             );
         }
-
         const job =
             await updateJob(
                 req.user.id,
                 req.params.id,
                 value
             );
-
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -220,7 +206,6 @@ const remove = asyncHandler(
             req.user.id,
             req.params.id
         );
-
         return sendSuccess(
             res,
             STATUS_CODES.OK,

@@ -20,10 +20,7 @@ import {
 const getSkills = asyncHandler(
     async (req, res) => {
         const { jobId } = req.params;
-
-        const skills =
-            await getJobSkills(jobId);
-
+        const skills = await getJobSkills(jobId);
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -48,7 +45,6 @@ const addSkill = asyncHandler(
                 stripUnknown: true,
             }
         );
-
         if (error) {
             return sendError(
                 res,
@@ -61,7 +57,6 @@ const addSkill = asyncHandler(
         }
 
         const { jobId } = req.params;
-
         const jobSkill =
             await addJobSkill(
                 req.user.id,

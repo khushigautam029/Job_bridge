@@ -22,7 +22,6 @@ const getNotifications = asyncHandler(
             await getMyNotifications(
                 req.user.id
             );
-
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -41,7 +40,6 @@ const unreadCount = asyncHandler(
             await getUnreadCount(
                 req.user.id
             );
-
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -61,7 +59,6 @@ const markRead = asyncHandler(
                 req.user.id,
                 req.params.id
             );
-
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -79,7 +76,6 @@ const markAllRead = asyncHandler(
         await markAllAsRead(
             req.user.id
         );
-
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -95,7 +91,6 @@ const removeNotification = asyncHandler(
             req.user.id,
             req.params.id
         );
-
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -111,7 +106,6 @@ const removeAllNotifications =
             await deleteAllNotifications(
                 req.user.id
             );
-
             return sendSuccess(
                 res,
                 STATUS_CODES.OK,

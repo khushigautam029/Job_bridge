@@ -12,12 +12,10 @@ import {
     sendError,
     sendSuccess,
 } from "../utils/responseHandler.js";
-
 import {
     MESSAGES,
     STATUS_CODES,
 } from "../utils/setConstants.js";
-
 import {
     createInterviewSchema,
     updateInterviewSchema,
@@ -35,7 +33,6 @@ const schedule = asyncHandler(
                     stripUnknown: true,
                 }
             );
-
         if (error) {
             return sendError(
                 res,
@@ -46,7 +43,6 @@ const schedule = asyncHandler(
                 )
             );
         }
-
         const interview =
             await scheduleInterview(
                 req.user.id,
@@ -72,7 +68,6 @@ const getMine = asyncHandler(
             await getMyInterviews(
                 req.user.id
             );
-
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -91,7 +86,6 @@ const getRecruiterMine =
             await getRecruiterInterviews(
                 req.user.id
             );
-
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -110,7 +104,6 @@ const getOne = asyncHandler(
                 req.user.id,
                 req.params.id
             );
-
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -133,7 +126,6 @@ const update = asyncHandler(
                     stripUnknown: true,
                 }
             );
-
         if (error) {
             return sendError(
                 res,
@@ -144,14 +136,12 @@ const update = asyncHandler(
                 )
             );
         }
-
         const interview =
             await updateInterview(
                 req.user.id,
                 req.params.id,
                 value
             );
-
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -174,7 +164,6 @@ const updateStatus = asyncHandler(
                     stripUnknown: true,
                 }
             );
-
         if (error) {
             return sendError(
                 res,
@@ -185,14 +174,12 @@ const updateStatus = asyncHandler(
                 )
             );
         }
-
         const interview =
             await updateInterviewStatus(
                 req.user.id,
                 req.params.id,
                 value.status
             );
-
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -211,7 +198,6 @@ const cancel = asyncHandler(
             req.user.id,
             req.params.id
         );
-
         return sendSuccess(
             res,
             STATUS_CODES.OK,

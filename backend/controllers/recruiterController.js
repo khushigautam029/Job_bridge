@@ -54,14 +54,12 @@ const getMyProfile = asyncHandler(
 
 const updateMyProfile = asyncHandler(
     async (req, res) => {
-
         const recruiterProfile =
             await RecruiterProfile.findOne({
                 where: {
                     userId: req.user.id,
                 },
             });
-
         if (!recruiterProfile) {
             return sendError(
                 res,
@@ -69,11 +67,9 @@ const updateMyProfile = asyncHandler(
                 MESSAGES.RECRUITER_PROFILE_NOT_FOUND
             );
         }
-
         const user = await User.findByPk(
             req.user.id
         );
-
         await user.update({
             name:
                 req.body.name ??
@@ -83,17 +79,14 @@ const updateMyProfile = asyncHandler(
                 req.body.phone ??
                 user.phone,
         });
-
         await recruiterProfile.update({
             designation:
                 req.body.designation ??
                 recruiterProfile.designation,
-
             phone:
                 req.body.phone ??
                 recruiterProfile.phone,
         });
-
         const updatedProfile =
             await RecruiterProfile.findOne({
                 where: {
@@ -113,7 +106,6 @@ const updateMyProfile = asyncHandler(
                     },
                 ],
             });
-
         return sendSuccess(
             res,
             STATUS_CODES.OK,
@@ -124,7 +116,6 @@ const updateMyProfile = asyncHandler(
         );
     }
 );
-
 
 export {
     getMyProfile,
