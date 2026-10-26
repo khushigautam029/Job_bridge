@@ -239,6 +239,7 @@ const Applications = () => {
                         workMode: (job.workMode || "").replaceAll("_", " "),
                         jobDescription: job.description || "",
                         skills: (job.skills || []).map((skill) => skill.name),
+                        atsAnalysis: item.atsAnalysis || null,
                         resumeUrl: item.resume || "",
                         resumeName: item.resume?.split(/[\\/]/).pop() || "Resume",
                         coverLetter: item.coverLetter || "",
@@ -830,6 +831,58 @@ const Applications = () => {
                                                 )
                                             )}
                                         </div>
+                                    </section>
+
+                                    {/* Resume improvement suggestions */}
+                                    <section className="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-5">
+                                        <div className="flex flex-wrap items-start justify-between gap-3">
+                                            <div>
+                                                <h4 className="text-sm font-bold text-slate-900">
+                                                    Resume match suggestions
+                                                </h4>
+                                                <p className="mt-1 text-xs leading-5 text-slate-500">
+                                                    Based on the resume text and requirements for {selectedApplication.position}. These are text matches, so only add terms that accurately describe your experience.
+                                                </p>
+                                            </div>
+                                            {selectedApplication.atsAnalysis?.status === "COMPLETED" && (
+                                                <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-indigo-700 shadow-sm">
+                                                    {selectedApplication.atsAnalysis.score}% match
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        {selectedApplication.atsAnalysis?.status === "COMPLETED" ? (
+                                            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                                                <div>
+                                                    <p className="mb-2 text-xs font-semibold text-amber-800">
+                                                        Required skills not found
+                                                    </p>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {(selectedApplication.atsAnalysis.missingSkills || []).length > 0
+                                                            ? selectedApplication.atsAnalysis.missingSkills.map((skill) => (
+                                                                <span key={skill} className="rounded-lg border border-amber-200 bg-white px-2.5 py-1.5 text-xs font-medium text-amber-900">{skill}</span>
+                                                            ))
+                                                            : <span className="text-xs text-slate-500">No required skill gaps detected.</span>}
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <p className="mb-2 text-xs font-semibold text-amber-800">
+                                                        Job keywords not found
+                                                    </p>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {(selectedApplication.atsAnalysis.missingKeywords || []).length > 0
+                                                            ? selectedApplication.atsAnalysis.missingKeywords.map((keyword) => (
+                                                                <span key={keyword} className="rounded-lg border border-amber-200 bg-white px-2.5 py-1.5 text-xs font-medium text-amber-900">{keyword}</span>
+                                                            ))
+                                                            : <span className="text-xs text-slate-500">No job keyword gaps detected.</span>}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <p className="mt-3 text-xs text-slate-500">
+                                                Resume analysis is not available for this application yet.
+                                            </p>
+                                        )}
                                     </section>
 
                                     {/* Cover Letter */}

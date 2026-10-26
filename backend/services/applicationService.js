@@ -254,6 +254,20 @@ const getMyApplications = async (
                         },
                     ],
                 },
+                {
+                    model: AtsAnalysis,
+                    as: "atsAnalysis",
+                    attributes: [
+                        "score",
+                        "matchedSkills",
+                        "missingSkills",
+                        "matchedKeywords",
+                        "missingKeywords",
+                        "status",
+                        "analyzedAt",
+                    ],
+                    required: false,
+                },
             ],
 
             order: [["appliedAt", "DESC"]],
