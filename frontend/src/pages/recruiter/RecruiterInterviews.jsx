@@ -17,6 +17,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { getRecruiterApplications } from "../../services/applicationService";
 
+import Pagination, { usePagination } from "../../components/Pagination.jsx";
 import {
     cancelInterview,
     getInterview,
@@ -25,7 +26,6 @@ import {
     updateInterview,
     updateInterviewStatus,
 } from "../../services/interviewService";
-import Pagination, { usePagination } from "../../components/Pagination.jsx";
 
 const emptyForm = {
     applicationId: "",
@@ -809,12 +809,6 @@ const RecruiterInterviews = () => {
                         Loading interviews...
                     </div>
                 ) : filteredInterviews.length > 0 ? (
-                    /*
-                     * RESPONSIVE GRID:
-                     * Mobile: 1 card per row
-                     * Small screens: 2 cards per row
-                     * Extra-large screens: 3 cards per row
-                     */
                     <>
                     <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
                         {pageInterviews.map((interview) => {
