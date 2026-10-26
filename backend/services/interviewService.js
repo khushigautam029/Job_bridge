@@ -1,5 +1,5 @@
+import { randomUUID } from "node:crypto";
 import { Op } from "sequelize";
-
 import {
     Application,
     ApplicationStatusHistory,
@@ -154,7 +154,7 @@ const scheduleInterview = async (
         recruiter.id
     ) {
         const error = new Error(
-           MESSAGES.YOU_ARE_UNAUTHORIZED_TO_SCHEDULE_AN_INTERVIEW
+            MESSAGES.YOU_ARE_UNAUTHORIZED_TO_SCHEDULE_AN_INTERVIEW
         );
 
         error.statusCode =
@@ -214,7 +214,7 @@ const scheduleInterview = async (
         )
     ) {
         const error = new Error(
-           MESSAGES.INVALID_INTERVIEW_TYPE
+            MESSAGES.INVALID_INTERVIEW_TYPE
         );
 
         error.statusCode =
@@ -222,23 +222,6 @@ const scheduleInterview = async (
 
         throw error;
     }
-
-
-    // ONLINE interview requires meeting link
-    if (
-        data.interviewType === "ONLINE" &&
-        !data.meetingLink?.trim()
-    ) {
-        const error = new Error(
-            "Meeting link is required for online interviews"
-        );
-
-        error.statusCode =
-            STATUS_CODES.BAD_REQUEST;
-
-        throw error;
-    }
-
 
     // OFFLINE interview requires location
     if (
@@ -281,6 +264,13 @@ const scheduleInterview = async (
         throw error;
     }
 
+    const meetingLink =
+        data.interviewType === "ONLINE"
+            ? (
+                data.meetingLink?.trim() ||
+                `https://meet.jit.si/jobbridge-${randomUUID()}`
+            )
+            : null;
 
     // Create interview
     const interview =
@@ -297,9 +287,7 @@ const scheduleInterview = async (
             interviewType:
                 data.interviewType,
 
-            meetingLink:
-                data.meetingLink?.trim() ||
-                null,
+            meetingLink,
 
             location:
                 data.location?.trim() ||
@@ -768,25 +756,19 @@ const updateInterview = async (
         data.interviewType ||
         interview.interviewType;
 
+    if (interviewType === "ONLINE") {
+        const providedLink = data.meetingLink?.trim();
 
-    // ONLINE requires meeting link
-    if (
-        interviewType === "ONLINE" &&
-        !(
-            data.meetingLink ??
-            interview.meetingLink
-        )?.trim()
-    ) {
-        const error = new Error(
-            "Meeting link is required for online interviews"
-        );
-
-        error.statusCode =
-            STATUS_CODES.BAD_REQUEST;
-
-        throw error;
+        if (providedLink) {
+            data.meetingLink = providedLink;
+        } else if (
+            interview.interviewType !== "ONLINE" ||
+            !interview.meetingLink
+        ) {
+            data.meetingLink =
+                `https://meet.jit.si/jobbridge-${randomUUID()}`;
+        }
     }
-
 
     // OFFLINE requires location
     if (
@@ -993,7 +975,7 @@ const cancelInterview = async (
     const recruiterOwnsInterview =
         recruiter &&
         interview.application.job.recruiterId ===
-            recruiter.id;
+        recruiter.id;
 
 
     if (

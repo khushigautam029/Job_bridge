@@ -176,9 +176,9 @@ const Interviews = () => {
             current.map((interview) =>
                 interview.id === id
                     ? {
-                          ...interview,
-                          status: "Cancelled",
-                      }
+                        ...interview,
+                        status: "Cancelled",
+                    }
                     : interview
             )
         );
@@ -187,9 +187,9 @@ const Interviews = () => {
             setSelectedInterview((current) =>
                 current
                     ? {
-                          ...current,
-                          status: "Cancelled",
-                      }
+                        ...current,
+                        status: "Cancelled",
+                    }
                     : null
             );
         }
@@ -401,7 +401,7 @@ const Interviews = () => {
                             <option value="CANCELLED">Cancelled</option>
                         </select>
 
-                       
+
                     </div>
                 </div>
             </section>
@@ -421,110 +421,109 @@ const Interviews = () => {
 
                     <div className="space-y-5">
                         {upcomingPagination.pageItems.map((interview) => (
-                                <div
-                                    key={interview.id}
-                                    className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-indigo-200 hover:shadow-md"
-                                >
-                                    <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                                        {/* Information */}
-                                        <div className="flex gap-4">
-                                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                                                <CalendarDays size={22} />
-                                            </div>
-
-                                            <div>
-                                                <div className="flex flex-wrap items-center gap-3">
-                                                    <h4 className="font-semibold text-slate-900">
-                                                        {
-                                                            interview.position
-                                                        }
-                                                    </h4>
-
-                                                    <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-600">
-                                                        Upcoming
-                                                    </span>
-                                                </div>
-
-                                                <p className="mt-1 text-sm font-medium text-slate-600">
-                                                    {interview.company}
-                                                </p>
-
-                                                <div className="mt-4 grid gap-2 text-sm text-slate-500 sm:grid-cols-2">
-                                                    <div className="flex items-center gap-2">
-                                                        <CalendarDays
-                                                            size={16}
-                                                            className="text-slate-400"
-                                                        />
-                                                        {interview.date}
-                                                    </div>
-
-                                                    <div className="flex items-center gap-2">
-                                                        <Clock3
-                                                            size={16}
-                                                            className="text-slate-400"
-                                                        />
-                                                        {interview.time}
-                                                    </div>
-
-                                                    <div className="flex items-center gap-2">
-                                                        <Video
-                                                            size={16}
-                                                            className="text-slate-400"
-                                                        />
-                                                        {interview.mode}
-                                                    </div>
-
-                                                    <div className="flex items-center gap-2">
-                                                        <MapPin
-                                                            size={16}
-                                                            className="text-slate-400"
-                                                        />
-                                                        {interview.location}
-                                                    </div>
-                                                </div>
-                                            </div>
+                            <div
+                                key={interview.id}
+                                className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-indigo-200 hover:shadow-md"
+                            >
+                                <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                                    {/* Information */}
+                                    <div className="flex gap-4">
+                                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                                            <CalendarDays size={22} />
                                         </div>
 
-                                        {/* Actions */}
-                                        <div className="flex flex-col gap-3 lg:min-w-52">
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    openJoinModal(interview)
-                                                }
-                                                className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
-                                            >
-                                                Join Interview
-                                                <ExternalLink size={16} />
-                                            </button>
+                                        <div>
+                                            <div className="flex flex-wrap items-center gap-3">
+                                                <h4 className="font-semibold text-slate-900">
+                                                    {
+                                                        interview.position
+                                                    }
+                                                </h4>
 
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    setSelectedInterview(
-                                                        interview
-                                                    )
-                                                }
-                                                className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
-                                            >
-                                                View Details
-                                                <ArrowRight size={16} />
-                                            </button>
+                                                <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-600">
+                                                    Upcoming
+                                                </span>
+                                            </div>
+
+                                            <p className="mt-1 text-sm font-medium text-slate-600">
+                                                {interview.company}
+                                            </p>
+
+                                            <div className="mt-4 grid gap-2 text-sm text-slate-500 sm:grid-cols-2">
+                                                <div className="flex items-center gap-2">
+                                                    <CalendarDays
+                                                        size={16}
+                                                        className="text-slate-400"
+                                                    />
+                                                    {interview.date}
+                                                </div>
+
+                                                <div className="flex items-center gap-2">
+                                                    <Clock3
+                                                        size={16}
+                                                        className="text-slate-400"
+                                                    />
+                                                    {interview.time}
+                                                </div>
+
+                                                <div className="flex items-center gap-2">
+                                                    <Video
+                                                        size={16}
+                                                        className="text-slate-400"
+                                                    />
+                                                    {interview.mode}
+                                                </div>
+
+                                                <div className="flex items-center gap-2">
+                                                    <MapPin
+                                                        size={16}
+                                                        className="text-slate-400"
+                                                    />
+                                                    {interview.location}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    {/* Interviewer */}
-                                    <div className="mt-5 border-t border-slate-100 pt-4">
-                                        <p className="text-xs text-slate-400">
-                                            Interviewer
-                                        </p>
+                                    {/* Actions */}
+                                    <div className="flex flex-col gap-3 lg:min-w-52">
+                                        <button
+                                            type="button"
+                                            onClick={() => openJoinModal(interview)}
+                                            disabled={!interview.meetingLink}
+                                            className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                        >
+                                            Join Interview
+                                            <ExternalLink size={16} />
+                                        </button>
 
-                                        <p className="mt-1 text-sm font-medium text-slate-700">
-                                            {interview.interviewer}
-                                        </p>
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                setSelectedInterview(
+                                                    interview
+                                                )
+                                            }
+                                            className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
+                                        >
+                                            View Details
+                                            <ArrowRight size={16} />
+                                        </button>
                                     </div>
                                 </div>
-                            ))}
+
+                                {/* Interviewer */}
+                                <div className="mt-5 border-t border-slate-100 pt-4">
+                                    <p className="text-xs text-slate-400">
+                                        Interviewer
+                                    </p>
+
+                                    <p className="mt-1 text-sm font-medium text-slate-700">
+                                        {interview.interviewer}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                     <Pagination
                         totalItems={filteredUpcoming.length}
@@ -550,78 +549,77 @@ const Interviews = () => {
                 {filteredHistory.length > 0 ? (
                     <div className="divide-y divide-slate-100">
                         {historyPagination.pageItems.map((interview) => (
-                                <div
-                                    key={interview.id}
-                                    className="flex flex-col gap-4 px-6 py-5 lg:flex-row lg:items-center lg:justify-between"
-                                >
-                                    <div className="flex items-center gap-4">
-                                        <div
-                                            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${
-                                                interview.status ===
-                                                "Completed"
-                                                    ? "bg-green-50 text-green-600"
-                                                    : "bg-red-50 text-red-600"
+                            <div
+                                key={interview.id}
+                                className="flex flex-col gap-4 px-6 py-5 lg:flex-row lg:items-center lg:justify-between"
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div
+                                        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${interview.status ===
+                                            "Completed"
+                                            ? "bg-green-50 text-green-600"
+                                            : "bg-red-50 text-red-600"
                                             }`}
-                                        >
-                                            {interview.status ===
+                                    >
+                                        {interview.status ===
                                             "Completed" ? (
-                                                <CheckCircle2 size={20} />
-                                            ) : (
-                                                <XCircle size={20} />
-                                            )}
-                                        </div>
-
-                                        <div>
-                                            <h4 className="text-sm font-semibold text-slate-800">
-                                                {interview.position}
-                                            </h4>
-
-                                            <p className="mt-1 text-xs font-medium text-slate-500">
-                                                {interview.company}
-                                            </p>
-
-                                            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400">
-                                                <span>
-                                                    {interview.date}
-                                                </span>
-
-                                                <span>
-                                                    {interview.time}
-                                                </span>
-
-                                                <span>
-                                                    Interviewer:{" "}
-                                                    {
-                                                        interview.interviewer
-                                                    }
-                                                </span>
-                                            </div>
-                                        </div>
+                                            <CheckCircle2 size={20} />
+                                        ) : (
+                                            <XCircle size={20} />
+                                        )}
                                     </div>
 
-                                    <div className="flex items-center gap-4">
-                                        <span
-                                            className={`rounded-full px-3 py-1.5 text-xs font-semibold ${getStatusClasses(
-                                                interview.status
-                                            )}`}
-                                        >
-                                            {interview.status}
-                                        </span>
+                                    <div>
+                                        <h4 className="text-sm font-semibold text-slate-800">
+                                            {interview.position}
+                                        </h4>
 
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                setSelectedInterview(
-                                                    interview
-                                                )
-                                            }
-                                            className="text-sm font-semibold text-indigo-600 hover:text-indigo-700"
-                                        >
-                                            View Details
-                                        </button>
+                                        <p className="mt-1 text-xs font-medium text-slate-500">
+                                            {interview.company}
+                                        </p>
+
+                                        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400">
+                                            <span>
+                                                {interview.date}
+                                            </span>
+
+                                            <span>
+                                                {interview.time}
+                                            </span>
+
+                                            <span>
+                                                Interviewer:{" "}
+                                                {
+                                                    interview.interviewer
+                                                }
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
-                            ))}
+
+                                <div className="flex items-center gap-4">
+                                    <span
+                                        className={`rounded-full px-3 py-1.5 text-xs font-semibold ${getStatusClasses(
+                                            interview.status
+                                        )}`}
+                                    >
+                                        {interview.status}
+                                    </span>
+
+                                    <button
+                                        type="button"
+                                        onClick={() =>
+                                            setSelectedInterview(
+                                                interview
+                                            )
+                                        }
+                                        className="text-sm font-semibold text-indigo-600 hover:text-indigo-700"
+                                    >
+                                        View Details
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 ) : (
                     <div className="px-6 py-14 text-center">
@@ -848,31 +846,31 @@ const Interviews = () => {
 
                                 {selectedInterview.status ===
                                     "Completed" && (
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            setSelectedInterview(null)
-                                        }
-                                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white"
-                                    >
-                                        <CheckCircle2 size={17} />
-                                        Interview Completed
-                                    </button>
-                                )}
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                setSelectedInterview(null)
+                                            }
+                                            className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white"
+                                        >
+                                            <CheckCircle2 size={17} />
+                                            Interview Completed
+                                        </button>
+                                    )}
 
                                 {selectedInterview.status ===
                                     "Cancelled" && (
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            setSelectedInterview(null)
-                                        }
-                                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600"
-                                    >
-                                        <XCircle size={17} />
-                                        Interview Cancelled
-                                    </button>
-                                )}
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                setSelectedInterview(null)
+                                            }
+                                            className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600"
+                                        >
+                                            <XCircle size={17} />
+                                            Interview Cancelled
+                                        </button>
+                                    )}
                             </div>
 
                         </div>
@@ -979,8 +977,7 @@ const Interviews = () => {
                         </button>
 
                         <p className="mt-4 text-center text-xs text-slate-400">
-                            This is a frontend demo. The meeting link is
-                            currently static.
+                            Join using the meeting link generated for your interview.
                         </p>
                     </div>
                 </div>

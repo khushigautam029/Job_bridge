@@ -447,13 +447,6 @@ const RecruiterInterviews = () => {
         }
 
         if (
-            form.interviewType === "ONLINE" &&
-            !form.meetingLink.trim()
-        ) {
-            return "Meeting link is required for an online interview.";
-        }
-
-        if (
             form.interviewType === "OFFLINE" &&
             !form.location.trim()
         ) {
@@ -478,10 +471,6 @@ const RecruiterInterviews = () => {
             scheduledAt: form.scheduledAt,
             interviewType: form.interviewType,
         };
-
-        if (form.interviewType === "ONLINE") {
-            payload.meetingLink = form.meetingLink.trim();
-        }
 
         if (form.interviewType === "OFFLINE") {
             payload.location = form.location.trim();
@@ -810,256 +799,256 @@ const RecruiterInterviews = () => {
                     </div>
                 ) : filteredInterviews.length > 0 ? (
                     <>
-                    <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-                        {pageInterviews.map((interview) => {
-                            const candidateName = getCandidateName(interview);
-                            const candidateEmail = getCandidateEmail(interview);
-                            const candidateProfile = getCandidateFromInterview(interview);
-                            const candidateProfileLabel = getCandidateProfileLabel(interview);
-                            const jobTitle = getJobTitle(interview);
-                            const category = getJobCategory(interview);
-                            const isActionLoading =
-                                actionLoadingId === interview.id;
+                        <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                            {pageInterviews.map((interview) => {
+                                const candidateName = getCandidateName(interview);
+                                const candidateEmail = getCandidateEmail(interview);
+                                const candidateProfile = getCandidateFromInterview(interview);
+                                const candidateProfileLabel = getCandidateProfileLabel(interview);
+                                const jobTitle = getJobTitle(interview);
+                                const category = getJobCategory(interview);
+                                const isActionLoading =
+                                    actionLoadingId === interview.id;
 
-                            return (
-                                <article
-                                    key={interview.id}
-                                    className="flex min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-indigo-200 hover:shadow-md sm:p-5"
-                                >
-                                    {/* CANDIDATE HEADER */}
-                                    <div className="flex min-w-0 items-start justify-between gap-3">
-                                        <div className="flex min-w-0 items-start gap-3">
-                                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-sm font-semibold text-indigo-600">
-                                                {getInitials(candidateName)}
-                                            </div>
-
-                                            <div className="min-w-0">
-                                                <h3 className="break-words font-semibold text-slate-900">
-                                                    {candidateName}
-                                                </h3>
-                                                <p className="mt-1 break-words text-sm text-indigo-600">
-                                                    {jobTitle}
-                                                </p>
-                                                {category !== "Uncategorized" && (
-                                                    <p className="mt-1 inline-flex rounded-md bg-violet-50 px-2 py-1 text-xs font-medium text-violet-700">
-                                                        {category}
-                                                    </p>
-                                                )}
-                                                {candidateEmail && (
-                                                    <p className="mt-1 break-all text-xs text-slate-400">
-                                                        {candidateEmail}
-                                                    </p>
-                                                )}
-                                                {candidateProfileLabel && (
-                                                    <p className="mt-1 break-words text-xs text-slate-500">
-                                                        {candidateProfileLabel}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        <span
-                                            className={`shrink-0 rounded-lg px-2 py-1 text-[10px] font-semibold ${getStatusClass(
-                                                interview.status
-                                            )}`}
-                                        >
-                                            {getStatusLabel(interview.status)}
-                                        </span>
-                                    </div>
-
-                                    {/* INTERVIEW DETAILS */}
-                                    <div className="mt-5 grid grid-cols-1 gap-3 border-t border-slate-100 pt-5">
-                                        <div className="flex min-w-0 items-center gap-2.5">
-                                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-500">
-                                                <CalendarDays size={15} />
-                                            </div>
-                                            <div className="min-w-0">
-                                                <p className="text-[11px] text-slate-400">
-                                                    Date
-                                                </p>
-                                                <p className="mt-0.5 text-xs font-medium text-slate-600">
-                                                    {formatDate(
-                                                        interview.scheduledAt
-                                                    )}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex min-w-0 items-center gap-2.5">
-                                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-500">
-                                                <Clock3 size={15} />
-                                            </div>
-                                            <div className="min-w-0">
-                                                <p className="text-[11px] text-slate-400">
-                                                    Time
-                                                </p>
-                                                <p className="mt-0.5 text-xs font-medium text-slate-600">
-                                                    {formatTime(
-                                                        interview.scheduledAt
-                                                    )}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex min-w-0 items-center gap-2.5">
-                                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-500">
-                                                {getInterviewTypeIcon(
-                                                    interview.interviewType
-                                                )}
-                                            </div>
-                                            <div className="min-w-0">
-                                                <p className="text-[11px] text-slate-400">
-                                                    Interview Type
-                                                </p>
-                                                <p className="mt-0.5 text-xs font-medium text-slate-600">
-                                                    {getTypeLabel(
-                                                        interview.interviewType
-                                                    )}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        {interview.interviewType === "ONLINE" &&
-                                            interview.meetingLink && (
-                                                <div className="flex min-w-0 items-center gap-2.5">
-                                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-500">
-                                                        <Video size={15} />
-                                                    </div>
-                                                    <div className="min-w-0">
-                                                        <p className="text-[11px] text-slate-400">
-                                                            Meeting Link
-                                                        </p>
-                                                        <a
-                                                            href={interview.meetingLink}
-                                                            target="_blank"
-                                                            rel="noreferrer"
-                                                            className="mt-0.5 block truncate text-xs font-medium text-indigo-600 hover:text-indigo-700"
-                                                        >
-                                                            Join Meeting
-                                                        </a>
-                                                    </div>
+                                return (
+                                    <article
+                                        key={interview.id}
+                                        className="flex min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-indigo-200 hover:shadow-md sm:p-5"
+                                    >
+                                        {/* CANDIDATE HEADER */}
+                                        <div className="flex min-w-0 items-start justify-between gap-3">
+                                            <div className="flex min-w-0 items-start gap-3">
+                                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-sm font-semibold text-indigo-600">
+                                                    {getInitials(candidateName)}
                                                 </div>
-                                            )}
 
-                                        {interview.interviewType === "OFFLINE" &&
-                                            interview.location && (
-                                                <div className="flex min-w-0 items-center gap-2.5">
-                                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-500">
-                                                        <MapPin size={15} />
-                                                    </div>
-                                                    <div className="min-w-0">
-                                                        <p className="text-[11px] text-slate-400">
-                                                            Location
+                                                <div className="min-w-0">
+                                                    <h3 className="break-words font-semibold text-slate-900">
+                                                        {candidateName}
+                                                    </h3>
+                                                    <p className="mt-1 break-words text-sm text-indigo-600">
+                                                        {jobTitle}
+                                                    </p>
+                                                    {category !== "Uncategorized" && (
+                                                        <p className="mt-1 inline-flex rounded-md bg-violet-50 px-2 py-1 text-xs font-medium text-violet-700">
+                                                            {category}
                                                         </p>
-                                                        <p className="mt-0.5 break-words text-xs font-medium text-slate-600">
-                                                            {interview.location}
+                                                    )}
+                                                    {candidateEmail && (
+                                                        <p className="mt-1 break-all text-xs text-slate-400">
+                                                            {candidateEmail}
                                                         </p>
-                                                    </div>
+                                                    )}
+                                                    {candidateProfileLabel && (
+                                                        <p className="mt-1 break-words text-xs text-slate-500">
+                                                            {candidateProfileLabel}
+                                                        </p>
+                                                    )}
                                                 </div>
-                                            )}
+                                            </div>
 
-                                        {interview.interviewType === "PHONE" && (
-                                            <div className="flex items-center gap-2.5">
+                                            <span
+                                                className={`shrink-0 rounded-lg px-2 py-1 text-[10px] font-semibold ${getStatusClass(
+                                                    interview.status
+                                                )}`}
+                                            >
+                                                {getStatusLabel(interview.status)}
+                                            </span>
+                                        </div>
+
+                                        {/* INTERVIEW DETAILS */}
+                                        <div className="mt-5 grid grid-cols-1 gap-3 border-t border-slate-100 pt-5">
+                                            <div className="flex min-w-0 items-center gap-2.5">
                                                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-500">
-                                                    <Phone size={15} />
+                                                    <CalendarDays size={15} />
                                                 </div>
-                                                <div>
+                                                <div className="min-w-0">
                                                     <p className="text-[11px] text-slate-400">
-                                                        Interview Method
+                                                        Date
                                                     </p>
                                                     <p className="mt-0.5 text-xs font-medium text-slate-600">
-                                                        Phone Call
+                                                        {formatDate(
+                                                            interview.scheduledAt
+                                                        )}
                                                     </p>
                                                 </div>
                                             </div>
-                                        )}
-                                    </div>
 
-                                    {candidateProfile?.skills?.length > 0 && (
-                                        <div className="mt-4 flex flex-wrap gap-1.5">
-                                            {candidateProfile.skills.slice(0, 4).map((skill) => (
-                                                <span key={skill.id || skill.name} className="rounded-md bg-indigo-50 px-2 py-1 text-[10px] font-medium text-indigo-600">
-                                                    {skill.name || skill}
-                                                </span>
-                                            ))}
-                                            {candidateProfile.skills.length > 4 && (
-                                                <span className="rounded-md bg-slate-50 px-2 py-1 text-[10px] text-slate-500">
-                                                    +{candidateProfile.skills.length - 4} more
-                                                </span>
+                                            <div className="flex min-w-0 items-center gap-2.5">
+                                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-500">
+                                                    <Clock3 size={15} />
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-[11px] text-slate-400">
+                                                        Time
+                                                    </p>
+                                                    <p className="mt-0.5 text-xs font-medium text-slate-600">
+                                                        {formatTime(
+                                                            interview.scheduledAt
+                                                        )}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex min-w-0 items-center gap-2.5">
+                                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-500">
+                                                    {getInterviewTypeIcon(
+                                                        interview.interviewType
+                                                    )}
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-[11px] text-slate-400">
+                                                        Interview Type
+                                                    </p>
+                                                    <p className="mt-0.5 text-xs font-medium text-slate-600">
+                                                        {getTypeLabel(
+                                                            interview.interviewType
+                                                        )}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {interview.interviewType === "ONLINE" &&
+                                                interview.meetingLink && (
+                                                    <div className="flex min-w-0 items-center gap-2.5">
+                                                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-500">
+                                                            <Video size={15} />
+                                                        </div>
+                                                        <div className="min-w-0">
+                                                            <p className="text-[11px] text-slate-400">
+                                                                Meeting Link
+                                                            </p>
+                                                            <a
+                                                                href={interview.meetingLink}
+                                                                target="_blank"
+                                                                rel="noreferrer"
+                                                                className="mt-0.5 block truncate text-xs font-medium text-indigo-600 hover:text-indigo-700"
+                                                            >
+                                                                Join Meeting
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                            {interview.interviewType === "OFFLINE" &&
+                                                interview.location && (
+                                                    <div className="flex min-w-0 items-center gap-2.5">
+                                                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-500">
+                                                            <MapPin size={15} />
+                                                        </div>
+                                                        <div className="min-w-0">
+                                                            <p className="text-[11px] text-slate-400">
+                                                                Location
+                                                            </p>
+                                                            <p className="mt-0.5 break-words text-xs font-medium text-slate-600">
+                                                                {interview.location}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                            {interview.interviewType === "PHONE" && (
+                                                <div className="flex items-center gap-2.5">
+                                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-500">
+                                                        <Phone size={15} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-[11px] text-slate-400">
+                                                            Interview Method
+                                                        </p>
+                                                        <p className="mt-0.5 text-xs font-medium text-slate-600">
+                                                            Phone Call
+                                                        </p>
+                                                    </div>
+                                                </div>
                                             )}
                                         </div>
-                                    )}
 
-                        
-                                    {/* ACTIONS */}
-                                    <div className="mt-auto flex flex-wrap gap-2 border-t border-slate-100 pt-4">
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                openInterview(interview)
-                                            }
-                                            className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
-                                        >
-                                            <Eye size={14} />
-                                            View
-                                        </button>
+                                        {candidateProfile?.skills?.length > 0 && (
+                                            <div className="mt-4 flex flex-wrap gap-1.5">
+                                                {candidateProfile.skills.slice(0, 4).map((skill) => (
+                                                    <span key={skill.id || skill.name} className="rounded-md bg-indigo-50 px-2 py-1 text-[10px] font-medium text-indigo-600">
+                                                        {skill.name || skill}
+                                                    </span>
+                                                ))}
+                                                {candidateProfile.skills.length > 4 && (
+                                                    <span className="rounded-md bg-slate-50 px-2 py-1 text-[10px] text-slate-500">
+                                                        +{candidateProfile.skills.length - 4} more
+                                                    </span>
+                                                )}
+                                            </div>
+                                        )}
 
-                                        {(interview.status === "SCHEDULED" ||
-                                            interview.status === "RESCHEDULED") && (
+
+                                        {/* ACTIONS */}
+                                        <div className="mt-auto flex flex-wrap gap-2 border-t border-slate-100 pt-4">
                                             <button
                                                 type="button"
                                                 onClick={() =>
-                                                    openRescheduleModal(interview)
+                                                    openInterview(interview)
                                                 }
-                                                disabled={isActionLoading}
-                                                className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600 disabled:opacity-50"
+                                                className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
                                             >
-                                                <CalendarDays size={14} />
-                                                Reschedule
+                                                <Eye size={14} />
+                                                View
                                             </button>
-                                        )}
 
-                                        {interview.status === "SCHEDULED" && (
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    handleStatusUpdate(
-                                                        interview,
-                                                        "COMPLETED"
-                                                    )
-                                                }
-                                                disabled={isActionLoading}
-                                                className="flex items-center gap-1.5 rounded-lg border border-emerald-200 px-3 py-2 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-50 disabled:opacity-50"
-                                            >
-                                                <CheckCircle2 size={14} />
-                                                {isActionLoading
-                                                    ? "Updating..."
-                                                    : "Complete"}
-                                            </button>
-                                        )}
+                                            {(interview.status === "SCHEDULED" ||
+                                                interview.status === "RESCHEDULED") && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            openRescheduleModal(interview)
+                                                        }
+                                                        disabled={isActionLoading}
+                                                        className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600 disabled:opacity-50"
+                                                    >
+                                                        <CalendarDays size={14} />
+                                                        Reschedule
+                                                    </button>
+                                                )}
 
-                                        {(interview.status === "SCHEDULED" ||
-                                            interview.status === "RESCHEDULED") && (
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    handleCancelInterview(interview)
-                                                }
-                                                disabled={isActionLoading}
-                                                className="flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-50"
-                                            >
-                                                <XCircle size={14} />
-                                                {isActionLoading
-                                                    ? "Cancelling..."
-                                                    : "Cancel"}
-                                            </button>
-                                        )}
-                                    </div>
-                                </article>
-                            );
-                        })}
-                    </div>
-                    <Pagination totalItems={filteredInterviews.length} currentPage={currentPage} pageCount={pageCount} onPageChange={setCurrentPage} />
+                                            {interview.status === "SCHEDULED" && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        handleStatusUpdate(
+                                                            interview,
+                                                            "COMPLETED"
+                                                        )
+                                                    }
+                                                    disabled={isActionLoading}
+                                                    className="flex items-center gap-1.5 rounded-lg border border-emerald-200 px-3 py-2 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-50 disabled:opacity-50"
+                                                >
+                                                    <CheckCircle2 size={14} />
+                                                    {isActionLoading
+                                                        ? "Updating..."
+                                                        : "Complete"}
+                                                </button>
+                                            )}
+
+                                            {(interview.status === "SCHEDULED" ||
+                                                interview.status === "RESCHEDULED") && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            handleCancelInterview(interview)
+                                                        }
+                                                        disabled={isActionLoading}
+                                                        className="flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-50"
+                                                    >
+                                                        <XCircle size={14} />
+                                                        {isActionLoading
+                                                            ? "Cancelling..."
+                                                            : "Cancel"}
+                                                    </button>
+                                                )}
+                                        </div>
+                                    </article>
+                                );
+                            })}
+                        </div>
+                        <Pagination totalItems={filteredInterviews.length} currentPage={currentPage} pageCount={pageCount} onPageChange={setCurrentPage} />
                     </>
                 ) : (
                     <div className="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
@@ -1246,29 +1235,30 @@ const RecruiterInterviews = () => {
                             </div>
 
                             {form.interviewType === "ONLINE" && (
-                                <div className="mt-5">
-                                    <label className="text-xs font-semibold text-slate-700">
-                                        Meeting Link
-                                        <span className="text-red-500"> *</span>
-                                    </label>
-                                    <div className="relative mt-2">
-                                        <Video
-                                            size={17}
-                                            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                                        />
-                                        <input
-                                            type="url"
-                                            name="meetingLink"
-                                            required
-                                            value={form.meetingLink}
-                                            onChange={handleFormChange}
-                                            placeholder="https://meet.google.com/..."
-                                            className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 pl-10 pr-4 text-sm text-slate-700 outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100"
-                                        />
+                                <div className="mt-5 rounded-2xl border border-indigo-100 bg-indigo-50/70 p-4">
+                                    <div className="flex items-start gap-3">
+                                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-indigo-600 shadow-sm">
+                                            <Video size={19} />
+                                        </div>
+
+                                        <div>
+                                            <p className="text-sm font-semibold text-slate-800">
+                                                Jitsi Meet Video Interview
+                                            </p>
+
+                                            <p className="mt-1 text-xs leading-5 text-slate-500">
+                                                JobBridge will automatically generate a unique
+                                                video meeting link when you schedule the interview.
+                                                The candidate and recruiter will use the same link.
+                                            </p>
+
+                                            {editingInterviewId && selectedInterview?.meetingLink && (
+                                                <p className="mt-2 text-xs font-medium text-indigo-600">
+                                                    The existing meeting link will be reused.
+                                                </p>
+                                            )}
+                                        </div>
                                     </div>
-                                    <p className="mt-2 text-xs text-slate-400">
-                                        Add the meeting URL that the candidate will use to join the interview.
-                                    </p>
                                 </div>
                             )}
 
@@ -1658,61 +1648,61 @@ const RecruiterInterviews = () => {
                                 </div>
                             )}
 
-                           
+
 
                             <div className="mt-6 flex flex-wrap gap-2 border-t border-slate-100 pt-5">
                                 {(selectedInterview.status === "SCHEDULED" ||
                                     selectedInterview.status === "RESCHEDULED") && (
-                                    <>
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                const interview = selectedInterview;
-                                                closeViewModal();
-                                                openRescheduleModal(interview);
-                                            }}
-                                            className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
-                                        >
-                                            <CalendarDays size={14} />
-                                            Reschedule
-                                        </button>
+                                        <>
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const interview = selectedInterview;
+                                                    closeViewModal();
+                                                    openRescheduleModal(interview);
+                                                }}
+                                                className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
+                                            >
+                                                <CalendarDays size={14} />
+                                                Reschedule
+                                            </button>
 
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                handleStatusUpdate(
-                                                    selectedInterview,
-                                                    "COMPLETED"
-                                                )
-                                            }
-                                            disabled={
-                                                actionLoadingId ===
-                                                selectedInterview.id
-                                            }
-                                            className="flex items-center gap-1.5 rounded-lg border border-emerald-200 px-3 py-2 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-50 disabled:opacity-50"
-                                        >
-                                            <CheckCircle2 size={14} />
-                                            Mark Completed
-                                        </button>
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    handleStatusUpdate(
+                                                        selectedInterview,
+                                                        "COMPLETED"
+                                                    )
+                                                }
+                                                disabled={
+                                                    actionLoadingId ===
+                                                    selectedInterview.id
+                                                }
+                                                className="flex items-center gap-1.5 rounded-lg border border-emerald-200 px-3 py-2 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-50 disabled:opacity-50"
+                                            >
+                                                <CheckCircle2 size={14} />
+                                                Mark Completed
+                                            </button>
 
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                handleCancelInterview(
-                                                    selectedInterview
-                                                )
-                                            }
-                                            disabled={
-                                                actionLoadingId ===
-                                                selectedInterview.id
-                                            }
-                                            className="flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-50"
-                                        >
-                                            <XCircle size={14} />
-                                            Cancel Interview
-                                        </button>
-                                    </>
-                                )}
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    handleCancelInterview(
+                                                        selectedInterview
+                                                    )
+                                                }
+                                                disabled={
+                                                    actionLoadingId ===
+                                                    selectedInterview.id
+                                                }
+                                                className="flex items-center gap-1.5 rounded-lg border border-red-200 px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-50"
+                                            >
+                                                <XCircle size={14} />
+                                                Cancel Interview
+                                            </button>
+                                        </>
+                                    )}
                             </div>
                         </div>
                     </div>
