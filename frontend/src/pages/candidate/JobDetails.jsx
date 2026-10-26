@@ -604,7 +604,7 @@ const JobDetails = () => {
                     {/* Sidebar */}
                     <aside className="space-y-5">
                         {/* Apply Card */}
-                        <div className="sticky top-5 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                             <h3 className="text-lg font-bold text-slate-900">
                                 {isApplied
                                     ? "Application Submitted"

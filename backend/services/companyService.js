@@ -1,7 +1,9 @@
 import {
     Company,
+    Job,
     RecruiterProfile,
 } from "../models/index.js";
+import { col, fn } from "sequelize";
 import { getHiddenCompanyIds } from "../utils/companyVisibility.js";
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
@@ -115,8 +117,28 @@ const getAllCompanies = async () => {
             ["createdAt", "DESC"],
         ],
     });
+    const jobCounts = await Job.findAll({
+        attributes: [
+            "companyId",
+            [fn("COUNT", col("id")), "openJobsCount"],
+        ],
+        where: { status: "OPEN" },
+        group: ["companyId"],
+        raw: true,
+    });
+    const countsByCompanyId = new Map(
+        jobCounts.map((entry) => [
+            Number(entry.companyId),
+            Number(entry.openJobsCount),
+        ])
+    );
     const hiddenCompanyIds = await getHiddenCompanyIds(companies.map((company) => company.id));
-    return companies.filter((company) => !hiddenCompanyIds.has(company.id));
+    return companies
+        .filter((company) => !hiddenCompanyIds.has(company.id))
+        .map((company) => ({
+            ...company.toJSON(),
+            openJobsCount: countsByCompanyId.get(company.id) || 0,
+        }));
 };
 
 

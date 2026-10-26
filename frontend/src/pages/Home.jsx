@@ -16,6 +16,7 @@ import {
     Search,
     Settings,
     ShieldCheck,
+    Star,
     User,
     UserCircle,
     UserPlus,
@@ -27,6 +28,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import LocationAutocomplete from "../components/LocationAutocomplete";
 import NotificationDropdown from "../pages/Notification";
+import { getCompanies } from "../services/companyService";
 import {
     formatJobCard,
     getJobCategories,
@@ -39,6 +41,14 @@ import {
     saveJob,
     unsaveJob,
 } from "../services/savedJobService";
+
+const getCompanyLogoUrl = (logo) => {
+    if (!logo) return "";
+    if (/^https?:\/\//i.test(logo)) return logo;
+    const apiUrl = (import.meta.env.VITE_API_URL || "http://localhost:5000/api")
+        .replace(/\/api\/?$/, "");
+    return `${apiUrl}/${String(logo).replace(/^[\\/]+/, "").replaceAll("\\", "/")}`;
+};
 
 const Home = () => {
     const navigate = useNavigate();
@@ -75,6 +85,8 @@ const Home = () => {
 
     const [successMessage, setSuccessMessage] = useState("");
     const [featuredJobs, setFeaturedJobs] = useState([]);
+    const [topCompanies, setTopCompanies] = useState([]);
+    const [showAllCompanies, setShowAllCompanies] = useState(false);
     const [categories, setCategories] = useState([]);
     const [savedJobIds, setSavedJobIds] = useState([]);
     const [homeError, setHomeError] = useState("");
@@ -118,6 +130,19 @@ const Home = () => {
                         "Unable to load current jobs."
                     );
                 }
+            });
+
+        getCompanies()
+            .then((companies) => {
+                if (!active) return;
+                setTopCompanies(
+                    companies
+                        .filter((company) => Number(company.openJobsCount) > 0)
+                        .sort((a, b) => Number(b.openJobsCount) - Number(a.openJobsCount))
+                );
+            })
+            .catch(() => {
+                if (active) setTopCompanies([]);
             });
 
         if (
@@ -186,6 +211,10 @@ const Home = () => {
         }
     };
 
+    const visibleCompanies = showAllCompanies
+        ? topCompanies
+        : topCompanies.slice(0, 4);
+
     useEffect(() => {
         const elements = document.querySelectorAll(".jobbridge-home .jb-reveal");
         if (!("IntersectionObserver" in window)) {
@@ -207,7 +236,7 @@ const Home = () => {
 
         elements.forEach((element) => observer.observe(element));
         return () => observer.disconnect();
-    }, [categories, featuredJobs]);
+    }, [categories, featuredJobs, topCompanies]);
 
     useEffect(() => {
         const message = sessionStorage.getItem(
@@ -404,6 +433,11 @@ const Home = () => {
                 keyword
             )}`
         );
+    };
+
+    const handleCompanyJobs = (companyName) => {
+        const jobsRoute = isLoggedIn ? getJobsRoute() : "/jobs";
+        navigate(`${jobsRoute}?search=${encodeURIComponent(companyName)}`);
     };
 
     const handleProfileClick = () => {
@@ -1432,6 +1466,80 @@ const Home = () => {
                     </div>
                 </div>
             </section>
+
+            {/* COMPANIES */}
+            {topCompanies.length > 0 && (
+                <section className="bg-slate-50">
+                    <div className="mx-auto max-w-[1400px] px-5 py-14 sm:px-7 lg:px-8">
+                        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+                            <div>
+                                <p className="jb-section-kicker text-xs font-bold uppercase tracking-wider text-indigo-600">
+                                    Discover employers
+                                </p>
+                                <h2 className="mt-1.5 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                                    Explore jobs by top companies
+                                </h2>
+                                <p className="mt-1.5 text-sm text-slate-500">
+                                    Find employers with open roles on JobBridge.
+                                </p>
+                            </div>
+                            {topCompanies.length > 4 && (
+                                <button
+                                    type="button"
+                                    onClick={() => setShowAllCompanies((current) => !current)}
+                                    className="jb-button flex shrink-0 items-center gap-1 text-sm font-semibold text-indigo-600 transition hover:text-indigo-700"
+                                >
+                                    {showAllCompanies ? "Show fewer" : "View all"}
+                                    <ArrowRight size={15} />
+                                </button>
+                            )}
+                        </div>
+
+                        <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                            {visibleCompanies.map((company) => (
+                                <article
+                                    key={company.id}
+                                    className="jb-card jb-reveal flex flex-col items-center rounded-2xl border border-slate-100 bg-white p-5 text-center shadow-sm"
+                                >
+                                    <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white p-2">
+                                        {company.logo ? (
+                                            <img
+                                                src={getCompanyLogoUrl(company.logo)}
+                                                alt={`${company.name} logo`}
+                                                className="h-full w-full object-contain"
+                                                onError={(event) => {
+                                                    event.currentTarget.style.display = "none";
+                                                }}
+                                            />
+                                        ) : (
+                                            <Building2 size={25} className="text-indigo-600" />
+                                        )}
+                                    </div>
+                                    <h3 className="mt-3 w-full truncate text-base font-semibold text-slate-900" title={company.name}>
+                                        {company.name}
+                                    </h3>
+                                    <div className="mt-3 w-full rounded-xl bg-emerald-50 px-3 py-2.5">
+                                        <p className="text-sm font-semibold text-slate-800">
+                                            {Number(company.openJobsCount)} open {Number(company.openJobsCount) === 1 ? "job" : "jobs"}
+                                        </p>
+                                        <p className="mt-1 inline-flex items-center gap-1 text-xs text-slate-500">
+                                            <Star size={13} className="fill-amber-400 text-amber-400" />
+                                            No reviews yet
+                                        </p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleCompanyJobs(company.name)}
+                                        className="mt-4 rounded-full border border-indigo-600 px-5 py-2 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-600 hover:text-white"
+                                    >
+                                        View jobs
+                                    </button>
+                                </article>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* CTA */}
             {!isLoggedIn && (

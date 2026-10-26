@@ -271,7 +271,7 @@ const ApplyJob = () => {
             {/* Main content fills the available layout width */}
             <div className="grid w-full grid-cols-1 items-start gap-4 xl:grid-cols-[minmax(260px,0.72fr)_minmax(0,1.8fr)]">
                 {/* Job summary panel */}
-                <aside className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm xl:sticky xl:top-24">
+                <aside className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                     <div className="bg-gradient-to-br from-indigo-600 via-indigo-600 to-violet-700 p-5 text-white sm:p-6">
                         <div className="flex items-center gap-3">
                             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/15 shadow-sm backdrop-blur">
