@@ -1631,6 +1631,7 @@ const Home = () => {
                                         <ArrowRight
                                             size={15}
                                             className="transition-transform group-hover:translate-x-1"
+
                                         />
                                     </span>
                                 </Link>
@@ -1647,7 +1648,7 @@ const Home = () => {
 
                         {/* BRAND SECTION */}
                         <div className="sm:col-span-2 lg:col-span-2">
-                            <div className="flex items-center gap-3">
+                            <Link to="/" className="inline-flex items-center gap-3">
                                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm">
                                     <BriefcaseBusiness size={21} />
                                 </div>
@@ -1655,7 +1656,7 @@ const Home = () => {
                                 <span className="text-xl font-extrabold tracking-tight text-slate-900">
                                     Job<span className="text-indigo-600">Bridge</span>
                                 </span>
-                            </div>
+                            </Link>
 
                             <p className="mt-4 max-w-md text-sm leading-6 text-slate-500">
                                 Connecting talented people with meaningful career
@@ -1672,40 +1673,30 @@ const Home = () => {
 
                             <ul className="mt-4 space-y-3 text-sm text-slate-500">
                                 <li>
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            document.getElementById("features")?.scrollIntoView({
-                                                behavior: "smooth",
-                                            })
-                                        }
+                                    <Link
+                                        to="/about"
                                         className="transition-colors hover:text-indigo-600"
                                     >
                                         About Us
-                                    </button>
+                                    </Link>
                                 </li>
 
                                 <li>
-                                    <button
-                                        type="button"
-                                        onClick={() =>
-                                            document.getElementById("features")?.scrollIntoView({
-                                                behavior: "smooth",
-                                            })
-                                        }
+                                    <Link
+                                        to="/features"
                                         className="transition-colors hover:text-indigo-600"
                                     >
                                         Our Features
-                                    </button>
+                                    </Link>
                                 </li>
 
                                 <li>
-                                    <a
-                                        href="/"
+                                    <Link
+                                        to="/"
                                         className="transition-colors hover:text-indigo-600"
                                     >
                                         Home
-                                    </a>
+                                    </Link>
                                 </li>
                             </ul>
                         </div>
@@ -1718,30 +1709,30 @@ const Home = () => {
 
                             <ul className="mt-4 space-y-3 text-sm text-slate-500">
                                 <li>
-                                    <a
-                                        href="mailto:support@jobbridge.com"
+                                    <Link
+                                        to="/contact"
                                         className="transition-colors hover:text-indigo-600"
                                     >
                                         Contact Us
-                                    </a>
+                                    </Link>
                                 </li>
 
                                 <li>
-                                    <a
-                                        href="/privacy"
+                                    <Link
+                                        to="/privacy"
                                         className="transition-colors hover:text-indigo-600"
                                     >
                                         Privacy Policy
-                                    </a>
+                                    </Link>
                                 </li>
 
                                 <li>
-                                    <a
-                                        href="/terms"
+                                    <Link
+                                        to="/terms"
                                         className="transition-colors hover:text-indigo-600"
                                     >
                                         Terms &amp; Conditions
-                                    </a>
+                                    </Link>
                                 </li>
                             </ul>
                         </div>
