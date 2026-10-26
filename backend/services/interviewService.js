@@ -20,6 +20,24 @@ import {
 import createNotification from "../utils/createNotification.js";
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
+// Interviews are scheduled for 45 minutes in the UI. Once that window passes,
+// close any still-open record so it cannot keep a stale Join action or block
+// scheduling another interview for the same application.
+const INTERVIEW_DURATION_MS = 45 * 60 * 1000;
+const completeExpiredInterviews = async (applicationId = null) => {
+    const cutoff = new Date(Date.now() - INTERVIEW_DURATION_MS);
+    await Interview.update(
+        { status: "COMPLETED" },
+        {
+            where: {
+                ...(applicationId ? { applicationId } : {}),
+                status: { [Op.in]: ["SCHEDULED", "RESCHEDULED"] },
+                scheduledAt: { [Op.lte]: cutoff },
+            },
+        }
+    );
+};
+
 const applyCandidatePrivacyToInterviews = async (interviews) => {
     const isList = Array.isArray(interviews);
     const rows = (isList ? interviews : [interviews]).map((interview) =>
@@ -97,7 +115,6 @@ const scheduleInterview = async (
     applicationId,
     data
 ) => {
-
     // Find recruiter
     const recruiter =
         await RecruiterProfile.findOne({
@@ -162,6 +179,8 @@ const scheduleInterview = async (
 
         throw error;
     }
+
+    await completeExpiredInterviews(application.id);
 
 
     // Candidate must be shortlisted first
@@ -239,7 +258,9 @@ const scheduleInterview = async (
     }
 
 
-    // Prevent duplicate active interviews
+    // Do not offer another interview for an application that already has a
+    // scheduled or completed interview. A different job has a different
+    // applicationId and remains eligible independently.
     const existingInterview =
         await Interview.findOne({
             where: {
@@ -248,6 +269,7 @@ const scheduleInterview = async (
                     [Op.in]: [
                         "SCHEDULED",
                         "RESCHEDULED",
+                        "COMPLETED",
                     ],
                 },
             },
@@ -255,7 +277,7 @@ const scheduleInterview = async (
 
     if (existingInterview) {
         const error = new Error(
-            "An active interview is already scheduled for this application"
+            "This application already has a scheduled or completed interview"
         );
 
         error.statusCode =
@@ -316,7 +338,6 @@ const scheduleInterview = async (
             "INTERVIEW",
     });
 
-
     // Update application status
     if (
         application.status !==
@@ -368,6 +389,12 @@ const getMyInterviews = async (
 
         throw error;
     }
+
+    const candidateApplications = await Application.findAll({
+        where: { candidateId: candidate.id },
+        attributes: ["id"],
+    });
+    await completeExpiredInterviews(candidateApplications.map(({ id }) => id));
 
 
     const interviews =
@@ -450,8 +477,27 @@ const getRecruiterInterviews = async (
         throw error;
     }
 
+    const recruiterApplications = await Application.findAll({
+        attributes: ["id"],
+        include: [{
+            model: Job,
+            as: "job",
+            attributes: [],
+            where: { recruiterId: recruiter.id },
+        }],
+    });
+    await completeExpiredInterviews(recruiterApplications.map(({ id }) => id));
+
 
     const interviews = await Interview.findAll({
+        // Constrain at the root of the query as well as through the nested
+        // job include. This guarantees no interview for another recruiter can
+        // enter the result set if an association include is incomplete.
+        where: {
+            applicationId: {
+                [Op.in]: recruiterApplications.map(({ id }) => id),
+            },
+        },
         include: [
             {
                 model: Application,
@@ -592,6 +638,8 @@ const getInterviewById = async (
     if (
         candidate.userId === userId
     ) {
+        await completeExpiredInterviews(interview.applicationId);
+        await interview.reload();
         return interview;
     }
 
@@ -619,6 +667,9 @@ const getInterviewById = async (
 
         throw error;
     }
+
+    await completeExpiredInterviews(interview.applicationId);
+    await interview.reload();
 
 
     return applyCandidatePrivacyToInterviews(interview);
@@ -697,6 +748,15 @@ const updateInterview = async (
         error.statusCode =
             STATUS_CODES.FORBIDDEN;
 
+        throw error;
+    }
+
+    await completeExpiredInterviews(interview.applicationId);
+    await interview.reload();
+
+    if (["COMPLETED", "CANCELLED"].includes(interview.status)) {
+        const error = new Error("Completed or cancelled interviews cannot be rescheduled");
+        error.statusCode = STATUS_CODES.BAD_REQUEST;
         throw error;
     }
 
@@ -883,6 +943,15 @@ const updateInterviewStatus = async (
         error.statusCode =
             STATUS_CODES.FORBIDDEN;
 
+        throw error;
+    }
+
+    await completeExpiredInterviews(interview.applicationId);
+    await interview.reload();
+
+    if (["COMPLETED", "CANCELLED"].includes(interview.status) && status !== interview.status) {
+        const error = new Error("Completed or cancelled interviews cannot be changed");
+        error.statusCode = STATUS_CODES.BAD_REQUEST;
         throw error;
     }
 

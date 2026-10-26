@@ -344,13 +344,26 @@ const RecruiterInterviews = () => {
     );
 
     const eligibleApplications = useMemo(
-        () =>
-            applications.filter(
+        () => {
+            // An application can be interviewed only once after it reaches
+            // the interview stage. Key by application (candidate + job), so
+            // the same candidate remains eligible for a different job.
+            const alreadyInterviewedApplicationIds = new Set(
+                interviews
+                    .filter((interview) =>
+                        ["SCHEDULED", "RESCHEDULED", "COMPLETED"].includes(interview.status)
+                    )
+                    .map((interview) => Number(interview.applicationId))
+            );
+            return applications.filter(
                 (application) =>
                     application.status === "SHORTLISTED" ||
                     application.status === "INTERVIEW"
-            ),
-        [applications]
+            ).filter((application) =>
+                !alreadyInterviewedApplicationIds.has(Number(application.id))
+            );
+        },
+        [applications, interviews]
     );
 
     const openScheduleModal = async () => {
@@ -908,7 +921,9 @@ const RecruiterInterviews = () => {
                                                 </div>
                                             </div>
 
-                                            {interview.interviewType === "ONLINE" &&
+                                            {(interview.status === "SCHEDULED" ||
+                                                interview.status === "RESCHEDULED") &&
+                                                interview.interviewType === "ONLINE" &&
                                                 interview.meetingLink && (
                                                     <div className="flex min-w-0 items-center gap-2.5">
                                                         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-500">
@@ -1008,7 +1023,8 @@ const RecruiterInterviews = () => {
                                                     </button>
                                                 )}
 
-                                            {interview.status === "SCHEDULED" && (
+                                            {(interview.status === "SCHEDULED" ||
+                                                interview.status === "RESCHEDULED") && (
                                                 <button
                                                     type="button"
                                                     onClick={() =>
@@ -1167,7 +1183,7 @@ const RecruiterInterviews = () => {
                                     {eligibleApplications.length === 0 &&
                                         !applicationsLoading && (
                                             <p className="mt-2 text-xs text-slate-400">
-                                                Only shortlisted or already-interviewed applications can be scheduled.
+                                                Only shortlisted applications without a scheduled or completed interview are available. Cancelled interviews can be scheduled again.
                                             </p>
                                         )}
                                 </div>
