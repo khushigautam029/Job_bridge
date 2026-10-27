@@ -21,18 +21,25 @@ import {
     unsaveJob,
 } from "../../services/savedJobService";
 
+
 const FindJobs = () => {
     const [searchParams] = useSearchParams();
     const [search, setSearch] = useState(searchParams.get("search") || "");
     const [location, setLocation] = useState(searchParams.get("location") || "");
     const [jobType, setJobType] = useState("All");
+    const [hiringType, setHiringType] = useState("All");
     const [experience, setExperience] = useState("All");
     const [sortBy, setSortBy] = useState("salary");
-    const [category, setCategory] = useState("");
+    const [category, setCategory] = useState(
+        searchParams.get("category") || ""
+    );
+    const [company, setCompany] = useState(
+        searchParams.get("company") || ""
+    );
     const [jobs, setJobs] = useState([]);
     const [savedJobs, setSavedJobs] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+    const [error, setError] = useState(""    );
 
     const navigate = useNavigate();
     useEffect(() => {
@@ -130,13 +137,18 @@ const FindJobs = () => {
         ...new Set(jobs.map((job) => job.category).filter(Boolean)),
     ].sort((a, b) => a.localeCompare(b));
 
+
     const matchingJobs = jobs.filter((job) => {
         const matchesCategory =
             !category ||
             String(job.category || "").toLowerCase() ===
-                category.toLowerCase();
+            category.toLowerCase();
 
-        const searchTerms = search.toLowerCase().trim().split(/\s+/).filter(Boolean);
+        const searchTerms = search
+            .toLowerCase()
+            .trim()
+            .split(/\s+/)
+            .filter(Boolean);
 
         const matchesSearch =
             !searchTerms.length ||
@@ -144,12 +156,20 @@ const FindJobs = () => {
                 const searchableText = [
                     job.title,
                     job.company,
+                    job.companyName,
                     job.category,
                     job.description,
                     ...(job.skills || []),
-                ].join(" ").toLowerCase();
+                ]
+                    .join(" ")
+                    .toLowerCase();
+
                 return searchableText.includes(term);
             });
+
+        const matchesHiringType =
+            hiringType === "All" ||
+            String(job.companyType || "").toUpperCase() === hiringType;
 
         const matchesLocation =
             !location ||
@@ -162,35 +182,64 @@ const FindJobs = () => {
 
         const matchesExperience =
             experience === "All" ||
-            job.experience === experience;
+            (() => {
+                const [selectedMin, selectedMax] = experience
+                    .split("-")
+                    .map(Number);
+                const jobMin = Number(job.experienceMin ?? 0);
+                const jobMax =
+                    job.experienceMax == null
+                        ? Number.POSITIVE_INFINITY
+                        : Number(job.experienceMax);
+
+                return jobMin <= selectedMax && jobMax >= selectedMin;
+            })();
+
+        // Match the company selected on the Home page
+        const jobCompany =
+            typeof job.company === "string"
+                ? job.company
+                : job.company?.name || job.companyName || "";
+
+        const matchesCompany =
+            !company ||
+            jobCompany.toLowerCase().trim() ===
+            company.toLowerCase().trim();
 
         return (
             matchesCategory &&
             matchesSearch &&
             matchesLocation &&
             matchesType &&
-            matchesExperience
+            matchesExperience &&
+            matchesCompany &&
+            matchesHiringType
         );
     });
-    const filteredJobs = sortBy === "salary"
-        ? matchingJobs
-        : [...matchingJobs].sort((a, b) => {
-              const salaryA = Number(
-                  sortBy === "salaryLow"
-                      ? a.minSalary || a.maxSalary || 0
-                      : a.maxSalary || a.minSalary || 0
-              );
-              const salaryB = Number(
-                  sortBy === "salaryLow"
-                      ? b.minSalary || b.maxSalary || 0
-                      : b.maxSalary || b.minSalary || 0
-              );
-              return sortBy === "salaryLow"
-                  ? salaryA - salaryB
-                  : salaryB - salaryA;
-          });
+
+    const filteredJobs =
+        sortBy === "salary"
+            ? matchingJobs
+            : [...matchingJobs].sort((a, b) => {
+                const salaryA = Number(
+                    sortBy === "salaryLow"
+                        ? a.minSalary || a.maxSalary || 0
+                        : a.maxSalary || a.minSalary || 0
+                );
+
+                const salaryB = Number(
+                    sortBy === "salaryLow"
+                        ? b.minSalary || b.maxSalary || 0
+                        : b.maxSalary || b.minSalary || 0
+                );
+
+                return sortBy === "salaryLow"
+                    ? salaryA - salaryB
+                    : salaryB - salaryA;
+            });
+
     const { pageItems: pageJobs, currentPage, setCurrentPage, pageCount } =
-        usePagination(filteredJobs, JSON.stringify([search, location, jobType, experience, category, sortBy]));
+        usePagination(filteredJobs, JSON.stringify([search, location, jobType, experience, category, sortBy, company]));
 
     const toggleSavedJob = async (jobId) => {
         if (
@@ -258,8 +307,8 @@ const FindJobs = () => {
             </div>
 
             {/* Search Area */}
-            <div className="mt-7 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                <div className="grid gap-3 lg:grid-cols-6">
+            <div className="mt-7 overflow-x-auto rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div className="grid min-w-[1180px] grid-cols-7 gap-3">
                     {/* Search */}
                     <div className="flex items-center gap-3 rounded-xl border border-slate-200 px-4 py-3">
                         <Search
@@ -340,13 +389,13 @@ const FindJobs = () => {
                             <option value="All">
                                 All Experience
                             </option>
-                            <option value="1-3 Years">
+                            <option value="1-3">
                                 1-3 Years
                             </option>
-                            <option value="2-4 Years">
+                            <option value="2-4">
                                 2-4 Years
                             </option>
-                            <option value="3-5 Years">
+                            <option value="3-5">
                                 3-5 Years
                             </option>
                         </select>
@@ -356,6 +405,26 @@ const FindJobs = () => {
                             className="pointer-events-none absolute right-3 top-3.5 text-slate-400"
                         />
                     </div>
+
+
+                    {/* Hiring Type: Direct or Consultancy */}
+                    <div className="relative">
+                        <select
+                            value={hiringType}
+                            onChange={(e) => setHiringType(e.target.value)}
+                            className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-3 pr-10 text-sm text-slate-600 outline-none focus:border-indigo-400"
+                        >
+                            <option value="All">All Hiring Types</option>
+                            <option value="DIRECT">Direct Hiring</option>
+                            <option value="CONSULTANCY">Consultancy Hiring</option>
+                        </select>
+
+                        <ChevronDown
+                            size={17}
+                            className="pointer-events-none absolute right-3 top-3.5 text-slate-400"
+                        />
+                    </div>
+
 
                     {/* Category */}
                     <select
@@ -398,7 +467,7 @@ const FindJobs = () => {
                     </p>
                 </div>
 
-                
+
             </div>
 
             {/* Job List */}
@@ -408,7 +477,7 @@ const FindJobs = () => {
                         Loading jobs...
                     </p>
                 ) : filteredJobs.length > 0 ? (
-                        pageJobs.map((job) => {
+                    pageJobs.map((job) => {
                         const hiringInfo = getHiringInfo(
                             job.companyType
                         );
@@ -479,11 +548,10 @@ const FindJobs = () => {
                                                 ? "Remove saved job"
                                                 : "Save job"
                                         }
-                                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition ${
-                                            savedJobs.includes(job.id)
-                                                ? "border-indigo-200 bg-indigo-50 text-indigo-600"
-                                                : "border-slate-200 text-slate-400 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
-                                        }`}
+                                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition ${savedJobs.includes(job.id)
+                                            ? "border-indigo-200 bg-indigo-50 text-indigo-600"
+                                            : "border-slate-200 text-slate-400 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
+                                            }`}
                                     >
                                         <Bookmark size={18} />
                                     </button>

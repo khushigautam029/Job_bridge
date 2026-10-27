@@ -115,6 +115,16 @@ const Job = sequelize.define(
             allowNull: false,
             defaultValue: "DRAFT",
         },
+        totalOpenings: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 1,
+            field: "total_openings",
+            validate: {
+                min: 1,
+                isInt: true,
+            },
+        },
     },
     {
         tableName: "jobs",

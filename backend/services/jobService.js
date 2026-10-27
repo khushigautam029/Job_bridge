@@ -28,10 +28,28 @@ const getRecruiterProfile = async (userId) => {
     return recruiterProfile;
 };
 
+const validateTotalOpenings = (value) => {
+    if (value === undefined ||
+        value === null ||
+        value === ""
+    ) {
+        return;
+    }
+    const openings = Number(value);
+    if (!Number.isInteger(openings) || openings < 1) {
+        const error = new Error(
+            "Total openings must be a positive whole number."
+        );
+        error.statusCode = STATUS_CODES.BAD_REQUEST;
+        throw error;
+    }
+};
+
 const createJob = async (
     userId,
     data
 ) => {
+    validateTotalOpenings(data.totalOpenings);
     const recruiterProfile = await getRecruiterProfile(userId);
     const category =
         await JobCategory.findByPk(
@@ -283,7 +301,7 @@ const getRecruiterJobs = async (userId) => {
             {
                 model: Application,
                 as: "applications",
-                attributes: ["id"],
+                attributes: ["id","status"],
                 separate: true,
             },
         ],
@@ -398,6 +416,26 @@ const updateJob = async (
             );
             error.statusCode =
                 STATUS_CODES.NOT_FOUND;
+            throw error;
+        }
+    }
+
+
+    if (data.totalOpenings !== undefined) {
+        validateTotalOpenings(data.totalOpenings);
+
+        const selectedCount = await Application.count({
+            where: {
+                jobId: job.id,
+                status: "SELECTED",
+            },
+        });
+
+        if (Number(data.totalOpenings) < selectedCount) {
+            const error = new Error(
+                `Total openings cannot be less than the ${selectedCount} candidates already selected.`
+            );
+            error.statusCode = STATUS_CODES.BAD_REQUEST;
             throw error;
         }
     }

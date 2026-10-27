@@ -16,7 +16,6 @@ import {
     Moon,
     Search,
     Settings,
-    ShieldCheck,
     Star,
     Sun,
     User,
@@ -54,7 +53,7 @@ const getCompanyLogoUrl = (logo) => {
 
 const Home = () => {
     const navigate = useNavigate();
-        const { isDarkMode, toggleTheme } = useTheme();
+    const { isDarkMode, toggleTheme } = useTheme();
 
     const storedUser = JSON.parse(
         localStorage.getItem("user") ||
@@ -263,11 +262,6 @@ const Home = () => {
         if (userRole === "RECRUITER") {
             return "/recruiter/jobs";
         }
-
-        if (userRole === "ADMIN") {
-            return "/admin/dashboard";
-        }
-
         return "/candidate/jobs";
     };
 
@@ -275,11 +269,6 @@ const Home = () => {
         if (userRole === "RECRUITER") {
             return "/recruiter/applications";
         }
-
-        if (userRole === "ADMIN") {
-            return "/admin/dashboard";
-        }
-
         return "/candidate/applications";
     };
 
@@ -287,11 +276,6 @@ const Home = () => {
         if (userRole === "RECRUITER") {
             return "/recruiter/interviews";
         }
-
-        if (userRole === "ADMIN") {
-            return "/admin/dashboard";
-        }
-
         return "/candidate/interviews";
     };
 
@@ -437,9 +421,25 @@ const Home = () => {
     };
 
     const handleCompanyJobs = (companyName) => {
-        // Company counts are global across open listings, so send both
-        // candidates and recruiters to the shared public jobs browser.
-        navigate(`/jobs?search=${encodeURIComponent(companyName)}`);
+        const storedUser =
+            JSON.parse(localStorage.getItem("user") || "null") ||
+            JSON.parse(sessionStorage.getItem("user") || "null");
+
+        // Recruiters should not navigate to another company's jobs
+        if (storedUser?.role === "RECRUITER") {
+            return;
+        }
+
+        // Candidates can view jobs filtered by the selected company
+        if (storedUser?.role === "CANDIDATE") {
+            navigate(
+                `/candidate/jobs?company=${encodeURIComponent(companyName)}`
+            );
+            return;
+        }
+
+        // Preserve your existing authentication flow for guests
+        showAuthModal("login");
     };
 
     const handleProfileClick = () => {
@@ -486,27 +486,6 @@ const Home = () => {
         navigate("/");
         window.location.reload();
     };
-
-    const features = [
-        {
-            icon: Search,
-            title: "Find the Right Job",
-            description:
-                "Search thousands of opportunities and find jobs that match your skills and career goals.",
-        },
-        {
-            icon: CheckCircle2,
-            title: "Easy Applications",
-            description:
-                "Apply for jobs quickly and keep all your applications organized in one place.",
-        },
-        {
-            icon: ShieldCheck,
-            title: "Track Everything",
-            description:
-                "Stay updated with application status, interviews, and notifications throughout your journey.",
-        },
-    ];
 
     return (
         <div className="jobbridge-home min-h-screen bg-slate-50 text-slate-800">
@@ -1066,8 +1045,8 @@ const Home = () => {
                                     : "Switch to dark mode"
                             }
                             className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-all duration-200 ${isDarkMode
-                                    ? "border-slate-700 bg-slate-800 text-amber-300 hover:bg-slate-700"
-                                    : "border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
+                                ? "border-slate-700 bg-slate-800 text-amber-300 hover:bg-slate-700"
+                                : "border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
                                 }`}
                         >
                             {isDarkMode ? (
@@ -1450,9 +1429,6 @@ const Home = () => {
                                         ))}
                                 </div>
 
-
-
-
                                 {/* FOOTER */}
                                 <div className="mt-5 border-t border-slate-200 pt-4">
                                     <div className="flex items-end justify-between gap-3">
@@ -1496,78 +1472,82 @@ const Home = () => {
             </section>
 
             {/* COMPANIES */}
-            {topCompanies.length > 0 && (
-                <section id="home-companies" data-scroll-anchor className="bg-slate-50">
-                    <div className="mx-auto max-w-[1400px] px-5 py-14 sm:px-7 lg:px-8">
-                        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
-                            <div>
-                                <p className="jb-section-kicker text-xs font-bold uppercase tracking-wider text-indigo-600">
-                                    Discover employers
-                                </p>
-                                <h2 className="mt-1.5 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-                                    Explore jobs by top companies
-                                </h2>
-                                <p className="mt-1.5 text-sm text-slate-500">
-                                    Find employers with open roles on JobBridge.
-                                </p>
+            {(JSON.parse(localStorage.getItem("user") || "null") ||
+                JSON.parse(sessionStorage.getItem("user") || "null"))?.role === "CANDIDATE" &&
+                topCompanies.length > 0 && (
+                    <section id="home-companies" data-scroll-anchor className="bg-slate-50">
+                        <div className="mx-auto max-w-[1400px] px-5 py-14 sm:px-7 lg:px-8">
+                            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+                                <div>
+                                    <p className="jb-section-kicker text-xs font-bold uppercase tracking-wider text-indigo-600">
+                                        Discover employers
+                                    </p>
+                                    <h2 className="mt-1.5 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                                        Explore jobs by top companies
+                                    </h2>
+                                    <p className="mt-1.5 text-sm text-slate-500">
+                                        Find employers with open roles on JobBridge.
+                                    </p>
+                                </div>
+                                {(JSON.parse(localStorage.getItem("user") || "null") ||
+                                    JSON.parse(sessionStorage.getItem("user") || "null"))?.role === "CANDIDATE" &&
+                                    topCompanies.length > 0 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowAllCompanies((current) => !current)}
+                                            className="jb-button flex shrink-0 items-center gap-1 text-sm font-semibold text-indigo-600 transition hover:text-indigo-700"
+                                        >
+                                            {showAllCompanies ? "Show fewer" : "View all"}
+                                            <ArrowRight size={15} />
+                                        </button>
+                                    )}
                             </div>
-                            {topCompanies.length > 4 && (
-                                <button
-                                    type="button"
-                                    onClick={() => setShowAllCompanies((current) => !current)}
-                                    className="jb-button flex shrink-0 items-center gap-1 text-sm font-semibold text-indigo-600 transition hover:text-indigo-700"
-                                >
-                                    {showAllCompanies ? "Show fewer" : "View all"}
-                                    <ArrowRight size={15} />
-                                </button>
-                            )}
-                        </div>
 
-                        <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                            {visibleCompanies.map((company) => (
-                                <article
-                                    key={company.id}
-                                    className="jb-card jb-reveal flex flex-col items-center rounded-2xl border border-slate-100 bg-white p-5 text-center shadow-sm"
-                                >
-                                    <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white p-2">
-                                        {company.logo ? (
-                                            <img
-                                                src={getCompanyLogoUrl(company.logo)}
-                                                alt={`${company.name} logo`}
-                                                className="h-full w-full object-contain"
-                                                onError={(event) => {
-                                                    event.currentTarget.style.display = "none";
-                                                }}
-                                            />
-                                        ) : (
-                                            <Building2 size={25} className="text-indigo-600" />
-                                        )}
-                                    </div>
-                                    <h3 className="mt-3 w-full truncate text-base font-semibold text-slate-900" title={company.name}>
-                                        {company.name}
-                                    </h3>
-                                    <div className="mt-3 w-full rounded-xl bg-emerald-50 px-3 py-2.5">
-                                        <p className="text-sm font-semibold text-slate-800">
-                                            {Number(company.openJobsCount)} open {Number(company.openJobsCount) === 1 ? "job" : "jobs"}
-                                        </p>
-                                        <p className="mt-1 inline-flex items-center gap-1 text-xs text-slate-500">
-                                            <Star size={13} className="fill-amber-400 text-amber-400" />
-                                            No reviews yet
-                                        </p>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => handleCompanyJobs(company.name)}
-                                        className="mt-4 rounded-full border border-indigo-600 px-5 py-2 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-600 hover:text-white"
+                            <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                                {visibleCompanies.map((company) => (
+                                    <article
+                                        key={company.id}
+                                        className="jb-card jb-reveal flex flex-col items-center rounded-2xl border border-slate-100 bg-white p-5 text-center shadow-sm"
                                     >
-                                        View jobs
-                                    </button>
-                                </article>
-                            ))}
+                                        <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white p-2">
+                                            {company.logo ? (
+                                                <img
+                                                    src={getCompanyLogoUrl(company.logo)}
+                                                    alt={`${company.name} logo`}
+                                                    className="h-full w-full object-contain"
+                                                    onError={(event) => {
+                                                        event.currentTarget.style.display = "none";
+                                                    }}
+                                                />
+                                            ) : (
+                                                <Building2 size={25} className="text-indigo-600" />
+                                            )}
+                                        </div>
+                                        <h3 className="mt-3 w-full truncate text-base font-semibold text-slate-900" title={company.name}>
+                                            {company.name}
+                                        </h3>
+                                        <div className="mt-3 w-full rounded-xl bg-emerald-50 px-3 py-2.5">
+                                            <p className="text-sm font-semibold text-slate-800">
+                                                {Number(company.openJobsCount)} open {Number(company.openJobsCount) === 1 ? "job" : "jobs"}
+                                            </p>
+                                            <p className="mt-1 inline-flex items-center gap-1 text-xs text-slate-500">
+                                                <Star size={13} className="fill-amber-400 text-amber-400" />
+                                                No reviews yet
+                                            </p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleCompanyJobs(company.name)}
+                                            className="mt-4 rounded-full border border-indigo-600 px-5 py-2 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-600 hover:text-white"
+                                        >
+                                            View jobs
+                                        </button>
+                                    </article>
+                                ))}
+                            </div>
                         </div>
-                    </div>
-                </section>
-            )}
+                    </section>
+                )}
 
             {/* CTA */}
             {!isLoggedIn && (

@@ -832,33 +832,50 @@ const getRecruiterApplications = async (userId) => {
 /*
     Recruiter changes application status
 */
+
+/*
+    Recruiter changes application status.
+    Automatically closes a job when all openings are filled.
+*/
 const updateApplicationStatus = async (
     userId,
     applicationId,
     status
 ) => {
+    const allowedStatuses = [
+        "APPLIED",
+        "UNDER_REVIEW",
+        "SHORTLISTED",
+        "INTERVIEW",
+        "SELECTED",
+        "REJECTED",
+    ];
 
-    const recruiter =
-        await RecruiterProfile.findOne({
-            where: {
-                userId,
-            },
-        });
+    if (!allowedStatuses.includes(status)) {
+        const error = new Error("Invalid application status.");
+        error.statusCode = STATUS_CODES.BAD_REQUEST;
+        throw error;
+    }
+
+    const recruiter = await RecruiterProfile.findOne({
+        where: { userId },
+    });
 
     if (!recruiter) {
         const error = new Error(
             MESSAGES.RECRUITER_PROFILE_NOT_FOUND
         );
-
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
-
-    const application =
-        await Application.findByPk(
+    return sequelize.transaction(async (transaction) => {
+        // Lock the job row so two simultaneous selections
+        // cannot exceed the available openings.
+        const application = await Application.findByPk(
             applicationId,
             {
+                transaction,
                 include: [
                     {
                         model: Job,
@@ -868,74 +885,121 @@ const updateApplicationStatus = async (
             }
         );
 
+        if (!application) {
+            const error = new Error(
+                MESSAGES.APPLICATION_NOT_FOUND
+            );
+            error.statusCode = STATUS_CODES.NOT_FOUND;
+            throw error;
+        }
 
-    if (!application) {
-        const error = new Error(
-            MESSAGES.APPLICATION_NOT_FOUND
-        );
-
-        error.statusCode = STATUS_CODES.NOT_FOUND;
-        throw error;
-    }
-
-
-    if (
-        application.job.recruiterId !==
-        recruiter.id
-    ) {
-        const error = new Error(
-            MESSAGES.NOT_AUTHORIZED_UPDATE
-        );
-
-        error.statusCode = STATUS_CODES.FORBIDDEN;
-        throw error;
-    }
-
-
-    if (
-        application.status === "WITHDRAWN"
-    ) {
-        const error = new Error(
-            MESSAGES.WITHDRAWN_CANNOT_UPDATE
-        );
-
-        error.statusCode = STATUS_CODES.BAD_REQUEST;
-        throw error;
-    }
-
-
-    // Update application status
-    application.status = status;
-
-    await application.save();
-
-
-    // Create status history
-    await ApplicationStatusHistory.create({
-        applicationId: application.id,
-        status: status,
-        changedBy: userId,
-    });
-
-    const candidate =
-        await CandidateProfile.findByPk(
-            application.candidateId
-        );
-
-    if (candidate) {
-
-        await createNotification({
-            userId: candidate.userId,
-            title: "Application Status Updated",
-            message: `Your application for "${application.job.title}" has been moved to ${status}.`,
-            type: "APPLICATION",
+        const job = await Job.findByPk(application.jobId, {
+            transaction,
+            lock: transaction.LOCK.UPDATE,
         });
-    }
 
+        if (!job || job.recruiterId !== recruiter.id) {
+            const error = new Error(
+                MESSAGES.NOT_AUTHORIZED_UPDATE
+            );
+            error.statusCode = STATUS_CODES.FORBIDDEN;
+            throw error;
+        }
 
-    return application;
+        if (application.status === "WITHDRAWN") {
+            const error = new Error(
+                MESSAGES.WITHDRAWN_CANNOT_UPDATE
+            );
+            error.statusCode = STATUS_CODES.BAD_REQUEST;
+            throw error;
+        }
+
+        const previousStatus = application.status;
+
+        // Only check capacity when a candidate is newly selected.
+        if (
+            status === "SELECTED" &&
+            previousStatus !== "SELECTED"
+        ) {
+            const selectedCount = await Application.count({
+                where: {
+                    jobId: job.id,
+                    status: "SELECTED",
+                },
+                transaction,
+            });
+
+            const totalOpenings = Number(job.totalOpenings || 1);
+
+            if (selectedCount >= totalOpenings) {
+                const error = new Error(
+                    `All ${totalOpenings} openings for this job have already been filled.`
+                );
+                error.statusCode = STATUS_CODES.BAD_REQUEST;
+                throw error;
+            }
+        }
+
+        // Update the application status.
+        application.status = status;
+        await application.save({ transaction });
+
+        // Record the status change.
+        await ApplicationStatusHistory.create(
+            {
+                applicationId: application.id,
+                status,
+                changedBy: userId,
+            },
+            { transaction }
+        );
+
+        // Count selected candidates after the update.
+        if (status === "SELECTED") {
+            const selectedCount = await Application.count({
+                where: {
+                    jobId: job.id,
+                    status: "SELECTED",
+                },
+                transaction,
+            });
+
+            if (
+                selectedCount >= Number(job.totalOpenings || 1) &&
+                job.status !== "CLOSED"
+            ) {
+                job.status = "CLOSED";
+                await job.save({ transaction });
+            }
+        }
+
+        return {
+            ...application.toJSON(),
+            job: {
+                id: job.id,
+                title: job.title,
+                status: job.status,
+                totalOpenings: job.totalOpenings,
+            },
+        };
+    }).then(async (updatedApplication) => {
+        // Send the notification after the transaction succeeds.
+        const candidate = await CandidateProfile.findByPk(
+            updatedApplication.candidateId
+        );
+
+        if (candidate) {
+            await createNotification({
+                userId: candidate.userId,
+                title: "Application Status Updated",
+                message: `Your application for "${updatedApplication.job.title}" has been moved to ${status}.`,
+                type: "APPLICATION",
+            });
+        }
+
+        return updatedApplication;
+    });
 };
-
 
 const getApplicationAtsScore = async (userId, applicationId) => {
     // 1. Find the logged-in recruiter's profile.
