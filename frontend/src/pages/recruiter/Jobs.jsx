@@ -227,6 +227,7 @@ const Jobs = () => {
             maxSalary: job.maxSalary ?? "",
             experienceMin: job.experienceMin ?? 0,
             experienceMax: job.experienceMax ?? "",
+            totalOpenings: job.totalOpenings ?? 1,
             deadline: job.applicationDeadline
                 ? String(job.applicationDeadline).slice(0, 10)
                 : "",
@@ -254,6 +255,12 @@ const Jobs = () => {
         const category = categories.find(
             (item) => item.name === selectedJob.category
         );
+        const totalOpenings = Number(selectedJob.totalOpenings);
+
+        if (!Number.isInteger(totalOpenings) || totalOpenings < 1) {
+            setError("Total openings must be a positive whole number.");
+            return;
+        }
 
         try {
             const response = await updateJob(selectedJob.id, {
@@ -281,6 +288,7 @@ const Jobs = () => {
                 experienceMax: selectedJob.experienceMax === ""
                     ? null
                     : Number(selectedJob.experienceMax),
+                totalOpenings,
                 applicationDeadline: selectedJob.deadline || null,
                 skillIds: skillCatalog
                     .filter((skill) => selectedJob.skills.includes(skill.name))
@@ -557,6 +565,19 @@ const Jobs = () => {
                                     />
                                     <span>
                                         {job.applications} applications
+                                    </span>
+                                </div>
+
+                                <div className="flex items-start gap-2 text-xs text-slate-500">
+                                    <Users
+                                        size={15}
+                                        className="mt-0.5 shrink-0 text-slate-400"
+                                    />
+                                    <span>
+                                        {Number(job.totalOpenings ?? 1)}{" "}
+                                        {Number(job.totalOpenings ?? 1) === 1
+                                            ? "opening"
+                                            : "openings"}
                                     </span>
                                 </div>
 
@@ -899,6 +920,10 @@ const Jobs = () => {
                                 <div>
                                     <label className="mb-2 block text-sm font-medium text-slate-700">Maximum Salary (annual, ₹)</label>
                                     <input type="number" min="1" name="maxSalary" value={selectedJob.maxSalary ?? ""} onChange={handleEditChange} placeholder="Not disclosed" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100" />
+                                </div>
+                                <div>
+                                    <label className="mb-2 block text-sm font-medium text-slate-700">Total Openings</label>
+                                    <input type="number" min="1" step="1" required name="totalOpenings" value={selectedJob.totalOpenings ?? 1} onChange={handleEditChange} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-100" />
                                 </div>
                                 <div className="sm:col-span-2">
                                     <label className="mb-2 block text-sm font-medium text-slate-700">Application Deadline</label>

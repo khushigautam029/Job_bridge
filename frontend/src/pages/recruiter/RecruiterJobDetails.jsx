@@ -423,12 +423,19 @@ const RecruiterJobDetails = () => {
                     </div>
 
                     {/* Quick information */}
-                    <div className="mt-8 grid gap-3 border-t border-slate-100 pt-6 sm:grid-cols-2 xl:grid-cols-4">
+                    <div className="mt-8 grid gap-3 border-t border-slate-100 pt-6 sm:grid-cols-2 xl:grid-cols-5">
                         <StatCard
                             icon={Users}
                             label="Total Applicants"
                             value={applicants}
                             detail="Applications received for this job"
+                        />
+
+                        <StatCard
+                            icon={BriefcaseBusiness}
+                            label="Total Openings"
+                            value={Number(job.totalOpenings ?? 1)}
+                            detail="Candidates to hire"
                         />
 
                         <StatCard

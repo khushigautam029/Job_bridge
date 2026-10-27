@@ -78,6 +78,7 @@ const PostJob = () => {
         description: "",
         responsibilities: "",
         requirements: "",
+        totalOpenings: "1",
     });
 
     const [skills, setSkills] = useState([]);
@@ -173,6 +174,13 @@ const PostJob = () => {
             setError("Salary is required.");
             return;
         }
+        if (!formData.totalOpenings ||
+            !Number.isInteger(Number(formData.totalOpenings)) ||
+            Number(formData.totalOpenings) < 1)
+            {
+            setError("Total Openings must be a positive whole number.")
+            return;
+        }
         if (!formData.deadline) {
             setError("Application deadline is required.");
             return;
@@ -254,6 +262,7 @@ const PostJob = () => {
                 categoryId: Number(formData.category),
                 skillIds: matchedSkills.map((skill) => skill.id),
                 title: formData.title.trim(),
+                totalOpenings: Number(formData.totalOpenings),
                 description: formData.description.trim(),
                 responsibilities: formData.responsibilities.trim(),
                 requirements: formData.requirements.trim(),
@@ -514,6 +523,27 @@ const PostJob = () => {
                             </div>
 
                             <div>
+                                <FieldLabel htmlFor="totalOpenings" required>
+                                    Total Openings
+                                </FieldLabel>
+                                <input
+                                    id="totalOpenings"
+                                    type="number"
+                                    name="totalOpenings"
+                                    required
+                                    min="1"
+                                    step="1"
+                                    value={formData.totalOpenings}
+                                    onChange={handleChange}
+                                    placeholder="e.g. 5"
+                                    className={inputClass}
+                                />
+                                <p className="mt-2 text-xs leading-5 text-slate-500">
+                                    Enter how many candidates you plan to hire for this job.
+                                </p>
+                            </div>
+
+                            <div>
                                 <FieldLabel htmlFor="deadline" required>
                                     Application Deadline
                                 </FieldLabel>
@@ -655,8 +685,8 @@ const PostJob = () => {
                                     }}
                                     placeholder="e.g. React, Node.js, MySQL"
                                     className={`${inputClass} min-w-0 flex-1 ${skillsError
-                                            ? "border-red-400 focus:border-red-500 focus:ring-red-100"
-                                            : ""
+                                        ? "border-red-400 focus:border-red-500 focus:ring-red-100"
+                                        : ""
                                         }`}
                                 />
                                 <button

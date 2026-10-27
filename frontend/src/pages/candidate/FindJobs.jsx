@@ -4,7 +4,8 @@ import {
     BriefcaseBusiness,
     ChevronDown,
     MapPin,
-    Search
+    Search,
+    Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -532,6 +533,14 @@ const FindJobs = () => {
 
                                                 <span>
                                                     💰 {job.salary}
+                                                </span>
+
+                                                <span className="flex items-center gap-1.5">
+                                                    <Users size={14} />
+                                                    {Number(job.totalOpenings ?? 1)}{" "}
+                                                    {Number(job.totalOpenings ?? 1) === 1
+                                                        ? "opening"
+                                                        : "openings"}
                                                 </span>
                                             </div>
                                         </div>

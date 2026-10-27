@@ -397,8 +397,14 @@ const JobDetails = () => {
                                             "Job Opportunity"}
                                     </p>
 
-                                    <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-600">
-                                        Open
+                                    <span
+                                        className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                                            job.status === "OPEN"
+                                                ? "bg-emerald-50 text-emerald-600"
+                                                : "bg-slate-100 text-slate-600"
+                                        }`}
+                                    >
+                                        {job.status === "OPEN" ? "Open" : "Closed"}
                                     </span>
 
                                     {hiringInfo && (
@@ -459,7 +465,7 @@ const JobDetails = () => {
                     </div>
 
                     {/* Job Stats */}
-                    <div className="mt-7 grid gap-4 border-t border-slate-100 pt-6 sm:grid-cols-2 lg:grid-cols-5">
+                    <div className="mt-7 grid gap-4 border-t border-slate-100 pt-6 sm:grid-cols-2 lg:grid-cols-6">
                         <div>
                             <p className="text-xs font-medium text-slate-400">
                                 Salary
@@ -484,6 +490,15 @@ const JobDetails = () => {
                             </p>
                             <p className="mt-1 text-sm font-semibold text-slate-800">
                                 {formatText(job.jobType)}
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="text-xs font-medium text-slate-400">
+                                Total Openings
+                            </p>
+                            <p className="mt-1 text-sm font-semibold text-slate-800">
+                                {Number(job.totalOpenings ?? 1)}
                             </p>
                         </div>
 
@@ -608,16 +623,29 @@ const JobDetails = () => {
                             <h3 className="text-lg font-bold text-slate-900">
                                 {isApplied
                                     ? "Application Submitted"
-                                    : "Interested in this job?"}
+                                    : job.status === "OPEN"
+                                        ? "Interested in this job?"
+                                        : "Applications are closed"}
                             </h3>
 
                             <p className="mt-2 text-sm leading-6 text-slate-500">
                                 {isApplied
                                     ? "Your application has been recorded. The recruiter will review your profile."
-                                    : "Submit your application and take the next step in your career."}
+                                    : job.status === "OPEN"
+                                        ? "Submit your application and take the next step in your career."
+                                        : "This job is no longer accepting applications."}
                             </p>
 
-                            {!isApplied ? (
+                            {isApplied ? (
+                                <button
+                                    type="button"
+                                    disabled
+                                    className="mt-5 flex w-full cursor-default items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3.5 text-sm font-semibold text-white"
+                                >
+                                    <CheckCircle2 size={17} />
+                                    Applied
+                                </button>
+                            ) : job.status === "OPEN" ? (
                                 <button
                                     type="button"
                                     onClick={handleApply}
@@ -630,10 +658,9 @@ const JobDetails = () => {
                                 <button
                                     type="button"
                                     disabled
-                                    className="mt-5 flex w-full cursor-default items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-3.5 text-sm font-semibold text-white"
+                                    className="mt-5 flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-slate-200 px-5 py-3.5 text-sm font-semibold text-slate-500"
                                 >
-                                    <CheckCircle2 size={17} />
-                                    Applied
+                                    Applications Closed
                                 </button>
                             )}
 

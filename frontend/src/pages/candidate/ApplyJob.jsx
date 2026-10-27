@@ -11,6 +11,7 @@ import {
     Phone,
     Send,
     Upload,
+    Users,
     User,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -133,6 +134,11 @@ const ApplyJob = () => {
         event.preventDefault();
         setError("");
 
+        if (selectedJob?.status !== "OPEN") {
+            setError("This job is no longer accepting applications.");
+            return;
+        }
+
         if (!candidateName.trim()) {
             setError("Please enter your name.");
             return;
@@ -209,6 +215,8 @@ const ApplyJob = () => {
             </div>
         );
     }
+
+    const isJobOpen = selectedJob.status === "OPEN";
 
     if (submitted) {
         return (
@@ -306,7 +314,17 @@ const ApplyJob = () => {
                                 <p className="mt-2 text-[11px] font-medium text-slate-500">Experience</p>
                                 <p className="mt-0.5 text-sm font-semibold text-slate-800">{selectedJob.experience}</p>
                             </div>
+                            <div className="col-span-2 rounded-xl border border-slate-100 bg-slate-50 p-3">
+                                <Users size={17} className="text-indigo-600" />
+                                <p className="mt-2 text-[11px] font-medium text-slate-500">Total openings</p>
+                                <p className="mt-0.5 text-sm font-semibold text-slate-800">{Number(selectedJob.totalOpenings ?? 1)}</p>
+                            </div>
                         </div>
+                        {!isJobOpen && (
+                            <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-800">
+                                This job is no longer accepting applications.
+                            </p>
+                        )}
                         {selectedJob.description && (
                             <div className="border-t border-slate-100 pt-4">
                                 <p className="text-xs font-bold uppercase tracking-wider text-slate-400">About the role</p>
@@ -422,8 +440,8 @@ const ApplyJob = () => {
                             <button type="button" onClick={backToJob} className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50">
                                 <ArrowLeft size={16} /> Cancel
                             </button>
-                            <button type="submit" disabled={submitting} className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-indigo-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0">
-                                {submitting ? <><span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" /> Submitting application...</> : <><Send size={16} /> Submit application</>}
+                            <button type="submit" disabled={submitting || !isJobOpen} className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-indigo-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0">
+                                {submitting ? <><span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" /> Submitting application...</> : !isJobOpen ? "Applications closed" : <><Send size={16} /> Submit application</>}
                             </button>
                         </div>
                         <p className="text-center text-[11px] leading-5 text-slate-400">By submitting, you confirm that the information provided is accurate.</p>

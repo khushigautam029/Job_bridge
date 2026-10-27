@@ -7,6 +7,7 @@ import {
     MapPin,
     Search,
     Trash2,
+    Users,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -411,6 +412,19 @@ const SavedJobs = () => {
                                             className="shrink-0 text-slate-400"
                                         />
                                         <span>{job.experience}</span>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        <Users
+                                            size={16}
+                                            className="shrink-0 text-slate-400"
+                                        />
+                                        <span>
+                                            {Number(job.totalOpenings ?? 1)}{" "}
+                                            {Number(job.totalOpenings ?? 1) === 1
+                                                ? "opening"
+                                                : "openings"}
+                                        </span>
                                     </div>
 
                                     <div className="flex items-center gap-2">
