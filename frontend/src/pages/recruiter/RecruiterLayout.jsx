@@ -5,7 +5,9 @@ import {
     FileText,
     LogOut,
     Menu,
+    Moon,
     Settings,
+    Sun,
     User,
     UserCircle,
     Users,
@@ -28,6 +30,10 @@ const RecruiterLayout = () => {
     const userName = profile?.user?.name || user?.name || "Recruiter";
     const userEmail = profile?.user?.email || user?.email || "";
     const avatarUrl = profile?.company?.logo || user?.recruiterProfile?.company?.logo;
+
+    const [isDarkMode , setIsDarkMode] = useState (()=>{
+        localStorage.getItem("jobbridge-theme") === "dark"
+    });
 
     // RECRUITER NAVIGATION
     const navigation = [
@@ -316,6 +322,35 @@ const RecruiterLayout = () => {
                                 </div>
                             )}
                         </div>
+
+                        {/* DARK MODE TOGGLE */}
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setIsDarkMode((previous) => !previous)
+                            }
+                            aria-label={
+                                isDarkMode
+                                    ? "Switch to light mode"
+                                    : "Switch to dark mode"
+                            }
+                            title={
+                                isDarkMode
+                                    ? "Switch to light mode"
+                                    : "Switch to dark mode"
+                            }
+                            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-all duration-200 ${isDarkMode
+                                ? "border-slate-700 bg-slate-800 text-amber-300 hover:bg-slate-700"
+                                : "border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
+                                }`}
+                        >
+                            {isDarkMode ? (
+                                <Sun size={19} />
+                            ) : (
+                                <Moon size={19} />
+                            )}
+                        </button>
+
 
                         {/* MOBILE MENU BUTTON */}
                         <button

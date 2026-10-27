@@ -258,9 +258,7 @@ const scheduleInterview = async (
     }
 
 
-    // Do not offer another interview for an application that already has a
-    // scheduled or completed interview. A different job has a different
-    // applicationId and remains eligible independently.
+    // Prevent duplicate active interviews
     const existingInterview =
         await Interview.findOne({
             where: {
@@ -269,7 +267,6 @@ const scheduleInterview = async (
                     [Op.in]: [
                         "SCHEDULED",
                         "RESCHEDULED",
-                        "COMPLETED",
                     ],
                 },
             },
@@ -277,7 +274,7 @@ const scheduleInterview = async (
 
     if (existingInterview) {
         const error = new Error(
-            "This application already has a scheduled or completed interview"
+            "An active interview is already scheduled for this application"
         );
 
         error.statusCode =
@@ -337,6 +334,7 @@ const scheduleInterview = async (
         type:
             "INTERVIEW",
     });
+
 
     // Update application status
     if (
@@ -490,14 +488,6 @@ const getRecruiterInterviews = async (
 
 
     const interviews = await Interview.findAll({
-        // Constrain at the root of the query as well as through the nested
-        // job include. This guarantees no interview for another recruiter can
-        // enter the result set if an association include is incomplete.
-        where: {
-            applicationId: {
-                [Op.in]: recruiterApplications.map(({ id }) => id),
-            },
-        },
         include: [
             {
                 model: Application,

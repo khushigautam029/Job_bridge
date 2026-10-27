@@ -13,17 +13,18 @@ import {
     LogOut,
     MapPin,
     MessagesSquare,
+    Moon,
     Search,
     Settings,
     ShieldCheck,
     Star,
+    Sun,
     User,
     UserCircle,
     UserPlus,
     Users,
-    X,
+    X
 } from "lucide-react";
-
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import LocationAutocomplete from "../components/LocationAutocomplete";
@@ -90,12 +91,13 @@ const Home = () => {
     const [categories, setCategories] = useState([]);
     const [savedJobIds, setSavedJobIds] = useState([]);
     const [homeError, setHomeError] = useState("");
+    const [isDarkMode, setIsDarkMode] = useState(
+        () => localStorage.getItem("jobbridge-theme") === "dark"
+    );
 
     useEffect(() => {
         let active = true;
-
         const isRecruiter = isLoggedIn && userRole === "RECRUITER";
-
         Promise.all([
             isRecruiter
                 ? getMyJobs().then((jobs) => ({ jobs }))
@@ -436,8 +438,9 @@ const Home = () => {
     };
 
     const handleCompanyJobs = (companyName) => {
-        const jobsRoute = isLoggedIn ? getJobsRoute() : "/jobs";
-        navigate(`${jobsRoute}?search=${encodeURIComponent(companyName)}`);
+        // Company counts are global across open listings, so send both
+        // candidates and recruiters to the shared public jobs browser.
+        navigate(`/jobs?search=${encodeURIComponent(companyName)}`);
     };
 
     const handleProfileClick = () => {
@@ -1049,6 +1052,34 @@ const Home = () => {
                                 </div>
                             )}
                         </div>
+                        {/* DARK MODE TOGGLE */}
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setIsDarkMode((previous) => !previous)
+                            }
+                            aria-label={
+                                isDarkMode
+                                    ? "Switch to light mode"
+                                    : "Switch to dark mode"
+                            }
+                            title={
+                                isDarkMode
+                                    ? "Switch to light mode"
+                                    : "Switch to dark mode"
+                            }
+                            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-all duration-200 ${isDarkMode
+                                    ? "border-slate-700 bg-slate-800 text-amber-300 hover:bg-slate-700"
+                                    : "border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
+                                }`}
+                        >
+                            {isDarkMode ? (
+                                <Sun size={19} />
+                            ) : (
+                                <Moon size={19} />
+                            )}
+                        </button>
+
                     </div>
                 </div>
             </header>
@@ -1469,7 +1500,7 @@ const Home = () => {
 
             {/* COMPANIES */}
             {topCompanies.length > 0 && (
-                <section className="bg-slate-50">
+                <section id="home-companies" data-scroll-anchor className="bg-slate-50">
                     <div className="mx-auto max-w-[1400px] px-5 py-14 sm:px-7 lg:px-8">
                         <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
                             <div>

@@ -1,4 +1,4 @@
-import { useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import {
     BrowserRouter,
     Navigate,
@@ -6,6 +6,7 @@ import {
     Route,
     Routes,
     useLocation,
+    useNavigationType,
 } from "react-router-dom";
 
 import FreshersCareerGuide from "./career-resources/FreshersCareerGuide";
@@ -111,13 +112,94 @@ const ProtectedRoute = ({ allowedRoles }) => {
     return <Outlet />;
 };
 
-// Scroll to top whenever the URL changes.
+const scrollPositions = new Map();
+
+// Start new history entries at the top, and restore the prior position when
+// the user goes back or forward. Anchors handle pages whose content loads
+// asynchronously and changes the document height.
 const ScrollToTop = () => {
-    const { pathname } = useLocation();
+    const location = useLocation();
+    const navigationType = useNavigationType();
+
+    useEffect(() => {
+        const previousRestoration = window.history.scrollRestoration;
+        window.history.scrollRestoration = "manual";
+        return () => {
+            window.history.scrollRestoration = previousRestoration;
+        };
+    }, []);
+
+    useEffect(() => {
+        const savePosition = () => {
+            const anchorLine = Math.min(120, window.innerHeight * 0.25);
+            const anchor = [...document.querySelectorAll("[data-scroll-anchor]")]
+                .find((element) => {
+                    const bounds = element.getBoundingClientRect();
+                    return bounds.top <= anchorLine && bounds.bottom > anchorLine;
+                });
+
+            scrollPositions.set(location.key, {
+                y: window.scrollY,
+                anchorId: anchor?.id || null,
+                anchorOffset: anchor?.getBoundingClientRect().top ?? null,
+            });
+        };
+
+        savePosition();
+        window.addEventListener("scroll", savePosition, { passive: true });
+        return () => window.removeEventListener("scroll", savePosition);
+    }, [location.key]);
 
     useLayoutEffect(() => {
-        window.scrollTo(0, 0);
-    }, [pathname]);
+        const savedPosition = scrollPositions.get(location.key);
+        if (navigationType !== "POP" || !savedPosition) {
+            window.scrollTo(0, 0);
+            return undefined;
+        }
+
+        let timeoutId;
+        let observer;
+        let restored = false;
+        const restorePosition = () => {
+            if (restored) return true;
+            const anchor = savedPosition.anchorId
+                ? document.getElementById(savedPosition.anchorId)
+                : null;
+
+            if (anchor) {
+                window.scrollTo(
+                    0,
+                    window.scrollY + anchor.getBoundingClientRect().top - savedPosition.anchorOffset
+                );
+                restored = true;
+                observer?.disconnect();
+                window.clearTimeout(timeoutId);
+                return true;
+            }
+
+            if (!savedPosition.anchorId) {
+                window.scrollTo(0, savedPosition.y);
+                restored = true;
+                return true;
+            }
+            return false;
+        };
+
+        if (!restorePosition()) {
+            window.scrollTo(0, 0);
+            observer = new MutationObserver(restorePosition);
+            observer.observe(document.body, { childList: true, subtree: true });
+            timeoutId = window.setTimeout(() => {
+                observer.disconnect();
+                if (!restored) window.scrollTo(0, savedPosition.y);
+            }, 5000);
+        }
+
+        return () => {
+            observer?.disconnect();
+            window.clearTimeout(timeoutId);
+        };
+    }, [location.key, navigationType]);
 
     return null;
 };

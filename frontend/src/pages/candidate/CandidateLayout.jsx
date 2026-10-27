@@ -6,8 +6,10 @@ import {
     FileText,
     LogOut,
     Menu,
+    Moon,
     Search,
     Settings,
+    Sun,
     User,
     UserCircle,
     X,
@@ -29,7 +31,10 @@ const CandidateLayout = () => {
     const userName = profile?.user?.name || user?.name || "Candidate";
     const userRole = user?.role || "CANDIDATE";
     const avatarUrl = profile?.profileImage || user?.candidateProfile?.profileImage;
-
+    const [isDarkMode, setIsDarkMode] = useState(
+            () => localStorage.getItem("jobbridge-theme") === "dark"
+    );
+    
     // CANDIDATE NAVIGATION
     const navigation = [
         {
@@ -209,7 +214,7 @@ const CandidateLayout = () => {
                                         `candidate-nav-link flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium ${isActive
                                             ? "is-active  bg-blue-50 text-indigo-700"
                                             : " text-slate-600 transition hover:bg-slate-50 hover:text-indigo-600"
-                                        
+
                                         }`
                                     }
                                 >
@@ -238,8 +243,8 @@ const CandidateLayout = () => {
                                     })
                                 }
                                 className={`candidate-profile-trigger flex items-center gap-2 rounded-lg px-2 py-1.5 transition ${profileMenuOpen
-                                        ? "bg-slate-100"
-                                        : "hover:bg-slate-50"
+                                    ? "bg-slate-100"
+                                    : "hover:bg-slate-50"
                                     }`}
                             >
                                 <div className="candidate-avatar flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-indigo-100 text-indigo-600">
@@ -326,6 +331,34 @@ const CandidateLayout = () => {
                                 </div>
                             )}
                         </div>
+                        {/* DARK MODE TOGGLE */}
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setIsDarkMode((previous) => !previous)
+                            }
+                            aria-label={
+                                isDarkMode
+                                    ? "Switch to light mode"
+                                    : "Switch to dark mode"
+                            }
+                            title={
+                                isDarkMode
+                                    ? "Switch to light mode"
+                                    : "Switch to dark mode"
+                            }
+                            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-all duration-200 ${isDarkMode
+                                    ? "border-slate-700 bg-slate-800 text-amber-300 hover:bg-slate-700"
+                                    : "border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
+                                }`}
+                        >
+                            {isDarkMode ? (
+                                <Sun size={19} />
+                            ) : (
+                                <Moon size={19} />
+                            )}
+                        </button>
+
 
                         {/* MOBILE MENU BUTTON */}
                         <button
