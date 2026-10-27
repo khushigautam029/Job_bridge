@@ -28,6 +28,7 @@ import {
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import LocationAutocomplete from "../components/LocationAutocomplete";
+import { useTheme } from "../context/ThemeContext";
 import NotificationDropdown from "../pages/Notification";
 import { getCompanies } from "../services/companyService";
 import {
@@ -53,6 +54,7 @@ const getCompanyLogoUrl = (logo) => {
 
 const Home = () => {
     const navigate = useNavigate();
+        const { isDarkMode, toggleTheme } = useTheme();
 
     const storedUser = JSON.parse(
         localStorage.getItem("user") ||
@@ -91,9 +93,6 @@ const Home = () => {
     const [categories, setCategories] = useState([]);
     const [savedJobIds, setSavedJobIds] = useState([]);
     const [homeError, setHomeError] = useState("");
-    const [isDarkMode, setIsDarkMode] = useState(
-        () => localStorage.getItem("jobbridge-theme") === "dark"
-    );
 
     useEffect(() => {
         let active = true;
@@ -1055,9 +1054,7 @@ const Home = () => {
                         {/* DARK MODE TOGGLE */}
                         <button
                             type="button"
-                            onClick={() =>
-                                setIsDarkMode((previous) => !previous)
-                            }
+                            onClick={toggleTheme}
                             aria-label={
                                 isDarkMode
                                     ? "Switch to light mode"

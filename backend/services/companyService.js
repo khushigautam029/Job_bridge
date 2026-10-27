@@ -1,9 +1,9 @@
+import { col, fn } from "sequelize";
 import {
     Company,
     Job,
     RecruiterProfile,
 } from "../models/index.js";
-import { col, fn } from "sequelize";
 import { getHiddenCompanyIds } from "../utils/companyVisibility.js";
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
@@ -27,19 +27,15 @@ const getMyCompany = async (userId) => {
         const error = new Error(
             MESSAGES.RECRUITER_PROFILE_NOT_FOUND
         );
-
         error.statusCode = STATUS_CODES.NOT_FOUND;
-
         throw error;
     }
 
     if (!recruiterProfile.company) {
         const error = new Error(
-           MESSAGES.COMPANY_NOT_FOUND
+            MESSAGES.COMPANY_NOT_FOUND
         );
-
         error.statusCode = STATUS_CODES.NOT_FOUND;
-
         throw error;
     }
 

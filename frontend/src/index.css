@@ -1,12 +1,37 @@
+
 @import "tailwindcss";
+
+/* Enable Tailwind dark: classes using the .dark class on <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
 
 * {
     box-sizing: border-box;
 }
 
+html {
+    min-height: 100%;
+    color-scheme: light;
+}
+
+html.dark {
+    color-scheme: dark;
+}
+
 body {
     margin: 0;
+    min-height: 100vh;
     font-family: Arial, sans-serif;
+    background-color: #ffffff;
+    color: #0f172a;
+    transition:
+        background-color 0.25s ease,
+        color 0.25s ease;
+}
+
+/* Global page colors in dark mode. */
+html.dark body {
+    background-color: #0f172a;
+    color: #e2e8f0;
 }
 
 /* Keep required markers consistent across candidate and recruiter forms. */
@@ -24,6 +49,7 @@ form label:has(+ div:has(textarea[required]))::after {
     font-weight: 700;
 }
 
+/* Form validation errors. */
 .field-invalid {
     border-color: #ef4444 !important;
     background-color: #fff7f7 !important;
@@ -41,7 +67,21 @@ form label:has(+ div:has(textarea[required]))::after {
     line-height: 1.25rem;
 }
 
+/* Preserve validation visibility in dark mode. */
+html.dark .field-invalid {
+    border-color: #ef4444 !important;
+    background-color: #451a1a !important;
+    color: #fee2e2 !important;
+}
 
+html.dark .field-invalid:focus {
+    border-color: #ef4444 !important;
+    --tw-ring-color: rgb(153 27 27) !important;
+}
+
+html.dark .field-error {
+    color: #fca5a5;
+}
 
 @keyframes savePop {
     0% {

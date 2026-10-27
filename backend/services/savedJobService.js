@@ -46,7 +46,6 @@ const saveJob = async (
         throw error;
     }
 
-
     // Check whether job is open
     if (job.status !== "OPEN") {
         const error = new Error(

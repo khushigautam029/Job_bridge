@@ -215,35 +215,20 @@ const getCandidateDashboard = async (userId) => {
             });
     }
 
-
     return {
-
         statistics: {
-
             totalApplications,
-
             applied,
-
             underReview,
-
             shortlisted,
-
             interviews,
-
             selected,
-
             rejected,
-
             savedJobs,
-
             unreadNotifications,
-
         },
-
         recentApplications,
-
         upcomingInterviews,
-
     };
 };
 

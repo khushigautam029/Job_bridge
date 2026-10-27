@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.jsx";
+import { ThemeProvider } from "./context/ThemeContext.jsx";
 import "./index.css";
 
 const InlineFormValidation = () => {
@@ -44,7 +45,10 @@ const InlineFormValidation = () => {
 };
 
 createRoot(document.getElementById("root")).render(
-    // <StrictMode>
-        <><InlineFormValidation /><App /></>
-    // </StrictMode>
+    <ThemeProvider>
+        <>
+            <InlineFormValidation />
+            <App />
+        </>
+    </ThemeProvider>
 );
