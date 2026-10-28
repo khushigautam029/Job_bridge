@@ -1,8 +1,10 @@
+
 import {
     ArrowRight,
     Bookmark,
     BriefcaseBusiness,
     Building2,
+    CheckCircle2,
     Clock3,
     MapPin,
     Search,
@@ -12,12 +14,32 @@ import {
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Pagination, { usePagination } from "../../components/Pagination";
+import { getApplications } from "../../services/applicationService";
 import { formatJobCard } from "../../services/jobService";
 import {
     getSavedJobs,
     saveJob,
     unsaveJob,
 } from "../../services/savedJobService";
+
+const EMPLOYMENT_TYPES = [
+    { value: "FULL_TIME", label: "Full Time" },
+    { value: "PART_TIME", label: "Part Time" },
+    { value: "INTERNSHIP", label: "Internship" },
+    { value: "CONTRACT", label: "Contract" },
+];
+
+const WORK_LOCATIONS = [
+    { value: "REMOTE", label: "Remote" },
+    { value: "ONSITE", label: "Onsite" },
+    { value: "HYBRID", label: "Hybrid" },
+];
+
+const normalizeValue = (value) =>
+    String(value || "")
+        .trim()
+        .replace(/[\s-]+/g, "_")
+        .toUpperCase();
 
 const SavedJobs = () => {
     const navigate = useNavigate();
@@ -26,38 +48,75 @@ const SavedJobs = () => {
     const [search, setSearch] = useState("");
     const [sortBy, setSortBy] = useState("salary");
     const [category, setCategory] = useState("");
+    const [employmentType, setEmploymentType] = useState("");
+    const [workLocation, setWorkLocation] = useState("");
     const [deletedJob, setDeletedJob] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [applyMessageJobId, setApplyMessageJobId] = useState(null);
 
     useEffect(() => {
         let active = true;
 
-        getSavedJobs()
-            .then((saved) => {
+        const isAuthenticated = Boolean(
+            localStorage.getItem("token") ||
+            sessionStorage.getItem("token")
+        );
+
+        Promise.allSettled([
+            getSavedJobs(),
+            isAuthenticated ? getApplications() : Promise.resolve([]),
+        ])
+            .then(([savedResult, applicationsResult]) => {
                 if (!active) return;
 
-                setSavedJobs(
-                    saved.map((entry) => ({
-                        ...formatJobCard(entry.job),
-                        savedDate: entry.createdAt
-                            ? new Date(
-                                  entry.createdAt
-                              ).toLocaleDateString()
-                            : "",
-                        description: entry.job.description || "",
-                        applied: false,
-                    }))
-                );
-            })
-            .catch((loadError) => {
-                if (!active) return;
+                const errors = [];
+                const appliedJobIds = new Set();
 
-                setSavedJobs([]);
-                setError(
-                    loadError.response?.data?.message ||
+                if (applicationsResult.status === "fulfilled") {
+                    applicationsResult.value
+                        .filter(
+                            (application) =>
+                                application.status !== "WITHDRAWN"
+                        )
+                        .forEach((application) =>
+                            appliedJobIds.add(String(application.jobId))
+                        );
+                } else {
+                    errors.push(
+                        applicationsResult.reason.response?.data?.message ||
+                        "Unable to load your applications."
+                    );
+                }
+
+                if (savedResult.status === "fulfilled") {
+                    setSavedJobs(
+                        savedResult.value.map((entry) => {
+                            const job = formatJobCard(entry.job);
+
+                            return {
+                                ...job,
+                                savedDate: entry.createdAt
+                                    ? new Date(
+                                        entry.createdAt
+                                    ).toLocaleDateString()
+                                    : "",
+                                description: entry.job.description || "",
+                                applied:
+                                    applicationsResult.status ===
+                                    "fulfilled" &&
+                                    appliedJobIds.has(String(job.id)),
+                            };
+                        })
+                    );
+                } else {
+                    errors.unshift(
+                        savedResult.reason.response?.data?.message ||
                         "Unable to load saved jobs."
-                );
+                    );
+                }
+
+                setError(errors.join(" "));
             })
             .finally(() => {
                 if (active) setLoading(false);
@@ -70,8 +129,11 @@ const SavedJobs = () => {
 
     const categories = useMemo(
         () =>
-            [...new Set(savedJobs.map((job) => job.category).filter(Boolean))]
-                .sort((a, b) => a.localeCompare(b)),
+            [
+                ...new Set(
+                    savedJobs.map((job) => job.category).filter(Boolean)
+                ),
+            ].sort((a, b) => a.localeCompare(b)),
         [savedJobs]
     );
 
@@ -87,7 +149,29 @@ const SavedJobs = () => {
                     skill.toLowerCase().includes(searchText)
                 );
 
-            return (!category || job.category === category) && matchesSearch;
+            const jobEmploymentType = normalizeValue(
+                job.jobType || job.type
+            );
+
+            const jobWorkLocation = normalizeValue(job.workMode);
+
+            const matchesCategory =
+                !category || job.category === category;
+
+            const matchesEmploymentType =
+                !employmentType ||
+                jobEmploymentType === employmentType;
+
+            const matchesWorkLocation =
+                !workLocation ||
+                jobWorkLocation === workLocation;
+
+            return (
+                matchesSearch &&
+                matchesCategory &&
+                matchesEmploymentType &&
+                matchesWorkLocation
+            );
         });
 
         if (sortBy === "salary") return jobs;
@@ -98,32 +182,62 @@ const SavedJobs = () => {
                     ? a.minSalary || a.maxSalary || 0
                     : a.maxSalary || a.minSalary || 0
             );
+
             const salaryB = Number(
                 sortBy === "salaryLow"
                     ? b.minSalary || b.maxSalary || 0
                     : b.maxSalary || b.minSalary || 0
             );
-            return sortBy === "salaryLow" ? salaryA - salaryB : salaryB - salaryA;
+
+            return sortBy === "salaryLow"
+                ? salaryA - salaryB
+                : salaryB - salaryA;
         });
-    }, [savedJobs, search, category, sortBy]);
-    const { pageItems: pageJobs, currentPage, setCurrentPage, pageCount } =
-        usePagination(filteredJobs, JSON.stringify([search, category, sortBy]));
+    }, [
+        savedJobs,
+        search,
+        category,
+        employmentType,
+        workLocation,
+        sortBy,
+    ]);
+
+    const {
+        pageItems: pageJobs,
+        currentPage,
+        setCurrentPage,
+        pageCount,
+    } = usePagination(
+        filteredJobs,
+        JSON.stringify([
+            search,
+            category,
+            employmentType,
+            workLocation,
+            sortBy,
+        ])
+    );
 
     const remoteJobs = savedJobs.filter(
-        (job) => job.workMode === "Remote"
+        (job) => normalizeValue(job.workMode) === "REMOTE"
     ).length;
 
     const fullTimeJobs = savedJobs.filter(
-        (job) => job.type === "Full Time"
+        (job) =>
+            normalizeValue(job.jobType || job.type) === "FULL_TIME"
     ).length;
 
-    // Open the individual job details page.
     const viewJob = (job) => {
         navigate(`/candidate/jobs/${job.id}`);
     };
 
-    // Open the application page for the selected job.
     const applyForJob = (job) => {
+        if (job.applied) {
+            setApplyMessageJobId(String(job.id));
+            return;
+        }
+
+        setApplyMessageJobId(null);
         navigate(`/candidate/jobs/${job.id}/apply`);
     };
 
@@ -134,7 +248,7 @@ const SavedJobs = () => {
         } catch (removeError) {
             setError(
                 removeError.response?.data?.message ||
-                    "Unable to remove this saved job."
+                "Unable to remove this saved job."
             );
             return;
         }
@@ -154,7 +268,7 @@ const SavedJobs = () => {
         } catch (saveError) {
             setError(
                 saveError.response?.data?.message ||
-                    "Unable to restore this saved job."
+                "Unable to restore this saved job."
             );
             return;
         }
@@ -171,6 +285,38 @@ const SavedJobs = () => {
 
         setDeletedJob(null);
     };
+
+    const clearFilters = () => {
+        setSearch("");
+        setCategory("");
+        setEmploymentType("");
+        setWorkLocation("");
+        setSortBy("salary");
+    };
+
+    const hasActiveFilters = Boolean(
+        search ||
+        category ||
+        employmentType ||
+        workLocation ||
+        sortBy !== "salary"
+    );
+
+    const appliedJobsCount = savedJobs.filter(
+        (job) => job.applied
+    ).length;
+    
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+
+    const newThisWeekCount = savedJobs.filter((job) => {
+        if (!job.createdAt) return false;
+        const postedAt = new Date(job.createdAt).getTime();
+        return (
+            !Number.isNaN(postedAt) &&
+            postedAt >= sevenDaysAgo &&
+            postedAt <= Date.now()
+        );
+    }).length;
 
     if (loading) {
         return (
@@ -233,35 +379,37 @@ const SavedJobs = () => {
                 />
 
                 <SummaryCard
-                    label="Full Time"
-                    value={fullTimeJobs}
-                    description="Full-time opportunities"
-                    icon={<BriefcaseBusiness size={21} />}
+                    label="Applied Jobs"
+                    value={appliedJobsCount}
+                    description="Saved jobs you've applied for"
+                    icon={<CheckCircle2 size={21} />}
                 />
-
                 <SummaryCard
-                    label="Remote"
-                    value={remoteJobs}
-                    description="Remote opportunities"
-                    icon={<MapPin size={21} />}
+                    label="New This Week"
+                    value={newThisWeekCount}
+                    description="Saved jobs posted in the last 7 days"
+                    icon={<Clock3 size={21} />}
                 />
             </section>
 
-            {/* Toolbar */}
+            {/* Toolbar and Filters */}
             <section className="mt-7">
-                <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                    <div>
+                <div className="mb-5 flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
+                    <div className="shrink-0">
                         <h3 className="font-semibold text-slate-900">
                             Your Saved Jobs
                         </h3>
 
                         <p className="mt-1 text-xs text-slate-400">
-                            {filteredJobs.length} jobs currently showing
+                            {filteredJobs.length}{" "}
+                            {filteredJobs.length === 1 ? "job" : "jobs"}{" "}
+                            currently showing
                         </p>
                     </div>
 
-                    <div className="flex flex-col gap-3 lg:flex-row lg:flex-nowrap">
-                        <div className="relative">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:flex xl:flex-wrap xl:justify-end">
+                        {/* Search */}
+                        <div className="relative sm:col-span-2 xl:col-span-1">
                             <Search
                                 size={17}
                                 className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
@@ -272,14 +420,17 @@ const SavedJobs = () => {
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 placeholder="Search saved jobs..."
-                                className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-700 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 sm:w-64"
+                                aria-label="Search saved jobs"
+                                className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-700 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 xl:w-56"
                             />
                         </div>
 
+                        {/* Category Filter */}
                         <select
                             value={category}
                             onChange={(e) => setCategory(e.target.value)}
-                            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 outline-none transition focus:border-indigo-400"
+                            aria-label="Filter by category"
+                            className="min-w-0 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 xl:w-44"
                         >
                             <option value="">All Categories</option>
                             {categories.map((item) => (
@@ -289,10 +440,52 @@ const SavedJobs = () => {
                             ))}
                         </select>
 
+                        {/* Employment Type Filter */}
+                        <select
+                            value={employmentType}
+                            onChange={(e) =>
+                                setEmploymentType(e.target.value)
+                            }
+                            aria-label="Filter by employment type"
+                            className="min-w-0 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 xl:w-40"
+                        >
+                            <option value="">Jobs Type</option>
+                            {EMPLOYMENT_TYPES.map((item) => (
+                                <option
+                                    key={item.value}
+                                    value={item.value}
+                                >
+                                    {item.label}
+                                </option>
+                            ))}
+                        </select>
+
+                        {/* Work Location Filter */}
+                        <select
+                            value={workLocation}
+                            onChange={(e) =>
+                                setWorkLocation(e.target.value)
+                            }
+                            aria-label="Filter by work location"
+                            className="min-w-0 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 xl:w-40"
+                        >
+                            <option value="">Work Location</option>
+                            {WORK_LOCATIONS.map((item) => (
+                                <option
+                                    key={item.value}
+                                    value={item.value}
+                                >
+                                    {item.label}
+                                </option>
+                            ))}
+                        </select>
+
+                        {/* Salary Sort */}
                         <select
                             value={sortBy}
                             onChange={(e) => setSortBy(e.target.value)}
-                            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 outline-none transition focus:border-indigo-400"
+                            aria-label="Sort by salary"
+                            className="min-w-0 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 xl:w-44"
                         >
                             <option value="salary">Salary</option>
                             <option value="salaryHigh">
@@ -317,8 +510,18 @@ const SavedJobs = () => {
                         </h3>
 
                         <p className="mt-1 text-sm text-slate-500">
-                            Try searching with a different keyword.
+                            Try changing your search or filters.
                         </p>
+
+                        {hasActiveFilters && (
+                            <button
+                                type="button"
+                                onClick={clearFilters}
+                                className="mt-4 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                            >
+                                Clear Filters
+                            </button>
+                        )}
                     </div>
                 )}
 
@@ -341,9 +544,7 @@ const SavedJobs = () => {
 
                         <button
                             type="button"
-                            onClick={() =>
-                                navigate("/candidate/jobs")
-                            }
+                            onClick={() => navigate("/candidate/jobs")}
                             className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
                         >
                             Find Jobs
@@ -403,7 +604,15 @@ const SavedJobs = () => {
                                             size={16}
                                             className="shrink-0 text-slate-400"
                                         />
-                                        <span>{job.type}</span>
+                                        <span>
+                                            {EMPLOYMENT_TYPES.find(
+                                                (item) =>
+                                                    item.value ===
+                                                    normalizeValue(
+                                                        job.jobType || job.type
+                                                    )
+                                            )?.label || job.type}
+                                        </span>
                                     </div>
 
                                     <div className="flex items-center gap-2">
@@ -420,11 +629,15 @@ const SavedJobs = () => {
                                             className="shrink-0 text-slate-400"
                                         />
                                         <span>
-                                            {Number(job.remainingOpenings ?? 1)}{" "}
-                                            {Number(job.remainingOpenings ?? 1) === 1
+                                            {Number(
+                                                job.remainingOpenings ?? 1
+                                            )}{" "}
+                                            {Number(
+                                                job.remainingOpenings ?? 1
+                                            ) === 1
                                                 ? "opening"
-                                                : "openings"}
-                                            {" "}remaining
+                                                : "openings"}{" "}
+                                            remaining
                                         </span>
                                     </div>
 
@@ -456,7 +669,11 @@ const SavedJobs = () => {
                                         </p>
 
                                         <span className="text-xs font-medium text-slate-400">
-                                            {job.workMode}
+                                            {WORK_LOCATIONS.find(
+                                                (item) =>
+                                                    item.value ===
+                                                    normalizeValue(job.workMode)
+                                            )?.label || job.workMode}
                                         </span>
                                     </div>
 
@@ -476,21 +693,43 @@ const SavedJobs = () => {
                                             onClick={() => applyForJob(job)}
                                             className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
                                         >
-                                            Apply Now
-                                            <ArrowRight size={16} />
+                                            {job.applied ? (
+                                                <>
+                                                    <CheckCircle2 size={16} />
+                                                    Applied
+                                                </>
+                                            ) : (
+                                                <>
+                                                    Apply Now
+                                                    <ArrowRight size={16} />
+                                                </>
+                                            )}
                                         </button>
                                     </div>
+
+                                    {applyMessageJobId === String(job.id) && (
+                                        <p
+                                            role="status"
+                                            className="mt-3 text-sm font-medium text-emerald-700"
+                                        >
+                                            You have already applied for this
+                                            job.
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         ))}
                     </div>
                 )}
-                <Pagination
-                    totalItems={filteredJobs.length}
-                    currentPage={currentPage}
-                    pageCount={pageCount}
-                    onPageChange={setCurrentPage}
-                />
+
+                {filteredJobs.length > 0 && (
+                    <Pagination
+                        totalItems={filteredJobs.length}
+                        currentPage={currentPage}
+                        pageCount={pageCount}
+                        onPageChange={setCurrentPage}
+                    />
+                )}
             </section>
 
             {/* Bottom CTA */}

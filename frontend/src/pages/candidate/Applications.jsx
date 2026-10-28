@@ -18,9 +18,9 @@ import { getApplications } from "../../services/applicationService";
 
 const Applications = () => {
     const navigate = useNavigate();
-
     const [selectedApplication, setSelectedApplication] = useState(null);
     const [filterStatus, setFilterStatus] = useState("All Applications");
+    const [categoryFilter, setCategoryFilter] = useState("All");
 
     const initialApplications = [
         {
@@ -215,6 +215,12 @@ const Applications = () => {
                     return {
                         ...item,
                         position: job.title || "Job",
+                        category:
+                            job.category?.name ||
+                            job.Category?.name ||
+                            job.categoryName ||
+                            item.category ||
+                            "Uncategorized",
                         company: job.company?.name || "Company",
                         location: job.location || "",
                         type: (job.jobType || "").replaceAll("_", " "),
@@ -296,17 +302,46 @@ const Applications = () => {
         },
     };
 
-    const filteredApplications = useMemo(() => {
-        if (filterStatus === "All Applications") {
-            return applications;
-        }
+    const categories = useMemo(() => {
+        return [
+            ...new Set(
+                applications
+                    .map((application) => application.category)
+                    .filter(
+                        (category) =>
+                            category && category !== "Uncategorized"
+                    )
+            ),
+        ].sort((a, b) => a.localeCompare(b));
+    }, [applications]);
 
-        return applications.filter(
-            (application) => application.status === filterStatus
-        );
-    }, [applications, filterStatus]);
-    const { pageItems: pageApplications, currentPage, setCurrentPage, pageCount } =
-        usePagination(filteredApplications, filterStatus);
+
+    const filteredApplications = useMemo(() => {
+        return applications.filter((application) => {
+            const matchesStatus =
+                filterStatus === "All Applications" ||
+                application.status === filterStatus;
+
+            const matchesCategory =
+                categoryFilter === "All" ||
+                application.category === categoryFilter;
+
+            return matchesStatus && matchesCategory;
+        });
+    }, [applications, filterStatus, categoryFilter]);
+
+    const paginationResetKey = JSON.stringify([
+        filterStatus,
+        categoryFilter,
+    ]);
+
+    const {
+        pageItems: pageApplications,
+        currentPage,
+        setCurrentPage,
+        pageCount,
+    } = usePagination(filteredApplications, paginationResetKey);
+
 
     const totalApplications = applications.length;
 
@@ -489,16 +524,40 @@ const Applications = () => {
                     </div>
 
                     {/* Filter */}
-                    <select
-                        value={filterStatus}
-                        onChange={(e) => setFilterStatus(e.target.value)}
-                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 sm:w-48"
-                    >
-                        <option>All Applications</option>
-                        <option>Applied</option>
-                        <option>Interview</option>
-                        <option>Rejected</option>
-                    </select>
+
+                    {/* Filters */}
+                    <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
+                        {/* Category Filter */}
+                        <select
+                            value={categoryFilter}
+                            onChange={(e) => setCategoryFilter(e.target.value)}
+                            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 sm:w-48"
+                        >
+                            <option value="All">All Categories</option>
+
+                            {categories.map((category) => (
+                                <option key={category} value={category}>
+                                    {category}
+                                </option>
+                            ))}
+                        </select>
+
+                        {/* Status Filter */}
+                        <select
+                            value={filterStatus}
+                            onChange={(e) => setFilterStatus(e.target.value)}
+                            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-600 outline-none transition focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 sm:w-48"
+                        >
+                            <option value="All Applications">All Applications</option>
+                            <option value="Applied">Applied</option>
+                            <option value="Shortlisted">Shortlisted</option>
+                            <option value="Interview">Interview</option>
+                            <option value="Selected">Selected</option>
+                            <option value="Rejected">Rejected</option>
+                            <option value="Withdrawn">Withdrawn</option>
+                        </select>
+                    </div>
+
                 </div>
 
                 {/* Application List */}
@@ -506,90 +565,95 @@ const Applications = () => {
                     <>
                         <div className="divide-y divide-slate-100">
                             {pageApplications.map((application) => {
-                            const StatusIcon = application.statusIcon;
+                                const StatusIcon = application.statusIcon;
 
-                            return (
-                                <div
-                                    key={application.id}
-                                    className="p-6 transition hover:bg-slate-50/70"
-                                >
-                                    <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-                                        {/* Job Information */}
-                                        <div className="flex gap-4">
-                                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                                                <Building2 size={22} />
-                                            </div>
+                                return (
+                                    <div
+                                        key={application.id}
+                                        className="p-6 transition hover:bg-slate-50/70"
+                                    >
+                                        <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+                                            {/* Job Information */}
+                                            <div className="flex gap-4">
+                                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                                                    <Building2 size={22} />
+                                                </div>
 
-                                            <div>
-                                                <h4 className="font-semibold text-slate-900">
-                                                    {application.position}
-                                                </h4>
+                                                <div>
+                                                    <h4 className="font-semibold text-slate-900">
+                                                        {application.position}
+                                                    </h4>
 
-                                                <p className="mt-1 text-sm font-medium text-slate-600">
-                                                    {application.company}
-                                                </p>
+                                                    {application.category &&
+                                                        application.category !== "Uncategorized" && (
+                                                            <p className="mt-1 text-xs font-medium text-indigo-600">
+                                                                {application.category}
+                                                            </p>
+                                                        )}
 
-                                                <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-slate-400">
-                                                    <span>
-                                                        📍{" "}
-                                                        {application.location}
-                                                    </span>
+                                                    <p className="mt-1 text-sm font-medium text-slate-600">
+                                                        {application.company}
+                                                    </p>
 
-                                                    <span>
-                                                        💼 {application.type}
-                                                    </span>
+                                                    <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-xs text-slate-400">
+                                                        <span>
+                                                            📍{" "}
+                                                            {application.location}
+                                                        </span>
 
-                                                    <span>
-                                                        Applied{" "}
-                                                        {
-                                                            application.appliedDate
-                                                        }
-                                                    </span>
+                                                        <span>
+                                                            💼 {application.type}
+                                                        </span>
+
+                                                        <span>
+                                                            Applied{" "}
+                                                            {
+                                                                application.appliedDate
+                                                            }
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        {/* Status */}
-                                        <div className="flex items-center gap-3">
-                                            <div
-                                                className={`flex h-9 w-9 items-center justify-center rounded-lg ${
-                                                    statusStyles[application.status]?.icon ||
-                                                    statusStyles.Applied.icon
-                                                }`}
-                                            >
-                                                <StatusIcon size={17} />
-                                            </div>
-
-                                            <div>
-                                                <span
-                                                    className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                                                        statusStyles[application.status]?.badge ||
-                                                        statusStyles.Applied.badge
-                                                    }`}
+                                            {/* Status */}
+                                            <div className="flex items-center gap-3">
+                                                <div
+                                                    className={`flex h-9 w-9 items-center justify-center rounded-lg ${statusStyles[application.status]?.icon ||
+                                                        statusStyles.Applied.icon
+                                                        }`}
                                                 >
-                                                    {application.status}
-                                                </span>
+                                                    <StatusIcon size={17} />
+                                                </div>
 
-                                                <p className="mt-2 text-xs text-slate-400">
-                                                    {application.statusText}
-                                                </p>
+                                                <div>
+                                                    <span
+                                                        className={`rounded-full px-3 py-1.5 text-xs font-semibold ${statusStyles[application.status]?.badge ||
+                                                            statusStyles.Applied.badge
+                                                            }`}
+                                                    >
+                                                        {application.status}
+                                                    </span>
+
+                                                    <p className="mt-2 text-xs text-slate-400">
+                                                        {application.statusText}
+                                                    </p>
+                                                </div>
                                             </div>
-                                        </div>
 
-                                        {/* Action */}
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                openDetails(application)
-                                            }
-                                            className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600 xl:w-auto"
-                                        >
-                                            View Details
-                                            <ArrowRight size={16} />
-                                        </button>
+                                            {/* Action */}
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    openDetails(application)
+                                                }
+                                                className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600 xl:w-auto"
+                                            >
+                                                View Details
+                                                <ArrowRight size={16} />
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            );
+                                );
                             })}
                         </div>
                         <Pagination
@@ -616,9 +680,10 @@ const Applications = () => {
 
                         <button
                             type="button"
-                            onClick={() =>
-                                setFilterStatus("All Applications")
-                            }
+                            onClick={() => {
+                                setFilterStatus("All Applications");
+                                setCategoryFilter("All");
+                            }}
                             className="mt-5 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-700"
                         >
                             View All Applications
@@ -713,10 +778,9 @@ const Applications = () => {
 
                                     <div className="mt-2 flex items-center gap-3">
                                         <span
-                                            className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                                                statusStyles[selectedApplication.status]?.badge ||
+                                            className={`rounded-full px-3 py-1.5 text-xs font-semibold ${statusStyles[selectedApplication.status]?.badge ||
                                                 statusStyles.Applied.badge
-                                            }`}
+                                                }`}
                                         >
                                             {selectedApplication.status}
                                         </span>
@@ -903,61 +967,61 @@ const Applications = () => {
                                     {/* Interview */}
                                     {selectedApplication.status ===
                                         "Interview" && (
-                                        <section className="rounded-2xl border border-green-100 bg-green-50 p-5">
-                                            <div className="flex items-start gap-3">
-                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-600">
-                                                    <CalendarDays size={19} />
-                                                </div>
+                                            <section className="rounded-2xl border border-green-100 bg-green-50 p-5">
+                                                <div className="flex items-start gap-3">
+                                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-100 text-green-600">
+                                                        <CalendarDays size={19} />
+                                                    </div>
 
-                                                <div>
-                                                    <h4 className="font-semibold text-slate-900">
-                                                        Interview Scheduled
-                                                    </h4>
+                                                    <div>
+                                                        <h4 className="font-semibold text-slate-900">
+                                                            Interview Scheduled
+                                                        </h4>
 
-                                                    <p className="mt-1 text-sm text-slate-600">
-                                                        Your interview has been
-                                                        scheduled with the
-                                                        hiring team.
-                                                    </p>
+                                                        <p className="mt-1 text-sm text-slate-600">
+                                                            Your interview has been
+                                                            scheduled with the
+                                                            hiring team.
+                                                        </p>
 
-                                                    <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                                                        <div>
-                                                            <p className="text-xs text-slate-400">
-                                                                Date
-                                                            </p>
-                                                            <p className="mt-1 text-sm font-semibold text-slate-800">
-                                                                {
-                                                                    selectedApplication.interviewDate
-                                                                }
-                                                            </p>
-                                                        </div>
+                                                        <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                                                            <div>
+                                                                <p className="text-xs text-slate-400">
+                                                                    Date
+                                                                </p>
+                                                                <p className="mt-1 text-sm font-semibold text-slate-800">
+                                                                    {
+                                                                        selectedApplication.interviewDate
+                                                                    }
+                                                                </p>
+                                                            </div>
 
-                                                        <div>
-                                                            <p className="text-xs text-slate-400">
-                                                                Time
-                                                            </p>
-                                                            <p className="mt-1 text-sm font-semibold text-slate-800">
-                                                                {
-                                                                    selectedApplication.interviewTime
-                                                                }
-                                                            </p>
-                                                        </div>
+                                                            <div>
+                                                                <p className="text-xs text-slate-400">
+                                                                    Time
+                                                                </p>
+                                                                <p className="mt-1 text-sm font-semibold text-slate-800">
+                                                                    {
+                                                                        selectedApplication.interviewTime
+                                                                    }
+                                                                </p>
+                                                            </div>
 
-                                                        <div>
-                                                            <p className="text-xs text-slate-400">
-                                                                Type
-                                                            </p>
-                                                            <p className="mt-1 text-sm font-semibold text-slate-800">
-                                                                {
-                                                                    selectedApplication.interviewType
-                                                                }
-                                                            </p>
+                                                            <div>
+                                                                <p className="text-xs text-slate-400">
+                                                                    Type
+                                                                </p>
+                                                                <p className="mt-1 text-sm font-semibold text-slate-800">
+                                                                    {
+                                                                        selectedApplication.interviewType
+                                                                    }
+                                                                </p>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </section>
-                                    )}
+                                            </section>
+                                        )}
 
                                     {/* Timeline */}
                                     <section>
@@ -975,11 +1039,10 @@ const Applications = () => {
                                                 >
                                                     <div className="relative flex flex-col items-center">
                                                         <div
-                                                            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-                                                                item.completed
-                                                                    ? "bg-indigo-600 text-white"
-                                                                    : "bg-slate-200 text-slate-400"
-                                                            }`}
+                                                            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${item.completed
+                                                                ? "bg-indigo-600 text-white"
+                                                                : "bg-slate-200 text-slate-400"
+                                                                }`}
                                                         >
                                                             <CheckCircle2
                                                                 size={16}
@@ -988,9 +1051,9 @@ const Applications = () => {
 
                                                         {index <
                                                             items.length -
-                                                                1 && (
-                                                            <div className="h-full w-px bg-slate-200" />
-                                                        )}
+                                                            1 && (
+                                                                <div className="h-full w-px bg-slate-200" />
+                                                            )}
                                                     </div>
 
                                                     <div className="pb-6">
