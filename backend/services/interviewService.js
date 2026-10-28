@@ -531,10 +531,18 @@ const getRecruiterInterviews = async (
             where: { recruiterId: recruiter.id },
         }],
     });
-    await completeExpiredInterviews(recruiterApplications.map(({ id }) => id));
+    const recruiterApplicationIds = recruiterApplications.map(
+        ({ id }) => id
+    );
+    await completeExpiredInterviews(recruiterApplicationIds);
 
 
     const interviews = await Interview.findAll({
+        where: {
+            applicationId: {
+                [Op.in]: recruiterApplicationIds,
+            },
+        },
         include: [
             {
                 model: Application,
@@ -1170,4 +1178,3 @@ export {
     updateInterview,
     updateInterviewStatus
 };
-

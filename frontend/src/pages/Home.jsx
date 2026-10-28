@@ -407,19 +407,6 @@ const Home = () => {
         );
     };
 
-    const handlePopularSearch = (keyword) => {
-        if (userRole === "ADMIN") {
-            navigate("/admin/dashboard");
-            return;
-        }
-
-        navigate(
-            `${isLoggedIn ? getJobsRoute() : "/jobs"}?search=${encodeURIComponent(
-                keyword
-            )}`
-        );
-    };
-
     const handleCompanyJobs = (companyName) => {
         const storedUser =
             JSON.parse(localStorage.getItem("user") || "null") ||
@@ -577,10 +564,6 @@ const Home = () => {
                     transition: transform .25s ease, background-color .25s ease;
                 }
                 .jobbridge-home .jb-card:hover .jb-icon-tile { transform: rotate(-4deg) scale(1.06); }
-                .jobbridge-home .jb-popular {
-                    transition: transform .2s ease, border-color .2s ease, background-color .2s ease;
-                }
-                .jobbridge-home .jb-popular:hover { transform: translateY(-2px); }
                 @keyframes jb-gradient-shift {
                     0%, 100% { background-position: 0% 50%; }
                     50% { background-position: 100% 50%; }
@@ -1175,30 +1158,6 @@ const Home = () => {
                         </div>
                     </div>
 
-                    {/* POPULAR SEARCHES */}
-                    <div className="jb-enter jb-delay-5 mt-4 flex flex-wrap items-center justify-center gap-2 text-xs">
-                        <span className="font-medium text-slate-500">
-                            Popular:
-                        </span>
-
-                        {[
-                            "React Developer",
-                            "Node.js",
-                            "UI/UX Designer",
-                            "Data Analyst",
-                        ].map((item) => (
-                            <button
-                                key={item}
-                                type="button"
-                                onClick={() =>
-                                    handlePopularSearch(item)
-                                }
-                                className="jb-popular rounded-full border border-slate-200 bg-white px-3 py-1.5 font-medium text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
-                            >
-                                {item}
-                            </button>
-                        ))}
-                    </div>
                 </div>
             </section>
 
