@@ -16,8 +16,8 @@ import {
     User,
     UserPreference,
 } from "../models/index.js";
-
 import createNotification from "../utils/createNotification.js";
+import { sendInterviewInvitationEmail } from "../utils/emailService.js";
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 // Interviews are scheduled for 45 minutes in the UI. Once that window passes,
@@ -337,28 +337,75 @@ const scheduleInterview = async (
 
 
     // Update application status
-    if (
-        application.status !==
-        "INTERVIEW"
-    ) {
-        application.status =
-            "INTERVIEW";
-
+    if (application.status !== "INTERVIEW") {
+        application.status = "INTERVIEW";
         await application.save();
-
         await ApplicationStatusHistory.create({
-            applicationId:
-                application.id,
-
-            status:
-                "INTERVIEW",
-
-            changedBy:
-                userId,
+            applicationId: application.id,
+            status: "INTERVIEW",
+            changedBy: userId,
         });
     }
 
+    if (
+        interview.interviewType === "ONLINE" &&
+        interview.meetingLink
+    ) {
+        try {
+            const candidateUser = await User.findByPk(
+                application.candidate.userId,
+                {
+                    attributes: ["id", "name", "email"],
+                }
+            );
+            const recruiterUser = await User.findByPk(
+                userId,
+                {
+                    attributes: ["name"],
+                }
+            );
+            if (!candidateUser?.email) {
+                throw new Error(
+                    "Candidate email address was not found."
+                );
+            }
+            const scheduledDate = new Date(
+                interview.scheduledAt
+            );
 
+            await sendInterviewInvitationEmail({
+                email: candidateUser.email,
+                name: candidateUser.name,
+                jobTitle: application.job.title,
+                interviewDate: scheduledDate.toLocaleDateString(
+                    "en-IN",
+                    {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                        timeZone: "Asia/Kolkata",
+                    }
+                ),
+                interviewTime: scheduledDate.toLocaleTimeString(
+                    "en-IN",
+                    {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        timeZone: "Asia/Kolkata",
+                    }
+                ),
+                meetingLink: interview.meetingLink,
+                interviewType: interview.interviewType,
+                recruiterName: recruiterUser?.name,
+            });
+            console.log("Interview invitation email sent successfully");
+        } catch (emailError) {
+            console.error(
+                "Interview invitation email failed:",
+                emailError.message
+            );
+        }
+    }
     return interview;
 };
 
@@ -714,18 +761,14 @@ const updateInterview = async (
             }
         );
 
-
     if (!interview) {
         const error = new Error(
             MESSAGES.INTERVIEW_NOT_FOUND
         );
-
         error.statusCode =
             STATUS_CODES.NOT_FOUND;
-
         throw error;
     }
-
 
     if (
         interview.application.job.recruiterId !==
@@ -734,10 +777,7 @@ const updateInterview = async (
         const error = new Error(
             "You are not authorized to update this interview"
         );
-
-        error.statusCode =
-            STATUS_CODES.FORBIDDEN;
-
+        error.statusCode = STATUS_CODES.FORBIDDEN;
         throw error;
     }
 
@@ -749,33 +789,27 @@ const updateInterview = async (
         error.statusCode = STATUS_CODES.BAD_REQUEST;
         throw error;
     }
+    const oldScheduledAt = interview.scheduledAt
+        ? new Date(interview.scheduledAt).getTime()
+        : null;
 
+    const oldInterviewType = interview.interviewType;
+    const oldMeetingLink = interview.meetingLink;
 
-    // Validate updated date
     if (data.scheduledAt) {
-        const scheduledDate =
-            new Date(data.scheduledAt);
-
+        const scheduledDate = new Date(data.scheduledAt);
         if (
-            Number.isNaN(
-                scheduledDate.getTime()
-            ) ||
+            Number.isNaN(scheduledDate.getTime()) ||
             scheduledDate <= new Date()
         ) {
             const error = new Error(
-                "Interview date must be a valid future date"
+                "Interview date must be a valid future date."
             );
-
-            error.statusCode =
-                STATUS_CODES.BAD_REQUEST;
-
+            error.statusCode = STATUS_CODES.BAD_REQUEST;
             throw error;
         }
-
-        data.scheduledAt =
-            scheduledDate;
+        data.scheduledAt = scheduledDate;
     }
-
 
     // Validate interview type
     if (data.interviewType) {
@@ -793,10 +827,7 @@ const updateInterview = async (
             const error = new Error(
                 "Invalid interview type"
             );
-
-            error.statusCode =
-                STATUS_CODES.BAD_REQUEST;
-
+            error.statusCode = STATUS_CODES.BAD_REQUEST;
             throw error;
         }
     }
@@ -828,16 +859,10 @@ const updateInterview = async (
             interview.location
         )?.trim()
     ) {
-        const error = new Error(
-            "Location is required for offline interviews"
-        );
-
-        error.statusCode =
-            STATUS_CODES.BAD_REQUEST;
-
+        const error = new Error("Location is required for offline interviews");
+        error.statusCode = STATUS_CODES.BAD_REQUEST;
         throw error;
     }
-
 
     if (data.meetingLink !== undefined) {
         data.meetingLink =
@@ -854,9 +879,84 @@ const updateInterview = async (
             data.notes?.trim() || null;
     }
 
+    //Determine whether the invitaion details changed
+    const newScheduledAt = data.scheduledAt
+        ? new Date(data.scheduledAt).getTime()
+        : oldScheduledAt;
+
+    const newMeetingLink =
+        data.meetingLink !== undefined
+            ? data.meetingLink
+            : interview.meetingLink;
+
+    const newInterviewType = data.interviewType || interview.interviewType;
+
+    const invitationChanged =
+        oldScheduledAt !== newScheduledAt ||
+        oldMeetingLink !== newMeetingLink ||
+        oldInterviewType !== newInterviewType;
 
     await interview.update(data);
 
+    if (
+        invitationChanged && interview.interviewType === "ONLINE" &&
+        interview.meetingLink
+    ) {
+        try {
+            const candidate = await CandidateProfile.findByPk(
+                interview.application.candidateId
+            );
+            if (candidate) {
+                const candidateUser = await User.findByPk(
+                    candidate.userId
+                );
+
+                const recruiterUser = await User.findByPk(
+                    userId
+                );
+
+                if (candidateUser?.email) {
+                    const scheduledDate = new Date(
+                        interview.scheduledAt
+                    );
+
+                    const interviewDate =
+                        scheduledDate.toLocaleDateString(
+                            "en-IN", {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                            timeZone: "Asia/Kolkata",
+                        }
+                    );
+                    const interviewTime =
+                        scheduledDate.toLocaleDateString(
+                            "en-IN", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            timeZone: "Asia/Kolkata",
+                        }
+                    );
+                    await sendInterviewInvitationEmail({
+                        email:candidateUser.email,
+                        name:candidateUser.name,
+                        jobTitle:interview.application.job.title,
+                        interviewDate,
+                        interviewTime,
+                        meetingLink:interview.meetingLink,
+                        interviewType:"Online",
+                        recruiterName:recruiterUser?.name||"Recruiter",
+                        isRescheduled:true,
+                    });
+                }
+            }
+        } catch (emailError) {
+            console.error(
+                "Failed to send the updated interview invitation:",
+                emailError.message
+            );
+        }
+    }
     return interview;
 };
 

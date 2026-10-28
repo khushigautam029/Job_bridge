@@ -20,6 +20,7 @@ import {
 import createNotification from "../utils/createNotification.js";
 import {
     sendApplicationConfirmationEmail,
+    sendCandidateSelectionEmail,
 } from "../utils/emailService.js";
 import extractResumeText from "../utils/resumeParserService.js";
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
@@ -839,6 +840,7 @@ const getRecruiterApplications = async (userId) => {
     Recruiter changes application status.
     Automatically closes a job when all openings are filled.
 */
+
 const updateApplicationStatus = async (
     userId,
     applicationId,
@@ -872,8 +874,7 @@ const updateApplicationStatus = async (
     }
 
     return sequelize.transaction(async (transaction) => {
-        // Lock the job row so two simultaneous selections
-        // cannot exceed the available openings.
+        // Lock the job row to prevent exceeding available openings.
         const application = await Application.findByPk(
             applicationId,
             {
@@ -917,12 +918,12 @@ const updateApplicationStatus = async (
         }
 
         const previousStatus = application.status;
-
-        // Only check capacity when a candidate is newly selected.
-        if (
+        const newlySelected =
             status === "SELECTED" &&
-            previousStatus !== "SELECTED"
-        ) {
+            previousStatus !== "SELECTED";
+
+        // Check available openings only for a new selection.
+        if (newlySelected) {
             const selectedCount = await Application.count({
                 where: {
                     jobId: job.id,
@@ -956,7 +957,7 @@ const updateApplicationStatus = async (
             { transaction }
         );
 
-        // Count selected candidates after the update.
+        // Close the job when all openings are filled.
         if (status === "SELECTED") {
             const selectedCount = await Application.count({
                 where: {
@@ -976,21 +977,52 @@ const updateApplicationStatus = async (
         }
 
         return {
-            ...application.toJSON(),
-            job: {
-                id: job.id,
-                title: job.title,
-                status: job.status,
-                totalOpenings: job.totalOpenings,
+            application: {
+                ...application.toJSON(),
+                job: {
+                    id: job.id,
+                    title: job.title,
+                    status: job.status,
+                    totalOpenings: job.totalOpenings,
+                },
             },
+            newlySelected,
         };
-    }).then(async (updatedApplication) => {
-        // Send the notification after the transaction succeeds.
+    }).then(async ({ application: updatedApplication, newlySelected }) => {
+        // The transaction has committed before this section runs.
         const candidate = await CandidateProfile.findByPk(
             updatedApplication.candidateId
         );
 
         if (candidate) {
+            // Send the selection email only for a new selection.
+            if (newlySelected) {
+                try {
+                    const candidateUser = await User.findByPk(
+                        candidate.userId
+                    );
+
+                    if (candidateUser?.email) {
+                        await sendCandidateSelectionEmail({
+                            email: candidateUser.email,
+                            name: candidateUser.name,
+                            jobTitle: updatedApplication.job.title,
+                        });
+                    } else {
+                        console.error(
+                            "Candidate selection email skipped: candidate email not found."
+                        );
+                    }
+                } catch (error) {
+                    // Email failure must not undo the saved selection.
+                    console.error(
+                        "Candidate selection email failed:",
+                        error.message
+                    );
+                }
+            }
+
+            // Preserve the existing in-app notification.
             await createNotification({
                 userId: candidate.userId,
                 title: "Application Status Updated",
@@ -999,9 +1031,11 @@ const updateApplicationStatus = async (
             });
         }
 
+        // Return the original application response shape.
         return updatedApplication;
     });
 };
+
 
 const getApplicationAtsScore = async (userId, applicationId) => {
     // 1. Find the logged-in recruiter's profile.
@@ -1043,7 +1077,7 @@ const getApplicationAtsScore = async (userId, applicationId) => {
     );
 
     if (!application) {
-        const error = new Error( MESSAGES.APPLICATION_NOT_FOUND );
+        const error = new Error(MESSAGES.APPLICATION_NOT_FOUND);
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
@@ -1140,7 +1174,7 @@ const analyzeJobApplicationsBatch = async (
     });
 
     if (!recruiter) {
-        const error = new Error( MESSAGES.RECRUITER_PROFILE_NOT_FOUND );
+        const error = new Error(MESSAGES.RECRUITER_PROFILE_NOT_FOUND);
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
@@ -1213,7 +1247,7 @@ const analyzeJobApplicationsBatch = async (
             );
 
             if (!candidate) {
-                throw new Error( MESSAGES.PROFILE_NOT_FOUND );
+                throw new Error(MESSAGES.PROFILE_NOT_FOUND);
             }
 
             // Respect resume privacy settings.

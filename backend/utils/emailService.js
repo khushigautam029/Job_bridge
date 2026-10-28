@@ -285,7 +285,225 @@ const sendApplicationConfirmationEmail = async ({
 };
 
 
+const sendCandidateSelectionEmail = async ({
+    email,
+    name,
+    jobTitle,
+}) => {
+    if (!email || !jobTitle) {
+        throw new Error("Candidate email and job title are required");
+    }
+
+    const safeName = escapeHtml(name || "Candidate");
+    const safeJobTitle = escapeHtml(jobTitle);
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Congratulations - JobBridge</title>
+</head>
+<body style="margin:0;padding:32px 12px;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;color:#1f2937;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0"
+        style="max-width:600px;margin:auto;background:#ffffff;border-radius:12px;overflow:hidden;">
+        <tr>
+            <td align="center" style="background:#2563eb;padding:28px;">
+                <h1 style="margin:0;color:#ffffff;">JobBridge</h1>
+                <p style="margin:8px 0 0;color:#dbeafe;">Connecting Talent with Opportunity</p>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding:32px 28px;">
+                <h2 style="color:#15803d;">Congratulations, ${safeName}!</h2>
+                <p style="font-size:15px;line-height:1.7;">
+                    We are pleased to inform you that you have been selected for the following position:
+                </p>
+                <div style="margin:24px 0;padding:18px;background:#f0fdf4;border-radius:8px;">
+                    <p style="margin:0;color:#166534;font-size:12px;">SELECTED POSITION</p>
+                    <h3 style="margin:8px 0 0;color:#14532d;">${safeJobTitle}</h3>
+                </div>
+                <p style="font-size:15px;line-height:1.7;">
+                    Congratulations on this achievement! Please check your JobBridge account
+                    for any updates or further communication from the recruiter.
+                </p>
+                <p style="font-size:15px;line-height:1.7;">
+                    We wish you success in your career journey.
+                </p>
+                <p style="font-size:15px;line-height:1.7;">
+                    Regards,<br><strong>JobBridge Team</strong>
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td align="center" style="background:#f9fafb;padding:18px;border-top:1px solid #e5e7eb;">
+                <p style="margin:0;color:#6b7280;font-size:12px;">
+                    This is an automated email. Please do not reply.
+                </p>
+                <p style="margin:8px 0 0;color:#9ca3af;font-size:12px;">
+                    &copy; ${new Date().getFullYear()} JobBridge. All rights reserved.
+                </p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
+
+    const textContent = [
+        `Congratulations, ${name || "Candidate"}!`,
+        "",
+        `You have been selected for the position: ${jobTitle}.`,
+        "",
+        "Please check your JobBridge account for updates or further communication from the recruiter.",
+        "",
+        "Regards,",
+        "JobBridge Team",
+    ].join("\n");
+
+    await sendBrevoEmail({
+        email,
+        name,
+        subject: `Congratulations! You've been selected for ${jobTitle}`,
+        htmlContent,
+        textContent,
+    });
+};
+
+// Email sent to the candidate when an interview is scheduled.
+const sendInterviewInvitationEmail = async ({
+    email,
+    name,
+    jobTitle,
+    interviewDate,
+    interviewTime,
+    meetingLink,
+    interviewType = "Online",
+    recruiterName,
+    isRescheduled = false,
+}) => {
+    if (!email || !jobTitle || !interviewDate || !meetingLink) {
+        throw new Error(
+            "Candidate email, job title, interview date, and meeting link are required"
+        );
+    }
+
+    const safeName = escapeHtml(name || "Candidate");
+    const safeJobTitle = escapeHtml(jobTitle);
+    const safeDate = escapeHtml(interviewDate);
+    const safeTime = escapeHtml(interviewTime || "As scheduled");
+    const safeMeetingLink = escapeHtml(meetingLink);
+    const safeInterviewType = escapeHtml(interviewType);
+    const safeRecruiterName = escapeHtml(recruiterName || "Recruitment Team");
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Invitation - JobBridge</title>
+</head>
+<body style="margin:0;padding:32px 12px;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;color:#1f2937;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0"
+        style="max-width:600px;margin:auto;background:#ffffff;border-radius:12px;overflow:hidden;">
+        <tr>
+            <td align="center" style="background:#2563eb;padding:28px;">
+                <h1 style="margin:0;color:#ffffff;">JobBridge</h1>
+                <p style="margin:8px 0 0;color:#dbeafe;">Connecting Talent with Opportunity</p>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding:32px 28px;">
+                <h2 style="color:#1d4ed8;">Your Interview Has Been Scheduled!</h2>
+                <p style="font-size:15px;line-height:1.7;">Hello ${safeName},</p>
+                <p style="font-size:15px;line-height:1.7;">
+                    You have been invited to an interview for the following position.
+                    Please review the details below.
+                </p>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0"
+                    style="margin:24px 0;background:#eff6ff;border-radius:8px;">
+                    <tr>
+                        <td style="padding:20px;">
+                            <p style="margin:0 0 6px;color:#1d4ed8;font-size:12px;">POSITION</p>
+                            <h3 style="margin:0 0 18px;color:#1e3a8a;">${safeJobTitle}</h3>
+                            <p style="margin:8px 0;font-size:14px;"><strong>Date:</strong> ${safeDate}</p>
+                            <p style="margin:8px 0;font-size:14px;"><strong>Time:</strong> ${safeTime}</p>
+                            <p style="margin:8px 0;font-size:14px;"><strong>Interview type:</strong> ${safeInterviewType}</p>
+                            <p style="margin:8px 0;font-size:14px;"><strong>Recruiter:</strong> ${safeRecruiterName}</p>
+                        </td>
+                    </tr>
+                </table>
+                <p style="font-size:15px;line-height:1.7;">
+                    Please join the interview at the scheduled time using the meeting link below.
+                </p>
+                <table role="presentation" cellspacing="0" cellpadding="0" style="margin:24px 0;">
+                    <tr>
+                        <td align="center" bgcolor="#2563eb" style="border-radius:8px;">
+                            <a href="${safeMeetingLink}"
+                                style="display:inline-block;padding:14px 28px;color:#ffffff;text-decoration:none;font-size:15px;font-weight:bold;">
+                                Join Interview
+                            </a>
+                        </td>
+                    </tr>
+                </table>
+                <p style="font-size:14px;line-height:1.7;color:#4b5563;">
+                    If the button does not work, copy this link into your browser:
+                </p>
+                <p style="font-size:13px;line-height:1.7;overflow-wrap:anywhere;">
+                    <a href="${safeMeetingLink}" style="color:#2563eb;word-break:break-all;">
+                        ${safeMeetingLink}
+                    </a>
+                </p>
+                <p style="font-size:15px;line-height:1.7;">
+                    Please be ready a few minutes before the scheduled time.
+                </p>
+                <p style="font-size:15px;line-height:1.7;">
+                    Regards,<br><strong>JobBridge Team</strong>
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td align="center" style="background:#f9fafb;padding:18px;border-top:1px solid #e5e7eb;">
+                <p style="margin:0;color:#6b7280;font-size:12px;">
+                    This is an automated email. Please do not reply.
+                </p>
+                <p style="margin:8px 0 0;color:#9ca3af;font-size:12px;">
+                    &copy; ${new Date().getFullYear()} JobBridge. All rights reserved.
+                </p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>`;
+
+    const textContent = [
+        `Hello ${name || "Candidate"},`,
+        "",
+        `Your interview for ${jobTitle} has been scheduled.`,
+        `Date: ${interviewDate}`,
+        `Time: ${interviewTime || "As scheduled"}`,
+        `Interview type: ${interviewType}`,
+        `Recruiter: ${recruiterName || "Recruitment Team"}`,
+        "",
+        `Join the interview: ${meetingLink}`,
+        "",
+        "Please be ready a few minutes before the scheduled time.",
+        "",
+        "Regards,",
+        "JobBridge Team",
+    ].join("\n");
+
+    await sendBrevoEmail({
+        email,
+        name,
+        subject: `${isRescheduled ? "Updated Interview Invitation" : "Interview Invitation"}: ${jobTitle}`,
+        htmlContent,
+        textContent,
+    });
+};
+
 export {
-    sendApplicationConfirmationEmail, sendPasswordResetEmail
+    sendApplicationConfirmationEmail, sendCandidateSelectionEmail, sendInterviewInvitationEmail, sendPasswordResetEmail
 };
 
