@@ -67,6 +67,8 @@ const ApplyJob = () => {
                 setSelectedJob({
                     ...job,
                     company: job.company?.name || "Company",
+                    remainingOpenings:
+                        job.remainingOpenings ?? job.totalOpenings ?? 1,
                     employmentType: formatLabel(job.jobType || ""),
                     workMode: formatLabel(job.workMode || ""),
                     experience: job.experienceMax
@@ -316,8 +318,8 @@ const ApplyJob = () => {
                             </div>
                             <div className="col-span-2 rounded-xl border border-slate-100 bg-slate-50 p-3">
                                 <Users size={17} className="text-indigo-600" />
-                                <p className="mt-2 text-[11px] font-medium text-slate-500">Total openings</p>
-                                <p className="mt-0.5 text-sm font-semibold text-slate-800">{Number(selectedJob.totalOpenings ?? 1)}</p>
+                                <p className="mt-2 text-[11px] font-medium text-slate-500">Openings remaining</p>
+                                <p className="mt-0.5 text-sm font-semibold text-slate-800">{Number(selectedJob.remainingOpenings)}</p>
                             </div>
                         </div>
                         {!isJobOpen && (

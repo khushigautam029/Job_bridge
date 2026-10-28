@@ -48,6 +48,11 @@ const RecruiterJobDetails = () => {
                     applicants: Array.isArray(applications)
                         ? applications.length
                         : 0,
+                    selectedCandidates: Array.isArray(applications)
+                        ? applications.filter(
+                            (application) => application.status === "SELECTED"
+                        ).length
+                        : 0,
                 });
             })
             .catch((loadError) => {
@@ -247,6 +252,11 @@ const RecruiterJobDetails = () => {
     const jobType = formatLabel(job.jobType);
     const workMode = formatLabel(job.workMode);
     const applicants = job.applicants || 0;
+    const totalOpenings = Number(job.totalOpenings ?? 1);
+    const remainingOpenings = Math.max(
+        totalOpenings - (job.selectedCandidates || 0),
+        0
+    );
 
     const isDeadlinePassed =
         job.applicationDeadline &&
@@ -433,9 +443,9 @@ const RecruiterJobDetails = () => {
 
                         <StatCard
                             icon={BriefcaseBusiness}
-                            label="Total Openings"
-                            value={Number(job.totalOpenings ?? 1)}
-                            detail="Candidates to hire"
+                            label="Openings Remaining"
+                            value={`${remainingOpenings} / ${totalOpenings}`}
+                            detail={`${job.selectedCandidates || 0} candidates selected`}
                         />
 
                         <StatCard

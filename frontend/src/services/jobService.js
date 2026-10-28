@@ -8,6 +8,17 @@ export const normalizeLocationQuery = (location) =>
 export const formatJobCard = (job) => {
     const minSalary = Number(job.minSalary || 0);
     const maxSalary = Number(job.maxSalary || 0);
+    const totalOpenings = Number(job.totalOpenings ?? 1);
+    const selectedCandidates = Number(
+        job.selectedCandidates ??
+            (job.applications || []).filter(
+                (application) => application.status === "SELECTED"
+            ).length
+    );
+    const remainingOpenings = Number(
+        job.remainingOpenings ??
+            Math.max(totalOpenings - selectedCandidates, 0)
+    );
 
     const salary =
         minSalary && maxSalary
@@ -45,6 +56,7 @@ export const formatJobCard = (job) => {
 
         salary,
         experience,
+        remainingOpenings,
         posted: postedDate,
 
         skills: (job.skills || []).map((skill) =>

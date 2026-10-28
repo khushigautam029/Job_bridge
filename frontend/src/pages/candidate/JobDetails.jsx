@@ -495,10 +495,10 @@ const JobDetails = () => {
 
                         <div>
                             <p className="text-xs font-medium text-slate-400">
-                                Total Openings
+                                Openings Remaining
                             </p>
                             <p className="mt-1 text-sm font-semibold text-slate-800">
-                                {Number(job.totalOpenings ?? 1)}
+                                {Number(job.remainingOpenings ?? job.totalOpenings ?? 1)}
                             </p>
                         </div>
 

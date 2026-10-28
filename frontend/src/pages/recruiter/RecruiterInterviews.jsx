@@ -9,13 +9,17 @@ import {
     MapPin,
     Phone,
     Search,
+    Users,
     Video,
     X,
     XCircle,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
-import { getRecruiterApplications } from "../../services/applicationService";
+import {
+    getRecruiterApplications,
+    updateApplicationStatus as updateApplicationStatusRequest,
+} from "../../services/applicationService";
 
 import Pagination, { usePagination } from "../../components/Pagination.jsx";
 import {
@@ -116,6 +120,7 @@ const RecruiterInterviews = () => {
 
     useEffect(() => {
         loadInterviews();
+        loadApplications();
     }, []);
 
     const getInitials = (name = "Candidate") =>
@@ -271,6 +276,25 @@ const RecruiterInterviews = () => {
         interview?.application?.job?.title ||
         interview?.application?.Job?.title ||
         "Job Position";
+
+    const getJobFromInterview = (interview) =>
+        interview?.application?.job ||
+        interview?.application?.Job ||
+        null;
+
+    const getRemainingOpenings = (interview) => {
+        const job = getJobFromInterview(interview);
+        const totalOpenings = Number(job?.totalOpenings);
+        if (!Number.isFinite(totalOpenings)) return null;
+
+        const selectedCount = applications.filter(
+            (application) =>
+                String(application.jobId) === String(job.id) &&
+                application.status === "SELECTED"
+        ).length;
+
+        return Math.max(totalOpenings - selectedCount, 0);
+    };
 
     const getJobCategory = (interview) =>
         interview?.application?.job?.category?.name ||
@@ -589,6 +613,46 @@ const RecruiterInterviews = () => {
         }
     };
 
+    const handleCandidateDecision = async (interview, status) => {
+        if (interview.status !== "COMPLETED") {
+            setError("Complete the interview before recording a candidate decision.");
+            return;
+        }
+
+        const application = interview.application;
+        const applicationId = interview.applicationId || application?.id;
+        if (!applicationId) {
+            setError("Unable to find the candidate application for this interview.");
+            return;
+        }
+
+        try {
+            clearMessages();
+            setActionLoadingId(interview.id);
+            await updateApplicationStatusRequest(applicationId, status);
+            setSuccess(
+                status === "SELECTED"
+                    ? `${getCandidateName(interview)} was selected.`
+                    : `${getCandidateName(interview)} was marked as not selected.`
+            );
+            await Promise.all([loadInterviews(), loadApplications()]);
+
+            if (selectedInterview?.id === interview.id) {
+                const updated = await getInterview(interview.id);
+                setSelectedInterview(updated);
+            }
+        } catch (decisionError) {
+            setError(
+                getErrorMessage(
+                    decisionError,
+                    "Unable to save the candidate decision."
+                )
+            );
+        } finally {
+            setActionLoadingId(null);
+        }
+    };
+
     const openInterview = async (interview) => {
         try {
             clearMessages();
@@ -820,6 +884,13 @@ const RecruiterInterviews = () => {
                                 const candidateProfileLabel = getCandidateProfileLabel(interview);
                                 const jobTitle = getJobTitle(interview);
                                 const category = getJobCategory(interview);
+                                const applicationStatus =
+                                    interview.application?.status || "INTERVIEW";
+                                const hasDecision = ["SELECTED", "REJECTED"].includes(
+                                    applicationStatus
+                                );
+                                const remainingOpenings =
+                                    getRemainingOpenings(interview);
                                 const isActionLoading =
                                     actionLoadingId === interview.id;
 
@@ -979,6 +1050,19 @@ const RecruiterInterviews = () => {
                                             )}
                                         </div>
 
+                                        {remainingOpenings !== null && (
+                                            <div className="mt-4 flex items-center gap-2 text-xs text-slate-500">
+                                                <Users size={15} className="text-slate-400" />
+                                                <span>
+                                                    {remainingOpenings}{" "}
+                                                    {remainingOpenings === 1
+                                                        ? "opening"
+                                                        : "openings"}{" "}
+                                                    remaining
+                                                </span>
+                                            </div>
+                                        )}
+
                                         {candidateProfile?.skills?.length > 0 && (
                                             <div className="mt-4 flex flex-wrap gap-1.5">
                                                 {candidateProfile.skills.slice(0, 4).map((skill) => (
@@ -1023,8 +1107,67 @@ const RecruiterInterviews = () => {
                                                     </button>
                                                 )}
 
-                                            {(interview.status === "SCHEDULED" ||
-                                                interview.status === "RESCHEDULED") && (
+                                                {interview.status === "COMPLETED" &&
+                                                    (hasDecision ? (
+                                                        <span
+                                                            className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold ${
+                                                                applicationStatus === "SELECTED"
+                                                                    ? "bg-emerald-50 text-emerald-700"
+                                                                    : "bg-slate-100 text-slate-600"
+                                                            }`}
+                                                        >
+                                                            {applicationStatus === "SELECTED" ? (
+                                                                <CheckCircle2 size={14} />
+                                                            ) : (
+                                                                <XCircle size={14} />
+                                                            )}
+                                                            {applicationStatus === "SELECTED"
+                                                                ? "Selected"
+                                                                : "Not selected"}
+                                                        </span>
+                                                    ) : (
+                                                        <>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    handleCandidateDecision(
+                                                                        interview,
+                                                                        "SELECTED"
+                                                                    )
+                                                                }
+                                                                disabled={
+                                                                    isActionLoading ||
+                                                                    remainingOpenings === 0
+                                                                }
+                                                                title={
+                                                                    remainingOpenings === 0
+                                                                        ? "All openings have been filled"
+                                                                        : "Select candidate"
+                                                                }
+                                                                className="flex items-center gap-1.5 rounded-lg border border-emerald-200 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                                            >
+                                                                <CheckCircle2 size={14} />
+                                                                Select
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    handleCandidateDecision(
+                                                                        interview,
+                                                                        "REJECTED"
+                                                                    )
+                                                                }
+                                                                disabled={isActionLoading}
+                                                                className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+                                                            >
+                                                                <XCircle size={14} />
+                                                                Not selected
+                                                            </button>
+                                                        </>
+                                                    ))}
+
+                                                {(interview.status === "SCHEDULED" ||
+                                                    interview.status === "RESCHEDULED") && (
                                                 <button
                                                     type="button"
                                                     onClick={() =>
@@ -1602,6 +1745,72 @@ const RecruiterInterviews = () => {
                                     </div>
                                 </div>
                             </div>
+
+                            {selectedInterview.status === "COMPLETED" && (
+                                <div className="mt-5 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div>
+                                            <p className="text-sm font-semibold text-slate-800">
+                                                Candidate decision
+                                            </p>
+                                            <p className="mt-1 text-xs text-slate-500">
+                                                Record the interview outcome to update the hiring pipeline.
+                                            </p>
+                                        </div>
+                                        {getRemainingOpenings(selectedInterview) !== null && (
+                                            <span className="shrink-0 text-xs font-medium text-slate-500">
+                                                {getRemainingOpenings(selectedInterview)} openings left
+                                            </span>
+                                        )}
+                                    </div>
+                                    {["SELECTED", "REJECTED"].includes(
+                                        selectedInterview.application?.status
+                                    ) ? (
+                                        <p className="mt-3 text-sm font-semibold text-slate-700">
+                                            Outcome:{" "}
+                                            {selectedInterview.application.status === "SELECTED"
+                                                ? "Selected"
+                                                : "Not selected"}
+                                        </p>
+                                    ) : (
+                                        <div className="mt-3 flex flex-wrap gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    handleCandidateDecision(
+                                                        selectedInterview,
+                                                        "SELECTED"
+                                                    )
+                                                }
+                                                disabled={
+                                                    actionLoadingId === selectedInterview.id ||
+                                                    getRemainingOpenings(selectedInterview) === 0
+                                                }
+                                                className="flex items-center gap-1.5 rounded-lg border border-emerald-200 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                            >
+                                                <CheckCircle2 size={14} />
+                                                Select candidate
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    handleCandidateDecision(
+                                                        selectedInterview,
+                                                        "REJECTED"
+                                                    )
+                                                }
+                                                disabled={
+                                                    actionLoadingId === selectedInterview.id
+                                                }
+                                                className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-white disabled:opacity-50"
+                                            >
+                                                <XCircle size={14} />
+                                                Not selected
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
                             {selectedInterview.interviewType === "ONLINE" &&
                                 selectedInterview.meetingLink && (

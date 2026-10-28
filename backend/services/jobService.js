@@ -45,6 +45,44 @@ const validateTotalOpenings = (value) => {
     }
 };
 
+const addOpeningCounts = async (jobs) => {
+    const jobList = (Array.isArray(jobs) ? jobs : [jobs]).filter(Boolean);
+    const jobIds = jobList.map((job) => job?.id).filter(Boolean);
+
+    if (jobIds.length === 0) return jobs;
+
+    const selectedApplications = await Application.findAll({
+        attributes: [
+            "jobId",
+            [sequelize.fn("COUNT", sequelize.col("id")), "selectedCount"],
+        ],
+        where: {
+            jobId: { [Op.in]: jobIds },
+            status: "SELECTED",
+        },
+        group: ["jobId"],
+        raw: true,
+    });
+    const selectedCounts = new Map(
+        selectedApplications.map((application) => [
+            String(application.jobId),
+            Number(application.selectedCount),
+        ])
+    );
+
+    jobList.forEach((job) => {
+        const selectedCount = selectedCounts.get(String(job.id)) || 0;
+        const totalOpenings = Number(job.totalOpenings || 1);
+        job.setDataValue("selectedCandidates", selectedCount);
+        job.setDataValue(
+            "remainingOpenings",
+            Math.max(totalOpenings - selectedCount, 0)
+        );
+    });
+
+    return jobs;
+};
+
 const createJob = async (
     userId,
     data
@@ -212,6 +250,7 @@ const getAllJobs = async (filters = {}) => {
     rows.forEach((job) => {
         if (hiddenCompanyIds.has(job.companyId)) job.setDataValue("company", null);
     });
+    await addOpeningCounts(rows);
     return {
         jobs: rows,
         pagination: {
@@ -276,7 +315,7 @@ const getRecruiterJobs = async (userId) => {
     const recruiterProfile =
         await getRecruiterProfile(userId);
 
-    return Job.findAll({
+    const jobs = await Job.findAll({
         where: {
             recruiterId: recruiterProfile.id,
         },
@@ -307,6 +346,8 @@ const getRecruiterJobs = async (userId) => {
         ],
         order: [["createdAt", "DESC"]],
     });
+
+    return addOpeningCounts(jobs);
 };
 
 const getJobById = async (
@@ -373,7 +414,7 @@ const getJobById = async (
     }
     const hiddenCompanyIds = await getHiddenCompanyIds([job.companyId]);
     if (hiddenCompanyIds.has(job.companyId)) job.setDataValue("company", null);
-    return job;
+    return addOpeningCounts(job);
 };
 
 const updateJob = async (
@@ -480,9 +521,8 @@ const deleteJob = async (
 
 
 export {
-    createJob,
+    addOpeningCounts, createJob,
     deleteJob,
     getAllJobs, getJobById, getJobCategories, getRecruiterJobCategories, getRecruiterJobs,
     updateJob
 };
-

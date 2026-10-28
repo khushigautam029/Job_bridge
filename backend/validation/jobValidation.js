@@ -16,6 +16,12 @@ const createJobSchema = Joi.object({
         .max(150)
         .required(),
 
+    totalOpenings: Joi.number()
+        .integer()
+        .min(1)
+        .optional()
+        .default(1),
+
     description: Joi.string()
         .trim()
         .required(),
@@ -106,6 +112,11 @@ const updateJobSchema = Joi.object({
     title: Joi.string()
         .trim()
         .max(150)
+        .optional(),
+
+    totalOpenings: Joi.number()
+        .integer()
+        .min(1)
         .optional(),
 
     description: Joi.string()

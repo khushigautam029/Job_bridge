@@ -33,6 +33,16 @@ const formatRecruiterJob = (job) => ({
     ...formatJobCard(job),
     categoryId: job.categoryId,
     applications: job.applications?.length || 0,
+    selectedCandidates: (job.applications || []).filter(
+        (application) => application.status === "SELECTED"
+    ).length,
+    remainingOpenings: Math.max(
+        Number(job.totalOpenings ?? 1) -
+            (job.applications || []).filter(
+                (application) => application.status === "SELECTED"
+            ).length,
+        0
+    ),
     postedDate: job.createdAt
         ? new Date(job.createdAt).toLocaleDateString()
         : "",
@@ -299,7 +309,18 @@ const Jobs = () => {
 
             setJobs((prevJobs) =>
                 prevJobs.map((job) =>
-                    job.id === updatedJob.id ? updatedJob : job
+                    job.id === updatedJob.id
+                        ? {
+                            ...updatedJob,
+                            applications: job.applications,
+                            selectedCandidates: job.selectedCandidates,
+                            remainingOpenings: Math.max(
+                                Number(updatedJob.totalOpenings ?? 1) -
+                                    job.selectedCandidates,
+                                0
+                            ),
+                        }
+                        : job
                 )
             );
 
@@ -574,10 +595,11 @@ const Jobs = () => {
                                         className="mt-0.5 shrink-0 text-slate-400"
                                     />
                                     <span>
-                                        {Number(job.totalOpenings ?? 1)}{" "}
-                                        {Number(job.totalOpenings ?? 1) === 1
+                                        {job.remainingOpenings}{" "}
+                                        {job.remainingOpenings === 1
                                             ? "opening"
                                             : "openings"}
+                                        {" "}remaining
                                     </span>
                                 </div>
 

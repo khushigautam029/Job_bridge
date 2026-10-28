@@ -420,10 +420,11 @@ const SavedJobs = () => {
                                             className="shrink-0 text-slate-400"
                                         />
                                         <span>
-                                            {Number(job.totalOpenings ?? 1)}{" "}
-                                            {Number(job.totalOpenings ?? 1) === 1
+                                            {Number(job.remainingOpenings ?? 1)}{" "}
+                                            {Number(job.remainingOpenings ?? 1) === 1
                                                 ? "opening"
                                                 : "openings"}
+                                            {" "}remaining
                                         </span>
                                     </div>
 

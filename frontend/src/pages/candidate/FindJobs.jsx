@@ -537,10 +537,11 @@ const FindJobs = () => {
 
                                                 <span className="flex items-center gap-1.5">
                                                     <Users size={14} />
-                                                    {Number(job.totalOpenings ?? 1)}{" "}
-                                                    {Number(job.totalOpenings ?? 1) === 1
+                                                    {job.remainingOpenings}{" "}
+                                                    {job.remainingOpenings === 1
                                                         ? "opening"
                                                         : "openings"}
+                                                    {" "}remaining
                                                 </span>
                                             </div>
                                         </div>

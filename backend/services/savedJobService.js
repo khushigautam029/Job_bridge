@@ -7,6 +7,7 @@ import {
     Skill,
 } from "../models/index.js";
 import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
+import { addOpeningCounts } from "./jobService.js";
 
 
 /*
@@ -158,6 +159,7 @@ const getMySavedJobs = async (
         });
 
 
+    await addOpeningCounts(savedJobs.map((savedJob) => savedJob.job));
     return savedJobs;
 };
 

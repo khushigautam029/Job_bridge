@@ -1,4 +1,6 @@
 import { Op } from "sequelize";
+import sequelize from "../config/database.js";
+
 import {
     Application,
     ApplicationStatusHistory,
