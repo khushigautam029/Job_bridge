@@ -1,4 +1,3 @@
-
 import {
     ArrowLeft,
     ArrowRight,
@@ -13,6 +12,7 @@ import {
     Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
 import { getApplications } from "../../services/applicationService";
 import { getJob } from "../../services/jobService";
@@ -45,13 +45,13 @@ const JobDetails = () => {
                     ...selectedJob,
                     responsibilities: selectedJob.responsibilities
                         ? selectedJob.responsibilities
-                              .split("\n")
-                              .filter(Boolean)
+                            .split("\n")
+                            .filter(Boolean)
                         : [],
                     requirements: selectedJob.requirements
                         ? selectedJob.requirements
-                              .split("\n")
-                              .filter(Boolean)
+                            .split("\n")
+                            .filter(Boolean)
                         : [],
                     skills: (selectedJob.skills || []).map(
                         (skill) =>
@@ -66,10 +66,11 @@ const JobDetails = () => {
             .catch((loadError) => {
                 if (active) {
                     setJob(null);
-                    setError(
+                    const errorMessage =
                         loadError.response?.data?.message ||
-                            "This job could not be found."
-                    );
+                        "This job could not be found.";
+                    setError(errorMessage);
+                    toast.error(errorMessage);
                 }
             })
             .finally(() => {
@@ -80,7 +81,7 @@ const JobDetails = () => {
 
         const isAuthenticated = Boolean(
             localStorage.getItem("token") ||
-                sessionStorage.getItem("token")
+            sessionStorage.getItem("token")
         );
 
         if (isAuthenticated) {
@@ -93,10 +94,12 @@ const JobDetails = () => {
                 })
                 .catch((loadError) => {
                     if (active) {
-                        setError(
+                        const errorMessage =
                             loadError.response?.data?.message ||
-                                "Unable to check whether this job is saved."
-                        );
+                            "Unable to check whether this job is saved.";
+
+                        setError(errorMessage);
+                        toast.error(errorMessage);
                     }
                 });
 
@@ -108,7 +111,7 @@ const JobDetails = () => {
                             applications.some(
                                 (application) =>
                                     String(application.jobId) ===
-                                        String(jobId) &&
+                                    String(jobId) &&
                                     application.status !== "WITHDRAWN"
                             )
                         );
@@ -116,10 +119,12 @@ const JobDetails = () => {
                 })
                 .catch((loadError) => {
                     if (active) {
-                        setError(
+                        const errorMessage =
                             loadError.response?.data?.message ||
-                                "Unable to load your applications."
-                        );
+                            "Unable to load your applications.";
+
+                        setError(errorMessage);
+                        toast.error(errorMessage);
                     }
                 });
         } else {
@@ -134,11 +139,13 @@ const JobDetails = () => {
 
     const isAuthenticated = Boolean(
         localStorage.getItem("token") ||
-            sessionStorage.getItem("token")
+        sessionStorage.getItem("token")
     );
+
 
     const toggleSavedJob = async () => {
         if (!isAuthenticated) {
+            toast.error("Please log in to save jobs.");
             navigate("/login");
             return;
         }
@@ -151,15 +158,21 @@ const JobDetails = () => {
             if (isSaved) {
                 await unsaveJob(job.id);
                 setIsSaved(false);
+
+                toast.success("Job removed from saved jobs.");
             } else {
                 await saveJob(job.id);
                 setIsSaved(true);
+
+                toast.success("Job saved successfully!");
             }
         } catch (requestError) {
-            setError(
+            const errorMessage =
                 requestError.response?.data?.message ||
-                    "Unable to update saved jobs."
-            );
+                "Unable to update saved jobs.";
+
+            setError(errorMessage);
+            toast.error(errorMessage);
         }
     };
 
@@ -398,11 +411,10 @@ const JobDetails = () => {
                                     </p>
 
                                     <span
-                                        className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                                            job.status === "OPEN"
-                                                ? "bg-emerald-50 text-emerald-600"
-                                                : "bg-slate-100 text-slate-600"
-                                        }`}
+                                        className={`rounded-full px-2.5 py-1 text-xs font-medium ${job.status === "OPEN"
+                                            ? "bg-emerald-50 text-emerald-600"
+                                            : "bg-slate-100 text-slate-600"
+                                            }`}
                                     >
                                         {job.status === "OPEN" ? "Open" : "Closed"}
                                     </span>
@@ -448,11 +460,10 @@ const JobDetails = () => {
                         <button
                             type="button"
                             onClick={toggleSavedJob}
-                            className={`flex shrink-0 items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold transition ${
-                                isSaved
-                                    ? "border-indigo-200 bg-indigo-50 text-indigo-600"
-                                    : "border-slate-200 text-slate-600 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
-                            }`}
+                            className={`flex shrink-0 items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold transition ${isSaved
+                                ? "border-indigo-200 bg-indigo-50 text-indigo-600"
+                                : "border-slate-200 text-slate-600 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
+                                }`}
                         >
                             {isSaved ? (
                                 <BookmarkCheck size={17} />

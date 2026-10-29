@@ -1,4 +1,3 @@
-
 import {
     ArrowRight,
     Bookmark,
@@ -12,6 +11,7 @@ import {
     Users,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import Pagination, { usePagination } from "../../components/Pagination";
 import { getApplications } from "../../services/applicationService";
@@ -116,7 +116,20 @@ const SavedJobs = () => {
                     );
                 }
 
-                setError(errors.join(" "));
+                const errorMessage = errors.join(" ");
+                setError(errorMessage);
+                if (applicationsResult.status === "rejected") {
+                    toast.error(
+                        applicationsResult.reason.response?.data?.message ||
+                        "Unable to load your applications."
+                    );
+                }
+                if (savedResult.status === "rejected") {
+                    toast.error(
+                        savedResult.reason.response?.data?.message ||
+                        "Unable to load saved jobs."
+                    );
+                }
             })
             .finally(() => {
                 if (active) setLoading(false);
@@ -234,9 +247,9 @@ const SavedJobs = () => {
     const applyForJob = (job) => {
         if (job.applied) {
             setApplyMessageJobId(String(job.id));
+            toast.error("You have already applied for this job.");
             return;
         }
-
         setApplyMessageJobId(null);
         navigate(`/candidate/jobs/${job.id}/apply`);
     };
@@ -245,45 +258,41 @@ const SavedJobs = () => {
         try {
             await unsaveJob(job.id);
             setError("");
-        } catch (removeError) {
-            setError(
-                removeError.response?.data?.message ||
-                "Unable to remove this saved job."
+            setSavedJobs((current) =>
+                current.filter((item) => item.id !== job.id)
             );
-            return;
+            setDeletedJob(job);
+            toast.success("Job removed from saved jobs.");
+        } catch (removeError) {
+            const errorMessage =
+                removeError.response?.data?.message ||
+                "Unable to remove this saved job.";
+            setError(errorMessage);
+            toast.error(errorMessage);
         }
-
-        setSavedJobs((current) =>
-            current.filter((item) => item.id !== job.id)
-        );
-
-        setDeletedJob(job);
     };
 
     const undoDelete = async () => {
         if (!deletedJob) return;
-
         try {
             await saveJob(deletedJob.id);
+            setSavedJobs((current) => {
+                const alreadyExists = current.some(
+                    (job) => job.id === deletedJob.id
+                );
+                if (alreadyExists) return current;
+                return [...current, deletedJob];
+            });
+            setDeletedJob(null);
+            setError("");
+            toast.success("Saved job restored successfully!");
         } catch (saveError) {
-            setError(
+            const errorMessage =
                 saveError.response?.data?.message ||
-                "Unable to restore this saved job."
-            );
-            return;
+                "Unable to restore this saved job.";
+            setError(errorMessage);
+            toast.error(errorMessage);
         }
-
-        setSavedJobs((current) => {
-            const alreadyExists = current.some(
-                (job) => job.id === deletedJob.id
-            );
-
-            if (alreadyExists) return current;
-
-            return [...current, deletedJob];
-        });
-
-        setDeletedJob(null);
     };
 
     const clearFilters = () => {
@@ -305,7 +314,7 @@ const SavedJobs = () => {
     const appliedJobsCount = savedJobs.filter(
         (job) => job.applied
     ).length;
-    
+
     const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
 
     const newThisWeekCount = savedJobs.filter((job) => {

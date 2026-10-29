@@ -10,6 +10,7 @@ import {
     X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import {
     deleteNotification as deleteNotificationRequest,
     getNotifications,
@@ -47,10 +48,12 @@ const NotificationDropdown = ({ onOpen, closeSignal = false }) => {
                 }
             } catch (loadError) {
                 if (active) {
-                    setError(
+                    const errorMessage =
                         loadError.response?.data?.message ||
-                        "Unable to load notifications."
-                    );
+                        "Unable to load notifications.";
+
+                    setError(errorMessage);
+                    toast.error(errorMessage);
                 }
             } finally {
                 if (active) setLoading(false);
@@ -94,61 +97,62 @@ const NotificationDropdown = ({ onOpen, closeSignal = false }) => {
     const markAsRead = async (id) => {
         try {
             await markNotificationRead(id);
-            setError("");
-        } catch (requestError) {
-            setError(
-                requestError.response?.data?.message ||
-                "Unable to mark this notification as read."
+
+            setNotifications((prev) =>
+                prev.map((notification) =>
+                    notification.id === id
+                        ? { ...notification, read: true }
+                        : notification
+                )
             );
-            return;
+            setError("");
+            toast.success("Notification marked as read.");
+        } catch (requestError) {
+            const errorMessage =
+                requestError.response?.data?.message ||
+                "Unable to mark this notification as read.";
+            setError(errorMessage);
+            toast.error(errorMessage);
         }
-        setNotifications((prev) =>
-            prev.map((notification) =>
-                notification.id === id
-                    ? {
-                        ...notification,
-                        read: true,
-                    }
-                    : notification
-            )
-        );
     };
 
     const markAllAsRead = async () => {
         try {
             await markAllNotificationsRead();
-            setError("");
-        } catch (requestError) {
-            setError(
-                requestError.response?.data?.message ||
-                "Unable to mark notifications as read."
+            setNotifications((prev) =>
+                prev.map((notification) => ({
+                    ...notification,
+                    read: true,
+                }))
             );
-            return;
+            setError("");
+            toast.success("All notifications marked as read.");
+        } catch (requestError) {
+            const errorMessage =
+                requestError.response?.data?.message ||
+                "Unable to mark notifications as read.";
+            setError(errorMessage);
+            toast.error(errorMessage);
         }
-        setNotifications((prev) =>
-            prev.map((notification) => ({
-                ...notification,
-                read: true,
-            }))
-        );
     };
 
     const deleteNotification = async (id) => {
         try {
             await deleteNotificationRequest(id);
-            setError("");
-        } catch (requestError) {
-            setError(
-                requestError.response?.data?.message ||
-                "Unable to delete this notification."
+            setNotifications((prev) =>
+                prev.filter(
+                    (notification) => notification.id !== id
+                )
             );
-            return;
+            setError("");
+            toast.success("Notification deleted successfully.");
+        } catch (requestError) {
+            const errorMessage =
+                requestError.response?.data?.message ||
+                "Unable to delete this notification.";
+            setError(errorMessage);
+            toast.error(errorMessage);
         }
-        setNotifications((prev) =>
-            prev.filter(
-                (notification) => notification.id !== id
-            )
-        );
     };
 
     const getNotificationIcon = (type) => {

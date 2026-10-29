@@ -25,6 +25,7 @@ import {
     X
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import LocationAutocomplete from "../components/LocationAutocomplete";
 import { useTheme } from "../context/ThemeContext";
@@ -125,10 +126,12 @@ const Home = () => {
             })
             .catch((error) => {
                 if (active) {
-                    setHomeError(
+                    const errorMessage =
                         error.response?.data?.message ||
-                        "Unable to load current jobs."
-                    );
+                        "Unable to load current jobs.";
+
+                    setHomeError(errorMessage);
+                    toast.error(errorMessage);
                 }
             });
 
@@ -142,7 +145,10 @@ const Home = () => {
                 );
             })
             .catch(() => {
-                if (active) setTopCompanies([]);
+                if (active) {
+                    setTopCompanies([]);
+                    toast.error("Unable to load companies.");
+                }
             });
 
         if (
@@ -159,11 +165,14 @@ const Home = () => {
                         );
                     }
                 })
-                .catch(() => {
+                .catch((error) => {
                     if (active) {
-                        setHomeError(
-                            "Unable to load your saved jobs."
-                        );
+                        const errorMessage =
+                            error.response?.data?.message ||
+                            "Unable to load your saved jobs.";
+
+                        setHomeError(errorMessage);
+                        toast.error(errorMessage);
                     }
                 });
         }
@@ -173,8 +182,10 @@ const Home = () => {
         };
     }, [isLoggedIn, userRole]);
 
+
     const toggleFeaturedSave = async (jobId) => {
         if (!isLoggedIn) {
+            toast.error("Please log in to save jobs.");
             setAuthAction("save");
             setShowAuthModal(true);
             return;
@@ -191,23 +202,28 @@ const Home = () => {
                 await unsaveJob(jobId);
 
                 setSavedJobIds((current) =>
-                    current.filter(
-                        (savedId) => savedId !== id
-                    )
+                    current.filter((savedId) => savedId !== id)
                 );
+
+                toast.success("Job removed from saved jobs.");
             } else {
                 await saveJob(jobId);
 
-                setSavedJobIds((current) => [
-                    ...current,
-                    id,
-                ]);
+                setSavedJobIds((current) =>
+                    current.includes(id)
+                        ? current
+                        : [...current, id]
+                );
+
+                toast.success("Job saved successfully!");
             }
         } catch (error) {
-            setHomeError(
+            const errorMessage =
                 error.response?.data?.message ||
-                "Unable to update saved jobs."
-            );
+                "Unable to update saved jobs.";
+
+            setHomeError(errorMessage);
+            toast.error(errorMessage);
         }
     };
 
@@ -245,6 +261,7 @@ const Home = () => {
 
         if (message) {
             setSuccessMessage(message);
+            toast.success(message);
 
             sessionStorage.removeItem(
                 "authSuccessMessage"

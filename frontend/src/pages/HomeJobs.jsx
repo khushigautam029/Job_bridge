@@ -11,16 +11,16 @@ import {
     UserPlus,
     X,
 } from "lucide-react";
-
 import { useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
+import LocationAutocomplete from "../components/LocationAutocomplete";
 import {
     formatJobCard,
     getJobs,
     normalizeLocationQuery,
 } from "../services/jobService";
-import LocationAutocomplete from "../components/LocationAutocomplete";
 import {
     getSavedJobs,
     saveJob as saveJobRequest,
@@ -58,10 +58,12 @@ const HomeJobs = () => {
             })
             .catch((loadError) => {
                 if (active) {
-                    setError(
+                    const errorMessage =
                         loadError.response?.data?.message ||
-                        "Unable to load jobs. Please try again."
-                    );
+                        "Unable to load jobs. Please try again.";
+
+                    setError(errorMessage);
+                    toast.error(errorMessage);
                 }
             })
             .finally(() => {
@@ -77,10 +79,12 @@ const HomeJobs = () => {
                 })
                 .catch((loadError) => {
                     if (active) {
-                        setError(
+                        const errorMessage =
                             loadError.response?.data?.message ||
-                            "Unable to load your saved jobs."
-                        );
+                            "Unable to load your saved jobs.";
+
+                        setError(errorMessage);
+                        toast.error(errorMessage);
                     }
                 });
         }
@@ -92,7 +96,7 @@ const HomeJobs = () => {
 
     // FILTER JOBS
     const filteredJobs = useMemo(() => {
-            const searchTerms = search.trim().toLowerCase().split(/\s+/).filter(Boolean);
+        const searchTerms = search.trim().toLowerCase().split(/\s+/).filter(Boolean);
 
         return jobs.filter((job) => {
             const matchesCategory = category
@@ -119,12 +123,17 @@ const HomeJobs = () => {
     // AUTH CHECK
     const requireLogin = (action, jobId = null) => {
         if (!isLoggedIn) {
+            toast.error("Please log in to continue.");
+
             setAuthAction(action);
             setShowAuthModal(true);
             return;
         }
 
-        if (storedUser?.role !== "CANDIDATE") return;
+        if (storedUser?.role !== "CANDIDATE") {
+            toast.error("Only candidates can apply for or save jobs.");
+            return;
+        }
 
         if (action === "apply" && jobId) {
             navigate(`/candidate/jobs/${jobId}`);
@@ -137,23 +146,45 @@ const HomeJobs = () => {
     };
 
     // SAVE / UNSAVE JOB
+    // SAVE / UNSAVE JOB
     const toggleSaveJob = async (jobId) => {
         try {
             setError("");
-            if (savedJobs.includes(jobId)) {
+
+            const isSaved = savedJobs.some(
+                (id) => String(id) === String(jobId)
+            );
+
+            if (isSaved) {
                 await unsaveJob(jobId);
+
                 setSavedJobs((current) =>
-                    current.filter((id) => id !== jobId)
+                    current.filter(
+                        (id) => String(id) !== String(jobId)
+                    )
                 );
+
+                toast.success("Job removed from saved jobs.");
             } else {
                 await saveJobRequest(jobId);
-                setSavedJobs((current) => [...current, jobId]);
+
+                setSavedJobs((current) =>
+                    current.some(
+                        (id) => String(id) === String(jobId)
+                    )
+                        ? current
+                        : [...current, jobId]
+                );
+
+                toast.success("Job saved successfully!");
             }
         } catch (saveError) {
-            setError(
+            const errorMessage =
                 saveError.response?.data?.message ||
-                "Unable to update saved jobs."
-            );
+                "Unable to update saved jobs.";
+
+            setError(errorMessage);
+            toast.error(errorMessage);
         }
     };
 
@@ -180,7 +211,7 @@ const HomeJobs = () => {
                     {error}
                 </div>
             )}
-                {/* HEADER */}
+            {/* HEADER */}
             <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
                 <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
                     {/* Logo */}
@@ -240,7 +271,7 @@ const HomeJobs = () => {
                 </div>
             </header>
 
-                {/* PAGE INTRO */}
+            {/* PAGE INTRO */}
             <section className="border-b border-slate-200 bg-white">
                 <div className="mx-auto max-w-7xl px-6 py-10 lg:px-8">
                     {/* Back */}
@@ -331,7 +362,7 @@ const HomeJobs = () => {
                 </div>
             </section>
 
-                {/* JOB LIST */}
+            {/* JOB LIST */}
             <main className="mx-auto max-w-7xl px-6 py-8 lg:px-8">
                 {loading ? (
                     <p className="py-10 text-center text-sm text-slate-500">
@@ -431,7 +462,7 @@ const HomeJobs = () => {
                                             </div>
                                         </div>
 
-                                            {/* ACTIONS */}
+                                        {/* ACTIONS */}
                                         <div className="flex shrink-0 gap-2">
                                             <button
                                                 type="button"
@@ -441,11 +472,10 @@ const HomeJobs = () => {
                                                         job.id
                                                     )
                                                 }
-                                                className={`rounded-lg border px-4 py-2 text-sm font-semibold transition ${
-                                                    isSaved
-                                                        ? "border-indigo-200 bg-indigo-50 text-indigo-600"
-                                                        : "border-slate-200 text-slate-600 hover:border-indigo-200 hover:text-indigo-600"
-                                                }`}
+                                                className={`rounded-lg border px-4 py-2 text-sm font-semibold transition ${isSaved
+                                                    ? "border-indigo-200 bg-indigo-50 text-indigo-600"
+                                                    : "border-slate-200 text-slate-600 hover:border-indigo-200 hover:text-indigo-600"
+                                                    }`}
                                             >
                                                 {isSaved
                                                     ? "Saved"
@@ -517,7 +547,7 @@ const HomeJobs = () => {
                 )}
             </main>
 
-                {/* LOGIN REQUIRED MODAL */}
+            {/* LOGIN REQUIRED MODAL */}
             {showAuthModal && (
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4 backdrop-blur-sm"
