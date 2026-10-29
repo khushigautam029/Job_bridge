@@ -10,6 +10,7 @@ import {
     X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import LocationAutocomplete from "../../components/LocationAutocomplete";
 import {
@@ -98,10 +99,12 @@ const PostJob = () => {
                 setSkillCatalog(availableSkills);
             })
             .catch((loadError) => {
-                setError(
+                const errorMessage =
                     loadError.response?.data?.message ||
-                    "Unable to load job categories and skills."
-                );
+                    "Unable to load job categories and skills.";
+
+                setError(errorMessage);
+                toast.error(errorMessage);
             });
     }, []);
 
@@ -139,6 +142,11 @@ const PostJob = () => {
         );
     };
 
+    const showValidationError = (message) => {
+        setError(message);
+        toast.error(message);
+    };
+
     const handleSubmit = async (event, allowDuplicate = false) => {
         event?.preventDefault();
 
@@ -147,54 +155,70 @@ const PostJob = () => {
         setSuccess("");
 
         if (!formData.title.trim()) {
-            setError("Job title is required.");
+            showValidationError("Job title is required.");
             return;
         }
+
         if (!formData.category) {
-            setError("Please select a job category.");
+            showValidationError("Please select a job category.");
             return;
         }
+
         if (!formData.type) {
-            setError("Please select a job type.");
+            showValidationError("Please select a job type.");
             return;
         }
+
         if (!formData.workMode) {
-            setError("Please select a work mode.");
+            showValidationError("Please select a work mode.");
             return;
         }
+
         if (!formData.location.trim()) {
-            setError("Location is required.");
+            showValidationError("Location is required.");
             return;
         }
+
         if (!formData.experience) {
-            setError("Please select the required experience.");
+            showValidationError("Please select the required experience.");
             return;
         }
+
         if (!formData.salary.trim()) {
-            setError("Salary is required.");
+            showValidationError("Salary is required.");
             return;
         }
-        if (!formData.totalOpenings ||
+
+        if (
+            !formData.totalOpenings ||
             !Number.isInteger(Number(formData.totalOpenings)) ||
-            Number(formData.totalOpenings) < 1)
-            {
-            setError("Total Openings must be a positive whole number.")
+            Number(formData.totalOpenings) < 1
+        ) {
+            showValidationError(
+                "Total Openings must be a positive whole number."
+            );
             return;
         }
+
         if (!formData.deadline) {
-            setError("Application deadline is required.");
+            showValidationError("Application deadline is required.");
             return;
         }
+
         if (!formData.description.trim()) {
-            setError("Job description is required.");
+            showValidationError("Job description is required.");
             return;
         }
+
         if (!formData.requirements.trim()) {
-            setError("Job requirements are required.");
+            showValidationError("Job requirements are required.");
             return;
         }
+
         if (skills.length === 0) {
-            setSkillsError("Please add at least one required skill.");
+            const message = "Please add at least one required skill.";
+            setSkillsError(message);
+            toast.error(message);
             return;
         }
 
@@ -220,6 +244,7 @@ const PostJob = () => {
 
                 if (duplicate) {
                     setPossibleDuplicate(duplicate);
+                    toast.error("A similar job posting already exists.");
                     return;
                 }
             }
@@ -281,16 +306,19 @@ const PostJob = () => {
 
             setPossibleDuplicate(null);
             setSuccess("Job posted successfully!");
+            toast.success("Job posted successfully!");
 
             setTimeout(() => {
                 navigate("/recruiter/jobs");
             }, 900);
         } catch (submitError) {
-            setError(
+            const errorMessage =
                 submitError.response?.data?.message ||
                 submitError.message ||
-                "Something went wrong while posting the job."
-            );
+                "Something went wrong while posting the job.";
+
+            setError(errorMessage);
+            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }

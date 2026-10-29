@@ -12,11 +12,14 @@ import {
     X,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
 import {
     useLocation,
     useNavigate,
     useSearchParams,
 } from "react-router-dom";
+import LocationAutocomplete from "../../components/LocationAutocomplete";
+import Pagination, { usePagination } from "../../components/Pagination.jsx";
 import { getJobApplications } from "../../services/applicationService";
 import {
     deleteJob as deleteJobRequest,
@@ -26,8 +29,6 @@ import {
     updateJob,
 } from "../../services/jobService";
 import { getSkills } from "../../services/skillService";
-import Pagination, { usePagination } from "../../components/Pagination.jsx";
-import LocationAutocomplete from "../../components/LocationAutocomplete";
 
 const formatRecruiterJob = (job) => ({
     ...formatJobCard(job),
@@ -38,9 +39,9 @@ const formatRecruiterJob = (job) => ({
     ).length,
     remainingOpenings: Math.max(
         Number(job.totalOpenings ?? 1) -
-            (job.applications || []).filter(
-                (application) => application.status === "SELECTED"
-            ).length,
+        (job.applications || []).filter(
+            (application) => application.status === "SELECTED"
+        ).length,
         0
     ),
     postedDate: job.createdAt
@@ -105,10 +106,13 @@ const Jobs = () => {
                 if (!active) return;
 
                 setJobs([]);
-                setError(
+
+                const errorMessage =
                     loadError.response?.data?.message ||
-                    "Unable to load your job postings."
-                );
+                    "Unable to load your job postings.";
+
+                setError(errorMessage);
+                toast.error(errorMessage);
             })
             .finally(() => {
                 if (active) setLoading(false);
@@ -221,10 +225,12 @@ const Jobs = () => {
                 [job.id]: [],
             }));
 
-            setError(
+            const errorMessage =
                 loadError.response?.data?.message ||
-                "Unable to load applications for this job."
-            );
+                "Unable to load applications for this job.";
+
+            setError(errorMessage);
+            toast.error(errorMessage);
         } finally {
             setApplicationsLoading(false);
         }
@@ -268,7 +274,11 @@ const Jobs = () => {
         const totalOpenings = Number(selectedJob.totalOpenings);
 
         if (!Number.isInteger(totalOpenings) || totalOpenings < 1) {
-            setError("Total openings must be a positive whole number.");
+            const errorMessage =
+                "Total openings must be a positive whole number.";
+
+            setError(errorMessage);
+            toast.error(errorMessage);
             return;
         }
 
@@ -316,7 +326,7 @@ const Jobs = () => {
                             selectedCandidates: job.selectedCandidates,
                             remainingOpenings: Math.max(
                                 Number(updatedJob.totalOpenings ?? 1) -
-                                    job.selectedCandidates,
+                                job.selectedCandidates,
                                 0
                             ),
                         }
@@ -327,11 +337,14 @@ const Jobs = () => {
             setError("");
             setShowEditModal(false);
             setSelectedJob(null);
+            toast.success("Job updated successfully!");
         } catch (updateError) {
-            setError(
+            const errorMessage =
                 updateError.response?.data?.message ||
-                "Unable to update this job."
-            );
+                "Unable to update this job.";
+
+            setError(errorMessage);
+            toast.error(errorMessage);
         }
     };
 
@@ -359,11 +372,14 @@ const Jobs = () => {
             setShowDeleteModal(false);
             setSelectedJob(null);
             setError("");
+            toast.success("Job deleted successfully!");
         } catch (deleteError) {
-            setError(
+            const errorMessage =
                 deleteError.response?.data?.message ||
-                "Unable to delete this job."
-            );
+                "Unable to delete this job.";
+
+            setError(errorMessage);
+            toast.error(errorMessage);
         }
     };
 
@@ -513,164 +529,164 @@ const Jobs = () => {
                 {(search ||
                     statusFilter !== "All" ||
                     categoryFilter !== "All") && (
-                    <button
-                        type="button"
-                        onClick={clearFilters}
-                        className="text-xs font-semibold text-indigo-600 hover:text-indigo-700"
-                    >
-                        Clear filters
-                    </button>
-                )}
+                        <button
+                            type="button"
+                            onClick={clearFilters}
+                            className="text-xs font-semibold text-indigo-600 hover:text-indigo-700"
+                        >
+                            Clear filters
+                        </button>
+                    )}
             </section>
 
             {/* Responsive Job Grid: 3 jobs per row on large screens */}
             {filteredJobs.length > 0 ? (
                 <>
                     <section className="grid w-full grid-cols-1 items-stretch gap-5 md:grid-cols-2 xl:grid-cols-3">
-                    {pageJobs.map((job) => (
-                        <article
-                            key={job.id}
-                            className="flex min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-indigo-200 hover:shadow-md sm:p-5"
-                        >
-                            {/* Card Header */}
-                            <div className="flex items-start justify-between gap-3">
-                                <div className="flex min-w-0 items-start gap-3">
-                                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                                        <BriefcaseBusiness size={20} />
+                        {pageJobs.map((job) => (
+                            <article
+                                key={job.id}
+                                className="flex min-w-0 flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-indigo-200 hover:shadow-md sm:p-5"
+                            >
+                                {/* Card Header */}
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="flex min-w-0 items-start gap-3">
+                                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                                            <BriefcaseBusiness size={20} />
+                                        </div>
+
+                                        <div className="min-w-0">
+                                            <h3 className="break-words font-semibold leading-5 text-slate-900">
+                                                {job.title}
+                                            </h3>
+
+                                            <p className="mt-1 text-xs text-slate-500">
+                                                {job.category}
+                                            </p>
+                                        </div>
                                     </div>
 
-                                    <div className="min-w-0">
-                                        <h3 className="break-words font-semibold leading-5 text-slate-900">
-                                            {job.title}
-                                        </h3>
-
-                                        <p className="mt-1 text-xs text-slate-500">
-                                            {job.category}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <span
-                                    className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${getStatusClasses(
-                                        job.status
-                                    )}`}
-                                >
-                                    {job.status}
-                                </span>
-                            </div>
-
-                            {/* Job Information */}
-                            <div className="mt-5 grid grid-cols-1 gap-3">
-                                <div className="flex min-w-0 items-start gap-2 text-xs text-slate-500">
-                                    <MapPin
-                                        size={15}
-                                        className="mt-0.5 shrink-0 text-slate-400"
-                                    />
-                                    <span className="break-words">
-                                        {job.location || "Location not specified"}
+                                    <span
+                                        className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${getStatusClasses(
+                                            job.status
+                                        )}`}
+                                    >
+                                        {job.status}
                                     </span>
                                 </div>
 
-                                <div className="flex items-start gap-2 text-xs text-slate-500">
-                                    <BriefcaseBusiness
-                                        size={15}
-                                        className="mt-0.5 shrink-0 text-slate-400"
-                                    />
-                                    <span>{job.type}</span>
-                                </div>
-
-                                <div className="flex items-start gap-2 text-xs text-slate-500">
-                                    <Users
-                                        size={15}
-                                        className="mt-0.5 shrink-0 text-slate-400"
-                                    />
-                                    <span>
-                                        {job.applications} applications
-                                    </span>
-                                </div>
-
-                                <div className="flex items-start gap-2 text-xs text-slate-500">
-                                    <Users
-                                        size={15}
-                                        className="mt-0.5 shrink-0 text-slate-400"
-                                    />
-                                    <span>
-                                        {job.remainingOpenings}{" "}
-                                        {job.remainingOpenings === 1
-                                            ? "opening"
-                                            : "openings"}
-                                        {" "}remaining
-                                    </span>
-                                </div>
-
-                                <div className="flex items-start gap-2 text-xs text-slate-500">
-                                    <CalendarDays
-                                        size={15}
-                                        className="mt-0.5 shrink-0 text-slate-400"
-                                    />
-                                    <span>Posted {job.postedDate || "N/A"}</span>
-                                </div>
-                            </div>
-
-                            {/* Description */}
-                            <p className="mt-5 line-clamp-4 break-words text-sm leading-6 text-slate-500">
-                                {job.description || "No description provided."}
-                            </p>
-
-                            {/* Skills */}
-                            {job.skills?.length > 0 && (
-                                <div className="mt-4 flex flex-wrap gap-2">
-                                    {job.skills.map((skill) => (
-                                        <span
-                                            key={skill}
-                                            className="rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-600"
-                                        >
-                                            {skill}
+                                {/* Job Information */}
+                                <div className="mt-5 grid grid-cols-1 gap-3">
+                                    <div className="flex min-w-0 items-start gap-2 text-xs text-slate-500">
+                                        <MapPin
+                                            size={15}
+                                            className="mt-0.5 shrink-0 text-slate-400"
+                                        />
+                                        <span className="break-words">
+                                            {job.location || "Location not specified"}
                                         </span>
-                                    ))}
+                                    </div>
+
+                                    <div className="flex items-start gap-2 text-xs text-slate-500">
+                                        <BriefcaseBusiness
+                                            size={15}
+                                            className="mt-0.5 shrink-0 text-slate-400"
+                                        />
+                                        <span>{job.type}</span>
+                                    </div>
+
+                                    <div className="flex items-start gap-2 text-xs text-slate-500">
+                                        <Users
+                                            size={15}
+                                            className="mt-0.5 shrink-0 text-slate-400"
+                                        />
+                                        <span>
+                                            {job.applications} applications
+                                        </span>
+                                    </div>
+
+                                    <div className="flex items-start gap-2 text-xs text-slate-500">
+                                        <Users
+                                            size={15}
+                                            className="mt-0.5 shrink-0 text-slate-400"
+                                        />
+                                        <span>
+                                            {job.remainingOpenings}{" "}
+                                            {job.remainingOpenings === 1
+                                                ? "opening"
+                                                : "openings"}
+                                            {" "}remaining
+                                        </span>
+                                    </div>
+
+                                    <div className="flex items-start gap-2 text-xs text-slate-500">
+                                        <CalendarDays
+                                            size={15}
+                                            className="mt-0.5 shrink-0 text-slate-400"
+                                        />
+                                        <span>Posted {job.postedDate || "N/A"}</span>
+                                    </div>
                                 </div>
-                            )}
 
-                            {/* Actions stay at the bottom of each card */}
-                            <div className="mt-auto grid grid-cols-2 gap-2 border-t border-slate-100 pt-5">
-                                <button
-                                    type="button"
-                                    onClick={() => handleViewJob(job)}
-                                    className="flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 px-2 py-2.5 text-xs font-semibold text-white transition hover:bg-indigo-700"
-                                >
-                                    <Eye size={15} />
-                                    View Job
-                                </button>
+                                {/* Description */}
+                                <p className="mt-5 line-clamp-4 break-words text-sm leading-6 text-slate-500">
+                                    {job.description || "No description provided."}
+                                </p>
 
-                                <button
-                                    type="button"
-                                    onClick={() => handleViewApplications(job)}
-                                    className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-2 py-2.5 text-xs font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
-                                >
-                                    <Users size={15} />
-                                    Applications
-                                </button>
+                                {/* Skills */}
+                                {job.skills?.length > 0 && (
+                                    <div className="mt-4 flex flex-wrap gap-2">
+                                        {job.skills.map((skill) => (
+                                            <span
+                                                key={skill}
+                                                className="rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-600"
+                                            >
+                                                {skill}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
 
-                                <button
-                                    type="button"
-                                    onClick={() => handleEdit(job)}
-                                    className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-2 py-2.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
-                                >
-                                    <Edit size={14} />
-                                    Edit
-                                </button>
+                                {/* Actions stay at the bottom of each card */}
+                                <div className="mt-auto grid grid-cols-2 gap-2 border-t border-slate-100 pt-5">
+                                    <button
+                                        type="button"
+                                        onClick={() => handleViewJob(job)}
+                                        className="flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 px-2 py-2.5 text-xs font-semibold text-white transition hover:bg-indigo-700"
+                                    >
+                                        <Eye size={15} />
+                                        View Job
+                                    </button>
 
-                                <button
-                                    type="button"
-                                    onClick={() => handleDelete(job)}
-                                    className="flex items-center justify-center gap-1.5 rounded-xl border border-red-100 px-2 py-2.5 text-xs font-semibold text-red-500 transition hover:bg-red-50"
-                                >
-                                    <Trash2 size={14} />
-                                    Delete
-                                </button>
-                            </div>
-                        </article>
-                    ))}
+                                    <button
+                                        type="button"
+                                        onClick={() => handleViewApplications(job)}
+                                        className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-2 py-2.5 text-xs font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
+                                    >
+                                        <Users size={15} />
+                                        Applications
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => handleEdit(job)}
+                                        className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-2 py-2.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
+                                    >
+                                        <Edit size={14} />
+                                        Edit
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => handleDelete(job)}
+                                        className="flex items-center justify-center gap-1.5 rounded-xl border border-red-100 px-2 py-2.5 text-xs font-semibold text-red-500 transition hover:bg-red-50"
+                                    >
+                                        <Trash2 size={14} />
+                                        Delete
+                                    </button>
+                                </div>
+                            </article>
+                        ))}
                     </section>
                     <Pagination totalItems={filteredJobs.length} currentPage={currentPage} pageCount={pageCount} onPageChange={setCurrentPage} />
                 </>
@@ -739,34 +755,34 @@ const Jobs = () => {
                                 </p>
                             ) : selectedApplications.length > 0 ? (
                                 <>
-                                <div className="space-y-3">
-                                    {applicationPagination.pageItems.map((application) => (
-                                        <div
-                                            key={application.id}
-                                            className="flex min-w-0 items-start gap-3 rounded-xl border border-slate-200 p-4"
-                                        >
-                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
-                                                <Users size={18} />
-                                            </div>
+                                    <div className="space-y-3">
+                                        {applicationPagination.pageItems.map((application) => (
+                                            <div
+                                                key={application.id}
+                                                className="flex min-w-0 items-start gap-3 rounded-xl border border-slate-200 p-4"
+                                            >
+                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
+                                                    <Users size={18} />
+                                                </div>
 
-                                            <div className="min-w-0 flex-1">
-                                                <h3 className="break-words text-sm font-semibold text-slate-900">
-                                                    {application.name}
-                                                </h3>
+                                                <div className="min-w-0 flex-1">
+                                                    <h3 className="break-words text-sm font-semibold text-slate-900">
+                                                        {application.name}
+                                                    </h3>
 
-                                                <p className="mt-1 break-all text-sm text-slate-500">
-                                                    {application.email}
-                                                </p>
+                                                    <p className="mt-1 break-all text-sm text-slate-500">
+                                                        {application.email}
+                                                    </p>
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
-                                </div>
-                                <Pagination
-                                    totalItems={selectedApplications.length}
-                                    currentPage={applicationPagination.currentPage}
-                                    pageCount={applicationPagination.pageCount}
-                                    onPageChange={applicationPagination.setCurrentPage}
-                                />
+                                        ))}
+                                    </div>
+                                    <Pagination
+                                        totalItems={selectedApplications.length}
+                                        currentPage={applicationPagination.currentPage}
+                                        pageCount={applicationPagination.pageCount}
+                                        onPageChange={applicationPagination.setCurrentPage}
+                                    />
                                 </>
                             ) : (
                                 <div className="py-12 text-center">

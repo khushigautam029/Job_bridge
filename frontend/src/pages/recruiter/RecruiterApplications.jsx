@@ -16,6 +16,7 @@
     X
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
 import Pagination, { usePagination } from "../../components/Pagination.jsx";
 import {
@@ -132,10 +133,13 @@ const RecruiterApplications = () => {
             .catch((loadError) => {
                 if (active) {
                     setApplications([]);
-                    setError(
+
+                    const errorMessage =
                         loadError.response?.data?.message ||
-                        "Unable to load applications."
-                    );
+                        "Unable to load applications.";
+
+                    setError(errorMessage);
+                    toast.error(errorMessage);
                 }
             })
             .finally(() => {
@@ -317,6 +321,7 @@ const RecruiterApplications = () => {
     };
 
     /* Update Application Status */
+    /* Update Application Status */
     const updateApplicationStatus = async (
         applicationId,
         newStatus
@@ -335,43 +340,49 @@ const RecruiterApplications = () => {
                 applicationId,
                 statusValues[newStatus]
             );
-            setError("");
-        } catch (statusError) {
-            setError(
-                statusError.response?.data?.message ||
-                "Unable to update the application status."
-            );
-            return;
-        }
 
-        setApplications(
-            (prevApplications) =>
-                prevApplications.map(
-                    (application) =>
-                        application.id ===
-                            applicationId
-                            ? {
-                                ...application,
-                                status: newStatus,
-                            }
-                            : application
+            setApplications((prevApplications) =>
+                prevApplications.map((application) =>
+                    application.id === applicationId
+                        ? {
+                            ...application,
+                            status: newStatus,
+                            applicationStatus: statusValues[newStatus],
+                        }
+                        : application
                 )
-        );
+            );
 
-        setSelectedCandidate((prev) =>
-            prev
-                ? {
-                    ...prev,
-                    status: newStatus,
-                }
-                : null
-        );
+            setSelectedCandidate((prev) =>
+                prev
+                    ? {
+                        ...prev,
+                        status: newStatus,
+                        applicationStatus: statusValues[newStatus],
+                    }
+                    : null
+            );
+
+            setError("");
+            toast.success(`Application status updated to ${newStatus}.`);
+        } catch (statusError) {
+            const errorMessage =
+                statusError.response?.data?.message ||
+                "Unable to update the application status.";
+
+            setError(errorMessage);
+            toast.error(errorMessage);
+        }
     };
 
     /* Load ATS-ranked applicants for the selected job */
     const loadRankedApplications = async () => {
         if (!atsJobId) {
-            setError("There are no job applications available to rank yet.");
+            const errorMessage =
+                "There are no job applications available to rank yet.";
+
+            setError(errorMessage);
+            toast.error(errorMessage);
             return;
         }
 
@@ -379,17 +390,25 @@ const RecruiterApplications = () => {
         try {
             const result = await getRankedJobApplications(atsJobId, 1, 100);
             const items = result.applications || [];
+
             setApplications(items.map(mapApplication));
             setRankedMode(true);
             setSearch("");
             setStatusFilter("All");
             setCategoryFilter("All");
-            if (!items.length) setAtsMessage("No applications were returned for this job.");
+
+            if (!items.length) {
+                setAtsMessage("No applications were returned for this job.");
+                toast("No applications were returned for this job.");
+            } else {
+                toast.success("Ranked applications loaded successfully.");
+            }
         } catch (rankError) {
-            setError(
+            const errorMessage =
                 rankError.response?.data?.message ||
-                "Unable to load ATS-ranked applicants."
-            );
+                "Unable to load ATS-ranked applicants.";
+            setError(errorMessage);
+            toast.error(errorMessage);
         }
     };
 
@@ -407,10 +426,12 @@ const RecruiterApplications = () => {
             setRankedMode(false);
             setAtsMessage("");
         } catch (loadError) {
-            setError(
+            const errorMessage =
                 loadError.response?.data?.message ||
-                "Unable to reload applications."
-            );
+                "Unable to reload applications.";
+
+            setError(errorMessage);
+            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -419,7 +440,11 @@ const RecruiterApplications = () => {
     /* Analyze applications in batches of 50 */
     const handleRunAtsAnalysis = async () => {
         if (!atsJobId) {
-            setError("There are no job applications available to analyze yet.");
+            const errorMessage =
+                "There are no job applications available to analyze yet.";
+
+            setError(errorMessage);
+            toast.error(errorMessage);
             return;
         }
 
@@ -449,16 +474,18 @@ const RecruiterApplications = () => {
                 if (nextCursor != null) cursor = nextCursor;
             }
 
-            setAtsMessage(
-                `ATS analysis finished — ${completed} completed, ${failed} failed, ${skipped} skipped.`
+            toast.success(
+                `ATS analysis finished: ${completed} completed, ${failed} failed, ${skipped} skipped.`
             );
             await loadRankedApplications();
         } catch (atsError) {
-            setError(
+            const errorMessage =
                 atsError.response?.data?.message ||
                 atsError.message ||
-                "Unable to run ATS analysis."
-            );
+                "Unable to run ATS analysis.";
+
+            setError(errorMessage);
+            toast.error(errorMessage);
         } finally {
             setAtsRunning(false);
         }
@@ -467,16 +494,17 @@ const RecruiterApplications = () => {
     /*  View Resume  */
     const handleViewResume = (application) => {
         if (!application.resume) {
-            alert("Resume is not available.");
+            toast.error("Resume is not available.");
             return;
         }
+
         window.open(
             application.resume,
             "_blank",
             "noopener,noreferrer"
         );
     };
-
+    
     /* Back To Job Details */
     const handleBack = () => {
         navigate(
@@ -515,7 +543,7 @@ const RecruiterApplications = () => {
                     </p>
                 </div>
 
-                
+
             </section>
 
             {/* BACK BUTTON — shown only when opened from a specific job */}
@@ -837,281 +865,281 @@ const RecruiterApplications = () => {
                 {/* APPLICATION LIST */}
                 {filteredApplications.length > 0 ? (
                     <>
-                    <div className="mt-5 space-y-4">
-                        {pageApplications.map(
-                            (application) => (
-                                <div
-                                    key={
-                                        application.id
-                                    }
-                                    className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-indigo-200 hover:shadow-md"
-                                >
-                                    {/* Main Information */}
-                                    <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-                                        {/* Candidate */}
-                                        <div className="flex items-start gap-4">
-                                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-50 font-semibold text-indigo-600">
-                                                {getInitials(
-                                                    application.candidate
-                                                )}
-                                            </div>
-                                            <div>
-                                                <div className="flex flex-wrap items-center gap-2">
-                                                    <h3 className="font-semibold text-slate-900">
-                                                        {
-                                                            application.candidate
-                                                        }
-                                                    </h3>
-                                                    <span
-                                                        className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${getStatusClasses(
-                                                            application.status
-                                                        )}`}
-                                                    >
-                                                        {
-                                                            application.status
-                                                        }
-                                                    </span>
+                        <div className="mt-5 space-y-4">
+                            {pageApplications.map(
+                                (application) => (
+                                    <div
+                                        key={
+                                            application.id
+                                        }
+                                        className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-indigo-200 hover:shadow-md"
+                                    >
+                                        {/* Main Information */}
+                                        <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+                                            {/* Candidate */}
+                                            <div className="flex items-start gap-4">
+                                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-50 font-semibold text-indigo-600">
+                                                    {getInitials(
+                                                        application.candidate
+                                                    )}
                                                 </div>
-                                                <p className="mt-1 text-sm text-slate-500">
-                                                    {
-                                                        application.email
-                                                    }
-                                                </p>
-                                                <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400">
-                                                    <span>
-                                                        📍{" "}
-                                                        {
-                                                            application.location
-                                                        }
-                                                    </span>
-                                                    <span>
-                                                        💼{" "}
-                                                        {
-                                                            application.experience
-                                                        }{" "}
-                                                        experience
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {/* Applied Job */}
-                                        <div className="flex items-start gap-3 xl:min-w-72">
-                                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                                                <BriefcaseBusiness
-                                                    size={
-                                                        18
-                                                    }
-                                                />
-                                            </div>
-
-                                            <div>
-                                                <p className="text-xs text-slate-400">
-                                                    Applied
-                                                    for
-                                                </p>
-
-                                                <p className="mt-1 text-sm font-semibold text-slate-800">
-                                                    {
-                                                        application.jobTitle
-                                                    }
-                                                </p>
-
-                                                {application.category && application.category !== "Uncategorized" && (
-                                                    <p className="mt-1 text-xs font-medium text-indigo-600">
-                                                        {application.category}
-                                                    </p>
-                                                )}
-
-                                                <p className="mt-1 text-xs text-slate-400">
-                                                    Applied{" "}
-                                                    {
-                                                        application.appliedDate
-                                                    }
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Details */}
-                                    <div className="mt-5 grid gap-5 border-t border-slate-100 pt-5 md:grid-cols-[auto_1fr]">
-                                        {/* Applied Date */}
-
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-50 text-slate-500">
-                                                <CalendarDays
-                                                    size={
-                                                        17
-                                                    }
-                                                />
-                                            </div>
-
-                                            <div>
-                                                <p className="text-[11px] text-slate-400">
-                                                    Applied
-                                                    Date
-                                                </p>
-
-                                                <p className="mt-0.5 text-xs font-medium text-slate-600">
-                                                    {
-                                                        application.appliedDate
-                                                    }
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        {/* Skills */}
-                                        <div>
-                                            <p className="mb-2 text-[11px] text-slate-400">
-                                                Skills
-                                            </p>
-
-                                            <div className="flex flex-wrap gap-2">
-                                                {application.skills.map(
-                                                    (
-                                                        skill
-                                                    ) => (
-                                                        <span
-                                                            key={
-                                                                skill
-                                                            }
-                                                            className="rounded-lg bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600"
-                                                        >
-                                                            {
-                                                                skill
-                                                            }
-                                                        </span>
-                                                    )
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* ATS RESUME MATCH CARD */}
-                                    <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-                                        <div className="flex flex-col gap-4 bg-gradient-to-r from-slate-50 via-white to-indigo-50/60 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-                                            <div className="flex items-start gap-3">
-                                                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-indigo-100 bg-white text-indigo-600 shadow-sm"><Sparkles size={18} /></span>
                                                 <div>
                                                     <div className="flex flex-wrap items-center gap-2">
-                                                        <h4 className="text-sm font-bold text-slate-900">Resume match report</h4>
-                                                        {application.atsAnalysis?.status === "COMPLETED" && <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700">Analysis complete</span>}
-                                                        {application.atsAnalysis?.status === "FAILED" && <span className="rounded-full bg-rose-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-rose-700">Analysis failed</span>}
-                                                        {application.atsAnalysis?.status === "PROCESSING" && <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-indigo-700">Scanning</span>}
-                                                        {(!application.atsAnalysis || application.atsAnalysis.status === "PENDING") && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-600">Awaiting scan</span>}
+                                                        <h3 className="font-semibold text-slate-900">
+                                                            {
+                                                                application.candidate
+                                                            }
+                                                        </h3>
+                                                        <span
+                                                            className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${getStatusClasses(
+                                                                application.status
+                                                            )}`}
+                                                        >
+                                                            {
+                                                                application.status
+                                                            }
+                                                        </span>
                                                     </div>
-                                                    <p className="mt-1 text-xs leading-5 text-slate-500">Compared with the role's listed skills and keywords</p>
+                                                    <p className="mt-1 text-sm text-slate-500">
+                                                        {
+                                                            application.email
+                                                        }
+                                                    </p>
+                                                    <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400">
+                                                        <span>
+                                                            📍{" "}
+                                                            {
+                                                                application.location
+                                                            }
+                                                        </span>
+                                                        <span>
+                                                            💼{" "}
+                                                            {
+                                                                application.experience
+                                                            }{" "}
+                                                            experience
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            {application.atsAnalysis?.status === "COMPLETED" ? (
-                                                <div className="flex items-center gap-3 sm:justify-end">
-                                                    <div className="relative flex h-[76px] w-[76px] shrink-0 items-center justify-center rounded-full" style={{ background: `conic-gradient(${Number(application.atsAnalysis.score) >= 75 ? '#059669' : Number(application.atsAnalysis.score) >= 50 ? '#4f46e5' : '#d97706'} ${Math.max(0, Math.min(100, Number(application.atsAnalysis.score) || 0))}%, #e2e8f0 0)` }}>
-                                                        <div className="flex h-[62px] w-[62px] flex-col items-center justify-center rounded-full bg-white"><span className="text-xl font-extrabold leading-none text-slate-900">{application.atsAnalysis.score}%</span><span className="mt-1 text-[9px] font-semibold uppercase tracking-wide text-slate-400">match</span></div>
-                                                    </div>
-                                                    <div className="min-w-[100px]">
-                                                        <p className="text-xs font-semibold text-slate-700">{Number(application.atsAnalysis.score) >= 75 ? "Strong match" : Number(application.atsAnalysis.score) >= 50 ? "Partial match" : "Lower match"}</p>
-                                                        <p className="mt-1 text-[11px] leading-4 text-slate-500">Use this score alongside your review.</p>
+
+                                            {/* Applied Job */}
+                                            <div className="flex items-start gap-3 xl:min-w-72">
+                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                                                    <BriefcaseBusiness
+                                                        size={
+                                                            18
+                                                        }
+                                                    />
+                                                </div>
+
+                                                <div>
+                                                    <p className="text-xs text-slate-400">
+                                                        Applied
+                                                        for
+                                                    </p>
+
+                                                    <p className="mt-1 text-sm font-semibold text-slate-800">
+                                                        {
+                                                            application.jobTitle
+                                                        }
+                                                    </p>
+
+                                                    {application.category && application.category !== "Uncategorized" && (
+                                                        <p className="mt-1 text-xs font-medium text-indigo-600">
+                                                            {application.category}
+                                                        </p>
+                                                    )}
+
+                                                    <p className="mt-1 text-xs text-slate-400">
+                                                        Applied{" "}
+                                                        {
+                                                            application.appliedDate
+                                                        }
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Details */}
+                                        <div className="mt-5 grid gap-5 border-t border-slate-100 pt-5 md:grid-cols-[auto_1fr]">
+                                            {/* Applied Date */}
+
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-50 text-slate-500">
+                                                    <CalendarDays
+                                                        size={
+                                                            17
+                                                        }
+                                                    />
+                                                </div>
+
+                                                <div>
+                                                    <p className="text-[11px] text-slate-400">
+                                                        Applied
+                                                        Date
+                                                    </p>
+
+                                                    <p className="mt-0.5 text-xs font-medium text-slate-600">
+                                                        {
+                                                            application.appliedDate
+                                                        }
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {/* Skills */}
+                                            <div>
+                                                <p className="mb-2 text-[11px] text-slate-400">
+                                                    Skills
+                                                </p>
+
+                                                <div className="flex flex-wrap gap-2">
+                                                    {application.skills.map(
+                                                        (
+                                                            skill
+                                                        ) => (
+                                                            <span
+                                                                key={
+                                                                    skill
+                                                                }
+                                                                className="rounded-lg bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600"
+                                                            >
+                                                                {
+                                                                    skill
+                                                                }
+                                                            </span>
+                                                        )
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* ATS RESUME MATCH CARD */}
+                                        <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                                            <div className="flex flex-col gap-4 bg-gradient-to-r from-slate-50 via-white to-indigo-50/60 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+                                                <div className="flex items-start gap-3">
+                                                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-indigo-100 bg-white text-indigo-600 shadow-sm"><Sparkles size={18} /></span>
+                                                    <div>
+                                                        <div className="flex flex-wrap items-center gap-2">
+                                                            <h4 className="text-sm font-bold text-slate-900">Resume match report</h4>
+                                                            {application.atsAnalysis?.status === "COMPLETED" && <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700">Analysis complete</span>}
+                                                            {application.atsAnalysis?.status === "FAILED" && <span className="rounded-full bg-rose-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-rose-700">Analysis failed</span>}
+                                                            {application.atsAnalysis?.status === "PROCESSING" && <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-indigo-700">Scanning</span>}
+                                                            {(!application.atsAnalysis || application.atsAnalysis.status === "PENDING") && <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-600">Awaiting scan</span>}
+                                                        </div>
+                                                        <p className="mt-1 text-xs leading-5 text-slate-500">Compared with the role's listed skills and keywords</p>
                                                     </div>
                                                 </div>
-                                            ) : (
-                                                <div className={`rounded-xl border px-4 py-3 text-xs ${application.atsAnalysis?.status === "FAILED" ? "border-rose-200 bg-rose-50 text-rose-700" : "border-slate-200 bg-white font-semibold text-slate-500"}`}>
-                                                    {application.atsAnalysis?.status === "FAILED" ? (
-                                                        <div className="flex flex-col gap-2 sm:items-end">
-                                                            <span>{application.atsAnalysis.errorMessage || "Could not analyze this resume."}</span>
-                                                            {["APPLIED", "UNDER_REVIEW"].includes(application.applicationStatus) && <button type="button" onClick={handleRunAtsAnalysis} disabled={atsRunning} className="font-semibold text-indigo-700 underline decoration-indigo-300 underline-offset-2 disabled:opacity-50">{atsRunning ? "Retrying scan…" : "Retry failed scan"}</button>}
+                                                {application.atsAnalysis?.status === "COMPLETED" ? (
+                                                    <div className="flex items-center gap-3 sm:justify-end">
+                                                        <div className="relative flex h-[76px] w-[76px] shrink-0 items-center justify-center rounded-full" style={{ background: `conic-gradient(${Number(application.atsAnalysis.score) >= 75 ? '#059669' : Number(application.atsAnalysis.score) >= 50 ? '#4f46e5' : '#d97706'} ${Math.max(0, Math.min(100, Number(application.atsAnalysis.score) || 0))}%, #e2e8f0 0)` }}>
+                                                            <div className="flex h-[62px] w-[62px] flex-col items-center justify-center rounded-full bg-white"><span className="text-xl font-extrabold leading-none text-slate-900">{application.atsAnalysis.score}%</span><span className="mt-1 text-[9px] font-semibold uppercase tracking-wide text-slate-400">match</span></div>
                                                         </div>
-                                                    ) : application.atsAnalysis?.status === "PROCESSING" ? "Scanning resume…" : "Run screening to generate a match score"}
+                                                        <div className="min-w-[100px]">
+                                                            <p className="text-xs font-semibold text-slate-700">{Number(application.atsAnalysis.score) >= 75 ? "Strong match" : Number(application.atsAnalysis.score) >= 50 ? "Partial match" : "Lower match"}</p>
+                                                            <p className="mt-1 text-[11px] leading-4 text-slate-500">Use this score alongside your review.</p>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div className={`rounded-xl border px-4 py-3 text-xs ${application.atsAnalysis?.status === "FAILED" ? "border-rose-200 bg-rose-50 text-rose-700" : "border-slate-200 bg-white font-semibold text-slate-500"}`}>
+                                                        {application.atsAnalysis?.status === "FAILED" ? (
+                                                            <div className="flex flex-col gap-2 sm:items-end">
+                                                                <span>{application.atsAnalysis.errorMessage || "Could not analyze this resume."}</span>
+                                                                {["APPLIED", "UNDER_REVIEW"].includes(application.applicationStatus) && <button type="button" onClick={handleRunAtsAnalysis} disabled={atsRunning} className="font-semibold text-indigo-700 underline decoration-indigo-300 underline-offset-2 disabled:opacity-50">{atsRunning ? "Retrying scan…" : "Retry failed scan"}</button>}
+                                                            </div>
+                                                        ) : application.atsAnalysis?.status === "PROCESSING" ? "Scanning resume…" : "Run screening to generate a match score"}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {application.atsAnalysis?.status === "COMPLETED" && (
+                                                <div className="grid border-t border-slate-100 md:grid-cols-2">
+                                                    <div className="p-4 sm:p-5 md:border-r md:border-slate-100">
+                                                        <div className="mb-3 flex items-center justify-between gap-2">
+                                                            <p className="flex items-center gap-2 text-xs font-bold text-emerald-700"><span className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-50">✓</span>Matched skills</p>
+                                                            <span className="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700">{(application.atsAnalysis.matchedSkills || []).length} found</span>
+                                                        </div>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {(application.atsAnalysis.matchedSkills || []).length ? application.atsAnalysis.matchedSkills.map((skill) => <span key={skill} className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-100 bg-emerald-50/70 px-2.5 py-1.5 text-xs font-medium text-emerald-800"><span className="text-emerald-600">✓</span>{skill}</span>) : <span className="text-xs text-slate-400">No listed skills matched</span>}
+                                                        </div>
+                                                    </div>
+                                                    <div className="p-4 sm:p-5">
+                                                        <div className="mb-3 flex items-center justify-between gap-2">
+                                                            <p className="flex items-center gap-2 text-xs font-bold text-amber-700"><span className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-50">!</span>Skills to review</p>
+                                                            <span className="rounded-full bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-700">{(application.atsAnalysis.missingSkills || []).length} gaps</span>
+                                                        </div>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {(application.atsAnalysis.missingSkills || []).length ? application.atsAnalysis.missingSkills.map((skill) => <span key={skill} className="inline-flex items-center gap-1.5 rounded-lg border border-amber-100 bg-amber-50/70 px-2.5 py-1.5 text-xs font-medium text-amber-800"><span className="text-amber-600">−</span>{skill}</span>) : <span className="text-xs text-slate-400">No listed skill gaps detected</span>}
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             )}
                                         </div>
 
-                                        {application.atsAnalysis?.status === "COMPLETED" && (
-                                            <div className="grid border-t border-slate-100 md:grid-cols-2">
-                                                <div className="p-4 sm:p-5 md:border-r md:border-slate-100">
-                                                    <div className="mb-3 flex items-center justify-between gap-2">
-                                                        <p className="flex items-center gap-2 text-xs font-bold text-emerald-700"><span className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-50">✓</span>Matched skills</p>
-                                                        <span className="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700">{(application.atsAnalysis.matchedSkills || []).length} found</span>
-                                                    </div>
-                                                    <div className="flex flex-wrap gap-2">
-                                                        {(application.atsAnalysis.matchedSkills || []).length ? application.atsAnalysis.matchedSkills.map((skill) => <span key={skill} className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-100 bg-emerald-50/70 px-2.5 py-1.5 text-xs font-medium text-emerald-800"><span className="text-emerald-600">✓</span>{skill}</span>) : <span className="text-xs text-slate-400">No listed skills matched</span>}
-                                                    </div>
-                                                </div>
-                                                <div className="p-4 sm:p-5">
-                                                    <div className="mb-3 flex items-center justify-between gap-2">
-                                                        <p className="flex items-center gap-2 text-xs font-bold text-amber-700"><span className="flex h-6 w-6 items-center justify-center rounded-lg bg-amber-50">!</span>Skills to review</p>
-                                                        <span className="rounded-full bg-amber-50 px-2 py-1 text-[10px] font-bold text-amber-700">{(application.atsAnalysis.missingSkills || []).length} gaps</span>
-                                                    </div>
-                                                    <div className="flex flex-wrap gap-2">
-                                                        {(application.atsAnalysis.missingSkills || []).length ? application.atsAnalysis.missingSkills.map((skill) => <span key={skill} className="inline-flex items-center gap-1.5 rounded-lg border border-amber-100 bg-amber-50/70 px-2.5 py-1.5 text-xs font-medium text-amber-800"><span className="text-amber-600">−</span>{skill}</span>) : <span className="text-xs text-slate-400">No listed skill gaps detected</span>}
-                                                    </div>
-                                                </div>
+                                        {/* ACTIONS */}
+                                        <div className="mt-5 flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
+                                            {/* Resume */}
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    handleViewResume(
+                                                        application
+                                                    )
+                                                }
+                                                className="flex w-fit items-center gap-2 text-xs font-semibold text-indigo-600 transition hover:text-indigo-700"
+                                            >
+                                                <FileText
+                                                    size={
+                                                        15
+                                                    }
+                                                />
+                                                View Resume
+                                            </button>
+
+                                            {/* Action Buttons */}
+                                            <div className="flex flex-col gap-2 sm:flex-row">
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        openCandidateModal(
+                                                            application
+                                                        )
+                                                    }
+                                                    className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
+                                                >
+                                                    <Eye
+                                                        size={
+                                                            15
+                                                        }
+                                                    />
+                                                    View Candidate
+                                                </button>
+
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        openManageModal(
+                                                            application
+                                                        )
+                                                    }
+                                                    className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-indigo-700"
+                                                >
+                                                    <User
+                                                        size={
+                                                            15
+                                                        }
+                                                    />
+
+                                                    Manage Application
+                                                </button>
                                             </div>
-                                        )}
-                                    </div>
-
-                                    {/* ACTIONS */}
-                                    <div className="mt-5 flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
-                                        {/* Resume */}
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                handleViewResume(
-                                                    application
-                                                )
-                                            }
-                                            className="flex w-fit items-center gap-2 text-xs font-semibold text-indigo-600 transition hover:text-indigo-700"
-                                        >
-                                            <FileText
-                                                size={
-                                                    15
-                                                }
-                                            />
-                                            View Resume
-                                        </button>
-
-                                        {/* Action Buttons */}
-                                        <div className="flex flex-col gap-2 sm:flex-row">
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    openCandidateModal(
-                                                        application
-                                                    )
-                                                }
-                                                className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
-                                            >
-                                                <Eye
-                                                    size={
-                                                        15
-                                                    }
-                                                />
-                                                View Candidate
-                                            </button>
-
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    openManageModal(
-                                                        application
-                                                    )
-                                                }
-                                                className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-indigo-700"
-                                            >
-                                                <User
-                                                    size={
-                                                        15
-                                                    }
-                                                />
-
-                                                Manage Application
-                                            </button>
                                         </div>
                                     </div>
-                                </div>
-                            )
-                        )}
-                    </div>
-                    <Pagination totalItems={filteredApplications.length} currentPage={currentPage} pageCount={pageCount} onPageChange={setCurrentPage} />
+                                )
+                            )}
+                        </div>
+                        <Pagination totalItems={filteredApplications.length} currentPage={currentPage} pageCount={pageCount} onPageChange={setCurrentPage} />
                     </>
                 ) : (
 

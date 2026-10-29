@@ -13,7 +13,7 @@ import {
     UserRound,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-
+import toast from "react-hot-toast";
 import {
     getMyCompany,
     getRecruiterProfile,
@@ -41,13 +41,12 @@ const whitespaceError = (value) => {
         return "Leading or trailing spaces are not allowed.";
     }
 
-    if (/[ \t]{2,}/.test(value)) {
+    if (/ {2,}|\t{2,}/.test(value)) {
         return "Avoid using multiple spaces together.";
     }
 
     return "";
 };
-
 const validateField = (section, name, value) => {
     const fieldValue = String(value ?? "");
     const whitespace = whitespaceError(fieldValue);
@@ -238,10 +237,12 @@ const RecruiterProfile = () => {
                 logo: companyData.logo || "",
             });
         } catch (err) {
-            setError(
+            const message =
                 err.response?.data?.message ||
-                    "Failed to load recruiter profile. Please try again."
-            );
+                "Failed to load recruiter profile. Please try again.";
+
+            setError(message);
+            toast.error(message);
         } finally {
             setLoading(false);
         }
@@ -325,7 +326,9 @@ const RecruiterProfile = () => {
         setError("");
 
         if (!validateAllFields()) {
-            setError("Please correct the highlighted fields before saving.");
+            const message = "Please correct the highlighted fields before saving.";
+            setError(message);
+            toast.error(message);
             return;
         }
 
@@ -348,11 +351,14 @@ const RecruiterProfile = () => {
 
             setMessage("Profile updated successfully.");
             setFieldErrors({});
+            toast.success("Profile updated successfully.");
         } catch (err) {
-            setError(
+            const message =
                 err.response?.data?.message ||
-                    "Failed to update profile. Please try again."
-            );
+                "Failed to update profile. Please try again.";
+
+            setError(message);
+            toast.error(message);
         } finally {
             setSaving(false);
         }
@@ -461,7 +467,7 @@ const RecruiterProfile = () => {
                                     name="email"
                                     type="email"
                                     value={profile.email}
-                                    onChange={() => {}}
+                                    onChange={() => { }}
                                     onBlur={(e) =>
                                         handleFieldBlur("profile", e)
                                     }
@@ -727,9 +733,8 @@ const InputField = ({
 
             <div className="relative">
                 <div
-                    className={`pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 ${
-                        invalid ? "text-red-500" : "text-slate-400"
-                    }`}
+                    className={`pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 ${invalid ? "text-red-500" : "text-slate-400"
+                        }`}
                 >
                     {icon}
                 </div>
@@ -754,15 +759,13 @@ const InputField = ({
                             .filter(Boolean)
                             .join(" ") || undefined
                     }
-                    className={`h-10 w-full rounded-lg border bg-white pl-9 pr-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 ${
-                        invalid
-                            ? "border-red-500 ring-1 ring-red-500 focus:ring-2 focus:ring-red-200"
-                            : "border-slate-200 hover:border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                    } ${
-                        disabled
+                    className={`h-10 w-full rounded-lg border bg-white pl-9 pr-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 ${invalid
+                        ? "border-red-500 ring-1 ring-red-500 focus:ring-2 focus:ring-red-200"
+                        : "border-slate-200 hover:border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                        } ${disabled
                             ? "cursor-not-allowed bg-slate-100 text-slate-500"
                             : ""
-                    }`}
+                        }`}
                 />
             </div>
 
@@ -835,11 +838,10 @@ const TextareaField = ({
                 maxLength={maxLength}
                 aria-invalid={invalid}
                 aria-describedby={invalid ? errorId : undefined}
-                className={`w-full resize-y rounded-lg border bg-white px-3 py-2.5 text-sm leading-5 text-slate-800 outline-none transition placeholder:text-slate-400 ${
-                    invalid
-                        ? "border-red-500 ring-1 ring-red-500 focus:ring-2 focus:ring-red-200"
-                        : "border-slate-200 hover:border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
-                }`}
+                className={`w-full resize-y rounded-lg border bg-white px-3 py-2.5 text-sm leading-5 text-slate-800 outline-none transition placeholder:text-slate-400 ${invalid
+                    ? "border-red-500 ring-1 ring-red-500 focus:ring-2 focus:ring-red-200"
+                    : "border-slate-200 hover:border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+                    }`}
             />
 
             {invalid && (

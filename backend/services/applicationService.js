@@ -12,6 +12,7 @@ import {
     Company,
     Job,
     JobCategory,
+    Interview,
     RecruiterProfile,
     Skill,
     User,
@@ -119,10 +120,25 @@ const applyForJob = async (
     // Handle reapplication after withdrawal.
     if (existingApplication) {
         if (existingApplication.status === "WITHDRAWN") {
-            await existingApplication.update({
-                ...data,
-                status: "APPLIED",
-                appliedAt: new Date(),
+            const appliedAt = new Date();
+            await sequelize.transaction(async (transaction) => {
+                await existingApplication.update(
+                    {
+                        ...data,
+                        status: "APPLIED",
+                        appliedAt,
+                    },
+                    { transaction }
+                );
+
+                await ApplicationStatusHistory.create(
+                    {
+                        applicationId: existingApplication.id,
+                        status: "APPLIED",
+                        changedBy: userId,
+                    },
+                    { transaction }
+                );
             });
 
             await sendApplicationEmails({
@@ -152,20 +168,29 @@ const applyForJob = async (
     }
 
     // Create a new application.
-    const application = await Application.create({
-        jobId,
-        candidateId: candidate.id,
-        resume: data.resume || null,
-        coverLetter: data.coverLetter || null,
-        expectedSalary: data.expectedSalary || null,
-        noticePeriod: data.noticePeriod || null,
-    });
+    const application = await sequelize.transaction(async (transaction) => {
+        const createdApplication = await Application.create(
+            {
+                jobId,
+                candidateId: candidate.id,
+                resume: data.resume || null,
+                coverLetter: data.coverLetter || null,
+                expectedSalary: data.expectedSalary || null,
+                noticePeriod: data.noticePeriod || null,
+            },
+            { transaction }
+        );
 
-    // Create initial application status history.
-    await ApplicationStatusHistory.create({
-        applicationId: application.id,
-        status: "APPLIED",
-        changedBy: userId,
+        await ApplicationStatusHistory.create(
+            {
+                applicationId: createdApplication.id,
+                status: "APPLIED",
+                changedBy: userId,
+            },
+            { transaction }
+        );
+
+        return createdApplication;
     });
 
     // Create the recruiter's in-app notification.
@@ -270,6 +295,25 @@ const getMyApplications = async (
                         "analyzedAt",
                     ],
                     required: false,
+                },
+                {
+                    model: ApplicationStatusHistory,
+                    as: "statusHistory",
+                    attributes: ["id", "status", "createdAt"],
+                    separate: true,
+                    order: [["createdAt", "ASC"], ["id", "ASC"]],
+                },
+                {
+                    model: Interview,
+                    as: "interviews",
+                    attributes: [
+                        "id",
+                        "scheduledAt",
+                        "interviewType",
+                        "status",
+                    ],
+                    separate: true,
+                    order: [["scheduledAt", "DESC"]],
                 },
             ],
 
@@ -477,15 +521,18 @@ const withdrawApplication = async (
     }
 
 
-    application.status = "WITHDRAWN";
+    await sequelize.transaction(async (transaction) => {
+        application.status = "WITHDRAWN";
+        await application.save({ transaction });
 
-
-    await application.save();
-
-    await ApplicationStatusHistory.create({
-        applicationId: application.id,
-        status: "WITHDRAWN",
-        changedBy: userId,
+        await ApplicationStatusHistory.create(
+            {
+                applicationId: application.id,
+                status: "WITHDRAWN",
+                changedBy: userId,
+            },
+            { transaction }
+        );
     });
 
 
@@ -1383,4 +1430,3 @@ export {
     getJobApplications,
     getMyApplications, getRankedJobApplications, getRecruiterApplications, sendApplicationEmails, updateApplicationStatus, withdrawApplication
 };
-

@@ -15,6 +15,7 @@ import {
     XCircle,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
 
 import {
     getRecruiterApplications,
@@ -95,9 +96,12 @@ const RecruiterInterviews = () => {
             const data = await getRecruiterInterviews();
             setInterviews(Array.isArray(data) ? data : []);
         } catch (loadError) {
-            setError(
-                getErrorMessage(loadError, "Unable to load interviews.")
+            const message = getErrorMessage(
+                loadError,
+                "Unable to load interviews."
             );
+            setError(message);
+            toast.error(message);
         } finally {
             setLoading(false);
         }
@@ -110,9 +114,12 @@ const RecruiterInterviews = () => {
             const data = await getRecruiterApplications();
             setApplications(Array.isArray(data) ? data : []);
         } catch (loadError) {
-            setError(
-                getErrorMessage(loadError, "Unable to load applications.")
+            const message = getErrorMessage(
+                loadError,
+                "Unable to load applications."
             );
+            setError(message);
+            toast.error(message);
         } finally {
             setApplicationsLoading(false);
         }
@@ -501,6 +508,7 @@ const RecruiterInterviews = () => {
 
         if (validationError) {
             setFormError(validationError);
+            toast.error(validationError);
             return;
         }
 
@@ -519,25 +527,27 @@ const RecruiterInterviews = () => {
             if (editingInterviewId) {
                 await updateInterview(editingInterviewId, payload);
                 setSuccess("Interview rescheduled successfully.");
+                toast.success("Interview rescheduled successfully.");
             } else {
                 await scheduleInterview(Number(form.applicationId), payload);
                 setSuccess("Interview scheduled successfully.");
+                toast.success("Interview scheduled successfully.");
             }
-
             setScheduleModalOpen(false);
             setEditingInterviewId(null);
             setForm(emptyForm);
 
             await loadInterviews();
         } catch (saveError) {
-            setFormError(
-                getErrorMessage(
-                    saveError,
-                    editingInterviewId
-                        ? "Unable to reschedule interview."
-                        : "Unable to schedule interview."
-                )
+            const message = getErrorMessage(
+                saveError,
+                editingInterviewId
+                    ? "Unable to reschedule interview."
+                    : "Unable to schedule interview."
             );
+
+            setFormError(message);
+            toast.error(message);
         } finally {
             setSaving(false);
         }
@@ -558,6 +568,7 @@ const RecruiterInterviews = () => {
 
             await cancelInterview(interview.id);
             setSuccess("Interview cancelled successfully.");
+            toast.success("Interview cancelled successfully.");
 
             await loadInterviews();
 
@@ -566,12 +577,13 @@ const RecruiterInterviews = () => {
                 setViewModalOpen(false);
             }
         } catch (cancelError) {
-            setError(
-                getErrorMessage(
-                    cancelError,
-                    "Unable to cancel interview."
-                )
+            const message = getErrorMessage(
+                cancelError,
+                "Unable to cancel interview."
             );
+
+            setError(message);
+            toast.error(message);
         } finally {
             setActionLoadingId(null);
         }
@@ -584,7 +596,7 @@ const RecruiterInterviews = () => {
 
             await updateInterviewStatus(interview.id, status);
 
-            setSuccess(
+            toast.success(
                 `Interview marked as ${getStatusLabel(status).toLowerCase()}.`
             );
 
@@ -602,12 +614,13 @@ const RecruiterInterviews = () => {
                 }
             }
         } catch (statusError) {
-            setError(
-                getErrorMessage(
-                    statusError,
-                    "Unable to update interview status."
-                )
+            const message = getErrorMessage(
+                statusError,
+                "Unable to update interview status."
             );
+
+            setError(message);
+            toast.error(message);
         } finally {
             setActionLoadingId(null);
         }
@@ -615,14 +628,18 @@ const RecruiterInterviews = () => {
 
     const handleCandidateDecision = async (interview, status) => {
         if (interview.status !== "COMPLETED") {
-            setError("Complete the interview before recording a candidate decision.");
+            const message = "Complete the interview before recording a candidate decision.";
+            setError(message);
+            toast.error(message);
             return;
         }
 
         const application = interview.application;
         const applicationId = interview.applicationId || application?.id;
         if (!applicationId) {
-            setError("Unable to find the candidate application for this interview.");
+            const message = "Unable to find the candidate application for this interview.";
+            setError(message);
+            toast.error(message);
             return;
         }
 
@@ -630,7 +647,7 @@ const RecruiterInterviews = () => {
             clearMessages();
             setActionLoadingId(interview.id);
             await updateApplicationStatusRequest(applicationId, status);
-            setSuccess(
+            toast.success(
                 status === "SELECTED"
                     ? `${getCandidateName(interview)} was selected.`
                     : `${getCandidateName(interview)} was marked as not selected.`
@@ -642,12 +659,13 @@ const RecruiterInterviews = () => {
                 setSelectedInterview(updated);
             }
         } catch (decisionError) {
-            setError(
-                getErrorMessage(
-                    decisionError,
-                    "Unable to save the candidate decision."
-                )
+            const message = getErrorMessage(
+                decisionError,
+                "Unable to save the candidate decision."
             );
+
+            setError(message);
+            toast.error(message);
         } finally {
             setActionLoadingId(null);
         }
@@ -662,12 +680,13 @@ const RecruiterInterviews = () => {
             const detailedInterview = await getInterview(interview.id);
             setSelectedInterview(detailedInterview);
         } catch (viewError) {
-            setError(
-                getErrorMessage(
-                    viewError,
-                    "Unable to load interview details."
-                )
+            const message = getErrorMessage(
+                viewError,
+                "Unable to load interview details."
             );
+
+            setError(message);
+            toast.error(message);
         }
     };
 
@@ -1107,84 +1126,83 @@ const RecruiterInterviews = () => {
                                                     </button>
                                                 )}
 
-                                                {interview.status === "COMPLETED" &&
-                                                    (hasDecision ? (
-                                                        <span
-                                                            className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold ${
-                                                                applicationStatus === "SELECTED"
-                                                                    ? "bg-emerald-50 text-emerald-700"
-                                                                    : "bg-slate-100 text-slate-600"
+                                            {interview.status === "COMPLETED" &&
+                                                (hasDecision ? (
+                                                    <span
+                                                        className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold ${applicationStatus === "SELECTED"
+                                                            ? "bg-emerald-50 text-emerald-700"
+                                                            : "bg-slate-100 text-slate-600"
                                                             }`}
+                                                    >
+                                                        {applicationStatus === "SELECTED" ? (
+                                                            <CheckCircle2 size={14} />
+                                                        ) : (
+                                                            <XCircle size={14} />
+                                                        )}
+                                                        {applicationStatus === "SELECTED"
+                                                            ? "Selected"
+                                                            : "Not selected"}
+                                                    </span>
+                                                ) : (
+                                                    <>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                handleCandidateDecision(
+                                                                    interview,
+                                                                    "SELECTED"
+                                                                )
+                                                            }
+                                                            disabled={
+                                                                isActionLoading ||
+                                                                remainingOpenings === 0
+                                                            }
+                                                            title={
+                                                                remainingOpenings === 0
+                                                                    ? "All openings have been filled"
+                                                                    : "Select candidate"
+                                                            }
+                                                            className="flex items-center gap-1.5 rounded-lg border border-emerald-200 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
                                                         >
-                                                            {applicationStatus === "SELECTED" ? (
-                                                                <CheckCircle2 size={14} />
-                                                            ) : (
-                                                                <XCircle size={14} />
-                                                            )}
-                                                            {applicationStatus === "SELECTED"
-                                                                ? "Selected"
-                                                                : "Not selected"}
-                                                        </span>
-                                                    ) : (
-                                                        <>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    handleCandidateDecision(
-                                                                        interview,
-                                                                        "SELECTED"
-                                                                    )
-                                                                }
-                                                                disabled={
-                                                                    isActionLoading ||
-                                                                    remainingOpenings === 0
-                                                                }
-                                                                title={
-                                                                    remainingOpenings === 0
-                                                                        ? "All openings have been filled"
-                                                                        : "Select candidate"
-                                                                }
-                                                                className="flex items-center gap-1.5 rounded-lg border border-emerald-200 px-3 py-2 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
-                                                            >
-                                                                <CheckCircle2 size={14} />
-                                                                Select
-                                                            </button>
-                                                            <button
-                                                                type="button"
-                                                                onClick={() =>
-                                                                    handleCandidateDecision(
-                                                                        interview,
-                                                                        "REJECTED"
-                                                                    )
-                                                                }
-                                                                disabled={isActionLoading}
-                                                                className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
-                                                            >
-                                                                <XCircle size={14} />
-                                                                Not selected
-                                                            </button>
-                                                        </>
-                                                    ))}
+                                                            <CheckCircle2 size={14} />
+                                                            Select
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                handleCandidateDecision(
+                                                                    interview,
+                                                                    "REJECTED"
+                                                                )
+                                                            }
+                                                            disabled={isActionLoading}
+                                                            className="flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+                                                        >
+                                                            <XCircle size={14} />
+                                                            Not selected
+                                                        </button>
+                                                    </>
+                                                ))}
 
-                                                {(interview.status === "SCHEDULED" ||
-                                                    interview.status === "RESCHEDULED") && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                        handleStatusUpdate(
-                                                            interview,
-                                                            "COMPLETED"
-                                                        )
-                                                    }
-                                                    disabled={isActionLoading}
-                                                    className="flex items-center gap-1.5 rounded-lg border border-emerald-200 px-3 py-2 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-50 disabled:opacity-50"
-                                                >
-                                                    <CheckCircle2 size={14} />
-                                                    {isActionLoading
-                                                        ? "Updating..."
-                                                        : "Complete"}
-                                                </button>
-                                            )}
+                                            {(interview.status === "SCHEDULED" ||
+                                                interview.status === "RESCHEDULED") && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            handleStatusUpdate(
+                                                                interview,
+                                                                "COMPLETED"
+                                                            )
+                                                        }
+                                                        disabled={isActionLoading}
+                                                        className="flex items-center gap-1.5 rounded-lg border border-emerald-200 px-3 py-2 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-50 disabled:opacity-50"
+                                                    >
+                                                        <CheckCircle2 size={14} />
+                                                        {isActionLoading
+                                                            ? "Updating..."
+                                                            : "Complete"}
+                                                    </button>
+                                                )}
 
                                             {(interview.status === "SCHEDULED" ||
                                                 interview.status === "RESCHEDULED") && (

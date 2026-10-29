@@ -16,6 +16,24 @@ import { useNavigate } from "react-router-dom";
 import Pagination, { usePagination } from "../../components/Pagination";
 import { getApplications } from "../../services/applicationService";
 
+const applicationStatusLabels = {
+    APPLIED: "Applied",
+    UNDER_REVIEW: "Under Review",
+    SHORTLISTED: "Shortlisted",
+    INTERVIEW: "Interview",
+    SELECTED: "Selected",
+    REJECTED: "Rejected",
+    WITHDRAWN: "Withdrawn",
+};
+
+const formatTimelineDate = (date) => {
+    if (!date || Number.isNaN(new Date(date).getTime())) return "";
+    return new Date(date).toLocaleString(undefined, {
+        dateStyle: "medium",
+        timeStyle: "short",
+    });
+};
+
 const Applications = () => {
     const navigate = useNavigate();
     const [selectedApplication, setSelectedApplication] = useState(null);
@@ -31,18 +49,16 @@ const Applications = () => {
         getApplications()
             .then((items) => {
                 if (!active) return;
-                const statusLabels = {
-                    APPLIED: "Applied",
-                    UNDER_REVIEW: "Under Review",
-                    SHORTLISTED: "Shortlisted",
-                    INTERVIEW: "Interview",
-                    SELECTED: "Selected",
-                    REJECTED: "Rejected",
-                    WITHDRAWN: "Withdrawn",
-                };
                 setApplications(items.map((item) => {
                     const job = item.job || {};
-                    const status = statusLabels[item.status] || item.status;
+                    const status =
+                        applicationStatusLabels[item.status] || item.status;
+                    const interview =
+                        (item.interviews || []).find((entry) =>
+                            ["SCHEDULED", "RESCHEDULED"].includes(entry.status)
+                        ) || (item.interviews || []).find(
+                            (entry) => entry.status !== "CANCELLED"
+                        );
                     return {
                         ...item,
                         position: job.title || "Job",
@@ -62,11 +78,28 @@ const Applications = () => {
                         statusText: status,
                         statusIcon: status === "Interview"
                             ? CalendarDays
-                            : status === "Rejected"
+                            : ["Rejected", "Withdrawn"].includes(status)
                                 ? XCircle
-                                : status === "Under Review"
+                                : ["Under Review", "Shortlisted"].includes(status)
                                     ? Clock3
                                     : CheckCircle2,
+                        statusHistory: item.statusHistory || [],
+                        interviewDate: interview?.scheduledAt
+                            ? new Date(interview.scheduledAt).toLocaleDateString()
+                            : "",
+                        interviewTime: interview?.scheduledAt
+                            ? new Date(interview.scheduledAt).toLocaleTimeString(
+                                [],
+                                { hour: "2-digit", minute: "2-digit" }
+                            )
+                            : "",
+                        interviewType: interview?.interviewType
+                            ? `${interview.interviewType
+                                .slice(0, 1)
+                                .toUpperCase()}${interview.interviewType
+                                .slice(1)
+                                .toLowerCase()}`
+                            : "",
                         salary: job.minSalary && job.maxSalary
                             ? `₹${Number(job.minSalary).toLocaleString("en-IN")} - ₹${Number(job.maxSalary).toLocaleString("en-IN")}`
                             : "Not specified",
@@ -120,16 +153,34 @@ const Applications = () => {
             timeline: "bg-amber-500",
         },
 
+        Shortlisted: {
+            badge: "bg-violet-50 text-violet-600",
+            icon: "bg-violet-50 text-violet-600",
+            timeline: "bg-violet-600",
+        },
+
         Interview: {
             badge: "bg-green-50 text-green-600",
             icon: "bg-green-50 text-green-600",
             timeline: "bg-green-600",
         },
 
+        Selected: {
+            badge: "bg-emerald-50 text-emerald-600",
+            icon: "bg-emerald-50 text-emerald-600",
+            timeline: "bg-emerald-600",
+        },
+
         Rejected: {
             badge: "bg-red-50 text-red-600",
             icon: "bg-red-50 text-red-600",
             timeline: "bg-red-500",
+        },
+
+        Withdrawn: {
+            badge: "bg-slate-100 text-slate-600",
+            icon: "bg-slate-100 text-slate-600",
+            timeline: "bg-slate-500",
         },
     };
 
@@ -197,48 +248,99 @@ const Applications = () => {
     };
 
     const getTimeline = (application) => {
-        const timeline = [
-            {
+        const statusDetails = {
+            APPLIED: {
                 title: "Application Submitted",
-                description: `You applied on ${application.appliedDate}.`,
-                completed: true,
+                description: "You applied",
             },
-        ];
-
-        if (
-            application.status === "Under Review" ||
-            application.status === "Interview"
-        ) {
-            timeline.push({
+            UNDER_REVIEW: {
                 title: "Application Under Review",
-                description:
-                    "The recruiter has reviewed your application.",
-                completed: true,
-            });
-        }
-
-        if (application.status === "Interview") {
-            timeline.push({
+                description: "The recruiter moved your application to review",
+            },
+            SHORTLISTED: {
+                title: "Application Shortlisted",
+                description: "The recruiter shortlisted your application",
+            },
+            INTERVIEW: {
                 title: "Interview Scheduled",
-                description: `${application.interviewDate} at ${application.interviewTime}`,
-                completed: true,
+                description: "Your application moved to the interview stage",
+            },
+            SELECTED: {
+                title: "Application Selected",
+                description: "The recruiter selected you for this position",
+            },
+            REJECTED: {
+                title: "Application Rejected",
+                description: "The recruiter decided not to move forward",
+            },
+            WITHDRAWN: {
+                title: "Application Withdrawn",
+                description: "You withdrew this application",
+            },
+        };
+        const history = [...application.statusHistory].sort(
+            (left, right) =>
+                new Date(left.createdAt).getTime() -
+                    new Date(right.createdAt).getTime() ||
+                left.id - right.id
+        );
+
+        if (!history.some((entry) => entry.status === "APPLIED")) {
+            history.unshift({
+                id: "applied-fallback",
+                status: "APPLIED",
+                createdAt: application.appliedAt,
             });
         }
 
-        if (application.status === "Rejected") {
-            timeline.push({
-                title: "Application Closed",
-                description:
-                    "The recruiter has decided not to move forward with this application.",
-                completed: true,
+        const currentStatus = Object.keys(applicationStatusLabels).find(
+            (status) => applicationStatusLabels[status] === application.status
+        );
+        if (currentStatus && history.at(-1)?.status !== currentStatus) {
+            history.push({
+                id: "current-status-fallback",
+                status: currentStatus,
+                createdAt: application.updatedAt,
             });
         }
+
+        const statusEvents = history.reduce((events, entry) => {
+            if (events.at(-1)?.status === entry.status) {
+                events[events.length - 1] = entry;
+            } else {
+                events.push(entry);
+            }
+            return events;
+        }, []);
+
+        const timeline = statusEvents.map((entry) => {
+            const details = statusDetails[entry.status];
+            const timestamp = formatTimelineDate(entry.createdAt);
+            const interview = (application.interviews || []).find(
+                (item) => item.status !== "CANCELLED"
+            );
+            const description =
+                entry.status === "INTERVIEW" && interview?.scheduledAt
+                    ? `Your interview is scheduled for ${formatTimelineDate(
+                        interview.scheduledAt
+                    )}.`
+                    : `${details.description}${timestamp ? ` on ${timestamp}` : ""}.`;
+
+            return {
+                id: entry.id,
+                title: details.title,
+                description,
+                completed: true,
+            };
+        });
 
         if (
-            application.status === "Applied" ||
-            application.status === "Under Review"
+            ["APPLIED", "UNDER_REVIEW", "SHORTLISTED", "INTERVIEW"].includes(
+                currentStatus
+            )
         ) {
             timeline.push({
+                id: "next-update",
                 title: "Next Update",
                 description:
                     "You will receive an update when the recruiter takes the next action.",
@@ -381,6 +483,7 @@ const Applications = () => {
                         >
                             <option value="All Applications">All Applications</option>
                             <option value="Applied">Applied</option>
+                            <option value="Under Review">Under Review</option>
                             <option value="Shortlisted">Shortlisted</option>
                             <option value="Interview">Interview</option>
                             <option value="Selected">Selected</option>
@@ -865,7 +968,7 @@ const Applications = () => {
                                                 selectedApplication
                                             ).map((item, index, items) => (
                                                 <div
-                                                    key={item.title}
+                                                    key={item.id}
                                                     className="relative flex gap-4"
                                                 >
                                                     <div className="relative flex flex-col items-center">

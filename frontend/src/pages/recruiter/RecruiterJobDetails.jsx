@@ -8,18 +8,18 @@ import {
     CheckCircle2,
     Clock3,
     Edit3,
+    FileText,
+    GraduationCap,
+    Laptop,
     MapPin,
     Users,
     Wallet,
-    Laptop,
-    FileText,
-    GraduationCap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
-
-import { getJob } from "../../services/jobService";
 import { getJobApplications } from "../../services/applicationService";
+import { getJob } from "../../services/jobService";
 
 const RecruiterJobDetails = () => {
     const navigate = useNavigate();
@@ -58,10 +58,12 @@ const RecruiterJobDetails = () => {
             .catch((loadError) => {
                 if (!active) return;
 
-                setError(
+                const message =
                     loadError?.response?.data?.message ||
-                    "Unable to load this job."
-                );
+                    "Unable to load this job.";
+
+                setError(message);
+                toast.error(message);
             })
             .finally(() => {
                 if (active) {
@@ -364,11 +366,10 @@ const RecruiterJobDetails = () => {
                                     </span>
 
                                     <span
-                                        className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                                            isDeadlinePassed
-                                                ? "bg-amber-50 text-amber-700"
-                                                : "bg-emerald-50 text-emerald-700"
-                                        }`}
+                                        className={`rounded-full px-3 py-1 text-xs font-semibold ${isDeadlinePassed
+                                            ? "bg-amber-50 text-amber-700"
+                                            : "bg-emerald-50 text-emerald-700"
+                                            }`}
                                     >
                                         {isDeadlinePassed
                                             ? "Deadline passed"
