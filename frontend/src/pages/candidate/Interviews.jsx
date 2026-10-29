@@ -13,6 +13,7 @@
     XCircle,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
 import Pagination, { usePagination } from "../../components/Pagination";
 import {
     cancelInterview as cancelInterviewRequest,
@@ -83,33 +84,31 @@ const Interviews = () => {
             .catch((loadError) => {
                 if (active) {
                     setInterviews([]);
-                    setError(
+
+                    const errorMessage =
                         loadError.response?.data?.message ||
-                        "Unable to load your interviews."
-                    );
+                        "Unable to load your interviews.";
+
+                    setError(errorMessage);
+                    toast.error(errorMessage);
                 }
             })
             .finally(() => {
                 if (active) setLoading(false);
             });
-
         return () => {
             active = false;
         };
     }, []);
-
     const upcomingInterviews = interviews.filter(
         (interview) => interview.status === "Upcoming"
     );
-
     const completedInterviews = interviews.filter(
         (interview) => interview.status === "Completed"
     );
-
     const cancelledInterviews = interviews.filter(
         (interview) => interview.status === "Cancelled"
     );
-
     const filteredInterviews = useMemo(() => {
         let result = interviews.filter((interview) => {
             const matchesSearch =
@@ -122,29 +121,24 @@ const Interviews = () => {
                 interview.interviewer
                     .toLowerCase()
                     .includes(search.toLowerCase());
-
             const matchesStatus =
                 statusFilter === "ALL" ||
                 interview.status.toUpperCase() === statusFilter;
 
             return matchesSearch && matchesStatus;
         });
-
         if (sortBy === "company") {
             result = [...result].sort((a, b) =>
                 a.company.localeCompare(b.company)
             );
         }
-
         if (sortBy === "position") {
             result = [...result].sort((a, b) =>
                 a.position.localeCompare(b.position)
             );
         }
-
         return result;
     }, [interviews, search, statusFilter, sortBy]);
-
     const filteredUpcoming = filteredInterviews.filter(
         (interview) => interview.status === "Upcoming"
     );
@@ -154,46 +148,45 @@ const Interviews = () => {
     const paginationResetKey = JSON.stringify([search, statusFilter, sortBy]);
     const upcomingPagination = usePagination(filteredUpcoming, paginationResetKey);
     const historyPagination = usePagination(filteredHistory, paginationResetKey);
-
     const cancelInterview = async (id) => {
         const confirmed = window.confirm(
             "Are you sure you want to cancel this interview?"
         );
-
         if (!confirmed) return;
-
         try {
             await cancelInterviewRequest(id);
+            setInterviews((current) =>
+                current.map((interview) =>
+                    interview.id === id
+                        ? {
+                            ...interview,
+                            status: "Cancelled",
+                        }
+                        : interview
+                )
+            );
+            if (selectedInterview?.id === id) {
+                setSelectedInterview((current) =>
+                    current
+                        ? {
+                            ...current,
+                            status: "Cancelled",
+                        }
+                        : null
+                );
+            }
+            setError("");
+            toast.success("Interview cancelled successfully!");
         } catch (cancelError) {
-            setError(
+            const errorMessage =
                 cancelError.response?.data?.message ||
-                "Unable to cancel this interview."
-            );
-            return;
-        }
+                "Unable to cancel this interview.";
 
-        setInterviews((current) =>
-            current.map((interview) =>
-                interview.id === id
-                    ? {
-                        ...interview,
-                        status: "Cancelled",
-                    }
-                    : interview
-            )
-        );
-
-        if (selectedInterview?.id === id) {
-            setSelectedInterview((current) =>
-                current
-                    ? {
-                        ...current,
-                        status: "Cancelled",
-                    }
-                    : null
-            );
+            setError(errorMessage);
+            toast.error(errorMessage);
         }
     };
+
 
     const openJoinModal = (interview) => {
         setMeetingInterview(interview);
@@ -201,8 +194,12 @@ const Interviews = () => {
         setCopied(false);
     };
 
+
     const copyMeetingLink = async () => {
-        if (!meetingInterview?.meetingLink) return;
+        if (!meetingInterview?.meetingLink) {
+            toast.error("Meeting link is not available.");
+            return;
+        }
 
         try {
             await navigator.clipboard.writeText(
@@ -210,12 +207,13 @@ const Interviews = () => {
             );
 
             setCopied(true);
+            toast.success("Meeting link copied successfully!");
 
             setTimeout(() => {
                 setCopied(false);
             }, 2000);
         } catch {
-            alert("Unable to copy meeting link");
+            toast.error("Unable to copy meeting link.");
         }
     };
 

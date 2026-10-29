@@ -16,8 +16,8 @@ import {
     User,
     X,
 } from "lucide-react";
-
 import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 
 import {
     addCandidateEducation,
@@ -281,15 +281,19 @@ const CandidateProfile = () => {
         return [];
     };
 
+
     const showSuccess = (text) => {
         setMessage(text);
         setError("");
+        toast.success(text);
     };
 
     const showError = (text) => {
         setError(text);
         setMessage("");
+        toast.error(text);
     };
+
 
     // LOAD PROFILE
     useEffect(() => {
@@ -1936,7 +1940,7 @@ const CandidateProfile = () => {
 
             <div className="w-full max-w-7xl mx-auto space-y-6">
 
-                    {/* NOTIFICATIONS */}
+                {/* NOTIFICATIONS */}
                 {message && (
 
                     <div className="bg-green-50 text-green-800 border border-green-200 rounded-lg px-4 py-3 flex items-center justify-between">
@@ -1975,7 +1979,7 @@ const CandidateProfile = () => {
                     </div>
                 )}
 
-                    {/* TOP PROFILE CARD */}
+                {/* TOP PROFILE CARD */}
 
                 <div className="bg-gradient-to-r from-white via-blue-50/70 to-purple-50/70 rounded-2xl shadow-sm border border-blue-100/80 p-6 md:p-8">
 
@@ -2201,7 +2205,7 @@ const CandidateProfile = () => {
 
                 </div>
 
-                    {/* TABS */}
+                {/* TABS */}
                 <div className="border-b border-gray-200">
 
                     <nav className="flex gap-8">
@@ -2213,12 +2217,11 @@ const CandidateProfile = () => {
                                     "viewEdit"
                                 )
                             }
-                            className={`pb-3 text-sm font-semibold border-b-2 transition ${
-                                activeTab ===
-                                "viewEdit"
+                            className={`pb-3 text-sm font-semibold border-b-2 transition ${activeTab ===
+                                    "viewEdit"
                                     ? "border-blue-600 text-blue-600"
                                     : "border-transparent text-gray-500 hover:text-gray-700"
-                            }`}
+                                }`}
                         >
                             View & Edit
                         </button>
@@ -2230,12 +2233,11 @@ const CandidateProfile = () => {
                                     "activity"
                                 )
                             }
-                            className={`pb-3 text-sm font-semibold border-b-2 transition focus:outline-none ${
-                                activeTab ===
-                                "activity"
+                            className={`pb-3 text-sm font-semibold border-b-2 transition focus:outline-none ${activeTab ===
+                                    "activity"
                                     ? "border-blue-600 text-blue-600"
                                     : "border-transparent text-gray-500 hover:text-gray-700"
-                            }`}
+                                }`}
                         >
                             Activity insights
                         </button>
@@ -2244,7 +2246,7 @@ const CandidateProfile = () => {
 
                 </div>
 
-                    {/* VIEW & EDIT */}
+                {/* VIEW & EDIT */}
                 {activeTab === "viewEdit" && (
 
                     <div className="w-full space-y-6">
@@ -2333,7 +2335,7 @@ const CandidateProfile = () => {
 
                         </div>
 
-                            {/* EDUCATION */}
+                        {/* EDUCATION */}
                         <div className="bg-gradient-to-br from-white to-blue-50/40 rounded-xl border border-blue-100/80 p-6 shadow-sm">
 
                             <div className="flex items-center justify-between mb-4">
@@ -2653,7 +2655,7 @@ const CandidateProfile = () => {
 
                         </div>
 
-                            {/* EXPERIENCE */}
+                        {/* EXPERIENCE */}
                         <div className="bg-gradient-to-br from-white to-blue-50/40 rounded-xl border border-blue-100/80 p-6 shadow-sm">
 
                             <div className="flex items-center justify-between mb-4">
@@ -2830,7 +2832,7 @@ const CandidateProfile = () => {
 
                         </div>
 
-                            {/* PROJECTS */}
+                        {/* PROJECTS */}
                         <div className="bg-gradient-to-br from-white to-blue-50/40 rounded-xl border border-blue-100/80 p-6 shadow-sm">
 
                             <div className="flex items-center justify-between mb-2">
@@ -3010,7 +3012,7 @@ const CandidateProfile = () => {
 
                         </div>
 
-                            {/* PROFILE SUMMARY */}
+                        {/* PROFILE SUMMARY */}
                         <div className="bg-gradient-to-br from-white to-blue-50/40 rounded-xl border border-blue-100/80 p-6 shadow-sm">
 
                             <div className="flex items-center justify-between mb-2">
@@ -3062,7 +3064,7 @@ const CandidateProfile = () => {
 
                         </div>
 
-                            {/* RESUME */}
+                        {/* RESUME */}
                         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm space-y-4">
 
                             <div>
@@ -3207,7 +3209,7 @@ const CandidateProfile = () => {
                     </div>
                 )}
 
-                    {/* ACTIVITY */}
+                {/* ACTIVITY */}
                 {activeTab === "activity" && (
 
                     <div className="bg-gradient-to-br from-white to-blue-50/40 rounded-xl border border-blue-100/80 p-6 shadow-sm">
@@ -3225,7 +3227,7 @@ const CandidateProfile = () => {
 
             </div>
 
-                {/* PERSONAL DETAILS MODAL */}
+            {/* PERSONAL DETAILS MODAL */}
             {editingHeader && (
 
                 <div className="fixed inset-0 z-[9999] grid place-items-center overflow-hidden bg-slate-900/45 p-3 backdrop-blur-sm sm:p-4">
@@ -3526,7 +3528,7 @@ const CandidateProfile = () => {
                 </div>
             )}
 
-                {/* CAREER PREFERENCES MODAL */}
+            {/* CAREER PREFERENCES MODAL */}
             {editingPref && (
 
                 <div className="fixed inset-0 z-[9999] grid place-items-center overflow-hidden bg-slate-900/45 p-3 backdrop-blur-sm sm:p-4">
@@ -3728,7 +3730,7 @@ const CandidateProfile = () => {
                 </div>
             )}
 
-                {/* EDUCATION MODAL */}
+            {/* EDUCATION MODAL */}
             {showEducationModal && (
 
                 <div className="fixed inset-0 z-[9999] grid place-items-center overflow-hidden bg-slate-900/45 p-3 backdrop-blur-sm sm:p-4">
@@ -4035,7 +4037,7 @@ const CandidateProfile = () => {
                 </div>
             )}
 
-                {/* EXPERIENCE MODAL */}
+            {/* EXPERIENCE MODAL */}
             {showExperienceModal && (
 
                 <div className="fixed inset-0 z-[9999] grid place-items-center overflow-hidden bg-slate-900/45 p-3 backdrop-blur-sm sm:p-4">
@@ -4403,7 +4405,7 @@ const CandidateProfile = () => {
                 </div>
             )}
 
-                {/* PROJECT MODAL */}
+            {/* PROJECT MODAL */}
             {showProjectModal && (
 
                 <div className="fixed inset-0 z-[9999] grid place-items-center overflow-hidden bg-slate-900/45 p-3 backdrop-blur-sm sm:p-4">
@@ -4747,7 +4749,7 @@ const CandidateProfile = () => {
                 </div>
             )}
 
-                {/* PROFILE SUMMARY MODAL */}
+            {/* PROFILE SUMMARY MODAL */}
             {editingBio && (
 
                 <div className="fixed inset-0 z-[9999] grid place-items-center overflow-hidden bg-slate-900/45 p-3 backdrop-blur-sm sm:p-4">

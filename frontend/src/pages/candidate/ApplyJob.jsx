@@ -11,10 +11,11 @@ import {
     Phone,
     Send,
     Upload,
-    Users,
     User,
+    Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
 import { applyForJob } from "../../services/applicationService";
 import { getJob } from "../../services/jobService";
@@ -85,7 +86,7 @@ const ApplyJob = () => {
                 if (active) {
                     setError(
                         loadError.response?.data?.message ||
-                            "Unable to load this job or your profile."
+                        "Unable to load this job or your profile."
                     );
                 }
             })
@@ -161,21 +162,24 @@ const ApplyJob = () => {
         try {
             setSubmitting(true);
             let resumePath = existingResume;
-
             if (resume) {
                 const response = await uploadCandidateResume(resume);
                 resumePath =
                     response.data.data?.candidate?.resume ||
                     response.data.candidate?.resume;
             }
-
-            await applyForJob(jobId, { resume: resumePath, coverLetter });
+            await applyForJob(jobId, {
+                resume: resumePath,
+                coverLetter,
+            });
+            toast.success("Application submitted successfully!");
             setSubmitted(true);
         } catch (submitError) {
-            setError(
+            const errorMessage =
                 submitError.response?.data?.message ||
-                    "Unable to submit your application."
-            );
+                "Unable to submit your application.";
+            setError(errorMessage);
+            toast.error(errorMessage);
         } finally {
             setSubmitting(false);
         }

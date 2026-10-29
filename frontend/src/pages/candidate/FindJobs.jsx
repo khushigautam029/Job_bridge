@@ -1,4 +1,3 @@
-
 import {
     Bookmark,
     BriefcaseBusiness,
@@ -8,6 +7,7 @@ import {
     Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import LocationAutocomplete from "../../components/LocationAutocomplete";
 import Pagination, { usePagination } from "../../components/Pagination";
@@ -40,7 +40,7 @@ const FindJobs = () => {
     const [jobs, setJobs] = useState([]);
     const [savedJobs, setSavedJobs] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(""    );
+    const [error, setError] = useState("");
 
     const navigate = useNavigate();
     useEffect(() => {
@@ -75,10 +75,12 @@ const FindJobs = () => {
             })
             .catch((loadError) => {
                 if (active) {
-                    setError(
+                    const errorMessage =
                         loadError.response?.data?.message ||
-                        "Unable to load jobs. Please try again."
-                    );
+                        "Unable to load jobs. Please try again.";
+
+                    setError(errorMessage);
+                    toast.error(errorMessage);
                 }
             })
             .finally(() => {
@@ -99,10 +101,12 @@ const FindJobs = () => {
                 })
                 .catch((loadError) => {
                     if (active) {
-                        setError(
+                        const errorMessage =
                             loadError.response?.data?.message ||
-                            "Unable to load saved jobs."
-                        );
+                            "Unable to load saved jobs.";
+
+                        setError(errorMessage);
+                        toast.error(errorMessage);
                     }
                 });
         }
@@ -249,6 +253,7 @@ const FindJobs = () => {
                 sessionStorage.getItem("token")
             )
         ) {
+            toast.error("Please login to save jobs.")
             navigate("/login");
             return;
         }
@@ -262,6 +267,7 @@ const FindJobs = () => {
                 setSavedJobs((current) =>
                     current.filter((id) => id !== jobId)
                 );
+                toast.success("Job remove from the saved jobs.")
             } else {
                 await saveJob(jobId);
 
@@ -269,12 +275,15 @@ const FindJobs = () => {
                     ...current,
                     jobId,
                 ]);
+                toast.success("Job saved successfully.");
             }
         } catch (saveError) {
-            setError(
+            const errorMessage =
                 saveError.response?.data?.message ||
-                "Unable to update saved jobs."
-            );
+                "Unable to update saved jobs.";
+
+            setError(errorMessage);
+            toast.error(errorMessage);
         }
     };
 
