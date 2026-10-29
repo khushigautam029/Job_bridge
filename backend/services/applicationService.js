@@ -486,42 +486,34 @@ const withdrawApplication = async (
     }
 
 
-    const application =
-        await Application.findOne({
+    return sequelize.transaction(async (transaction) => {
+        const application = await Application.findOne({
             where: {
                 id: applicationId,
                 candidateId: candidate.id,
             },
+            transaction,
+            lock: transaction.LOCK.UPDATE,
         });
 
+        if (!application) {
+            const error = new Error(
+                MESSAGES.APPLICATION_NOT_FOUND
+            );
+            error.statusCode = STATUS_CODES.NOT_FOUND;
+            throw error;
+        }
 
-    if (!application) {
-        const error = new Error(
-            MESSAGES.APPLICATION_NOT_FOUND
-        );
+        if (
+            ["SELECTED", "REJECTED", "WITHDRAWN"].includes(
+                application.status
+            )
+        ) {
+            const error = new Error(MESSAGES.CANNOT_WITHDRAW);
+            error.statusCode = STATUS_CODES.BAD_REQUEST;
+            throw error;
+        }
 
-        error.statusCode = STATUS_CODES.NOT_FOUND;
-        throw error;
-    }
-
-
-    if (
-        [
-            "SELECTED",
-            "REJECTED",
-        ].includes(application.status)
-    ) {
-
-        const error = new Error(
-            MESSAGES.CANNOT_WITHDRAW
-        );
-
-        error.statusCode = STATUS_CODES.BAD_REQUEST;
-        throw error;
-    }
-
-
-    await sequelize.transaction(async (transaction) => {
         application.status = "WITHDRAWN";
         await application.save({ transaction });
 
@@ -533,10 +525,9 @@ const withdrawApplication = async (
             },
             { transaction }
         );
+
+        return application;
     });
-
-
-    return application;
 };
 
 
@@ -687,7 +678,10 @@ const getRankedJobApplications = async (
 
         // 3. Fetch applications with saved ATS results.
         return Application.findAndCountAll({
-            where: { jobId },
+            where: {
+                jobId,
+                status: { [Op.ne]: "WITHDRAWN" },
+            },
             attributes: [
                 "id",
                 "jobId",

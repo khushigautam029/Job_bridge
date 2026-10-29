@@ -1,5 +1,6 @@
 import {
     ArrowRight,
+    Ban,
     BriefcaseBusiness,
     Building2,
     CalendarDays,
@@ -12,9 +13,13 @@ import {
     XCircle,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import Pagination, { usePagination } from "../../components/Pagination";
-import { getApplications } from "../../services/applicationService";
+import {
+    getApplications,
+    withdrawApplication as withdrawApplicationRequest,
+} from "../../services/applicationService";
 
 const applicationStatusLabels = {
     APPLIED: "Applied",
@@ -43,6 +48,7 @@ const Applications = () => {
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [withdrawingApplicationId, setWithdrawingApplicationId] = useState(null);
 
     useEffect(() => {
         let active = true;
@@ -227,10 +233,6 @@ const Applications = () => {
 
     const totalApplications = applications.length;
 
-    const underReviewCount = applications.filter(
-        (application) => application.status === "Under Review"
-    ).length;
-
     const interviewCount = applications.filter(
         (application) => application.status === "Interview"
     ).length;
@@ -245,6 +247,54 @@ const Applications = () => {
 
     const closeDetails = () => {
         setSelectedApplication(null);
+    };
+
+    const withdrawApplication = async (application) => {
+        const confirmed = window.confirm(
+            `Are you sure you want to withdraw your application for ${application.position}?`
+        );
+        if (!confirmed) return;
+
+        setWithdrawingApplicationId(application.id);
+        setError("");
+
+        try {
+            await withdrawApplicationRequest(application.id);
+            const changedAt = new Date().toISOString();
+            const updatedApplication = {
+                ...application,
+                status: "Withdrawn",
+                statusText: "Withdrawn",
+                statusIcon: XCircle,
+                nextStep: "You withdrew this application.",
+                statusHistory: [
+                    ...application.statusHistory,
+                    {
+                        id: `withdrawn-${application.id}-${changedAt}`,
+                        status: "WITHDRAWN",
+                        createdAt: changedAt,
+                    },
+                ],
+            };
+
+            setApplications((current) =>
+                current.map((item) =>
+                    item.id === application.id ? updatedApplication : item
+                )
+            );
+            setSelectedApplication((current) =>
+                current?.id === application.id ? updatedApplication : current
+            );
+            toast.success("Application withdrawn successfully.");
+        } catch (withdrawError) {
+            const errorMessage =
+                withdrawError.response?.data?.message ||
+                "Unable to withdraw your application.";
+            setError(errorMessage);
+            toast.error(errorMessage);
+        } finally {
+            setWithdrawingApplicationId(null);
+        }
     };
 
     const getTimeline = (application) => {
@@ -575,16 +625,17 @@ const Applications = () => {
                                             </div>
 
                                             {/* Action */}
-                                            <button
-                                                type="button"
-                                                onClick={() =>
-                                                    openDetails(application)
-                                                }
-                                                className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600 xl:w-auto"
-                                            >
-                                                View Details
-                                                <ArrowRight size={16} />
-                                            </button>
+                                            <div className="flex flex-col gap-2 sm:flex-row">
+                                                {["Applied", "Under Review", "Shortlisted", "Interview"].includes(application.status)}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => openDetails(application)}
+                                                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600 xl:w-auto"
+                                                >
+                                                    View Details
+                                                    <ArrowRight size={16} />
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 );
@@ -909,49 +960,47 @@ const Applications = () => {
 
                                                     <div>
                                                         <h4 className="font-semibold text-slate-900">
-                                                            Interview Scheduled
+                                                            {selectedApplication.interviewDate
+                                                                ? "Interview Scheduled"
+                                                                : "Interview Stage"}
                                                         </h4>
 
                                                         <p className="mt-1 text-sm text-slate-600">
-                                                            Your interview has been
-                                                            scheduled with the
-                                                            hiring team.
+                                                            {selectedApplication.interviewDate
+                                                                ? "Your interview has been scheduled with the hiring team."
+                                                                : "The recruiter moved your application to the interview stage. Interview details are not available yet."}
                                                         </p>
 
-                                                        <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                                                            <div>
-                                                                <p className="text-xs text-slate-400">
-                                                                    Date
-                                                                </p>
-                                                                <p className="mt-1 text-sm font-semibold text-slate-800">
-                                                                    {
-                                                                        selectedApplication.interviewDate
-                                                                    }
-                                                                </p>
-                                                            </div>
+                                                        {selectedApplication.interviewDate && (
+                                                            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                                                                <div>
+                                                                    <p className="text-xs text-slate-400">
+                                                                        Date
+                                                                    </p>
+                                                                    <p className="mt-1 text-sm font-semibold text-slate-800">
+                                                                        {selectedApplication.interviewDate}
+                                                                    </p>
+                                                                </div>
 
-                                                            <div>
-                                                                <p className="text-xs text-slate-400">
-                                                                    Time
-                                                                </p>
-                                                                <p className="mt-1 text-sm font-semibold text-slate-800">
-                                                                    {
-                                                                        selectedApplication.interviewTime
-                                                                    }
-                                                                </p>
-                                                            </div>
+                                                                <div>
+                                                                    <p className="text-xs text-slate-400">
+                                                                        Time
+                                                                    </p>
+                                                                    <p className="mt-1 text-sm font-semibold text-slate-800">
+                                                                        {selectedApplication.interviewTime}
+                                                                    </p>
+                                                                </div>
 
-                                                            <div>
-                                                                <p className="text-xs text-slate-400">
-                                                                    Type
-                                                                </p>
-                                                                <p className="mt-1 text-sm font-semibold text-slate-800">
-                                                                    {
-                                                                        selectedApplication.interviewType
-                                                                    }
-                                                                </p>
+                                                                <div>
+                                                                    <p className="text-xs text-slate-400">
+                                                                        Type
+                                                                    </p>
+                                                                    <p className="mt-1 text-sm font-semibold text-slate-800">
+                                                                        {selectedApplication.interviewType}
+                                                                    </p>
+                                                                </div>
                                                             </div>
-                                                        </div>
+                                                        )}
                                                     </div>
                                                 </div>
                                             </section>
@@ -1087,6 +1136,17 @@ const Applications = () => {
                             </button>
 
                             <div className="flex flex-col gap-3 sm:flex-row">
+                                {["Applied", "Under Review", "Shortlisted", "Interview"].includes(selectedApplication.status) && (
+                                    <button
+                                        type="button"
+                                        onClick={() => withdrawApplication(selectedApplication)}
+                                        disabled={withdrawingApplicationId !== null}
+                                        className="flex items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-5 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        <Ban size={16} />
+                                        {withdrawingApplicationId === selectedApplication.id ? "Withdrawing..." : "Withdraw Application"}
+                                    </button>
+                                )}
                                 <a
                                     href={`mailto:${selectedApplication.recruiterEmail}`}
                                     className="flex items-center justify-center gap-2 rounded-xl border border-indigo-200 bg-white px-5 py-2.5 text-sm font-semibold text-indigo-600 transition hover:bg-indigo-50"

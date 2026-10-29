@@ -34,6 +34,7 @@ const statusLabels = {
     INTERVIEW: "Interview",
     SELECTED: "Selected",
     REJECTED: "Rejected",
+    WITHDRAWN: "Withdrawn",
 };
 
 const formatProfileDate = (value) => {
@@ -253,6 +254,9 @@ const RecruiterApplications = () => {
             case "Rejected":
                 return "bg-red-50 text-red-500";
 
+            case "Withdrawn":
+                return "bg-slate-100 text-slate-500";
+
             default:
                 return "bg-slate-100 text-slate-600";
         }
@@ -326,6 +330,11 @@ const RecruiterApplications = () => {
         applicationId,
         newStatus
     ) => {
+        if (selectedCandidate?.applicationStatus === "WITHDRAWN") {
+            toast.error("Withdrawn applications cannot be processed.");
+            return;
+        }
+
         const statusValues = {
             Applied: "APPLIED",
             "Under Review": "UNDER_REVIEW",
@@ -821,6 +830,14 @@ const RecruiterApplications = () => {
 
                             <option value="Rejected">
                                 Rejected
+                            </option>
+
+                            <option value="Selected">
+                                Selected
+                            </option>
+
+                            <option value="Withdrawn">
+                                Withdrawn
                             </option>
                         </select>
 
@@ -1540,21 +1557,21 @@ const RecruiterApplications = () => {
                                             Change Application
                                             Status
                                         </p>
-                                        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                                            {[
-                                                "Applied",
-                                                "Under Review",
-                                                "Shortlisted",
-                                                "Interview",
-                                                "Rejected",
-                                            ].map(
-                                                (
-                                                    status
-                                                ) => (
+                                        {selectedCandidate.applicationStatus === "WITHDRAWN" ? (
+                                            <p className="mt-3 rounded-xl bg-slate-50 p-4 text-sm text-slate-600">
+                                                The candidate withdrew this application. It cannot be processed further unless they reapply.
+                                            </p>
+                                        ) : (
+                                            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                                                {[
+                                                    "Applied",
+                                                    "Under Review",
+                                                    "Shortlisted",
+                                                    "Interview",
+                                                    "Rejected",
+                                                ].map((status) => (
                                                     <button
-                                                        key={
-                                                            status
-                                                        }
+                                                        key={status}
                                                         type="button"
                                                         onClick={() =>
                                                             updateApplicationStatus(
@@ -1568,13 +1585,11 @@ const RecruiterApplications = () => {
                                                             : "border-slate-200 text-slate-600 hover:bg-slate-50"
                                                             }`}
                                                     >
-                                                        {
-                                                            status
-                                                        }
+                                                        {status}
                                                     </button>
-                                                )
-                                            )}
-                                        </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Quick Actions */}
