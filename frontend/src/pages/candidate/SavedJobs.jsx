@@ -231,14 +231,14 @@ const SavedJobs = () => {
         ])
     );
 
-    const remoteJobs = savedJobs.filter(
-        (job) => normalizeValue(job.workMode) === "REMOTE"
-    ).length;
+    // const remoteJobs = savedJobs.filter(
+    //     (job) => normalizeValue(job.workMode) === "REMOTE"
+    // ).length;
 
-    const fullTimeJobs = savedJobs.filter(
-        (job) =>
-            normalizeValue(job.jobType || job.type) === "FULL_TIME"
-    ).length;
+    // const fullTimeJobs = savedJobs.filter(
+    //     (job) =>
+    //         normalizeValue(job.jobType || job.type) === "FULL_TIME"
+    // ).length;
 
     const viewJob = (job) => {
         navigate(`/candidate/jobs/${job.id}`);

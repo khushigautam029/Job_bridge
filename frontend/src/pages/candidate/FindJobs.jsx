@@ -34,9 +34,9 @@ const FindJobs = () => {
     const [category, setCategory] = useState(
         searchParams.get("category") || ""
     );
-    const [company, setCompany] = useState(
-        searchParams.get("company") || ""
-    );
+    // const [company, setCompany] = useState(
+    //     searchParams.get("company") || ""
+    // );
     const [jobs, setJobs] = useState([]);
     const [savedJobs, setSavedJobs] = useState([]);
     const [loading, setLoading] = useState(true);

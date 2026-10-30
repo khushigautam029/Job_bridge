@@ -26,7 +26,7 @@ const Interviews = () => {
     const [selectedInterview, setSelectedInterview] = useState(null);
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState("ALL");
-    const [sortBy, setSortBy] = useState("recent");
+    // const [sortBy, setSortBy] = useState("recent");
     const [showJoinModal, setShowJoinModal] = useState(false);
     const [meetingInterview, setMeetingInterview] = useState(null);
     const [copied, setCopied] = useState(false);

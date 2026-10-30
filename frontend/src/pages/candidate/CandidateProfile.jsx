@@ -189,10 +189,10 @@ const CandidateProfile = () => {
     const [showSkillInput, setShowSkillInput] =
         useState(false);
 
-    // HELPER FUNCTIONS
-    const getResponseData = (response) => {
-        return response?.data || {};
-    };
+    // // HELPER FUNCTIONS
+    // const getResponseData = (response) => {
+    //     return response?.data || {};
+    // };
 
     const getAssetUrl = (filePath) => {
 

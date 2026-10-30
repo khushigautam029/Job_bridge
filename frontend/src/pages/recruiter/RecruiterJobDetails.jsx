@@ -21,6 +21,70 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getJobApplications } from "../../services/applicationService";
 import { getJob } from "../../services/jobService";
 
+
+const StatCard = ({ icon: Icon, label, value, detail }) => (
+    <div className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-indigo-200 hover:shadow-sm">
+        <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+                <p className="text-sm font-medium text-slate-500">
+                    {label}
+                </p>
+
+                <p className="mt-2 break-words text-xl font-bold tracking-tight text-slate-900">
+                    {value}
+                </p>
+
+                {detail && (
+                    <p className="mt-1 text-xs leading-5 text-slate-400">
+                        {detail}
+                    </p>
+                )}
+            </div>
+
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                <Icon size={19} />
+            </div>
+        </div>
+    </div>
+);
+
+const ContentSection = ({ icon: Icon, title, children, count }) => (
+    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+        <div className="flex items-start justify-between gap-4">
+            <div className="flex min-w-0 items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-indigo-600">
+                    <Icon size={19} />
+                </div>
+
+                <div>
+                    <h2 className="text-base font-bold text-slate-900 sm:text-lg">
+                        {title}
+                    </h2>
+
+                    {count !== undefined && (
+                        <p className="mt-0.5 text-xs text-slate-400">
+                            {count} {count === 1 ? "item" : "items"}
+                        </p>
+                    )}
+                </div>
+            </div>
+        </div>
+
+        <div className="mt-5">{children}</div>
+    </section>
+);
+
+const DetailRow = ({ label, value }) => (
+    <div className="flex items-start justify-between gap-4">
+        <span className="text-sm text-slate-500">{label}</span>
+
+        <span className="max-w-[60%] break-words text-right text-sm font-semibold text-slate-800">
+            {value || "Not specified"}
+        </span>
+    </div>
+);
+
+
 const RecruiterJobDetails = () => {
     const navigate = useNavigate();
     const { jobId } = useParams();
@@ -263,64 +327,6 @@ const RecruiterJobDetails = () => {
     const isDeadlinePassed =
         job.applicationDeadline &&
         new Date(job.applicationDeadline).getTime() < Date.now();
-
-    const StatCard = ({ icon: Icon, label, value, detail }) => (
-        <div className="min-w-0 rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-indigo-200 hover:shadow-sm">
-            <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                    <p className="text-sm font-medium text-slate-500">
-                        {label}
-                    </p>
-                    <p className="mt-2 break-words text-xl font-bold tracking-tight text-slate-900">
-                        {value}
-                    </p>
-                    {detail && (
-                        <p className="mt-1 text-xs leading-5 text-slate-400">
-                            {detail}
-                        </p>
-                    )}
-                </div>
-
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                    <Icon size={19} />
-                </div>
-            </div>
-        </div>
-    );
-
-    const ContentSection = ({ icon: Icon, title, children, count }) => (
-        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
-            <div className="flex items-start justify-between gap-4">
-                <div className="flex min-w-0 items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-indigo-600">
-                        <Icon size={19} />
-                    </div>
-
-                    <div>
-                        <h2 className="text-base font-bold text-slate-900 sm:text-lg">
-                            {title}
-                        </h2>
-                        {count !== undefined && (
-                            <p className="mt-0.5 text-xs text-slate-400">
-                                {count} {count === 1 ? "item" : "items"}
-                            </p>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            <div className="mt-5">{children}</div>
-        </section>
-    );
-
-    const DetailRow = ({ label, value }) => (
-        <div className="flex items-start justify-between gap-4">
-            <span className="text-sm text-slate-500">{label}</span>
-            <span className="max-w-[60%] break-words text-right text-sm font-semibold text-slate-800">
-                {value || "Not specified"}
-            </span>
-        </div>
-    );
 
     return (
         <div className="min-h-full w-full space-y-6 pb-8">

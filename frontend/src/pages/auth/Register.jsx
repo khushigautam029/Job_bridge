@@ -11,17 +11,20 @@ import {
     Phone,
     User,
 } from "lucide-react";
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import { registerUser } from "../../services/authService";
+
+const RequiredMark = () => (
+        <span className="ml-0.5 text-red-500" aria-hidden="true">
+            *
+        </span>
+    );
 
 const Register = () => {
     const navigate = useNavigate();
 
     const [accountType, setAccountType] = useState(null);
-
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] =
         useState(false);
@@ -497,12 +500,6 @@ const Register = () => {
                 : "border-slate-200 text-slate-600 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
         }`;
     };
-
-    const RequiredMark = () => (
-        <span className="ml-0.5 text-red-500" aria-hidden="true">
-            *
-        </span>
-    );
 
     const renderFieldError = (fieldName) => {
         if (!touched[fieldName] || !fieldErrors[fieldName]) {
