@@ -18,6 +18,7 @@ import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import Pagination, { usePagination } from "../../components/Pagination.jsx";
 import { getRecruiterApplications } from "../../services/applicationService";
+import getAssetUrl from "../../services/assetUrl";
 
 const getInitials = (name = "Candidate") =>
     name
@@ -476,7 +477,11 @@ const renderProfileLinks = (candidate) => (
         {candidate.resume && (
             <button
                 type="button"
-                onClick={() => openExternalLink(candidate.resume)}
+                onClick={() => window.open(
+                    getAssetUrl(candidate.resume),
+                    "_blank",
+                    "noopener,noreferrer"
+                )}
                 className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-indigo-600 hover:bg-indigo-50"
             >
                 <FileText size={14} />

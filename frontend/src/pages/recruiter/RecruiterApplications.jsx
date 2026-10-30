@@ -26,6 +26,7 @@ import {
     runJobAtsAnalysis,
     updateApplicationStatus as updateApplicationStatusRequest,
 } from "../../services/applicationService";
+import getAssetUrl from "../../services/assetUrl";
 
 const statusLabels = {
     APPLIED: "Applied",
@@ -508,7 +509,7 @@ const RecruiterApplications = () => {
         }
 
         window.open(
-            application.resume,
+            getAssetUrl(application.resume),
             "_blank",
             "noopener,noreferrer"
         );

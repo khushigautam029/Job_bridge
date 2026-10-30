@@ -20,6 +20,7 @@ import {
     getApplications,
     withdrawApplication as withdrawApplicationRequest,
 } from "../../services/applicationService";
+import getAssetUrl from "../../services/assetUrl";
 
 const applicationStatusLabels = {
     APPLIED: "Applied",
@@ -1076,17 +1077,19 @@ const Applications = () => {
                                             </div>
                                         </div>
 
-                                        <a
-                                            href={
-                                                selectedApplication.resumeUrl
-                                            }
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
-                                        >
-                                            View Resume
-                                            <ExternalLink size={15} />
-                                        </a>
+                                        {selectedApplication.resumeUrl && (
+                                            <a
+                                                href={getAssetUrl(
+                                                    selectedApplication.resumeUrl
+                                                )}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
+                                            >
+                                                View Resume
+                                                <ExternalLink size={15} />
+                                            </a>
+                                        )}
                                     </div>
 
                                     {/* Recruiter */}

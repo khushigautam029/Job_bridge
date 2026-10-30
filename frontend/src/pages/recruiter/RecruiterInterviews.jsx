@@ -21,6 +21,7 @@ import {
     getRecruiterApplications,
     updateApplicationStatus as updateApplicationStatusRequest,
 } from "../../services/applicationService";
+import getAssetUrl from "../../services/assetUrl";
 
 import Pagination, { usePagination } from "../../components/Pagination.jsx";
 import {
@@ -38,15 +39,6 @@ const emptyForm = {
     interviewType: "ONLINE",
     meetingLink: "",
     location: "",
-};
-
-const getCandidateAssetUrl = (path) => {
-    if (!path) return "";
-    if (/^https?:\/\//i.test(path)) return path;
-
-    const apiUrl = (import.meta.env.VITE_API_URL || "http://localhost:5000/api")
-        .replace(/\/api\/?$/, "");
-    return `${apiUrl}/${String(path).replace(/^[\\/]+/, "").replaceAll("\\", "/")}`;
 };
 
 const normalizeCandidateLink = (url) =>
@@ -1712,7 +1704,7 @@ const RecruiterInterviews = () => {
 
                                     {(selectedCandidateProfile.resume || selectedInterview.application?.resume) && (
                                         <a
-                                            href={getCandidateAssetUrl(selectedCandidateProfile.resume || selectedInterview.application.resume)}
+                                            href={getAssetUrl(selectedCandidateProfile.resume || selectedInterview.application.resume)}
                                             target="_blank"
                                             rel="noreferrer"
                                             className="mt-4 inline-flex items-center gap-2 rounded-lg border border-indigo-100 px-3 py-2 text-xs font-semibold text-indigo-600 hover:bg-indigo-50"
