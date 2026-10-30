@@ -18,6 +18,7 @@ import {
     Settings,
     Star,
     Sun,
+    Trash2,
     User,
     UserCircle,
     UserPlus,
@@ -43,6 +44,7 @@ import {
     saveJob,
     unsaveJob,
 } from "../services/savedJobService";
+import { deleteAccount } from "../services/userService";
 
 const getCompanyLogoUrl = (logo) => {
     if (!logo) return "";
@@ -511,6 +513,43 @@ const Home = () => {
 
         navigate("/");
         window.location.reload();
+    };
+
+    const handleDelete = async () => {
+        const currentPassword = window.prompt(
+            "Enter your current password to delete your account:"
+        );
+
+        if (!currentPassword) return;
+
+        const confirmDelete = window.confirm(
+            "Are you sure you want to permanently delete your JobBridge account?"
+        );
+
+        if (!confirmDelete) return;
+
+        try {
+            await deleteAccount({ currentPassword });
+
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+
+            sessionStorage.removeItem("token");
+            sessionStorage.removeItem("user");
+
+            setProfileMenuOpen(false);
+
+            navigate("/", { replace: true });
+            window.location.reload();
+
+        } catch (error) {
+            console.error("Delete account error:", error);
+
+            alert(
+                error?.response?.data?.message ||
+                "Unable to delete your account. Please try again."
+            );
+        }
     };
 
     return (
@@ -1032,6 +1071,17 @@ const Home = () => {
                                                 >
                                                     <Settings size={17} />
                                                     Settings
+                                                </button>
+                                            </div>
+
+                                            <div className="border-t border-slate-100 p-1.5">
+                                                <button
+                                                    type="button"
+                                                    onClick={handleDelete}
+                                                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-50"
+                                                >
+                                                    <Trash2 size={17} />
+                                                    Delete Account
                                                 </button>
                                             </div>
 

@@ -19,5 +19,5 @@ export const getUserPreferences = async () =>
 export const saveUserPreferences = async (preferences) =>
     getData(await api.put("/users/preferences", preferences)).preferences;
 
-export const deleteAccount = async () =>
-    api.delete("/users/account");
+export const deleteAccount = async (data) =>
+    api.delete("/users/account", { data });

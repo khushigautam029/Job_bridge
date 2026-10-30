@@ -10,6 +10,7 @@ import {
     Search,
     Settings,
     Sun,
+    Trash2,
     User,
     UserCircle,
     X,
@@ -17,6 +18,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import useRoleHeaderData from "../../hooks/useRoleHeaderData";
+import { deleteAccount } from "../../services/userService";
 import NotificationDropdown from "../Notification";
 
 const CandidateLayout = () => {
@@ -33,7 +35,7 @@ const CandidateLayout = () => {
     const userRole = user?.role || "CANDIDATE";
     const avatarUrl = profile?.profileImage || user?.candidateProfile?.profileImage;
     const [isDarkMode, setIsDarkMode] = useState(
-            () => localStorage.getItem("jobbridge-theme") === "dark"
+        () => localStorage.getItem("jobbridge-theme") === "dark"
     );
 
     useEffect(() => {
@@ -56,7 +58,7 @@ const CandidateLayout = () => {
             document.removeEventListener("keydown", closeOnEscape);
         };
     }, [profileMenuOpen]);
-    
+
     // CANDIDATE NAVIGATION
     const navigation = [
         {
@@ -85,6 +87,35 @@ const CandidateLayout = () => {
     const closeMenus = () => {
         setMobileMenuOpen(false);
         setProfileMenuOpen(false);
+    };
+
+    const handleDelete = async () => {
+        const currentPassword = window.prompt(
+            "Enter your current password to delete your account:"
+        );
+        if (!currentPassword) return;
+        const confirmDelete = window.confirm(
+            "Are you sure you want to permanently delete your JobBridge account?"
+        );
+        if (!confirmDelete) return;
+        try {
+            await deleteAccount({ currentPassword });
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+
+            sessionStorage.removeItem("token");
+            sessionStorage.removeItem("user");
+
+            setProfileMenuOpen(false);
+            navigate("/", { replace: true });
+            window.location.reload();
+        } catch (error) {
+            console.error("Delete account error:", error);
+            alert(
+                error?.response?.data?.message ||
+                "Unable to delete your account. Please try again."
+            );
+        }
     };
 
     // LOGOUT
@@ -338,6 +369,17 @@ const CandidateLayout = () => {
                                     <div className="border-t border-slate-100 p-1.5">
                                         <button
                                             type="button"
+                                            onClick={handleDelete}
+                                            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-50"
+                                        >
+                                            <Trash2 size={17} />
+                                            Delete Account
+                                        </button>
+                                    </div>
+
+                                    <div className="border-t border-slate-100 p-1.5">
+                                        <button
+                                            type="button"
                                             onClick={handleLogout}
                                             className="candidate-dropdown-item flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-red-500 transition hover:bg-red-50"
                                         >
@@ -365,8 +407,8 @@ const CandidateLayout = () => {
                                     : "Switch to dark mode"
                             }
                             className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-all duration-200 ${isDarkMode
-                                    ? "border-slate-700 bg-slate-800 text-amber-300 hover:bg-slate-700"
-                                    : "border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
+                                ? "border-slate-700 bg-slate-800 text-amber-300 hover:bg-slate-700"
+                                : "border-slate-200 bg-white text-slate-600 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
                                 }`}
                         >
                             {isDarkMode ? (

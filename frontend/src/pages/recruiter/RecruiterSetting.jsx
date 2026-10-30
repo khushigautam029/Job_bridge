@@ -3,13 +3,16 @@ import {
     Bell,
     Check,
     CheckCircle2,
+    ChevronRight,
     Eye,
     EyeOff,
     LoaderCircle,
     Lock,
     Mail,
     Save,
+    Settings,
     Shield,
+    Sparkles,
     User,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -20,6 +23,108 @@ import {
     saveUserPreferences,
     updateCurrentUser,
 } from "../../services/userService";
+
+const PRIMARY = "#4f46e5";
+
+const sections = [
+    {
+        id: "account",
+        label: "Account",
+        description: "Contact information",
+        icon: User,
+    },
+    {
+        id: "notifications",
+        label: "Notifications",
+        description: "Recruitment alerts",
+        icon: Bell,
+    },
+    {
+        id: "password",
+        label: "Password & Security",
+        description: "Protect your account",
+        icon: Lock,
+    },
+];
+
+const sectionContent = {
+    account: {
+        title: "Recruiter account settings",
+        description: "Manage your recruiter contact information.",
+    },
+    notifications: {
+        title: "Notification preferences",
+        description: "Choose how and when JobBridge keeps you informed.",
+    },
+    password: {
+        title: "Password & security",
+        description: "Keep your recruiter account protected.",
+    },
+};
+
+// Validation helpers
+const validatePhone = (phone) => {
+    if (!phone.trim()) return "Phone number is required.";
+
+    if (!/^[0-9]{10}$/.test(phone.trim())) {
+        return "Please enter a valid 10-digit phone number.";
+    }
+
+    return "";
+};
+
+const validatePassword = (password) => {
+    if (!password) return "Current password is required.";
+    return "";
+};
+
+const validateNewPassword = (password) => {
+    if (!password) return "New password is required.";
+
+    if (password.length < 8) {
+        return "Password must contain at least 8 characters.";
+    }
+
+    return "";
+};
+
+const validateConfirmPassword = (password, newPassword) => {
+    if (!password) return "Please confirm your new password.";
+
+    if (password !== newPassword) {
+        return "Passwords do not match.";
+    }
+
+    return "";
+};
+
+// Reusable required label
+const FieldLabel = ({ htmlFor, children, required = false }) => (
+    <label
+        htmlFor={htmlFor}
+        className="mb-2 block text-sm font-semibold text-slate-700"
+    >
+        {children}
+
+        {required && (
+            <span className="ml-1 text-red-600" aria-hidden="true">
+                *
+            </span>
+        )}
+    </label>
+);
+
+// Reusable inline error
+const FieldError = ({ children }) => {
+    if (!children) return null;
+
+    return (
+        <p className="mt-1.5 flex items-start gap-1.5 text-xs font-medium text-red-600">
+            <Shield size={13} className="mt-0.5 shrink-0" />
+            <span>{children}</span>
+        </p>
+    );
+};
 
 const RecruiterSetting = () => {
     const [activeSection, setActiveSection] = useState("account");
@@ -41,6 +146,8 @@ const RecruiterSetting = () => {
         newPassword: "",
         confirmPassword: "",
     });
+
+    const [fieldErrors, setFieldErrors] = useState({});
 
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
@@ -68,7 +175,6 @@ const RecruiterSetting = () => {
                     ...prev,
                     ...(preferences.notificationSettings || {}),
                 }));
-
             })
             .catch((loadError) => {
                 if (active) {
@@ -87,26 +193,20 @@ const RecruiterSetting = () => {
         };
     }, []);
 
-    const sections = [
-        {
-            id: "account",
-            label: "Account",
-            description: "Contact information",
-            icon: User,
-        },
-        {
-            id: "notifications",
-            label: "Notifications",
-            description: "Recruitment alerts",
-            icon: Bell,
-        },
-        {
-            id: "password",
-            label: "Password & Security",
-            description: "Protect your account",
-            icon: Lock,
-        },
-    ];
+    const clearFieldError = (name) => {
+        setFieldErrors((prev) => ({
+            ...prev,
+            [name]: "",
+        }));
+    };
+
+    const handleSectionChange = (section) => {
+        setActiveSection(section);
+        setError("");
+        setMessage("");
+        setSavedSection("");
+        setFieldErrors({});
+    };
 
     const handleAccountChange = (e) => {
         const { name, value } = e.target;
@@ -115,15 +215,66 @@ const RecruiterSetting = () => {
             ...prev,
             [name]: value,
         }));
+
+        clearFieldError(name);
+        setSavedSection("");
+        setMessage("");
+        setError("");
+
+        // Validate while typing once an error has been displayed
+        if (fieldErrors[name]) {
+            setFieldErrors((prev) => ({
+                ...prev,
+                [name]: name === "phone" ? validatePhone(value) : "",
+            }));
+        }
     };
 
     const handlePasswordChange = (e) => {
         const { name, value } = e.target;
 
-        setPasswordData((prev) => ({
-            ...prev,
+        const updatedData = {
+            ...passwordData,
             [name]: value,
-        }));
+        };
+
+        setPasswordData(updatedData);
+
+        setSavedSection("");
+        setMessage("");
+        setError("");
+
+        setFieldErrors((prev) => {
+            const updatedErrors = { ...prev };
+
+            if (name === "currentPassword" && prev.currentPassword) {
+                updatedErrors.currentPassword = validatePassword(value);
+            }
+
+            if (name === "newPassword" && prev.newPassword) {
+                updatedErrors.newPassword = validateNewPassword(value);
+            }
+
+            if (name === "confirmPassword" && prev.confirmPassword) {
+                updatedErrors.confirmPassword = validateConfirmPassword(
+                    value,
+                    updatedData.newPassword
+                );
+            }
+
+            // Revalidate confirm password when new password changes
+            if (
+                name === "newPassword" &&
+                updatedErrors.confirmPassword
+            ) {
+                updatedErrors.confirmPassword = validateConfirmPassword(
+                    updatedData.confirmPassword,
+                    updatedData.newPassword
+                );
+            }
+
+            return updatedErrors;
+        });
     };
 
     const handleNotificationChange = (name) => {
@@ -150,15 +301,32 @@ const RecruiterSetting = () => {
         } catch (saveError) {
             setError(
                 saveError.response?.data?.message ||
-                    "Unable to save changes. Please try again."
+                    "Unable to save your changes. Please try again."
             );
         } finally {
             setSaving("");
         }
     };
 
+    // Account validation
+    const validateAccountForm = () => {
+        const errors = {
+            phone: validatePhone(accountSettings.phone),
+        };
+
+        setFieldErrors(errors);
+
+        return !Object.values(errors).some(Boolean);
+    };
+
     const handleAccountSave = async (e) => {
         e.preventDefault();
+
+        if (!validateAccountForm()) {
+            setMessage("");
+            setError("Please correct the highlighted field.");
+            return;
+        }
 
         await runSave(
             "account",
@@ -167,27 +335,31 @@ const RecruiterSetting = () => {
         );
     };
 
+    // Password validation
+    const validatePasswordForm = () => {
+        const errors = {
+            currentPassword: validatePassword(
+                passwordData.currentPassword
+            ),
+            newPassword: validateNewPassword(
+                passwordData.newPassword
+            ),
+            confirmPassword: validateConfirmPassword(
+                passwordData.confirmPassword,
+                passwordData.newPassword
+            ),
+        };
+
+        setFieldErrors(errors);
+
+        return !Object.values(errors).some(Boolean);
+    };
+
     const handlePasswordSave = async (e) => {
         e.preventDefault();
 
-        if (
-            !passwordData.currentPassword ||
-            !passwordData.newPassword ||
-            !passwordData.confirmPassword
-        ) {
-            setError("Please fill in all password fields.");
-            setMessage("");
-            return;
-        }
-
-        if (passwordData.newPassword !== passwordData.confirmPassword) {
-            setError("New password and confirm password do not match.");
-            setMessage("");
-            return;
-        }
-
-        if (passwordData.newPassword.length < 8) {
-            setError("Your new password must contain at least 8 characters.");
+        if (!validatePasswordForm()) {
+            setError("Please correct the highlighted password fields.");
             setMessage("");
             return;
         }
@@ -205,6 +377,8 @@ const RecruiterSetting = () => {
                     newPassword: "",
                     confirmPassword: "",
                 });
+
+                setFieldErrors({});
             },
             "Password updated successfully."
         );
@@ -221,94 +395,96 @@ const RecruiterSetting = () => {
         (section) => section.id === activeSection
     );
 
+    const ActiveIcon = activeDetails?.icon || User;
+
     return (
         <div className="min-h-screen w-full bg-slate-50 text-slate-800">
-            {/* Full-width recruiter settings header */}
-            <header className="w-full border-b border-blue-100 bg-white">
-                <div className="flex flex-col gap-3 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7 lg:px-9">
-                    <div className="flex items-center gap-3">
-                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm shadow-blue-200">
-                            <Shield size={22} />
+            <div className="flex min-h-screen w-full flex-col">
+                {/* Page heading */}
+                <header className="flex flex-col gap-3 border-b border-slate-200 bg-white px-5 py-5 sm:px-8 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                        <div className="mb-1 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-indigo-600">
+                            <Settings size={15} />
+                            Account management
                         </div>
 
-                        <div>
-                            <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
-                                Recruiter Settings
-                            </h1>
-                            <p className="mt-0.5 text-sm text-slate-500">
-                                Manage your recruitment account and preferences.
-                            </p>
-                        </div>
+                        <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+                            Recruiter Settings
+                        </h1>
+
+                        <p className="mt-1 text-sm text-slate-500">
+                            Manage your recruitment account, preferences and security.
+                        </p>
                     </div>
 
-                    <div className="flex w-fit items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700">
-                        <span className="h-2 w-2 rounded-full bg-blue-600" />
+                    <div className="flex items-center gap-2 self-start rounded-full border border-indigo-100 bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700 lg:self-center">
+                        <Sparkles size={15} />
                         Recruiter workspace
                     </div>
-                </div>
-            </header>
+                </header>
 
-            <main className="w-full px-3 py-4 sm:px-5 sm:py-5 lg:px-7">
-                {/* Success and error messages */}
+                {/* Status messages */}
                 {(error || message) && (
-                    <div
-                        role="status"
-                        aria-live="polite"
-                        className={`mb-4 flex items-start gap-3 rounded-xl border px-4 py-3 text-sm shadow-sm ${
-                            error
-                                ? "border-red-200 bg-red-50 text-red-700"
-                                : "border-emerald-200 bg-emerald-50 text-emerald-700"
-                        }`}
-                    >
-                        {error ? (
-                            <Shield size={19} className="mt-0.5 shrink-0" />
-                        ) : (
-                            <CheckCircle2
-                                size={19}
-                                className="mt-0.5 shrink-0"
-                            />
-                        )}
-
-                        <span className="flex-1">{error || message}</span>
-
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setError("");
-                                setMessage("");
-                            }}
-                            aria-label="Dismiss message"
-                            className="rounded-md px-1 text-lg leading-none opacity-70 transition hover:opacity-100"
+                    <div className="px-5 pt-4 sm:px-8">
+                        <div
+                            role="status"
+                            aria-live="polite"
+                            className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-sm ${
+                                error
+                                    ? "border-red-200 bg-red-50 text-red-700"
+                                    : "border-emerald-200 bg-emerald-50 text-emerald-700"
+                            }`}
                         >
-                            ×
-                        </button>
+                            {error ? (
+                                <Shield size={18} className="mt-0.5 shrink-0" />
+                            ) : (
+                                <CheckCircle2
+                                    size={18}
+                                    className="mt-0.5 shrink-0"
+                                />
+                            )}
+
+                            <span className="flex-1">{error || message}</span>
+
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setError("");
+                                    setMessage("");
+                                }}
+                                aria-label="Dismiss message"
+                                className="rounded-md px-1 text-lg leading-none opacity-60 transition hover:opacity-100"
+                            >
+                                ×
+                            </button>
+                        </div>
                     </div>
                 )}
 
                 {loading ? (
-                    <div className="flex min-h-[55vh] w-full flex-col items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white">
+                    <div className="flex flex-1 flex-col items-center justify-center bg-slate-50">
                         <LoaderCircle
-                            size={32}
-                            className="animate-spin text-blue-600"
+                            size={36}
+                            className="animate-spin text-indigo-600"
                         />
-                        <p className="text-sm font-medium text-slate-500">
+                        <p className="mt-4 text-sm font-medium text-slate-500">
                             Loading recruiter settings...
                         </p>
                     </div>
                 ) : (
-                    <div className="grid w-full grid-cols-1 items-start gap-4 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-5">
-                        {/* Desktop navigation */}
-                        <aside className="hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm lg:block">
-                            <div className="border-b border-slate-100 px-5 py-4">
+                    <div className="grid flex-1 grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)]">
+                        {/* Sidebar */}
+                        <aside className="border-b border-slate-200 bg-white lg:min-h-full lg:border-b-0 lg:border-r">
+                            <div className="hidden border-b border-slate-100 px-6 py-5 lg:block">
                                 <h2 className="text-sm font-bold text-slate-900">
-                                    Recruiter Preferences
+                                    Settings menu
                                 </h2>
                                 <p className="mt-1 text-xs text-slate-500">
-                                    Configure your workspace
+                                    Manage your recruiter preferences.
                                 </p>
                             </div>
 
-                            <nav className="space-y-1.5 p-3">
+                            <nav className="flex gap-2 overflow-x-auto p-3 lg:flex-col lg:gap-1 lg:p-4">
                                 {sections.map((section) => {
                                     const Icon = section.icon;
                                     const selected =
@@ -318,256 +494,257 @@ const RecruiterSetting = () => {
                                         <button
                                             key={section.id}
                                             type="button"
-                                            onClick={() => {
-                                                setActiveSection(section.id);
-                                                setError("");
-                                                setMessage("");
-                                            }}
-                                            className={`group flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-left transition-all duration-200 ${
+                                            onClick={() =>
+                                                handleSectionChange(section.id)
+                                            }
+                                            aria-current={
+                                                selected ? "page" : undefined
+                                            }
+                                            className={`group flex min-w-fit flex-1 items-center gap-3 rounded-xl border px-3 py-3 text-left transition-all lg:flex-none ${
                                                 selected
-                                                    ? "border-blue-200 bg-blue-50 text-blue-700 shadow-sm"
-                                                    : "border-transparent text-slate-600 hover:border-slate-100 hover:bg-slate-50"
+                                                    ? "border-indigo-100 bg-indigo-50"
+                                                    : "border-transparent hover:border-slate-100 hover:bg-slate-50"
                                             }`}
                                         >
                                             <span
-                                                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg transition-colors ${
+                                                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors ${
                                                     selected
-                                                        ? "bg-blue-600 text-white"
-                                                        : "bg-slate-100 text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600"
+                                                        ? "bg-indigo-600 text-white shadow-sm shadow-indigo-200"
+                                                        : "bg-slate-100 text-slate-500 group-hover:bg-indigo-50 group-hover:text-indigo-600"
                                                 }`}
                                             >
                                                 <Icon size={19} />
                                             </span>
 
                                             <span className="min-w-0 flex-1">
-                                                <span className="block text-sm font-semibold">
-                                                    {section.label}
-                                                </span>
                                                 <span
-                                                    className={`mt-0.5 block text-xs ${
+                                                    className={`block whitespace-nowrap text-sm font-semibold ${
                                                         selected
-                                                            ? "text-blue-600"
-                                                            : "text-slate-400"
+                                                            ? "text-indigo-700"
+                                                            : "text-slate-700"
                                                     }`}
                                                 >
+                                                    {section.label}
+                                                </span>
+
+                                                <span className="mt-0.5 hidden text-[11px] text-slate-400 lg:block">
                                                     {section.description}
                                                 </span>
                                             </span>
 
                                             {selected && (
-                                                <span className="h-2 w-2 shrink-0 rounded-full bg-blue-600" />
+                                                <ChevronRight
+                                                    size={17}
+                                                    className="hidden shrink-0 text-indigo-600 lg:block"
+                                                />
                                             )}
                                         </button>
                                     );
                                 })}
                             </nav>
 
-                            <div className="mx-3 mb-3 rounded-xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-4">
-                                <div className="mb-2 flex items-center gap-2 text-blue-700">
-                                    <Shield size={17} />
-                                    <span className="text-xs font-bold">
-                                        Your workspace, your control
-                                    </span>
+                            <div className="m-4 hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50 to-white p-5 lg:block">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-indigo-600 shadow-sm">
+                                    <Shield size={20} />
                                 </div>
-                                <p className="text-xs leading-5 text-slate-500">
-                                    Manage candidate alerts, recruitment
-                                    preferences and company visibility.
+
+                                <h3 className="mt-4 text-sm font-bold text-slate-900">
+                                    Your workspace, your control
+                                </h3>
+
+                                <p className="mt-2 text-xs leading-5 text-slate-500">
+                                    Manage your recruitment notifications and
+                                    keep your recruiter account secure.
                                 </p>
                             </div>
                         </aside>
 
-                        {/* Mobile navigation */}
-                        <nav
-                            aria-label="Recruiter settings sections"
-                            className="flex gap-2 overflow-x-auto rounded-xl border border-slate-200 bg-white p-2 shadow-sm lg:hidden"
-                        >
-                            {sections.map((section) => {
-                                const Icon = section.icon;
-                                const selected =
-                                    activeSection === section.id;
-
-                                return (
-                                    <button
-                                        key={section.id}
-                                        type="button"
-                                        onClick={() => {
-                                            setActiveSection(section.id);
-                                            setError("");
-                                            setMessage("");
-                                        }}
-                                        className={`flex shrink-0 items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold transition ${
-                                            selected
-                                                ? "bg-blue-600 text-white shadow-sm"
-                                                : "bg-white text-slate-600 hover:bg-blue-50 hover:text-blue-700"
-                                        }`}
-                                    >
-                                        <Icon size={17} />
-                                        {section.label}
-                                    </button>
-                                );
-                            })}
-                        </nav>
-
-                        {/* Main settings panel */}
-                        <section className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                            <div className="flex items-center gap-3 border-b border-slate-100 px-4 py-4 sm:px-6 sm:py-5">
-                                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 ring-1 ring-blue-100">
-                                    {activeDetails &&
-                                        (() => {
-                                            const Icon = activeDetails.icon;
-                                            return <Icon size={21} />;
-                                        })()}
-                                </div>
-
-                                <div className="min-w-0">
-                                    <h2 className="text-base font-bold text-slate-900 sm:text-lg">
-                                        {activeSection === "account" &&
-                                            "Recruiter Account"}
-                                        {activeSection === "notifications" &&
-                                            "Recruitment Notifications"}
-                                        {activeSection === "password" &&
-                                            "Password & Security"}
-                                    </h2>
-
-                                    <p className="mt-1 text-xs leading-5 text-slate-500 sm:text-sm">
-                                        {activeSection === "account" &&
-                                            "Manage your recruiter contact information."}
-                                        {activeSection === "notifications" &&
-                                            "Stay updated on applications, interviews and candidates."}
-                                        {activeSection === "password" &&
-                                            "Keep your recruiter account secure."}
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Account settings */}
-                            {activeSection === "account" && (
-                                <form
-                                    onSubmit={handleAccountSave}
-                                    className="space-y-5 p-4 sm:p-6"
-                                >
-                                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                                        <div className="min-w-0">
-                                            <label
-                                                htmlFor="recruiter-email"
-                                                className="mb-2 block text-sm font-semibold text-slate-700"
-                                            >
-                                                Email address
-                                            </label>
-
-                                            <div className="relative">
-                                                <Mail
-                                                    size={18}
-                                                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-                                                />
-                                                <input
-                                                    id="recruiter-email"
-                                                    type="email"
-                                                    name="email"
-                                                    value={accountSettings.email}
-                                                    readOnly
-                                                    className="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50 py-3 pl-11 pr-4 text-sm text-slate-500 outline-none"
-                                                />
-                                            </div>
-
-                                            <p className="mt-2 text-xs text-slate-400">
-                                                Your registered email cannot
-                                                be changed here.
-                                            </p>
-                                        </div>
-
-                                        <div className="min-w-0">
-                                            <label
-                                                htmlFor="recruiter-phone"
-                                                className="mb-2 block text-sm font-semibold text-slate-700"
-                                            >
-                                                Phone number
-                                            </label>
-
-                                            <input
-                                                id="recruiter-phone"
-                                                type="tel"
-                                                name="phone"
-                                                autoComplete="tel"
-                                                value={accountSettings.phone}
-                                                onChange={handleAccountChange}
-                                                placeholder="Enter your phone number"
-                                                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
-                                            />
-
-                                            <p className="mt-2 text-xs text-slate-400">
-                                                Keep your recruiter contact
-                                                details up to date.
-                                            </p>
-                                        </div>
+                        {/* Main content */}
+                        <main className="min-w-0 bg-slate-50">
+                            <div className="flex min-h-full flex-col">
+                                {/* Section header */}
+                                <div className="flex items-center gap-4 border-b border-slate-200 bg-white px-5 py-5 sm:px-8 sm:py-6">
+                                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 ring-1 ring-indigo-100">
+                                        <ActiveIcon size={23} />
                                     </div>
 
-                                    <div className="flex justify-end border-t border-slate-100 pt-5">
-                                        <SaveButton
+                                    <div className="min-w-0">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
+                                                {sectionContent[activeSection].title}
+                                            </h2>
+
+                                            <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-indigo-600">
+                                                {activeDetails?.label}
+                                            </span>
+                                        </div>
+
+                                        <p className="mt-1 text-sm text-slate-500">
+                                            {sectionContent[activeSection].description}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* Account settings */}
+                                {activeSection === "account" && (
+                                    <form
+                                        onSubmit={handleAccountSave}
+                                        noValidate
+                                        className="flex flex-1 flex-col"
+                                    >
+                                        <div className="flex-1 px-5 py-7 sm:px-8 sm:py-9">
+                                            <div className="mb-7">
+                                                <h3 className="text-base font-bold text-slate-900">
+                                                    Contact information
+                                                </h3>
+                                                <p className="mt-1 text-sm text-slate-500">
+                                                    Your registered recruiter contact details.
+                                                </p>
+                                                <p className="mt-2 text-xs text-slate-500">
+                                                    Fields marked with <span className="font-bold text-red-600">*</span> are required.
+                                                </p>
+                                            </div>
+
+                                            <div className="grid max-w-4xl grid-cols-1 gap-7 md:grid-cols-2">
+                                                <div>
+                                                    <FieldLabel htmlFor="recruiter-email">
+                                                        Email address
+                                                    </FieldLabel>
+
+                                                    <div className="relative">
+                                                        <Mail
+                                                            size={18}
+                                                            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                                                        />
+
+                                                        <input
+                                                            id="recruiter-email"
+                                                            type="email"
+                                                            name="email"
+                                                            value={accountSettings.email}
+                                                            readOnly
+                                                            className="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-100 py-3 pl-11 pr-4 text-sm text-slate-500 outline-none"
+                                                        />
+                                                    </div>
+
+                                                    <p className="mt-2 text-xs text-slate-400">
+                                                        Your registered email cannot be changed here.
+                                                    </p>
+                                                </div>
+
+                                                <div>
+                                                    <FieldLabel
+                                                        htmlFor="recruiter-phone"
+                                                        required
+                                                    >
+                                                        Phone number
+                                                    </FieldLabel>
+
+                                                    <input
+                                                        id="recruiter-phone"
+                                                        type="tel"
+                                                        name="phone"
+                                                        autoComplete="tel"
+                                                        value={accountSettings.phone}
+                                                        onChange={handleAccountChange}
+                                                        placeholder="Enter your 10-digit phone number"
+                                                        maxLength={10}
+                                                        aria-invalid={!!fieldErrors.phone}
+                                                        aria-describedby={
+                                                            fieldErrors.phone
+                                                                ? "recruiter-phone-error"
+                                                                : undefined
+                                                        }
+                                                        className={`w-full rounded-xl border bg-white px-4 py-3 text-sm outline-none transition placeholder:text-slate-400 focus:ring-4 ${
+                                                            fieldErrors.phone
+                                                                ? "border-red-500 focus:border-red-500 focus:ring-red-50"
+                                                                : "border-slate-200 focus:border-indigo-500 focus:ring-indigo-50"
+                                                        }`}
+                                                    />
+
+                                                    <FieldError>
+                                                        {fieldErrors.phone}
+                                                    </FieldError>
+
+                                                    {!fieldErrors.phone && (
+                                                        <p className="mt-2 text-xs text-slate-400">
+                                                            Enter a valid 10-digit phone number.
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <SaveFooter
                                             loading={saving === "account"}
                                             saved={savedSection === "account"}
                                             disabled={!!saving}
                                             label="Save Changes"
                                         />
-                                    </div>
-                                </form>
-                            )}
+                                    </form>
+                                )}
 
-                            {/* Recruiter notifications */}
-                            {activeSection === "notifications" && (
-                                <div>
-                                    <div className="divide-y divide-slate-100">
-                                        <SettingToggle
-                                            title="Application Alerts"
-                                            description="Receive notifications when candidates apply to your job postings."
-                                            enabled={notificationSettings.applicationAlerts}
-                                            onChange={() =>
-                                                handleNotificationChange(
-                                                    "applicationAlerts"
-                                                )
-                                            }
-                                            disabled={!!saving}
-                                        />
+                                {/* Notifications */}
+                                {activeSection === "notifications" && (
+                                    <div className="flex flex-1 flex-col">
+                                        <div className="flex-1">
+                                            <div className="border-b border-slate-100 bg-white px-5 py-5 sm:px-8">
+                                                <h3 className="text-base font-bold text-slate-900">
+                                                    Recruitment notifications
+                                                </h3>
+                                                <p className="mt-1 text-sm text-slate-500">
+                                                    Choose which recruitment updates you want to receive.
+                                                </p>
+                                            </div>
 
-                                        <SettingToggle
-                                            title="Interview Updates"
-                                            description="Stay informed about scheduled interviews and interview changes."
-                                            enabled={notificationSettings.interviewUpdates}
-                                            onChange={() =>
-                                                handleNotificationChange(
-                                                    "interviewUpdates"
-                                                )
-                                            }
-                                            disabled={!!saving}
-                                        />
+                                            <div className="divide-y divide-slate-100 bg-white">
+                                                <SettingToggle
+                                                    icon={Bell}
+                                                    title="Application Alerts"
+                                                    description="Receive in-app notifications when candidates apply to your job postings."
+                                                    enabled={notificationSettings.applicationAlerts}
+                                                    onChange={() =>
+                                                        handleNotificationChange("applicationAlerts")
+                                                    }
+                                                    disabled={!!saving}
+                                                />
 
-                                        <SettingToggle
-                                            title="New Candidate Alerts"
-                                            description="Receive alerts about new candidates and recruitment activity."
-                                            enabled={notificationSettings.newCandidateAlerts}
-                                            onChange={() =>
-                                                handleNotificationChange(
-                                                    "newCandidateAlerts"
-                                                )
-                                            }
-                                            disabled={!!saving}
-                                        />
+                                                <SettingToggle
+                                                    icon={CheckCircle2}
+                                                    title="Interview Updates"
+                                                    description="Stay informed about scheduled interviews and interview changes."
+                                                    enabled={notificationSettings.interviewUpdates}
+                                                    onChange={() =>
+                                                        handleNotificationChange("interviewUpdates")
+                                                    }
+                                                    disabled={!!saving}
+                                                />
 
-                                        <SettingToggle
-                                            title="Email Notifications"
-                                            description="Receive important JobBridge recruiter updates through email."
-                                            enabled={notificationSettings.emailNotifications}
-                                            onChange={() =>
-                                                handleNotificationChange(
-                                                    "emailNotifications"
-                                                )
-                                            }
-                                            disabled={!!saving}
-                                        />
-                                    </div>
+                                                <SettingToggle
+                                                    icon={User}
+                                                    title="New Candidate Alerts"
+                                                    description="Receive alerts about new candidates and recruitment activity."
+                                                    enabled={notificationSettings.newCandidateAlerts}
+                                                    onChange={() =>
+                                                        handleNotificationChange("newCandidateAlerts")
+                                                    }
+                                                    disabled={!!saving}
+                                                />
 
-                                    <div className="flex justify-end border-t border-slate-100 px-4 py-4 sm:px-6">
-                                        <SaveButton
+                                                <SettingToggle
+                                                    icon={Mail}
+                                                    title="Email Notifications"
+                                                    description="Receive important JobBridge recruiter updates through email."
+                                                    enabled={notificationSettings.emailNotifications}
+                                                    onChange={() =>
+                                                        handleNotificationChange("emailNotifications")
+                                                    }
+                                                    disabled={!!saving}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <SaveFooter
                                             loading={saving === "notifications"}
                                             saved={savedSection === "notifications"}
                                             disabled={!!saving}
@@ -575,88 +752,123 @@ const RecruiterSetting = () => {
                                             onClick={handleNotificationSave}
                                         />
                                     </div>
-                                </div>
-                            )}
+                                )}
 
-                            {/* Password and security */}
-                            {activeSection === "password" && (
-                                <form
-                                    onSubmit={handlePasswordSave}
-                                    className="space-y-5 p-4 sm:p-6"
-                                >
-                                    <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-                                        <PasswordInput
-                                            id="recruiter-current-password"
-                                            label="Current password"
-                                            name="currentPassword"
-                                            value={passwordData.currentPassword}
-                                            onChange={handlePasswordChange}
-                                            show={showCurrentPassword}
-                                            setShow={setShowCurrentPassword}
-                                            disabled={!!saving}
-                                        />
-
-                                        <div className="hidden xl:block" />
-
-                                        <PasswordInput
-                                            id="recruiter-new-password"
-                                            label="New password"
-                                            name="newPassword"
-                                            value={passwordData.newPassword}
-                                            onChange={handlePasswordChange}
-                                            show={showNewPassword}
-                                            setShow={setShowNewPassword}
-                                            disabled={!!saving}
-                                        />
-
-                                        <PasswordInput
-                                            id="recruiter-confirm-password"
-                                            label="Confirm new password"
-                                            name="confirmPassword"
-                                            value={passwordData.confirmPassword}
-                                            onChange={handlePasswordChange}
-                                            show={showConfirmPassword}
-                                            setShow={setShowConfirmPassword}
-                                            disabled={!!saving}
-                                        />
-                                    </div>
-
-                                    <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-4">
-                                        <div className="flex items-start gap-3">
-                                            <Lock
-                                                size={18}
-                                                className="mt-0.5 shrink-0 text-blue-600"
-                                            />
-                                            <div>
-                                                <p className="text-sm font-semibold text-slate-800">
-                                                    Password security
+                                {/* Password settings */}
+                                {activeSection === "password" && (
+                                    <form
+                                        onSubmit={handlePasswordSave}
+                                        noValidate
+                                        className="flex flex-1 flex-col"
+                                    >
+                                        <div className="flex-1 px-5 py-7 sm:px-8 sm:py-9">
+                                            <div className="mb-7">
+                                                <h3 className="text-base font-bold text-slate-900">
+                                                    Change your password
+                                                </h3>
+                                                <p className="mt-1 text-sm text-slate-500">
+                                                    Choose a strong password to protect your recruiter account.
                                                 </p>
-                                                <p className="mt-1 text-xs leading-5 text-slate-600">
-                                                    Use at least 8 characters
-                                                    and avoid reusing passwords
-                                                    from other websites.
+                                                <p className="mt-2 text-xs text-slate-500">
+                                                    Fields marked with <span className="font-bold text-red-600">*</span> are required.
                                                 </p>
                                             </div>
-                                        </div>
-                                    </div>
 
-                                    <div className="flex justify-end border-t border-slate-100 pt-5">
-                                        <SaveButton
+                                            <div className="max-w-3xl space-y-6">
+                                                <PasswordInput
+                                                    id="recruiter-current-password"
+                                                    label="Current password"
+                                                    name="currentPassword"
+                                                    value={passwordData.currentPassword}
+                                                    onChange={handlePasswordChange}
+                                                    show={showCurrentPassword}
+                                                    setShow={setShowCurrentPassword}
+                                                    disabled={!!saving}
+                                                    error={fieldErrors.currentPassword}
+                                                    required
+                                                />
+
+                                                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                                                    <PasswordInput
+                                                        id="recruiter-new-password"
+                                                        label="New password"
+                                                        name="newPassword"
+                                                        value={passwordData.newPassword}
+                                                        onChange={handlePasswordChange}
+                                                        show={showNewPassword}
+                                                        setShow={setShowNewPassword}
+                                                        disabled={!!saving}
+                                                        error={fieldErrors.newPassword}
+                                                        required
+                                                    />
+
+                                                    <PasswordInput
+                                                        id="recruiter-confirm-password"
+                                                        label="Confirm new password"
+                                                        name="confirmPassword"
+                                                        value={passwordData.confirmPassword}
+                                                        onChange={handlePasswordChange}
+                                                        show={showConfirmPassword}
+                                                        setShow={setShowConfirmPassword}
+                                                        disabled={!!saving}
+                                                        error={fieldErrors.confirmPassword}
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-8 max-w-3xl rounded-xl border border-indigo-100 bg-indigo-50/70 p-4">
+                                                <div className="flex items-start gap-3">
+                                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-indigo-600 shadow-sm">
+                                                        <Lock size={19} />
+                                                    </div>
+
+                                                    <div>
+                                                        <p className="text-sm font-bold text-slate-800">
+                                                            Create a strong password
+                                                        </p>
+                                                        <p className="mt-1 text-xs leading-5 text-slate-600">
+                                                            Use at least 8 characters and avoid reusing passwords from other websites.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <SaveFooter
                                             loading={saving === "password"}
                                             saved={savedSection === "password"}
                                             disabled={!!saving}
                                             label="Update Password"
                                         />
-                                    </div>
-                                </form>
-                            )}
-                        </section>
+                                    </form>
+                                )}
+                            </div>
+                        </main>
                     </div>
                 )}
-            </main>
+            </div>
         </div>
     );
 };
+
+const SaveFooter = ({
+    loading = false,
+    saved = false,
+    disabled = false,
+    label,
+    onClick,
+}) => (
+    <div className="mt-auto flex justify-end border-t border-slate-200 bg-white px-5 py-5 sm:px-8">
+        <SaveButton
+            loading={loading}
+            saved={saved}
+            disabled={disabled}
+            label={label}
+            onClick={onClick}
+        />
+    </div>
+);
 
 const SaveButton = ({
     loading = false,
@@ -669,11 +881,10 @@ const SaveButton = ({
         type={onClick ? "button" : "submit"}
         onClick={onClick}
         disabled={disabled || loading}
-        className={`group relative inline-flex min-h-11 items-center justify-center gap-2 overflow-hidden rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-75 ${
-            saved && !loading
-                ? "bg-emerald-600 shadow-emerald-100"
-                : "bg-blue-600 shadow-blue-100 hover:-translate-y-0.5 hover:bg-blue-700 hover:shadow-md active:translate-y-0"
-        }`}
+        style={{
+            backgroundColor: saved && !loading ? "#059669" : PRIMARY,
+        }}
+        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-indigo-100 disabled:cursor-not-allowed disabled:opacity-60"
     >
         {loading ? (
             <>
@@ -682,18 +893,12 @@ const SaveButton = ({
             </>
         ) : saved ? (
             <>
-                <CheckCircle2
-                    size={18}
-                    className="animate-[savePop_0.3s_ease-out]"
-                />
+                <CheckCircle2 size={18} />
                 Saved Successfully
             </>
         ) : (
             <>
-                <Save
-                    size={17}
-                    className="transition-transform duration-200 group-hover:scale-110"
-                />
+                <Save size={17} />
                 {label}
             </>
         )}
@@ -701,18 +906,47 @@ const SaveButton = ({
 );
 
 const SettingToggle = ({
+    icon: Icon,
     title,
     description,
     enabled,
     onChange,
     disabled = false,
 }) => (
-    <div className="flex items-center justify-between gap-4 px-4 py-4 transition-colors hover:bg-slate-50/70 sm:px-6 sm:py-5">
-        <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-semibold text-slate-800">{title}</h3>
-            <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-500 sm:text-sm">
-                {description}
-            </p>
+    <div className="flex items-center justify-between gap-4 px-5 py-5 transition-colors hover:bg-slate-50 sm:px-8 sm:py-6">
+        <div className="flex min-w-0 items-start gap-4">
+            <div
+                className={`mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors ${
+                    enabled
+                        ? "bg-indigo-50 text-indigo-600"
+                        : "bg-slate-100 text-slate-400"
+                }`}
+            >
+                {Icon && <Icon size={20} />}
+            </div>
+
+            <div className="min-w-0 flex-1">
+                <h3 className="text-sm font-bold text-slate-800">
+                    {title}
+                </h3>
+
+                <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-500 sm:text-sm">
+                    {description}
+                </p>
+
+                <span
+                    className={`mt-2 inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider ${
+                        enabled ? "text-indigo-600" : "text-slate-400"
+                    }`}
+                >
+                    <span
+                        className={`h-1.5 w-1.5 rounded-full ${
+                            enabled ? "bg-indigo-600" : "bg-slate-400"
+                        }`}
+                    />
+                    {enabled ? "Enabled" : "Disabled"}
+                </span>
+            </div>
         </div>
 
         <button
@@ -722,8 +956,8 @@ const SettingToggle = ({
             aria-label={title}
             disabled={disabled}
             onClick={onChange}
-            className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-60 ${
-                enabled ? "bg-blue-600" : "bg-slate-300"
+            className={`relative h-6 w-11 shrink-0 rounded-full transition-colors duration-200 focus:outline-none focus:ring-4 focus:ring-indigo-100 disabled:cursor-not-allowed disabled:opacity-50 ${
+                enabled ? "bg-indigo-600" : "bg-slate-300"
             }`}
         >
             <span
@@ -732,7 +966,7 @@ const SettingToggle = ({
                 }`}
             >
                 {enabled && (
-                    <Check size={10} className="text-blue-600" />
+                    <Check size={10} className="text-indigo-600" />
                 )}
             </span>
         </button>
@@ -748,14 +982,13 @@ const PasswordInput = ({
     show,
     setShow,
     disabled = false,
+    error = "",
+    required = false,
 }) => (
     <div className="min-w-0">
-        <label
-            htmlFor={id}
-            className="mb-2 block text-sm font-semibold text-slate-700"
-        >
+        <FieldLabel htmlFor={id} required={required}>
             {label}
-        </label>
+        </FieldLabel>
 
         <div className="relative">
             <Lock
@@ -776,7 +1009,13 @@ const PasswordInput = ({
                         : "new-password"
                 }
                 placeholder={`Enter ${label.toLowerCase()}`}
-                className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-12 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 disabled:bg-slate-50"
+                aria-invalid={!!error}
+                aria-describedby={error ? `${id}-error` : undefined}
+                className={`w-full rounded-xl border bg-white py-3 pl-10 pr-12 text-sm outline-none transition placeholder:text-slate-400 focus:ring-4 disabled:bg-slate-50 ${
+                    error
+                        ? "border-red-500 focus:border-red-500 focus:ring-red-50"
+                        : "border-slate-200 focus:border-indigo-500 focus:ring-indigo-50"
+                }`}
             />
 
             <button
@@ -784,11 +1023,13 @@ const PasswordInput = ({
                 disabled={disabled}
                 onClick={() => setShow((prev) => !prev)}
                 aria-label={show ? "Hide password" : "Show password"}
-                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 transition hover:bg-blue-50 hover:text-blue-600 disabled:opacity-50"
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 transition hover:bg-indigo-50 hover:text-indigo-600 disabled:opacity-50"
             >
                 {show ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
         </div>
+
+        <FieldError>{error}</FieldError>
     </div>
 );
 
