@@ -24,7 +24,7 @@ import {
     Users,
     X
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import LocationAutocomplete from "../components/LocationAutocomplete";
@@ -81,6 +81,7 @@ const Home = () => {
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [authAction, setAuthAction] = useState("");
     const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+    const profileMenuRef = useRef(null);
 
     const [searchKeyword, setSearchKeyword] = useState("");
     const [searchLocation, setSearchLocation] = useState("");
@@ -93,6 +94,27 @@ const Home = () => {
     const [categories, setCategories] = useState([]);
     const [savedJobIds, setSavedJobIds] = useState([]);
     const [homeError, setHomeError] = useState("");
+
+    useEffect(() => {
+        if (!profileMenuOpen) return undefined;
+
+        const closeOnOutsideInteraction = (event) => {
+            if (!profileMenuRef.current?.contains(event.target)) {
+                setProfileMenuOpen(false);
+            }
+        };
+        const closeOnEscape = (event) => {
+            if (event.key === "Escape") setProfileMenuOpen(false);
+        };
+
+        document.addEventListener("pointerdown", closeOnOutsideInteraction);
+        document.addEventListener("keydown", closeOnEscape);
+
+        return () => {
+            document.removeEventListener("pointerdown", closeOnOutsideInteraction);
+            document.removeEventListener("keydown", closeOnEscape);
+        };
+    }, [profileMenuOpen]);
 
     useEffect(() => {
         let active = true;
@@ -878,7 +900,7 @@ const Home = () => {
                         )}
 
                         {/* PROFILE */}
-                        <div className="relative">
+                        <div className="relative" ref={profileMenuRef}>
                             <button
                                 type="button"
                                 onClick={() =>

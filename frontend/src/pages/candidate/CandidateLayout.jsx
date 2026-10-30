@@ -14,7 +14,7 @@ import {
     UserCircle,
     X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import useRoleHeaderData from "../../hooks/useRoleHeaderData";
 import NotificationDropdown from "../Notification";
@@ -25,6 +25,7 @@ const CandidateLayout = () => {
 
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+    const profileMenuRef = useRef(null);
 
     const { user, profile } = useRoleHeaderData("CANDIDATE");
 
@@ -34,6 +35,27 @@ const CandidateLayout = () => {
     const [isDarkMode, setIsDarkMode] = useState(
             () => localStorage.getItem("jobbridge-theme") === "dark"
     );
+
+    useEffect(() => {
+        if (!profileMenuOpen) return undefined;
+
+        const closeOnOutsideInteraction = (event) => {
+            if (!profileMenuRef.current?.contains(event.target)) {
+                setProfileMenuOpen(false);
+            }
+        };
+        const closeOnEscape = (event) => {
+            if (event.key === "Escape") setProfileMenuOpen(false);
+        };
+
+        document.addEventListener("pointerdown", closeOnOutsideInteraction);
+        document.addEventListener("keydown", closeOnEscape);
+
+        return () => {
+            document.removeEventListener("pointerdown", closeOnOutsideInteraction);
+            document.removeEventListener("keydown", closeOnEscape);
+        };
+    }, [profileMenuOpen]);
     
     // CANDIDATE NAVIGATION
     const navigation = [
@@ -98,10 +120,6 @@ const CandidateLayout = () => {
                     from { opacity: 0; transform: translateY(-16px); }
                     to { opacity: 1; transform: translateY(0); }
                 }
-                @keyframes candidatePageIn {
-                    from { opacity: 0; }
-                    to { opacity: 1; }
-                }
                 @keyframes candidateDropdownIn {
                     from { opacity: 0; transform: translateY(-7px) scale(.985); }
                     to { opacity: 1; transform: translateY(0) scale(1); }
@@ -165,7 +183,6 @@ const CandidateLayout = () => {
                 .candidate-profile-trigger:hover .candidate-avatar { transform: scale(1.07); box-shadow: 0 0 0 3px rgba(99,102,241,.12); }
                 .candidate-unread-badge { animation: candidateBadgePulse 2.2s ease-in-out infinite; }
                 .candidate-mobile-menu { animation: candidateDropdownIn .22s ease-out both; transform-origin: top; }
-                .candidate-page-content { animation: candidatePageIn .42s cubic-bezier(.2,.7,.2,1) both; }
                 .candidate-layout button:focus-visible, .candidate-layout a:focus-visible {
                     outline: 3px solid rgba(99,102,241,.35);
                     outline-offset: 3px;
@@ -234,7 +251,7 @@ const CandidateLayout = () => {
                         />
 
                         {/* PROFILE */}
-                        <div className="relative">
+                        <div className="relative" ref={profileMenuRef}>
                             <button
                                 type="button"
                                 onClick={() =>
@@ -413,7 +430,7 @@ const CandidateLayout = () => {
 
             {/* PAGE CONTENT */}
             <main className="mx-auto max-w-[1440px] px-5 py-6 sm:px-7 lg:px-10">
-                <section key={location.pathname} className="candidate-page-content">
+                <section key={location.pathname}>
                     <Outlet />
                 </section>
             </main>

@@ -13,7 +13,7 @@ import {
     Users,
     X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import useRoleHeaderData from "../../hooks/useRoleHeaderData";
 import NotificationDropdown from "../Notification";
@@ -24,12 +24,34 @@ const RecruiterLayout = () => {
 
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+    const profileMenuRef = useRef(null);
 
     const { user, profile } = useRoleHeaderData("RECRUITER");
 
     const userName = profile?.user?.name || user?.name || "Recruiter";
     const userEmail = profile?.user?.email || user?.email || "";
     const avatarUrl = profile?.company?.logo || user?.recruiterProfile?.company?.logo;
+
+    useEffect(() => {
+        if (!profileMenuOpen) return undefined;
+
+        const closeOnOutsideInteraction = (event) => {
+            if (!profileMenuRef.current?.contains(event.target)) {
+                setProfileMenuOpen(false);
+            }
+        };
+        const closeOnEscape = (event) => {
+            if (event.key === "Escape") setProfileMenuOpen(false);
+        };
+
+        document.addEventListener("pointerdown", closeOnOutsideInteraction);
+        document.addEventListener("keydown", closeOnEscape);
+
+        return () => {
+            document.removeEventListener("pointerdown", closeOnOutsideInteraction);
+            document.removeEventListener("keydown", closeOnEscape);
+        };
+    }, [profileMenuOpen]);
 
     const [isDarkMode , setIsDarkMode] = useState (()=>{
         localStorage.getItem("jobbridge-theme") === "dark"
@@ -98,10 +120,6 @@ const RecruiterLayout = () => {
                     from { opacity: 0; transform: translateY(-16px); }
                     to { opacity: 1; transform: translateY(0); }
                 }
-                @keyframes recruiterPageIn {
-                    from { opacity: 0; }
-                    to { opacity: 1; }
-                }
                 @keyframes recruiterDropdownIn {
                     from { opacity: 0; transform: translateY(-7px) scale(.985); }
                     to { opacity: 1; transform: translateY(0) scale(1); }
@@ -165,7 +183,6 @@ const RecruiterLayout = () => {
                 .recruiter-profile-trigger:hover .recruiter-avatar { transform: scale(1.07); box-shadow: 0 0 0 3px rgba(99,102,241,.12); }
                 .recruiter-unread-badge { animation: recruiterBadgePulse 2.2s ease-in-out infinite; }
                 .recruiter-mobile-menu { animation: recruiterDropdownIn .22s ease-out both; transform-origin: top; }
-                .recruiter-page-content { animation: recruiterPageIn .42s cubic-bezier(.2,.7,.2,1) both; }
                 .recruiter-layout button:focus-visible, .recruiter-layout a:focus-visible {
                     outline: 3px solid rgba(99,102,241,.35);
                     outline-offset: 3px;
@@ -233,7 +250,7 @@ const RecruiterLayout = () => {
                         />
 
                         {/* PROFILE */}
-                        <div className="relative">
+                        <div className="relative" ref={profileMenuRef}>
                             <button
                                 type="button"
                                 onClick={() =>
@@ -405,7 +422,7 @@ const RecruiterLayout = () => {
 
             {/* PAGE CONTENT */}
             <main className="mx-auto max-w-[1440px] px-5 py-6 sm:px-7 lg:px-10">
-                <section key={location.pathname} className="recruiter-page-content">
+                <section key={location.pathname}>
                     <Outlet />
                 </section>
             </main>
