@@ -22,6 +22,8 @@ const registerUser = async ({
     role = "CANDIDATE",
     companyName,
     companyType,
+    designation,
+    website,
 }) => {
     const normalizedEmail = email.trim().toLowerCase();
 
@@ -61,10 +63,12 @@ const registerUser = async ({
             const company = await Company.create({
                 name: companyName.trim(),
                 companyType,
+                website: website || null,
             }, { transaction });
             await RecruiterProfile.create({
                 userId: user.id,
                 companyId: company.id,
+                designation: designation || null,
             }, { transaction });
         }
         return user;
@@ -230,4 +234,3 @@ export {
     loginUser,
     registerUser, requestPasswordReset, resetPassword
 };
-

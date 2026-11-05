@@ -938,7 +938,7 @@ const updateInterview = async (
                         }
                     );
                     const interviewTime =
-                        scheduledDate.toLocaleDateString(
+                        scheduledDate.toLocaleTimeString(
                             "en-IN", {
                             hour: "2-digit",
                             minute: "2-digit",

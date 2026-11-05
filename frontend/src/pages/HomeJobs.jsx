@@ -50,13 +50,35 @@ const HomeJobs = () => {
 
     useEffect(() => {
         let active = true;
-        getJobs({ limit: 50 })
-            .then((result) => {
-                if (active) {
-                    setJobs((result.jobs || []).map(formatJobCard));
+        const loadJobs = async () => {
+            try {
+                const firstPage = await getJobs({
+                    limit: 50,
+                    page: 1,
+                });
+                if (!active) return;
+
+                setJobs((firstPage.jobs || []).map(formatJobCard));
+                setLoading(false);
+
+                const totalPages = Math.max(
+                    1,
+                    Number(firstPage.pagination?.totalPages) || 1
+                );
+                for (let page = 2; page <= totalPages; page += 1) {
+                    const result = await getJobs({
+                        limit: 50,
+                        page,
+                    });
+                    if (!active) return;
+
+                    setJobs((currentJobs) => [
+                        ...currentJobs,
+                        ...(result.jobs || []).map(formatJobCard),
+                    ]);
                 }
-            })
-            .catch((loadError) => {
+
+            } catch (loadError) {
                 if (active) {
                     const errorMessage =
                         loadError.response?.data?.message ||
@@ -65,10 +87,12 @@ const HomeJobs = () => {
                     setError(errorMessage);
                     toast.error(errorMessage);
                 }
-            })
-            .finally(() => {
+            } finally {
                 if (active) setLoading(false);
-            });
+            }
+        };
+
+        loadJobs();
 
         if (isLoggedIn && storedUser?.role === "CANDIDATE") {
             getSavedJobs()

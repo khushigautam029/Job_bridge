@@ -74,6 +74,28 @@ const registerSchema = Joi.object({
             "string.empty": "Company name is required for recruiters",
             "any.required": "Company name is required for recruiters",
         }),
+
+    designation: Joi.string()
+        .trim()
+        .max(100)
+        .allow("")
+        .when("role", {
+            is: "RECRUITER",
+            otherwise: Joi.forbidden(),
+        }),
+
+    website: Joi.string()
+        .trim()
+        .uri({ scheme: ["http", "https"] })
+        .max(255)
+        .allow("")
+        .when("role", {
+            is: "RECRUITER",
+            otherwise: Joi.forbidden(),
+        })
+        .messages({
+            "string.uri": MESSAGES.PROVIDE_A_VALID_WEB_URL,
+        }),
 });
 
 const loginSchema = Joi.object({
@@ -136,4 +158,3 @@ export {
     forgotPasswordSchema, loginSchema,
     registerSchema, resetPasswordSchema
 };
-
