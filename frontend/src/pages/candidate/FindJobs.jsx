@@ -183,8 +183,10 @@ const FindJobs = () => {
                 .includes(normalizeLocationQuery(location));
 
         const matchesType =
-            jobType === "All" || job.type === jobType;
-
+            jobType === "All" ||
+            String(job.type || "").toUpperCase().replace(/[\s_-]/g, "") ===
+            jobType.toUpperCase().replace(/[\s_-]/g, "");
+            
         const matchesExperience =
             experience === "All" ||
             (() => {
@@ -349,6 +351,7 @@ const FindJobs = () => {
                             onChange={(e) =>
                                 setLocation(e.target.value)
                             }
+                            usePortal
                             placeholder="Location"
                             className="min-w-0 flex-1"
                             inputClassName="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
@@ -378,6 +381,9 @@ const FindJobs = () => {
                             </option>
                             <option value="Internship">
                                 Internship
+                            </option>
+                            <option value="Freelance">
+                                Freelance
                             </option>
                         </select>
 

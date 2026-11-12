@@ -91,10 +91,7 @@ const sendBrevoEmail = async ({
     }
 };
 
-// --------------------------------------------------
 // Reusable professional JobBridge email template
-// --------------------------------------------------
-
 const BRAND = {
     primary: "#2563eb",
     primaryDark: "#1d4ed8",
@@ -230,10 +227,7 @@ const createLinkFallback = (url, label = "If the button does not work, copy this
     <a href="${escapeHtml(url)}" style="color:${BRAND.primary};">${escapeHtml(url)}</a>
 </p>`;
 
-// --------------------------------------------------
 // 1. Password reset email
-// --------------------------------------------------
-
 const sendPasswordResetEmail = async ({ email, name, token }) => {
     const frontendUrl = process.env.FRONTEND_URL;
 
@@ -302,10 +296,7 @@ const sendPasswordResetEmail = async ({ email, name, token }) => {
     });
 };
 
-// --------------------------------------------------
 // 2. Candidate application confirmation email
-// --------------------------------------------------
-
 const sendApplicationConfirmationEmail = async ({
     email,
     name,
@@ -366,10 +357,7 @@ const sendApplicationConfirmationEmail = async ({
     });
 };
 
-// --------------------------------------------------
 // 3. Candidate selection email
-// --------------------------------------------------
-
 const sendCandidateSelectionEmail = async ({
     email,
     name,
@@ -427,10 +415,7 @@ const sendCandidateSelectionEmail = async ({
     });
 };
 
-// --------------------------------------------------
 // 4. Interview invitation / rescheduling email
-// --------------------------------------------------
-
 const sendInterviewInvitationEmail = async ({
     email,
     name,

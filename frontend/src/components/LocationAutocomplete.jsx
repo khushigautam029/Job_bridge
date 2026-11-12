@@ -1,4 +1,11 @@
-import { useEffect, useId, useRef, useState } from "react";
+import {
+    useEffect,
+    useId,
+    useLayoutEffect,
+    useRef,
+    useState,
+} from "react";
+import { createPortal } from "react-dom";
 
 const API_KEY = import.meta.env.VITE_GEOAPIFY_API_KEY;
 
@@ -8,6 +15,7 @@ const LocationAutocomplete = ({
     onChange,
     onSelect,
     onSuggestionsOpenChange,
+    usePortal = false,
     className = "",
     inputClassName = "",
     placeholder = "Start typing a city or location",
@@ -22,7 +30,9 @@ const LocationAutocomplete = ({
     const [isOpen, setIsOpen] = useState(false);
     const [activeIndex, setActiveIndex] = useState(-1);
     const rootRef = useRef(null);
+    const dropdownRef = useRef(null);
     const selectedValueRef = useRef("");
+    const [dropdownPosition, setDropdownPosition] = useState(null);
 
     useEffect(() => {
         onSuggestionsOpenChange?.(isOpen && suggestions.length > 0);
@@ -72,11 +82,41 @@ const LocationAutocomplete = ({
 
     useEffect(() => {
         const closeOnOutsideClick = (event) => {
-            if (!rootRef.current?.contains(event.target)) setIsOpen(false);
+            if (
+                !rootRef.current?.contains(event.target) &&
+                !dropdownRef.current?.contains(event.target)
+            ) {
+                setIsOpen(false);
+            }
         };
         document.addEventListener("mousedown", closeOnOutsideClick);
         return () => document.removeEventListener("mousedown", closeOnOutsideClick);
     }, []);
+
+    useLayoutEffect(() => {
+        if (!usePortal || !isOpen) return undefined;
+
+        const updatePosition = () => {
+            const bounds = rootRef.current?.getBoundingClientRect();
+            if (!bounds) return;
+
+            setDropdownPosition({
+                top: bounds.bottom + 4,
+                left: bounds.left,
+                width: Math.max(bounds.width,350),
+                maxHeight: Math.min(400, Math.max(0, window.innerHeight - bounds.bottom - 8)),
+            });
+        };
+
+        updatePosition();
+        window.addEventListener("resize", updatePosition);
+        window.addEventListener("scroll", updatePosition, true);
+
+        return () => {
+            window.removeEventListener("resize", updatePosition);
+            window.removeEventListener("scroll", updatePosition, true);
+        };
+    }, [isOpen, usePortal]);
 
     const chooseSuggestion = (suggestion) => {
         selectedValueRef.current = suggestion.value;
@@ -112,6 +152,37 @@ const LocationAutocomplete = ({
         }
     };
 
+    const suggestionsList = isOpen && suggestions.length > 0 ? (
+        <ul
+            ref={dropdownRef}
+            id={listId}
+            role="listbox"
+            style={usePortal ? dropdownPosition : undefined}
+            className={`${usePortal ? "fixed z-[100]" : "absolute left-0 right-0 top-full z-50 mt-1"} overflow-y-auto rounded-xl border border-slate-200 bg-white p-2 shadow-xl`}
+        >
+            {suggestions.map((suggestion, index) => (
+                <li
+                    key={suggestion.key}
+                    role="option"
+                    aria-selected={index === activeIndex}
+                >
+                    <button
+                        id={`${listId}-${index}`}
+                        type="button"
+                        className={`w-full rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-indigo-50 ${index === activeIndex ? "bg-indigo-50" : ""}`}
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => chooseSuggestion(suggestion)}
+                    >
+                        {suggestion.label}
+                    </button>
+                </li>
+            ))}
+            <li className="px-3 py-1.5 text-right text-[10px] text-slate-400">
+                OpenStreetMap contributors | Powered by Geoapify
+            </li>
+        </ul>
+    ) : null;
+
     return (
         <div ref={rootRef} className={`relative ${className}`}>
             <input
@@ -133,24 +204,11 @@ const LocationAutocomplete = ({
                 onFocus={() => suggestions.length > 0 && setIsOpen(true)}
                 onKeyDown={handleKeyDown}
             />
-            {isOpen && suggestions.length > 0 && (
-                <ul id={listId} role="listbox" className="absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-auto rounded-xl border border-slate-200 bg-white p-1 shadow-xl">
-                    {suggestions.map((suggestion, index) => (
-                        <li key={suggestion.key} role="option" aria-selected={index === activeIndex}>
-                            <button
-                                id={`${listId}-${index}`}
-                                type="button"
-                                className={`w-full rounded-lg px-3 py-2 text-left text-sm text-slate-700 hover:bg-indigo-50 ${index === activeIndex ? "bg-indigo-50" : ""}`}
-                                onMouseDown={(event) => event.preventDefault()}
-                                onClick={() => chooseSuggestion(suggestion)}
-                            >
-                                {suggestion.label}
-                            </button>
-                        </li>
-                    ))}
-                    <li className="px-3 py-1.5 text-right text-[10px] text-slate-400">OpenStreetMap contributors | Powered by Geoapify</li>
-                </ul>
-            )}
+            {suggestionsList &&
+                (usePortal
+                    ? dropdownPosition &&
+                      createPortal(suggestionsList, document.body)
+                    : suggestionsList)}
         </div>
     );
 };

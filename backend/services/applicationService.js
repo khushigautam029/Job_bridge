@@ -10,9 +10,9 @@ import {
     CandidateProfile,
     CandidateProject,
     Company,
+    Interview,
     Job,
     JobCategory,
-    Interview,
     RecruiterProfile,
     Skill,
     User,
@@ -143,7 +143,6 @@ const applyForJob = async (
 
             await sendApplicationEmails({
                 candidateUserId: userId,
-                recruiterUserId: recruiter?.userId,
                 jobTitle: job.title,
             });
 
@@ -873,15 +872,9 @@ const getRecruiterApplications = async (userId) => {
 };
 
 
-/*
-    Recruiter changes application status
-*/
-
-/*
-    Recruiter changes application status.
-    Automatically closes a job when all openings are filled.
-*/
-
+//  Recruiter changes application status
+// Recruiter changes application status.
+// Automatically closes a job when all openings are filled.
 const updateApplicationStatus = async (
     userId,
     applicationId,
@@ -953,6 +946,14 @@ const updateApplicationStatus = async (
         if (application.status === "WITHDRAWN") {
             const error = new Error(
                 MESSAGES.WITHDRAWN_CANNOT_UPDATE
+            );
+            error.statusCode = STATUS_CODES.BAD_REQUEST;
+            throw error;
+        }
+
+        if (application.status === "SELECTED" && status !== "SELECTED") {
+            const error = new Error(
+                "A selected candidate application status cannot be changed."
             );
             error.statusCode = STATUS_CODES.BAD_REQUEST;
             throw error;
