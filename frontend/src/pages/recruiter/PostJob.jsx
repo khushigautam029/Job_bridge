@@ -262,18 +262,36 @@ const PostJob = () => {
                 );
             }
 
+
+            // Remove commas before extracting salary amounts.
+            const normalizedSalary = formData.salary.replace(/,/g, "");
+
             const salaryAmounts = [
-                ...formData.salary.matchAll(/(\d+(?:\.\d+)?)\s*([LK]?)/gi),
+                ...normalizedSalary.matchAll(
+                    /(\d+(?:\.\d+)?)\s*(LPA|LAKHS?|L|K)?/gi
+                ),
             ];
-            const salaryMultiplier = /lpa|lakh|L/i.test(formData.salary)
+
+            // Detect a common multiplier when the unit is written only once.
+            // Example: 8 - 12 LPA
+            const sharedMultiplier = /\b(LPA|LAKHS?|L)\b/i.test(normalizedSalary)
                 ? 100000
-                : /k/i.test(formData.salary)
+                : /\bK\b/i.test(normalizedSalary)
                     ? 1000
                     : 1;
 
-            const amounts = salaryAmounts.map(
-                (match) => Number(match[1]) * salaryMultiplier
-            );
+            const amounts = salaryAmounts.slice(0, 2).map((match) => {
+                const unit = (match[2] || "").toUpperCase();
+
+                const multiplier = ["LPA", "LAKH", "LAKHS", "L"].includes(unit)
+                    ? 100000
+                    : unit === "K"
+                        ? 1000
+                        : sharedMultiplier;
+
+                return Number(match[1]) * multiplier;
+            });
+
 
             const experienceValues =
                 formData.experience.match(/\d+/g)?.map(Number) || [];

@@ -49,6 +49,52 @@ const sendApplicationEmails = async ({
     }
 };
 
+// Returns today's calendar date in the application's timezone (IST).
+const getTodayIST = () =>
+    new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Kolkata",
+    }).format(new Date());
+
+// A DATEONLY value may be returned by Sequelize as either a string
+// ("YYYY-MM-DD") or a Date object. Preserve the stored calendar date.
+const getDeadlineDate = (deadline) => {
+    if (!deadline) return null;
+
+    if (deadline instanceof Date) {
+        if (Number.isNaN(deadline.getTime())) return null;
+        return deadline.toISOString().slice(0, 10);
+    }
+
+    const deadlineString = String(deadline).trim();
+    const dateOnlyMatch = deadlineString.match(/^\d{4}-\d{2}-\d{2}/);
+
+    if (!dateOnlyMatch) {
+        throw new Error("Invalid job application deadline format.");
+    }
+
+    return dateOnlyMatch[0];
+};
+
+// privacySettings may be a JSON object or a JSON string, depending on
+// the Sequelize column type and how the value was loaded.
+const getPrivacySettings = (value) => {
+    if (!value) return {};
+    if (typeof value === "object" && !Array.isArray(value)) return value;
+
+    if (typeof value === "string") {
+        try {
+            const parsed = JSON.parse(value);
+            return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+                ? parsed
+                : {};
+        } catch {
+            return {};
+        }
+    }
+
+    return {};
+};
+
 /*
     Candidate applies for a job
 */
@@ -92,14 +138,12 @@ const applyForJob = async (
         throw error;
     }
 
-    if (
-        job.applicationDeadline &&
-        new Date(job.applicationDeadline) < new Date()
-    ) {
+    const deadlineDate = getDeadlineDate(job.applicationDeadline);
+
+    if (deadlineDate && deadlineDate < getTodayIST()) {
         const error = new Error(
             MESSAGES.JOB_DEADLINE_PASSED
         );
-
         error.statusCode = STATUS_CODES.BAD_REQUEST;
         throw error;
     }
@@ -202,10 +246,10 @@ const applyForJob = async (
         });
     }
 
-    // Send emails to the candidate and recruiter.
+    // Send the application confirmation email to the candidate.
+    // The recruiter receives the in-app notification created above.
     await sendApplicationEmails({
         candidateUserId: userId,
-        recruiterUserId: recruiter?.userId,
         jobTitle: job.title,
     });
 
@@ -315,15 +359,15 @@ const getMyApplications = async (
                     order: [["scheduledAt", "DESC"]],
                 },
             ],
-
             order: [["appliedAt", "DESC"]],
         });
-
 
     return applications;
 };
 
-
+/*
+    Get one application
+*/
 /*
     Get one application
 */
@@ -423,14 +467,13 @@ const applyCandidatePrivacySettings = async (applications) => {
     });
     const byUserId = new Map(preferences.map((preference) => [
         preference.userId,
-        preference,
+        getPrivacySettings(preference.privacySettings),
     ]));
 
     return rows.map((application) => {
         const candidate = application.candidate;
         const userId = candidate?.user?.id;
-        const settings = byUserId.get(userId);
-        const privacy = settings?.privacySettings || {};
+        const privacy = byUserId.get(userId) || {};
 
         if (privacy.profileVisibility === false && candidate) {
             candidate.bio = null;
@@ -674,8 +717,7 @@ const getRankedJobApplications = async (
             error.statusCode = STATUS_CODES.FORBIDDEN;
             throw error;
         }
-
-        // 3. Fetch applications with saved ATS results.
+                // 3. Fetch applications with saved ATS results.
         return Application.findAndCountAll({
             where: {
                 jobId,
@@ -1078,7 +1120,6 @@ const updateApplicationStatus = async (
     });
 };
 
-
 const getApplicationAtsScore = async (userId, applicationId) => {
     // 1. Find the logged-in recruiter's profile.
     const recruiter = await RecruiterProfile.findOne({
@@ -1140,8 +1181,9 @@ const getApplicationAtsScore = async (userId, applicationId) => {
         },
     });
 
-    const privacySettings =
-        preferences?.privacySettings || {};
+    const privacySettings = getPrivacySettings(
+        preferences?.privacySettings
+    );
 
     if (privacySettings.resumeVisibility === false) {
         const error = new Error(
