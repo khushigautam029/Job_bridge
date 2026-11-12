@@ -28,7 +28,6 @@ const fileFilter = (req, file, cb) => {
 
     const allowedExtensions = [
         ".pdf",
-        ".doc",
         ".docx",
     ];
 
@@ -39,7 +38,7 @@ const fileFilter = (req, file, cb) => {
     if (!allowedExtensions.includes(extension)) {
         return cb(
             new Error(
-                "Only PDF, DOC, and DOCX resume files are allowed"
+                "Only PDF and DOCX resume files are allowed"
             ),
             false
         );

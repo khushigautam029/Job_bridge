@@ -117,7 +117,7 @@ const createJob = async (
         await transaction.rollback();
         throw error;
     }
-    return getJobById(job.id);
+    return getJobById(job.id, { publicOnly: false });
 };
 
 const getAllJobs = async (filters = {}) => {
@@ -196,9 +196,21 @@ const getAllJobs = async (filters = {}) => {
     }
     // Experience filters
     if (experienceMin !== undefined) {
-        where.experienceMax = {
-            [Op.gte]: experienceMin,
-        };
+        where[Op.and] = [
+            ...(where[Op.and] || []),
+            {
+                [Op.or]: [
+                    {
+                        experienceMax: {
+                            [Op.gte]: experienceMin,
+                        },
+                    },
+                    {
+                        experienceMax: null,
+                    },
+                ],
+            },
+        ];
     }
     if (experienceMax !== undefined) {
         where.experienceMin = {
@@ -340,7 +352,7 @@ const getRecruiterJobs = async (userId) => {
             {
                 model: Application,
                 as: "applications",
-                attributes: ["id","status"],
+                attributes: ["id", "status"],
                 separate: true,
             },
         ],
@@ -350,70 +362,74 @@ const getRecruiterJobs = async (userId) => {
     return addOpeningCounts(jobs);
 };
 
-const getJobById = async (
-    jobId
-) => {
-    const job = await Job.findByPk(
-        jobId,
-        {
-            include: [
-                {
-                    model: Company,
-                    as: "company",
-                    attributes: [
-                        "id",
-                        "name",
-                        "companyType",
-                        "description",
-                        "logo",
-                        "website",
-                        "location",
-                    ],
+
+const getJobById = async (jobId, options = {}) => {
+    const { publicOnly = true } = options;
+
+    const where = { id: jobId };
+
+    // Public users can only access OPEN jobs.
+    if (publicOnly) {
+        where.status = "OPEN";
+    }
+
+    const job = await Job.findOne({
+        where,
+        include: [
+            {
+                model: Company,
+                as: "company",
+                attributes: [
+                    "id",
+                    "name",
+                    "companyType",
+                    "description",
+                    "logo",
+                    "website",
+                    "location",
+                ],
+            },
+            {
+                model: JobCategory,
+                as: "category",
+                attributes: ["id", "name"],
+            },
+            {
+                model: RecruiterProfile,
+                as: "recruiter",
+                attributes: [
+                    "id",
+                    "userId",
+                    "companyId",
+                    "designation",
+                    "phone",
+                ],
+            },
+            {
+                model: Skill,
+                as: "skills",
+                attributes: ["id", "name"],
+                through: {
+                    attributes: [],
                 },
-                {
-                    model: JobCategory,
-                    as: "category",
-                    attributes: [
-                        "id",
-                        "name",
-                    ],
-                },
-                {
-                    model: RecruiterProfile,
-                    as: "recruiter",
-                    attributes: [
-                        "id",
-                        "userId",
-                        "companyId",
-                        "designation",
-                        "phone",
-                    ],
-                },
-                {
-                    model: Skill,
-                    as: "skills",
-                    attributes: [
-                        "id",
-                        "name",
-                    ],
-                    through: {
-                        attributes: [],
-                    },
-                },
-            ],
-        }
-    );
+            },
+        ],
+    });
 
     if (!job) {
-        const error = new Error(
-            MESSAGES.JOB_NOT_FOUND
-        );
-        error.statusCode =
-            STATUS_CODES.NOT_FOUND;
+        const error = new Error(MESSAGES.JOB_NOT_FOUND);
+        error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
-    const hiddenCompanyIds = await getHiddenCompanyIds([job.companyId]);
-    if (hiddenCompanyIds.has(job.companyId)) job.setDataValue("company", null);
+
+    const hiddenCompanyIds = await getHiddenCompanyIds([
+        job.companyId,
+    ]);
+
+    if (hiddenCompanyIds.has(job.companyId)) {
+        job.setDataValue("company", null);
+    }
+
     return addOpeningCounts(job);
 };
 
@@ -486,7 +502,7 @@ const updateJob = async (
     if (skillIds) {
         await job.setSkills(skillIds);
     }
-    return getJobById(job.id);
+    return getJobById(job.id, { publicOnly: false });
 };
 
 const deleteJob = async (

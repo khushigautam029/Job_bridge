@@ -1,4 +1,25 @@
 import Joi from "joi";
+const validateJobRanges = (value , helpers) => {
+    const {minSalary , maxSalary , experienceMin , experienceMax } = value;
+    if ( minSalary != null &&
+        maxSalary != null &&
+        minSalary > maxSalary
+        ){
+            return helpers.error("any.custom",{
+                message:"Minimum salary cannot be greater than maximum salary.",
+            });
+        }
+        if (
+            experienceMin != null &&
+            experienceMax != null &&
+            experienceMin > experienceMax
+        ){
+            return helpers.error("any.custom", {
+                message: "Minimum experience cannot be greater than maximum experience.",
+            });
+        }
+    return value;
+}
 
 const createJobSchema = Joi.object({
     categoryId: Joi.number()
@@ -192,7 +213,7 @@ const updateJobSchema = Joi.object({
             "CLOSED"
         )
         .optional(),
-});
+}).custom(validateJobRanges);
 
 
 /*
@@ -274,7 +295,7 @@ const searchJobSchema = Joi.object({
         .min(1)
         .max(50)
         .default(10),
-});
+}).custom(validateJobRanges);
 
 
 export {
