@@ -4,6 +4,7 @@ import express from "express";
 import helmet from "helmet";
 import errorMiddleware from "./middleware/errorMiddleware.js";
 import notFoundMiddleware from "./middleware/notFoundMiddleware.js";
+import aiRoutes from "./routes/aiRoutes.js";
 import applicationRoutes from "./routes/applicationRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import candidateEducationRoutes from "./routes/candidateEducationRoutes.js";
@@ -84,6 +85,8 @@ app.use("/uploads", express.static("uploads"));
 app.use("/api/candidate/education", candidateEducationRoutes);
 app.use("/api/candidate/experience", candidateExperienceRoutes);
 app.use( "/api/candidate/projects", candidateProjectRoutes);
+// AI chatbot
+app.use("/api/ai", aiRoutes);
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
