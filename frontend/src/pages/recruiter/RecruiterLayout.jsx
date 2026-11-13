@@ -19,6 +19,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import useRoleHeaderData from "../../hooks/useRoleHeaderData";
 import { deleteAccount } from "../../services/userService";
 import NotificationDropdown from "../Notification";
+import AIChatbot from "../../components/AIChatbot";
 
 const RecruiterLayout = () => {
     const navigate = useNavigate();
@@ -42,6 +43,7 @@ const RecruiterLayout = () => {
                 setProfileMenuOpen(false);
             }
         };
+        
         const closeOnEscape = (event) => {
             if (event.key === "Escape") setProfileMenuOpen(false);
         };
@@ -477,6 +479,7 @@ const RecruiterLayout = () => {
                 </section>
             </main>
 
+            <AIChatbot role="RECRUITER"/>
         </div>
     );
 };

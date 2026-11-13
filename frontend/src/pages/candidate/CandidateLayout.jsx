@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import AIChatbot from "../../components/AIChatbot";
 import useRoleHeaderData from "../../hooks/useRoleHeaderData";
 import { deleteAccount } from "../../services/userService";
 import NotificationDropdown from "../Notification";
@@ -477,6 +478,7 @@ const CandidateLayout = () => {
                 </section>
             </main>
 
+            <AIChatbot role="CANDIDATE" />
         </div>
     );
 };

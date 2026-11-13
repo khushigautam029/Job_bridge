@@ -215,84 +215,29 @@ const App = () => {
                     <Route path="/candidate" element={<CandidateLayout />}>
                         <Route index element={<Navigate to="jobs" replace />} />
                         <Route path="jobs" element={<FindJobs />} />
-                        <Route
-                            path="jobs/:jobId"
-                            element={<JobDetails />}
-                        />
-                        <Route
-                            path="jobs/:jobId/apply"
-                            element={<ApplyJob />}
-                        />
-                        <Route
-                            path="applications"
-                            element={<Applications />}
-                        />
-                        <Route
-                            path="saved-jobs"
-                            element={<SavedJobs />}
-                        />
-                        <Route
-                            path="interviews"
-                            element={<Interviews />}
-                        />
-                        <Route
-                            path="profile"
-                            element={<CandidateProfile />}
-                        />
-                        <Route
-                            path="settings"
-                            element={<CandidateSettings />}
-                        />
+                        <Route path="jobs/:jobId" element={<JobDetails />}/>
+                        <Route path="jobs/:jobId/apply" element={<ApplyJob />}/>
+                        <Route path="applications" element={<Applications />}/>
+                        <Route path="saved-jobs" element={<SavedJobs />} />
+                        <Route path="interviews" element={<Interviews />} />
+                        <Route path="profile" element={<CandidateProfile />} />
+                        <Route path="settings" element={<CandidateSettings />} />
                     </Route>
                 </Route>
 
                 {/* Recruiter Routes: RECRUITER role only */}
-                <Route
-                    element={
-                        <ProtectedRoute allowedRoles={["RECRUITER"]} />
-                    }
-                >
-                    <Route
-                        path="/recruiter"
-                        element={<RecruiterLayout />}
-                    >
-                        <Route
-                            index
-                            element={<Navigate to="jobs" replace />}
-                        />
+                <Route element={ <ProtectedRoute allowedRoles={["RECRUITER"]} /> }>
+                    <Route path="/recruiter" element={<RecruiterLayout />} >
+                        <Route index element={<Navigate to="jobs" replace />} />
                         <Route path="jobs" element={<Jobs />} />
-                        <Route
-                            path="jobs/:jobId"
-                            element={<RecruiterJobDetails />}
-                        />
-                        <Route
-                            path="jobs/:jobId/applications"
-                            element={<RecruiterApplications />}
-                        />
-                        <Route
-                            path="applications"
-                            element={<RecruiterApplications />}
-                        />
-                        <Route
-                            path="candidates"
-                            element={<Candidates />}
-                        />
-                        <Route
-                            path="interviews"
-                            element={<RecruiterInterviews />}
-                        />
-                        <Route
-                            path="post-job"
-                            element={<PostJob />}
-                        />
-                        <Route
-                            path="profile"
-                            element={<RecruiterProfile />}
-                        />
-                        <Route
-                            path="settings"
-                            element={<RecruiterSetting />}
-                        />
+                        <Route path="jobs/:jobId" element={<RecruiterJobDetails />} />
+                        <Route path="jobs/:jobId/applications" element={<RecruiterApplications />} />
+                        <Route path="applications" element={<RecruiterApplications />} />
+                        <Route path="candidates" element={<Candidates />} />
+                        <Route path="interviews" element={<RecruiterInterviews />} />
+                        <Route path="post-job" element={<PostJob />} />
+                        <Route path="profile" element={<RecruiterProfile />} />
+                        <Route path="settings" element={<RecruiterSetting />} />
                     </Route>
                 </Route>
 

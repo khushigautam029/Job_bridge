@@ -28,6 +28,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
+import AIChatbot from "../components/AIChatbot";
 import LocationAutocomplete from "../components/LocationAutocomplete";
 import { useTheme } from "../context/ThemeContext";
 import NotificationDropdown from "../pages/Notification";
@@ -1974,6 +1975,9 @@ const Home = () => {
                     </div>
                 </div>
             )}
+            <AIChatbot
+                role={isLoggedIn ? userRole : "PUBLIC"}
+            />
         </div>
     );
 };
