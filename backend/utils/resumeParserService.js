@@ -11,7 +11,7 @@ const RESUME_DIRECTORY = path.resolve(
 
 const extractResumeText = async(resumePath) => {
     if (!resumePath || typeof resumePath !== "string"){
-        throw new error("Resume path is required.");
+        throw new Error("Resume path is required.");
     }
 
     const fileName = path.basename(resumePath);

@@ -1,3 +1,4 @@
+import multer from "multer";
 import {
     sendError,
 } from "../utils/responseHandler.js";
@@ -8,6 +9,31 @@ import {
 
 const errorMiddleware = (err, req, res, next) => {
     console.error(err);
+    // Multer upload errors
+    if (err instanceof multer.MulterError) {
+        if (err.code === "LIMIT_FILE_SIZE") {
+            return sendError(
+                res,
+                STATUS_CODES.BAD_REQUEST,
+                "Resume file size must not exceed 5 MB."
+            );
+        }
+        return sendError(
+            res,
+            STATUS_CODES.BAD_REQUEST,
+            err.message
+        );
+    }
+
+    // Invalid file type
+    if (err.message === "Only PDF and DOCX resume files are allowed") {
+        return sendError(
+            res,
+            STATUS_CODES.BAD_REQUEST,
+            err.message
+        );
+    }
+
     if (err.name === "SequelizeUniqueConstraintError") {
         // Duplicate phone number
         if (err.fields?.phone) {
