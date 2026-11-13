@@ -1,7 +1,5 @@
-import { GoogleGenAI } from "@google/genai";
-import dotenv from "dotenv";
 
-dotenv.config();
+import { GoogleGenAI } from "@google/genai";
 
 if (!process.env.GEMINI_API_KEY) {
     throw new Error("GEMINI_API_KEY is missing from environment variables");
@@ -11,9 +9,9 @@ const ai = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY,
 });
 
-const MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash";;
+const MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash";
 
-const generateAIResponse = async ({ message, history, role }) => {
+const generateAIResponse = async ({ message, history = [], role }) => {
     const systemInstruction =
         role === "CANDIDATE"
             ? `You are JobBridge AI, a friendly career assistant for candidates.
