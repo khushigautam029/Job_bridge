@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import app from "./app.js";
 import sequelize from "./config/database.js";
+import startAiMessageCleanup from "./jobs/aiMessageCleanup.js";
 import "./models/index.js";
 dotenv.config();
 
@@ -12,6 +13,10 @@ const startServer = async () => {
         console.log("---------------------------------------------");
         console.log("MySQL database connected successfully");
         await sequelize.sync();
+
+        //Start AI message cleanup
+        await startAiMessageCleanup();
+        
         app.listen(PORT, () => {
             console.log(`JobBridge server running on port ${PORT}`);
             console.log("---------------------------------------------");

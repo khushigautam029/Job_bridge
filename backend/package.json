@@ -38,6 +38,7 @@
     "mammoth": "^1.13.0",
     "multer": "^2.3.0",
     "mysql2": "^3.24.2",
+    "node-cron": "^4.6.0",
     "pdf-parse": "^2.4.5",
     "sequelize": "^6.37.8"
   },

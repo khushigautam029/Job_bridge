@@ -1,3 +1,5 @@
+import AiConversation from "./AiConversation.js";
+import AiMessage from "./AiMessage.js";
 import Application from "./Application.js";
 import ApplicationStatusHistory from "./ApplicationStatusHistory.js";
 import AtsAnalysis from "./AtsAnalysis.js";
@@ -311,9 +313,32 @@ AtsAnalysis.belongsTo(Application, {
     as: "application",
 });
 
+// USER → AI CONVERSATION
+User.hasOne(AiConversation, {
+    foreignKey: "userId",
+    as: "aiConversation",
+    onDelete: "CASCADE",
+});
+
+AiConversation.belongsTo(User, {
+    foreignKey: "userId",
+    as: "user",
+});
+
+// AI CONVERSATION → AI MESSAGES
+AiConversation.hasMany(AiMessage, {
+    foreignKey: "conversationId",
+    as: "messages",
+    onDelete: "CASCADE",
+});
+
+AiMessage.belongsTo(AiConversation, {
+    foreignKey: "conversationId",
+    as: "conversation",
+});
 
 export {
-    Application, ApplicationStatusHistory, AtsAnalysis, CandidateEducation, CandidateExperience, CandidateProfile, CandidateProject,
+    AiConversation, AiMessage, Application, ApplicationStatusHistory, AtsAnalysis, CandidateEducation, CandidateExperience, CandidateProfile, CandidateProject,
     CandidateSkill, Company, Interview, Job, JobCategory, JobSkill, Notification, RecruiterProfile,
     SavedJob, Skill, User, UserPreference
 };
