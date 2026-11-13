@@ -762,16 +762,6 @@ const Home = () => {
                     border-radius: 999px; background: #6366f1; transform: scaleX(0); transition: transform .22s ease;
                 }
                 .jobbridge-home .jb-nav-link:hover::after { transform: scaleX(1); }
-                @media (prefers-reduced-motion: reduce) {
-                    .jobbridge-home *, .jobbridge-home *::before, .jobbridge-home *::after {
-                        animation-duration: .01ms !important;
-                        animation-iteration-count: 1 !important;
-                        scroll-behavior: auto !important;
-                        transition-duration: .01ms !important;
-                    }
-                    .jobbridge-home .jb-enter, .jobbridge-home .jb-enter-down { opacity: 1; }
-                    .jobbridge-home .jb-reveal { opacity: 1; transform: none; }
-                }
             `}</style>
 
             {/* SUCCESS MESSAGE */}
