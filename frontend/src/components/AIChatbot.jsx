@@ -7,117 +7,31 @@ import {
     Sparkles,
     X,
 } from "lucide-react";
+
 import { useEffect, useRef, useState } from "react";
 
-// PUBLIC MODE: predefined answers for visitors who are not logged in.
-const getGuestResponse = (message) => {
-    const text = message.toLowerCase().trim();
-
-    // Questions requiring an authenticated account
-    const personalQuestionPatterns = [
-        /\bmy (application|applications|resume|profile|account|dashboard|interview|interviews|saved jobs|job status|candidates|applicants|company)\b/,
-        /\b(check|show|track|update|view) my\b/,
-        /\b(application|interview|resume|profile) status\b/,
-        /\brecommend (me|jobs for me)\b/,
-        /\bmy job application\b/,
-        /\bmy interview schedule\b/,
-        /\bmy recruiter dashboard\b/,
-        /\bmy candidate dashboard\b/,
-        /\bwho applied to my job\b/,
-    ];
-
-    if (personalQuestionPatterns.some((pattern) => pattern.test(text))) {
-        return "I'd be happy to help with that! However, this requires access to your personal JobBridge account. Please log in or create an account first. Once you're logged in, I can help you with the relevant candidate or recruiter features. 😊";
-    }
-
-    // What is JobBridge?
-    if (
-        /\b(what is|about|explain|tell me about)\b/.test(text) &&
-        /\b(jobbridge|this platform|this website|this application|this app)\b/.test(text)
-    ) {
-        return "JobBridge is an online job portal designed to connect job seekers with recruiters. Candidates can explore job opportunities, apply for suitable positions, save jobs, and manage their recruitment journey. Recruiters can publish job openings and manage applications and candidates through one platform.";
-    }
-
-    // Purpose of the application
-    if (
-        /\b(why|purpose|reason)\b/.test(text) &&
-        /\b(created|made|built|developed|application|website|jobbridge|platform)\b/.test(text)
-    ) {
-        return "JobBridge was created to make the job search and recruitment process easier and more organized. It provides a common platform where candidates can discover opportunities and recruiters can manage their hiring activities efficiently.";
-    }
-
-    // Features and modules
-    if (
-        /\b(feature|features|include|includes|modules|functionality|capabilities|what can)\b/.test(text)
-    ) {
-        return "JobBridge includes two main sections:\n\n👩‍💻 Candidate features:\n• Find and explore jobs\n• Apply for jobs\n• Save jobs for later\n• Manage applications\n• View interview information\n• Manage your profile\n\n🏢 Recruiter features:\n• Post and manage jobs\n• View applications\n• Explore candidates\n• Manage interviews\n• Manage recruiter profiles\n\nSome features require you to log in.";
-    }
-
-    // Candidate and recruiter difference
-    if (
-        /\b(candidate|recruiter)\b/.test(text) &&
-        /\b(difference|roles|types|both|mean|means)\b/.test(text)
-    ) {
-        return "JobBridge supports two main account types:\n\n👩‍💻 Candidate: A person looking for job opportunities. Candidates can search and apply for jobs, save jobs, and manage their applications.\n\n🏢 Recruiter: A person or organization looking to hire candidates. Recruiters can post jobs, review applications, and manage their hiring process.";
-    }
-
-    // Registration
-    if (
-        /\b(register|registration|sign up|signup|create account|create an account)\b/.test(text)
-    ) {
-        return "Creating a JobBridge account is simple!\n\n1. Visit the Register page.\n2. Choose whether you want to register as a Candidate or Recruiter.\n3. Enter the required details.\n4. Complete the registration process.\n5. Log in to access your account features.\n\nYou can get started here: /register";
-    }
-
-    // Login
-    if (
-        /\b(login|log in|sign in|signin)\b/.test(text)
-    ) {
-        return "If you already have a JobBridge account, visit the Login page and enter your registered email and password. If you don't have an account yet, you can create one first.\n\nLogin: /login\nRegister: /register";
-    }
-
-    // Job search
-    if (
-        /\b(find jobs|search jobs|job search|job opportunities|available jobs|browse jobs)\b/.test(text)
-    ) {
-        return "You can explore job opportunities through the Find Jobs section. Browse available listings and explore job details to learn more about each opportunity. To apply for jobs and manage your applications, you'll need a Candidate account.";
-    }
-
-    // Recruiter information
-    if (
-        /\b(recruiter|employer|hiring|hire candidates|post jobs|post a job)\b/.test(text)
-    ) {
-        return "JobBridge provides recruiters with tools to publish job openings, review candidate applications, explore candidates, and manage interviews. You'll need to create a Recruiter account and log in to use these features.";
-    }
-
-    // Contact information
-    if (
-        /\b(contact|support|help|reach you|customer service)\b/.test(text)
-    ) {
-        return "You can visit the Contact Us page on JobBridge to find information about contacting the platform team. You can also explore the About Us and Features pages to learn more about the platform.";
-    }
-
-    // Greetings
-    if (
-        /^(hi|hello|hey|good morning|good afternoon|good evening)[!. ]*$/.test(text)
-    ) {
-        return "Hello! 👋 Welcome to JobBridge. I'm here to answer your general questions about the platform, its features, and how to get started. What would you like to know?";
-    }
-
-    // Questions outside public FAQ scope
-    return "I'm currently available in Guest Mode, so I can answer general questions about JobBridge, its features, and how to get started.\n\nFor personalized assistance, such as managing applications, checking interview details, accessing candidate features, or using recruiter tools, please log in or create an account first.\n\nYou can ask me things like:\n• What is JobBridge?\n• Why was JobBridge created?\n• What features does it include?\n• How can I register?";
-};
+import {
+    getAIConversation,
+    sendAIMessage,
+    sendPublicAIMessage,
+} from "../services/aiService";
 
 const AIChatbot = ({ role = "CANDIDATE" }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [message, setMessage] = useState("");
     const [isTyping, setIsTyping] = useState(false);
+    const [isLoadingConversation, setIsLoadingConversation] = useState(false);
     const [messages, setMessages] = useState([]);
 
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
+    const hasLoadedConversation = useRef(false);
 
-    const isPublic = role === "PUBLIC";
-    const isCandidate = role === "CANDIDATE";
+    // Normalize role to avoid case-related issues
+    const userRole = role?.toUpperCase();
+
+    const isPublic = !["CANDIDATE", "RECRUITER"].includes(userRole);
+    const isCandidate = userRole === "CANDIDATE";
 
     const welcomeMessage = isPublic
         ? "Hi! Welcome to JobBridge 👋 I'm your AI assistant. Feel free to ask me about JobBridge, its features, and how to get started. For personalized candidate or recruiter assistance, you'll need to log in first."
@@ -139,12 +53,85 @@ const AIChatbot = ({ role = "CANDIDATE" }) => {
         }
     }, [isOpen]);
 
-    const handleSendMessage = (event) => {
+    // Load conversation history for logged-in users
+    useEffect(() => {
+        if (!isOpen || isPublic || hasLoadedConversation.current) {
+            return;
+        }
+
+        let isActive = true;
+        let isSettled = false;
+
+        hasLoadedConversation.current = true;
+        setIsLoadingConversation(true);
+
+        const loadConversation = async () => {
+            try {
+                const conversation = await getAIConversation();
+                const conversationMessages = conversation?.messages;
+
+                if (!Array.isArray(conversationMessages)) {
+                    throw new Error("The conversation response was invalid.");
+                }
+
+                if (isActive) {
+                    setMessages(
+                        conversationMessages.map((item) => ({
+                            id: item.id,
+                            sender: item.sender,
+                            message: item.message,
+                        }))
+                    );
+                }
+            } catch (error) {
+                if (isActive) {
+                    hasLoadedConversation.current = false;
+
+                    setMessages((previous) => [
+                        ...previous,
+                        {
+                            id: Date.now(),
+                            sender: "AI",
+                            message:
+                                error.response?.data?.message ||
+                                error.message ||
+                                "Unable to load your previous conversation. You can still send a message.",
+                        },
+                    ]);
+                }
+            } finally {
+                isSettled = true;
+
+                if (isActive) {
+                    setIsLoadingConversation(false);
+                }
+            }
+        };
+
+        loadConversation();
+
+        return () => {
+            isActive = false;
+
+            if (!isSettled) {
+                hasLoadedConversation.current = false;
+            }
+        };
+    }, [isOpen, isPublic]);
+
+    // Send a message
+    const handleSendMessage = async (event) => {
         event.preventDefault();
 
         const trimmedMessage = message.trim();
 
-        if (!trimmedMessage || isTyping) return;
+        if (
+            !trimmedMessage ||
+            isTyping ||
+            isLoadingConversation
+        ) {
+            return;
+        }
 
         const userMessage = {
             id: Date.now(),
@@ -152,26 +139,54 @@ const AIChatbot = ({ role = "CANDIDATE" }) => {
             message: trimmedMessage,
         };
 
-        setMessages((previous) => [...previous, userMessage]);
+        setMessages((previous) => [
+            ...previous,
+            userMessage,
+        ]);
+
         setMessage("");
         setIsTyping(true);
 
-        // Temporary public FAQ responses
-        // Candidate and Recruiter responses will be connected to Gemini later.
-        setTimeout(() => {
-            const response = isPublic
-                ? getGuestResponse(trimmedMessage)
-                : "Thanks for your message! I'll be able to assist you with this once the Gemini backend integration is connected.";
+        try {
+            const result = isPublic
+                ? await sendPublicAIMessage(trimmedMessage)
+                : await sendAIMessage(trimmedMessage);
+            const reply = result?.reply;
+
+            if (typeof reply !== "string" || !reply.trim()) {
+                throw new Error(
+                    "The AI assistant returned an empty response."
+                );
+            }
 
             const aiMessage = {
-                id: Date.now() + 1,
+                id: result?.aiMessage?.id || Date.now() + 1,
                 sender: "AI",
-                message: response,
+                message: reply.trim(),
             };
 
-            setMessages((previous) => [...previous, aiMessage]);
+            setMessages((previous) => [
+                ...previous,
+                aiMessage,
+            ]);
+        } catch (error) {
+            const errorMessage =
+                error.response?.data?.message ||
+                (error.response
+                    ? "The AI assistant couldn't process your message. Please try again."
+                    : "Couldn't connect to the AI assistant. Check your connection and try again.");
+
+            setMessages((previous) => [
+                ...previous,
+                {
+                    id: Date.now() + 1,
+                    sender: "AI",
+                    message: errorMessage,
+                },
+            ]);
+        } finally {
             setIsTyping(false);
-        }, 700);
+        }
     };
 
     return (
@@ -211,6 +226,7 @@ const AIChatbot = ({ role = "CANDIDATE" }) => {
 
                                 <div className="mt-0.5 flex items-center gap-1.5">
                                     <span className="h-2 w-2 rounded-full bg-emerald-300" />
+
                                     <span className="text-[11px] text-indigo-100">
                                         {isPublic
                                             ? "Guest Assistant"
@@ -263,6 +279,13 @@ const AIChatbot = ({ role = "CANDIDATE" }) => {
                             </div>
                         </div>
 
+                        {/* LOADING CONVERSATION */}
+                        {isLoadingConversation && (
+                            <p className="text-center text-xs text-slate-400">
+                                Loading your previous conversation...
+                            </p>
+                        )}
+
                         {/* CONVERSATION MESSAGES */}
                         {messages.map((item) => {
                             const isUser = item.sender === "USER";
@@ -271,7 +294,9 @@ const AIChatbot = ({ role = "CANDIDATE" }) => {
                                 <div
                                     key={item.id}
                                     className={`flex items-start gap-2.5 ${
-                                        isUser ? "justify-end" : "justify-start"
+                                        isUser
+                                            ? "justify-end"
+                                            : "justify-start"
                                     }`}
                                 >
                                     {!isUser && (
@@ -355,13 +380,19 @@ const AIChatbot = ({ role = "CANDIDATE" }) => {
                                 }
                                 rows={1}
                                 maxLength={2000}
-                                disabled={isTyping}
+                                disabled={
+                                    isTyping || isLoadingConversation
+                                }
                                 className="max-h-24 min-h-[38px] flex-1 resize-none bg-transparent px-2 py-2 text-sm text-slate-700 outline-none placeholder:text-slate-400 disabled:opacity-60"
                             />
 
                             <button
                                 type="submit"
-                                disabled={!message.trim() || isTyping}
+                                disabled={
+                                    !message.trim() ||
+                                    isTyping ||
+                                    isLoadingConversation
+                                }
                                 aria-label="Send message"
                                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-300"
                             >

@@ -197,6 +197,11 @@ export const MESSAGES = {
 
     PASSWORD_RESET_EMAIL_SENT:"If an account with that email exists, a password reset link has been sent.",
     PASSWORD_RESET_SUCCESS:"Password reset successful. You can now log in with your new password.",
-    SKILL_IS_ALREADY_ADDED:"Skill is already added to this job"
+    SKILL_IS_ALREADY_ADDED:"Skill is already added to this job",
+    YOU_ARE_NOT_ALLOWED_TO_USE_AI_ASSISTANT:"You are not allowed to use the AI assistant.",
+    AI_CONVERSATION_FETCHED:"AI conversation fetched successfully.",
+    PLEASE_ENTER_A_VALID_MESSAGE:"Please enter a valid message.",
+    MESSAGE_CANNOT_EXCEED_2000_CHARACTERS:"Message cannot exceed 2000 characters.",
+    AI_RESPONSE_GENERATED:"AI response generated successfully."
 
 };
