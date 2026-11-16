@@ -13,6 +13,9 @@ import Interview from "./Interview.js";
 import Job from "./Job.js";
 import JobCategory from "./JobCategory.js";
 import JobSkill from "./JobSkill.js";
+import MockInterview from "./MockInterview.js";
+import MockInterviewQuestion from "./MockInterviewQuestion.js";
+import MockInterviewReport from "./MockInterviewReport.js";
 import Notification from "./Notification.js";
 import RecruiterProfile from "./RecruiterProfile.js";
 import SavedJob from "./SavedJob.js";
@@ -337,9 +340,57 @@ AiMessage.belongsTo(AiConversation, {
     as: "conversation",
 });
 
+// CANDIDATE PROFILE → MOCK INTERVIEWS
+CandidateProfile.hasMany(MockInterview, {
+    foreignKey: "candidateId",
+    as: "mockInterviews",
+    onDelete: "CASCADE",
+});
+
+MockInterview.belongsTo(CandidateProfile, {
+    foreignKey: "candidateId",
+    as: "candidate",
+});
+
+// JOB → MOCK INTERVIEWS
+Job.hasMany(MockInterview, {
+    foreignKey: "jobId",
+    as: "mockInterviews",
+    onDelete: "SET NULL",
+});
+
+MockInterview.belongsTo(Job, {
+    foreignKey: "jobId",
+    as: "job",
+});
+
+// MOCK INTERVIEW → QUESTIONS
+MockInterview.hasMany(MockInterviewQuestion, {
+    foreignKey: "mockInterviewId",
+    as: "questions",
+    onDelete: "CASCADE",
+});
+
+MockInterviewQuestion.belongsTo(MockInterview, {
+    foreignKey: "mockInterviewId",
+    as: "mockInterview",
+});
+
+// MOCK INTERVIEW → REPORT
+MockInterview.hasOne(MockInterviewReport, {
+    foreignKey: "mockInterviewId",
+    as: "report",
+    onDelete: "CASCADE",
+});
+
+MockInterviewReport.belongsTo(MockInterview, {
+    foreignKey: "mockInterviewId",
+    as: "mockInterview",
+});
+
 export {
     AiConversation, AiMessage, Application, ApplicationStatusHistory, AtsAnalysis, CandidateEducation, CandidateExperience, CandidateProfile, CandidateProject,
-    CandidateSkill, Company, Interview, Job, JobCategory, JobSkill, Notification, RecruiterProfile,
+    CandidateSkill, Company, Interview, Job, JobCategory, JobSkill, MockInterview, MockInterviewQuestion, MockInterviewReport, Notification, RecruiterProfile,
     SavedJob, Skill, User, UserPreference
 };
 

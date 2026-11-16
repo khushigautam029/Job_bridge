@@ -1,7 +1,6 @@
 import cron from "node-cron";
 import { Op } from "sequelize";
 import { AiMessage } from "../models/index.js";
-
 const deleteExpiredAiMessages = async () => {
     try {
         const expirationDate = new Date(
