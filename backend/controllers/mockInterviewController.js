@@ -222,7 +222,7 @@ export const startMockInterview = async (req, res) => {
 
         if (!candidate) {
             return res.status(STATUS_CODES.NOT_FOUND).json({
-                message: "Candidate profile not found",
+                message: MESSAGES.PROFILE_NOT_FOUND,
             });
         }
 
@@ -233,13 +233,13 @@ export const startMockInterview = async (req, res) => {
 
         if (!interview) {
             return res.status(STATUS_CODES.NOT_FOUND).json({
-                message: "Mock interview not found",
+                message: MESSAGES.MOCK_INTERVIEW_NOT_FOUND,
             });
         }
 
         if (interview.status !== "IN_PROGRESS") {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
-                message: "This interview cannot be started",
+                message: MESSAGES.THIS_INTERVIEW_CANNOT_BE_STARTED,
             });
         }
 
@@ -252,7 +252,7 @@ export const startMockInterview = async (req, res) => {
 
         if (existingQuestions > 0) {
             return res.status(STATUS_CODES.NOT_FOUND).json({
-                message: "Interview questions have already been generated",
+                message: MESSAGES.INTERVIEW_QUESTIONS_HAVE_ALREADY_BEEN_GENERATED,
             });
         }
 
@@ -289,7 +289,7 @@ export const startMockInterview = async (req, res) => {
         await interview.save();
 
         return res.status(STATUS_CODES.OK).json({
-            message: "Mock interview started successfully",
+            message: MESSAGES.MOCK_INTERVIEW_STARTED,
             questions: questionRecords,
         });
 
@@ -297,7 +297,7 @@ export const startMockInterview = async (req, res) => {
         console.error("Start mock interview error:", error);
 
         return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
-            message: "Failed to start mock interview",
+            message: MESSAGES.FAILED_TO_START_MOCK_INTERVIEW,
         });
     }
 };
@@ -313,7 +313,7 @@ export const submitMockInterviewAnswer = async (req, res) => {
             answer.length > 10000
         ) {
             return res.status(STATUS_CODES.NOT_FOUND).json({
-                message: "Answer is required and must not exceed 10000 characters",
+                message: MESSAGES.ANSWER_REQUIRED_AND_MUST_NOT_EXCEED_LENGTH,
             });
         }
 
@@ -321,7 +321,7 @@ export const submitMockInterviewAnswer = async (req, res) => {
 
         if (!candidate) {
             return res.status(STATUS_CODES.NOT_FOUND).json({
-                message: "Candidate profile not found",
+                message: MESSAGES.PROFILE_NOT_FOUND,
             });
         }
 
@@ -332,13 +332,13 @@ export const submitMockInterviewAnswer = async (req, res) => {
 
         if (!interview) {
             return res.status(STATUS_CODES.NOT_FOUND).json({
-                message: "Mock interview not found",
+                message: MESSAGES.MOCK_INTERVIEW_NOT_FOUND,
             });
         }
 
         if (interview.status !== "IN_PROGRESS" || !interview.startedAt) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
-                message: "This interview has not been started or is already completed",
+                message: MESSAGES.THIS_INTERVIEW_HAS_NOT_BEEN_STARTED_OR_IS_ALREADY_COMPLETED,
             });
         }
 
@@ -351,13 +351,13 @@ export const submitMockInterviewAnswer = async (req, res) => {
 
         if (!question) {
             return res.status(STATUS_CODES.NOT_FOUND).json({
-                message: "Interview question not found",
+                message: MESSAGES.INTERVIEW_QUESTION_NOT_FOUND,
             });
         }
 
         if (question.candidateAnswer !== null) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
-                message: "This question has already been answered",
+                message: MESSAGES.THIS_QUESTION_HAS_ALREADY_BEEN_ANSWERED,
             });
         }
 
@@ -379,7 +379,7 @@ export const submitMockInterviewAnswer = async (req, res) => {
         await question.save();
 
         return res.status(STATUS_CODES.OK).json({
-            message: "Answer submitted and evaluated successfully",
+            message: MESSAGES.ANSWER_SUBMITTED_AND_EVALUATED,
             evaluation,
         });
 
@@ -387,7 +387,7 @@ export const submitMockInterviewAnswer = async (req, res) => {
         console.error("Submit mock interview answer error:", error);
 
         return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
-            message: "Failed to submit and evaluate answer",
+            message: MESSAGES.FAILED_TO_SUBMIT_AND_EVALUATE_ANSWER,
         });
     }
 };
@@ -399,7 +399,7 @@ export const completeMockInterview = async (req, res) => {
 
         if (!candidate) {
             return res.status(STATUS_CODES.NOT_FOUND).json({
-                message: "Candidate profile not found",
+                message: MESSAGES.PROFILE_NOT_FOUND,
             });
         }
 
@@ -410,19 +410,19 @@ export const completeMockInterview = async (req, res) => {
 
         if (!interview) {
             return res.status(STATUS_CODES.NOT_FOUND).json({
-                message: "Mock interview not found",
+                message: MESSAGES.MOCK_INTERVIEW_NOT_FOUND,
             });
         }
 
         if (interview.status === "COMPLETED") {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
-                message: "This interview has already been completed",
+                message: MESSAGES.THIS_INTERVIEW_HAS_ALREADY_BEEN_COMPLETED,
             });
         }
 
         if (!interview.startedAt) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
-                message: "Please start the interview first",
+                message: MESSAGES.PLEASE_START_THE_INTERVIEW_FIRST,
             });
         }
 
@@ -435,7 +435,7 @@ export const completeMockInterview = async (req, res) => {
 
         if (questions.length !== interview.totalQuestions) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
-                message: "Interview questions are incomplete",
+                message: MESSAGES.INTERVIEW_QUESTIONS_ARE_INCOMPLETE,
             });
         }
 
@@ -446,7 +446,7 @@ export const completeMockInterview = async (req, res) => {
 
         if (unansweredQuestions.length > 0) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
-                message: "Please answer all interview questions before completing",
+                message: MESSAGES.PLEASE_ANSWER_ALL_INTERVIEW_QUESTIONS_BEFORE_COMPLETING,
                 unansweredCount: unansweredQuestions.length,
             });
         }
@@ -489,7 +489,7 @@ export const completeMockInterview = async (req, res) => {
         await interview.save();
 
         return res.status(STATUS_CODES.OK).json({
-            message: "Mock interview completed successfully",
+            message: MESSAGES.MOCK_INTERVIEW_COMPLETED,
             overallScore: reportData.overallScore,
             report,
         });
@@ -498,7 +498,7 @@ export const completeMockInterview = async (req, res) => {
         console.error("Complete mock interview error:", error);
 
         return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
-            message: "Failed to complete mock interview",
+            message:MESSAGES.FAILED_TO_COMPLETE_MOCK_INTERVIEW,
         });
     }
 };
@@ -510,7 +510,7 @@ export const getMockInterviewReport = async (req, res) => {
 
         if (!candidate) {
             return res.status(STATUS_CODES.NOT_FOUND).json({
-                message: "Candidate profile not found",
+                message: MESSAGES.PROFILE_NOT_FOUND,
             });
         }
 
@@ -521,13 +521,13 @@ export const getMockInterviewReport = async (req, res) => {
 
         if (!interview) {
             return res.status(STATUS_CODES.NOT_FOUND).json({
-                message: "Mock interview not found",
+                message: MESSAGES.MOCK_INTERVIEW_NOT_FOUND,
             });
         }
 
         if (interview.status !== "COMPLETED") {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
-                message: "Performance report is not available yet",
+                message: MESSAGES.PERFORMANCE_REPORT_IS_NOT_AVAILABLE_YET,
             });
         }
 
@@ -539,12 +539,12 @@ export const getMockInterviewReport = async (req, res) => {
 
         if (!report) {
             return res.status(STATUS_CODES.NOT_FOUND).json({
-                message: "Performance report not found",
+                message: MESSAGES.PERFORMANCE_REPORT_NOT_FOUND,
             });
         }
 
         return res.status(STATUS_CODES.OK).json({
-            message: "Performance report fetched successfully",
+            message: MESSAGES.PERFORMANCE_REPORT_FETCHED,
             report,
         });
 
@@ -552,7 +552,7 @@ export const getMockInterviewReport = async (req, res) => {
         console.error("Get mock interview report error:", error);
 
         return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
-            message: "Failed to fetch performance report",
+            message: MESSAGES.FAILED_TO_FETCH_PERFORMANCE_REPORT,
         });
     }
 };

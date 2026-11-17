@@ -214,6 +214,26 @@ export const MESSAGES = {
     FAILED_TO_FETCH_MOCK_INTERVIEW_HISTORY:"Failed to fetch mock interview history",
     MOCK_INTERVIEW_NOT_FOUND:"Mock interview not found",
     MOCK_INTERVIEW_DETAILS_FETCHED:"Mock interview details fetched successfully",
-    FAILED_T0_FETCH_MOCK_INTERVIEW_DETAILS:"Failed to fetch mock interview details"
+    FAILED_T0_FETCH_MOCK_INTERVIEW_DETAILS:"Failed to fetch mock interview details",
+    THIS_INTERVIEW_CANNOT_BE_STARTED:"This interview cannot be started",
+    INTERVIEW_QUESTIONS_HAVE_ALREADY_BEEN_GENERATED:"Interview questions have already been generated",
+    MOCK_INTERVIEW_STARTED:"Mock interview started successfully",
+    FAILED_TO_START_MOCK_INTERVIEW:"Failed to start mock interview",
+    ANSWER_REQUIRED_AND_MUST_NOT_EXCEED_LENGTH:"Answer is required and must not exceed 10000 characters",
+    THIS_INTERVIEW_HAS_NOT_BEEN_STARTED_OR_IS_ALREADY_COMPLETED:"This interview has not been started or is already completed",
+    INTERVIEW_QUESTION_NOT_FOUND:"Interview question not found",
+    THIS_QUESTION_HAS_ALREADY_BEEN_ANSWERED:"This question has already been answered",
+    ANSWER_SUBMITTED_AND_EVALUATED:"Answer submitted and evaluated successfully",
+    FAILED_TO_SUBMIT_AND_EVALUATE_ANSWER:"Failed to submit and evaluate answer",
+    THIS_INTERVIEW_HAS_ALREADY_BEEN_COMPLETED:"This interview has already been completed",
+    PLEASE_START_THE_INTERVIEW_FIRST:"Please start the interview first",
+    INTERVIEW_QUESTIONS_ARE_INCOMPLETE:"Interview questions are incomplete",
+    PLEASE_ANSWER_ALL_INTERVIEW_QUESTIONS_BEFORE_COMPLETING:"Please answer all interview questions before completing",
+    MOCK_INTERVIEW_COMPLETED:"Mock interview completed successfully",
+    FAILED_TO_COMPLETE_MOCK_INTERVIEW:"Failed to complete mock interview",
+    PERFORMANCE_REPORT_IS_NOT_AVAILABLE_YET:"Performance report is not available yet",
+    PERFORMANCE_REPORT_NOT_FOUND:"Performance report not found",
+    PERFORMANCE_REPORT_FETCHED:"Performance report fetched successfully",
+    FAILED_TO_FETCH_PERFORMANCE_REPORT:"Failed to fetch performance report"
 
 };
