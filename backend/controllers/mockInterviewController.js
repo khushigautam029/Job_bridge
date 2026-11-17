@@ -12,6 +12,7 @@ import {
     generateMockInterviewQuestions,
     generateMockInterviewReport,
 } from "../utils/mockInterviewService.js";
+import { STATUS_CODES } from "../utils/setConstants.js";
 
 // Helper: Get the logged-in candidate's profile
 const getCandidateProfile = async (userId) => {
@@ -44,7 +45,7 @@ export const createMockInterview = async (req, res) => {
         const candidate = await getCandidateProfile(req.user.id);
 
         if (!candidate) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 message: "Candidate profile not found",
             });
         }
@@ -54,19 +55,19 @@ export const createMockInterview = async (req, res) => {
         const allowedQuestionCounts = [5, 10, 15];
 
         if (!allowedTypes.includes(interviewType)) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 message: "Invalid interview type",
             });
         }
 
         if (!allowedDifficulties.includes(difficulty)) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 message: "Invalid interview difficulty",
             });
         }
 
         if (!allowedQuestionCounts.includes(Number(totalQuestions))) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 message: "Total questions must be 5, 10 or 15",
             });
         }
@@ -79,13 +80,13 @@ export const createMockInterview = async (req, res) => {
             selectedJob = await Job.findByPk(jobId);
 
             if (!selectedJob) {
-                return res.status(404).json({
+                return res.status(STATUS_CODES.NOT_FOUND).json({
                     message: "Selected job not found",
                 });
             }
 
             if (selectedJob.status !== "OPEN") {
-                return res.status(400).json({
+                return res.status(STATUS_CODES.BAD_REQUEST).json({
                     message: "This job is not currently open",
                 });
             }
@@ -95,7 +96,7 @@ export const createMockInterview = async (req, res) => {
         }
 
         if (!finalJobRole) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 message: "Please provide a job role",
             });
         }
@@ -109,7 +110,7 @@ export const createMockInterview = async (req, res) => {
             totalQuestions: Number(totalQuestions),
         });
 
-        return res.status(201).json({
+        return res.status(STATUS_CODES.OK).json({
             message: "Mock interview created successfully",
             interview: mockInterview,
         });
@@ -117,7 +118,7 @@ export const createMockInterview = async (req, res) => {
     } catch (error) {
         console.error("Create mock interview error:", error);
 
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             message: "Failed to create mock interview",
         });
     }
@@ -129,7 +130,7 @@ export const getMockInterviews = async (req, res) => {
         const candidate = await getCandidateProfile(req.user.id);
 
         if (!candidate) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 message: "Candidate profile not found",
             });
         }
@@ -147,7 +148,7 @@ export const getMockInterviews = async (req, res) => {
             order: [["createdAt", "DESC"]],
         });
 
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             message: "Mock interview history fetched successfully",
             interviews,
         });
@@ -155,7 +156,7 @@ export const getMockInterviews = async (req, res) => {
     } catch (error) {
         console.error("Get mock interviews error:", error);
 
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             message: "Failed to fetch mock interview history",
         });
     }
@@ -167,7 +168,7 @@ export const getMockInterviewById = async (req, res) => {
         const candidate = await getCandidateProfile(req.user.id);
 
         if (!candidate) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 message: "Candidate profile not found",
             });
         }
@@ -195,12 +196,12 @@ export const getMockInterviewById = async (req, res) => {
         });
 
         if (!interview) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 message: "Mock interview not found",
             });
         }
 
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             message: "Mock interview details fetched successfully",
             interview,
         });
@@ -208,7 +209,7 @@ export const getMockInterviewById = async (req, res) => {
     } catch (error) {
         console.error("Get mock interview details error:", error);
 
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             message: "Failed to fetch mock interview details",
         });
     }
@@ -220,7 +221,7 @@ export const startMockInterview = async (req, res) => {
         const candidate = await getCandidateProfile(req.user.id);
 
         if (!candidate) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 message: "Candidate profile not found",
             });
         }
@@ -231,13 +232,13 @@ export const startMockInterview = async (req, res) => {
         );
 
         if (!interview) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 message: "Mock interview not found",
             });
         }
 
         if (interview.status !== "IN_PROGRESS") {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 message: "This interview cannot be started",
             });
         }
@@ -250,7 +251,7 @@ export const startMockInterview = async (req, res) => {
         });
 
         if (existingQuestions > 0) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 message: "Interview questions have already been generated",
             });
         }
@@ -287,7 +288,7 @@ export const startMockInterview = async (req, res) => {
         interview.startedAt = new Date();
         await interview.save();
 
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             message: "Mock interview started successfully",
             questions: questionRecords,
         });
@@ -295,7 +296,7 @@ export const startMockInterview = async (req, res) => {
     } catch (error) {
         console.error("Start mock interview error:", error);
 
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             message: "Failed to start mock interview",
         });
     }
@@ -311,7 +312,7 @@ export const submitMockInterviewAnswer = async (req, res) => {
             !answer.trim() ||
             answer.length > 10000
         ) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 message: "Answer is required and must not exceed 10000 characters",
             });
         }
@@ -319,7 +320,7 @@ export const submitMockInterviewAnswer = async (req, res) => {
         const candidate = await getCandidateProfile(req.user.id);
 
         if (!candidate) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 message: "Candidate profile not found",
             });
         }
@@ -330,13 +331,13 @@ export const submitMockInterviewAnswer = async (req, res) => {
         );
 
         if (!interview) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 message: "Mock interview not found",
             });
         }
 
         if (interview.status !== "IN_PROGRESS" || !interview.startedAt) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 message: "This interview has not been started or is already completed",
             });
         }
@@ -349,13 +350,13 @@ export const submitMockInterviewAnswer = async (req, res) => {
         });
 
         if (!question) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 message: "Interview question not found",
             });
         }
 
         if (question.candidateAnswer !== null) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 message: "This question has already been answered",
             });
         }
@@ -377,7 +378,7 @@ export const submitMockInterviewAnswer = async (req, res) => {
 
         await question.save();
 
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             message: "Answer submitted and evaluated successfully",
             evaluation,
         });
@@ -385,7 +386,7 @@ export const submitMockInterviewAnswer = async (req, res) => {
     } catch (error) {
         console.error("Submit mock interview answer error:", error);
 
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             message: "Failed to submit and evaluate answer",
         });
     }
@@ -397,7 +398,7 @@ export const completeMockInterview = async (req, res) => {
         const candidate = await getCandidateProfile(req.user.id);
 
         if (!candidate) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 message: "Candidate profile not found",
             });
         }
@@ -408,19 +409,19 @@ export const completeMockInterview = async (req, res) => {
         );
 
         if (!interview) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 message: "Mock interview not found",
             });
         }
 
         if (interview.status === "COMPLETED") {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 message: "This interview has already been completed",
             });
         }
 
         if (!interview.startedAt) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 message: "Please start the interview first",
             });
         }
@@ -433,7 +434,7 @@ export const completeMockInterview = async (req, res) => {
         });
 
         if (questions.length !== interview.totalQuestions) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 message: "Interview questions are incomplete",
             });
         }
@@ -444,7 +445,7 @@ export const completeMockInterview = async (req, res) => {
         );
 
         if (unansweredQuestions.length > 0) {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 message: "Please answer all interview questions before completing",
                 unansweredCount: unansweredQuestions.length,
             });
@@ -487,7 +488,7 @@ export const completeMockInterview = async (req, res) => {
 
         await interview.save();
 
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             message: "Mock interview completed successfully",
             overallScore: reportData.overallScore,
             report,
@@ -496,7 +497,7 @@ export const completeMockInterview = async (req, res) => {
     } catch (error) {
         console.error("Complete mock interview error:", error);
 
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             message: "Failed to complete mock interview",
         });
     }
@@ -508,7 +509,7 @@ export const getMockInterviewReport = async (req, res) => {
         const candidate = await getCandidateProfile(req.user.id);
 
         if (!candidate) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 message: "Candidate profile not found",
             });
         }
@@ -519,13 +520,13 @@ export const getMockInterviewReport = async (req, res) => {
         );
 
         if (!interview) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 message: "Mock interview not found",
             });
         }
 
         if (interview.status !== "COMPLETED") {
-            return res.status(400).json({
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
                 message: "Performance report is not available yet",
             });
         }
@@ -537,12 +538,12 @@ export const getMockInterviewReport = async (req, res) => {
         });
 
         if (!report) {
-            return res.status(404).json({
+            return res.status(STATUS_CODES.NOT_FOUND).json({
                 message: "Performance report not found",
             });
         }
 
-        return res.status(200).json({
+        return res.status(STATUS_CODES.OK).json({
             message: "Performance report fetched successfully",
             report,
         });
@@ -550,7 +551,7 @@ export const getMockInterviewReport = async (req, res) => {
     } catch (error) {
         console.error("Get mock interview report error:", error);
 
-        return res.status(500).json({
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             message: "Failed to fetch performance report",
         });
     }
