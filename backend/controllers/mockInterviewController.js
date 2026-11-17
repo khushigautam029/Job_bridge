@@ -97,7 +97,7 @@ export const createMockInterview = async (req, res) => {
 
         if (!finalJobRole) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
-                message: "Please provide a job role",
+                message:MESSAGES.PLEASE_PROVIDE_A_JOB_ROLE,
             });
         }
 
@@ -111,7 +111,7 @@ export const createMockInterview = async (req, res) => {
         });
 
         return res.status(STATUS_CODES.OK).json({
-            message: "Mock interview created successfully",
+            message: MESSAGES.MOCK_INTERVIEW_CREATED,
             interview: mockInterview,
         });
 
@@ -119,7 +119,7 @@ export const createMockInterview = async (req, res) => {
         console.error("Create mock interview error:", error);
 
         return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
-            message: "Failed to create mock interview",
+            message:MESSAGES.FAILED_T0_CREATE_MOCK_INTERVIEW,
         });
     }
 };
@@ -131,7 +131,7 @@ export const getMockInterviews = async (req, res) => {
 
         if (!candidate) {
             return res.status(STATUS_CODES.NOT_FOUND).json({
-                message: "Candidate profile not found",
+                message: MESSAGES.PROFILE_NOT_FOUND,
             });
         }
 
@@ -149,7 +149,7 @@ export const getMockInterviews = async (req, res) => {
         });
 
         return res.status(STATUS_CODES.OK).json({
-            message: "Mock interview history fetched successfully",
+            message: MESSAGES.MOCK_INTERVIEW_HISTORY_FETCHED,
             interviews,
         });
 
@@ -157,7 +157,7 @@ export const getMockInterviews = async (req, res) => {
         console.error("Get mock interviews error:", error);
 
         return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
-            message: "Failed to fetch mock interview history",
+            message: MESSAGES.FAILED_TO_FETCH_MOCK_INTERVIEW_HISTORY,
         });
     }
 };
@@ -169,7 +169,7 @@ export const getMockInterviewById = async (req, res) => {
 
         if (!candidate) {
             return res.status(STATUS_CODES.NOT_FOUND).json({
-                message: "Candidate profile not found",
+                message: MESSAGES.PROFILE_NOT_FOUND,
             });
         }
 
@@ -197,12 +197,12 @@ export const getMockInterviewById = async (req, res) => {
 
         if (!interview) {
             return res.status(STATUS_CODES.NOT_FOUND).json({
-                message: "Mock interview not found",
+                message: MESSAGES.MOCK_INTERVIEW_NOT_FOUND,
             });
         }
 
         return res.status(STATUS_CODES.OK).json({
-            message: "Mock interview details fetched successfully",
+            message: MESSAGES.MOCK_INTERVIEW_DETAILS_FETCHED,
             interview,
         });
 
@@ -210,7 +210,7 @@ export const getMockInterviewById = async (req, res) => {
         console.error("Get mock interview details error:", error);
 
         return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
-            message: "Failed to fetch mock interview details",
+            message: MESSAGES.FAILED_T0_FETCH_MOCK_INTERVIEW_DETAILS,
         });
     }
 };
