@@ -12,7 +12,7 @@ import {
     generateMockInterviewQuestions,
     generateMockInterviewReport,
 } from "../utils/mockInterviewService.js";
-import { STATUS_CODES } from "../utils/setConstants.js";
+import { MESSAGES, STATUS_CODES } from "../utils/setConstants.js";
 
 // Helper: Get the logged-in candidate's profile
 const getCandidateProfile = async (userId) => {
@@ -46,7 +46,7 @@ export const createMockInterview = async (req, res) => {
 
         if (!candidate) {
             return res.status(STATUS_CODES.NOT_FOUND).json({
-                message: "Candidate profile not found",
+                message: MESSAGES.PROFILE_NOT_FOUND,
             });
         }
 
@@ -56,19 +56,19 @@ export const createMockInterview = async (req, res) => {
 
         if (!allowedTypes.includes(interviewType)) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
-                message: "Invalid interview type",
+                message: MESSAGES.INVALID_INTERVIEW_TYPE,
             });
         }
 
         if (!allowedDifficulties.includes(difficulty)) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
-                message: "Invalid interview difficulty",
+                message:MESSAGES.INVALID_INTERVIEW_DIFFICULTY,
             });
         }
 
         if (!allowedQuestionCounts.includes(Number(totalQuestions))) {
             return res.status(STATUS_CODES.BAD_REQUEST).json({
-                message: "Total questions must be 5, 10 or 15",
+                message: MESSAGES.TOTAL_QUESTIONS,
             });
         }
 
@@ -81,13 +81,13 @@ export const createMockInterview = async (req, res) => {
 
             if (!selectedJob) {
                 return res.status(STATUS_CODES.NOT_FOUND).json({
-                    message: "Selected job not found",
+                    message: MESSAGES.SELECTED_JOB_NOT_FOUND,
                 });
             }
 
             if (selectedJob.status !== "OPEN") {
                 return res.status(STATUS_CODES.BAD_REQUEST).json({
-                    message: "This job is not currently open",
+                    message: MESSAGES.JOB_IS_NOT_CURRENTLY_OPEN,
                 });
             }
 

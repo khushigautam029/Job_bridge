@@ -1,5 +1,4 @@
 export const STATUS_CODES = {
-
     // Success
     OK: 200,
     CREATED: 201,
@@ -118,6 +117,10 @@ export const MESSAGES = {
     INTERVIEW_TYPE_REQUIRED: "Interview type is required",
     INVALID_INTERVIEW_STATUS: "Invalid interview status",
     INTERVIEW_STATUS_REQUIRED: "Interview status is required",
+    INVALID_INTERVIEW_DIFFICULTY:"Invalid interview difficulty",
+    TOTAL_QUESTIONS:"Total questions must be 5, 10 or 15",
+    SELECTED_JOB_NOT_FOUND:"Selected job not found",
+    JOB_IS_NOT_CURRENTLY_OPEN:"This job is not currently open",
 
     NOTIFICATION_FETCHED: "Notifications fetched successfully",
     NOTIFICATIONS_MARKED_READ: "Notification marked as read",
