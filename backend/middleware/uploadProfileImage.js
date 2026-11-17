@@ -1,8 +1,15 @@
+
 import fs from "fs";
 import multer from "multer";
 import path from "path";
 
-const uploadDirectory = "uploads/profile-images";
+const uploadDirectory = path.join(
+    process.env.AWS_LAMBDA_FUNCTION_NAME
+        ? "/tmp"
+        : process.cwd(),
+    "uploads",
+    "profile-images"
+);
 
 if (!fs.existsSync(uploadDirectory)) {
     fs.mkdirSync(uploadDirectory, {
@@ -53,7 +60,6 @@ const fileFilter = (req, file, cb) => {
 const uploadProfileImage = multer({
     storage,
     fileFilter,
-
     limits: {
         fileSize: 2 * 1024 * 1024,
     },

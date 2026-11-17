@@ -1,0 +1,59 @@
+
+service: jobbridge-backend
+
+frameworkVersion: "4"
+
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: nodejs22.x
+  region: ap-south-1
+  stage: dev
+
+  memorySize: 512
+  timeout: 30
+
+  environment:
+    NODE_ENV: production
+
+    # Database configuration
+    DB_HOST: ${env:DB_HOST}
+    DB_PORT: ${env:DB_PORT}
+    DB_NAME: ${env:DB_NAME}
+    DB_USER: ${env:DB_USER}
+    DB_PASSWORD: ${env:DB_PASSWORD}
+
+    # JWT configuration
+    JWT_SECRET: ${env:JWT_SECRET}
+    JWT_EXPIRES_IN: ${env:JWT_EXPIRES_IN}
+
+    # Email configuration
+    BREVO_API_KEY: ${env:BREVO_API_KEY}
+    BREVO_SENDER_EMAIL: ${env:BREVO_SENDER_EMAIL}
+    BREVO_SENDER_NAME: ${env:BREVO_SENDER_NAME}
+
+    # Frontend URL
+    FRONTEND_URL: ${env:FRONTEND_URL}
+
+    # Gemini AI
+    GEMINI_API_KEY: ${env:GEMINI_API_KEY}
+
+functions:
+  api:
+    handler: lambda.handler
+    events:
+      - httpApi:
+          path: /
+          method: ANY
+
+      - httpApi:
+          path: /{proxy+}
+          method: ANY
+
+package:
+  patterns:
+    - '!uploads/**'
+    - '!.env'
+    - '!.env.*'
+    - 'certs/ca.pem'

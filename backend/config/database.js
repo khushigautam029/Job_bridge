@@ -1,7 +1,13 @@
+
 import dotenv from "dotenv";
+import { readFileSync } from "node:fs";
 import { Sequelize } from "sequelize";
 
 dotenv.config();
+
+const caCertificate = readFileSync(
+    new URL("../certs/ca.pem", import.meta.url)
+);
 
 const sequelize = new Sequelize(
     process.env.DB_NAME,
@@ -14,8 +20,15 @@ const sequelize = new Sequelize(
 
         logging: false,
 
+        dialectOptions: {
+            ssl: {
+                ca: caCertificate,
+                rejectUnauthorized: true,
+            },
+        },
+
         pool: {
-            max: 10,
+            max: 2,
             min: 0,
             acquire: 30000,
             idle: 10000,

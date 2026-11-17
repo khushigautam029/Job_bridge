@@ -12,7 +12,7 @@ const startServer = async () => {
         await sequelize.authenticate();
         console.log("---------------------------------------------");
         console.log("MySQL database connected successfully");
-        await sequelize.sync();
+        // await sequelize.sync();
 
         //Start AI message cleanup
         await startAiMessageCleanup();

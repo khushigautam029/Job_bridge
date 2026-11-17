@@ -1,7 +1,6 @@
 import fs from "fs/promises";
 import mammoth from "mammoth";
 import path from "path";
-import { PDFParse } from "pdf-parse";
 
 const RESUME_DIRECTORY = path.resolve(
     process.cwd(),
@@ -9,20 +8,20 @@ const RESUME_DIRECTORY = path.resolve(
     "resumes"
 );
 
-const extractResumeText = async(resumePath) => {
-    if (!resumePath || typeof resumePath !== "string"){
+const extractResumeText = async (resumePath) => {
+    if (!resumePath || typeof resumePath !== "string") {
         throw new Error("Resume path is required.");
     }
 
     const fileName = path.basename(resumePath);
     const extension = path.extname(fileName).toLowerCase();
 
-    if (![".pdf" , ".docx"].includes(extension)){
+    if (![".pdf", ".docx"].includes(extension)) {
         throw new Error(
             "ATS currently supports PDF and DOCX resumes only."
         );
     }
-    
+
     const filePath = path.join(
         RESUME_DIRECTORY,
         fileName
@@ -30,28 +29,35 @@ const extractResumeText = async(resumePath) => {
 
     const fileBuffer = await fs.readFile(filePath);
 
-    if (fileBuffer.length === 0){
+    if (fileBuffer.length === 0) {
         throw new Error("The resume file is empty.");
     }
 
     let extractedText = "";
 
-    if (extension === ".pdf"){
+    if (extension === ".pdf") {
+        // Load PDF dependencies only when a PDF is processed.
+        const { PDFParse } = await import("pdf-parse");
+        const { CanvasFactory } = await import("pdf-parse/worker");
+
         const parser = new PDFParse({
             data: new Uint8Array(fileBuffer),
+            CanvasFactory,
         });
-        try{
+
+        try {
             const result = await parser.getText();
             extractedText = result.text || "";
-        }finally{
+        } finally {
             await parser.destroy();
         }
     }
 
-    if (extension === ".docx"){
+    if (extension === ".docx") {
         const result = await mammoth.extractRawText({
             buffer: fileBuffer,
         });
+
         extractedText = result.value || "";
     }
 

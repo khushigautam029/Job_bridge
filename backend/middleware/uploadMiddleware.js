@@ -1,8 +1,15 @@
+
 import fs from "fs";
 import multer from "multer";
 import path from "path";
 
-const uploadDirectory = "uploads/resumes";
+const uploadDirectory = path.join(
+    process.env.AWS_LAMBDA_FUNCTION_NAME
+        ? "/tmp"
+        : process.cwd(),
+    "uploads",
+    "resumes"
+);
 
 if (!fs.existsSync(uploadDirectory)) {
     fs.mkdirSync(uploadDirectory, {
@@ -16,7 +23,7 @@ const storage = multer.diskStorage({
     },
 
     filename: (req, file, cb) => {
-        const extension = path.extname(file.originalname);
+        const extension = path.extname(file.originalname).toLowerCase();
 
         const fileName = `resume-${req.user.id}-${Date.now()}${extension}`;
 
@@ -25,7 +32,6 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (req, file, cb) => {
-
     const allowedExtensions = [
         ".pdf",
         ".docx",
@@ -50,7 +56,6 @@ const fileFilter = (req, file, cb) => {
 const uploadResume = multer({
     storage,
     fileFilter,
-
     limits: {
         fileSize: 5 * 1024 * 1024,
     },
