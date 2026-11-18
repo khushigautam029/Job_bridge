@@ -6,14 +6,12 @@ import {
     FileText,
     LogOut,
     Menu,
-    Moon,
     Search,
     Settings,
-    Sun,
     Trash2,
     User,
     UserCircle,
-    X,
+    X
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -35,9 +33,9 @@ const CandidateLayout = () => {
     const userName = profile?.user?.name || user?.name || "Candidate";
     const userRole = user?.role || "CANDIDATE";
     const avatarUrl = profile?.profileImage || user?.candidateProfile?.profileImage;
-    const [isDarkMode, setIsDarkMode] = useState(
-        () => localStorage.getItem("jobbridge-theme") === "dark"
-    );
+    // const [isDarkMode, setIsDarkMode] = useState(
+    //     () => localStorage.getItem("jobbridge-theme") === "dark"
+    // );
 
     useEffect(() => {
         if (!profileMenuOpen) return undefined;
@@ -391,7 +389,7 @@ const CandidateLayout = () => {
                                 </div>
                             )}
                         </div>
-                        {/* DARK MODE TOGGLE */}
+                        {/* DARK MODE TOGGLE
                         <button
                             type="button"
                             onClick={() =>
@@ -417,7 +415,7 @@ const CandidateLayout = () => {
                             ) : (
                                 <Moon size={19} />
                             )}
-                        </button>
+                        </button> */}
 
 
                         {/* MOBILE MENU BUTTON */}

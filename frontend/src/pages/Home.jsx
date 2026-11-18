@@ -13,11 +13,9 @@ import {
     LogOut,
     MapPin,
     MessagesSquare,
-    Moon,
     Search,
     Settings,
     Star,
-    Sun,
     Trash2,
     User,
     UserCircle,
@@ -30,7 +28,6 @@ import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import AIChatbot from "../components/AIChatbot";
 import LocationAutocomplete from "../components/LocationAutocomplete";
-import { useTheme } from "../context/ThemeContext";
 import NotificationDropdown from "../pages/Notification";
 import { getCompanies } from "../services/companyService";
 import {
@@ -57,7 +54,7 @@ const getCompanyLogoUrl = (logo) => {
 
 const Home = () => {
     const navigate = useNavigate();
-    const { isDarkMode, toggleTheme } = useTheme();
+    // const { isDarkMode, toggleTheme } = useTheme();
 
     const storedUser = JSON.parse(
         localStorage.getItem("user") ||
@@ -1093,7 +1090,7 @@ const Home = () => {
                                 </div>
                             )}
                         </div>
-                        {/* DARK MODE TOGGLE */}
+                        {/* DARK MODE TOGGLE
                         <button
                             type="button"
                             onClick={toggleTheme}
@@ -1117,7 +1114,7 @@ const Home = () => {
                             ) : (
                                 <Moon size={19} />
                             )}
-                        </button>
+                        </button> */}
 
                     </div>
                 </div>

@@ -40,6 +40,7 @@ const allowedOrigins = (
     .map((origin) => origin.trim());
 app.use(
     cors({
+
         origin: (origin, callback) => {
             if (!origin || allowedOrigins.includes(origin)) {
                 callback(null, true);

@@ -5,21 +5,19 @@ import {
     FileText,
     LogOut,
     Menu,
-    Moon,
     Settings,
-    Sun,
     Trash2,
     User,
     UserCircle,
     Users,
-    X,
+    X
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import AIChatbot from "../../components/AIChatbot";
 import useRoleHeaderData from "../../hooks/useRoleHeaderData";
 import { deleteAccount } from "../../services/userService";
 import NotificationDropdown from "../Notification";
-import AIChatbot from "../../components/AIChatbot";
 
 const RecruiterLayout = () => {
     const navigate = useNavigate();
@@ -57,9 +55,9 @@ const RecruiterLayout = () => {
         };
     }, [profileMenuOpen]);
 
-    const [isDarkMode, setIsDarkMode] = useState(() => {
-        localStorage.getItem("jobbridge-theme") === "dark"
-    });
+    // const [isDarkMode, setIsDarkMode] = useState(() => {
+    //     localStorage.getItem("jobbridge-theme") === "dark"
+    // });
 
     // RECRUITER NAVIGATION
     const navigation = [
@@ -392,7 +390,7 @@ const RecruiterLayout = () => {
                             )}
                         </div>
 
-                        {/* DARK MODE TOGGLE */}
+                        {/* DARK MODE TOGGLE
                         <button
                             type="button"
                             onClick={() =>
@@ -419,7 +417,7 @@ const RecruiterLayout = () => {
                                 <Moon size={19} />
                             )}
                         </button>
-
+ */}
 
                         {/* MOBILE MENU BUTTON */}
                         <button
