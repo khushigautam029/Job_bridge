@@ -406,7 +406,7 @@ Payment.belongsTo(ApplicationPassPlan, {
 User.hasMany(Payment, {
     foreignKey: "userId",
     as: "payments",
-    onDelete: "CASCADE",
+    onDelete: "RESTRICT",
 });
 
 Payment.belongsTo(User, {
