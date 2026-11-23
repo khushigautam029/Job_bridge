@@ -1,10 +1,12 @@
 import AiConversation from "./AiConversation.js";
 import AiMessage from "./AiMessage.js";
 import Application from "./Application.js";
+import ApplicationPassPlan from "./ApplicationPassPlan.js";
 import ApplicationStatusHistory from "./ApplicationStatusHistory.js";
 import AtsAnalysis from "./AtsAnalysis.js";
 import CandidateEducation from "./CandidateEducation.js";
 import CandidateExperience from "./CandidateExperience.js";
+import CandidatePlan from "./CandidatePlan.js";
 import CandidateProfile from "./CandidateProfile.js";
 import CandidateProject from "./CandidateProject.js";
 import CandidateSkill from "./CandidateSkill.js";
@@ -17,6 +19,7 @@ import MockInterview from "./MockInterview.js";
 import MockInterviewQuestion from "./MockInterviewQuestion.js";
 import MockInterviewReport from "./MockInterviewReport.js";
 import Notification from "./Notification.js";
+import Payment from "./Payment.js";
 import RecruiterProfile from "./RecruiterProfile.js";
 import SavedJob from "./SavedJob.js";
 import Skill from "./Skill.js";
@@ -388,9 +391,67 @@ MockInterviewReport.belongsTo(MockInterview, {
     as: "mockInterview",
 });
 
+// APPLICATION PASS PLAN → PAYMENTS
+ApplicationPassPlan.hasMany(Payment, {
+    foreignKey: "planId",
+    as: "payments",
+});
+
+Payment.belongsTo(ApplicationPassPlan, {
+    foreignKey: "planId",
+    as: "plan",
+});
+
+// USER → PAYMENTS
+User.hasMany(Payment, {
+    foreignKey: "userId",
+    as: "payments",
+    onDelete: "CASCADE",
+});
+
+Payment.belongsTo(User, {
+    foreignKey: "userId",
+    as: "user",
+});
+
+// USER → CANDIDATE PLANS
+User.hasMany(CandidatePlan, {
+    foreignKey: "userId",
+    as: "candidatePlans",
+    onDelete: "CASCADE",
+});
+
+CandidatePlan.belongsTo(User, {
+    foreignKey: "userId",
+    as: "user",
+});
+
+// APPLICATION PASS PLAN → CANDIDATE PLANS
+ApplicationPassPlan.hasMany(CandidatePlan, {
+    foreignKey: "planId",
+    as: "candidatePlans",
+});
+
+CandidatePlan.belongsTo(ApplicationPassPlan, {
+    foreignKey: "planId",
+    as: "plan",
+});
+
+// PAYMENT → CANDIDATE PLAN
+Payment.hasOne(CandidatePlan, {
+    foreignKey: "paymentId",
+    as: "candidatePlan",
+});
+
+CandidatePlan.belongsTo(Payment, {
+    foreignKey: "paymentId",
+    as: "payment",
+});
+
+
 export {
-    AiConversation, AiMessage, Application, ApplicationStatusHistory, AtsAnalysis, CandidateEducation, CandidateExperience, CandidateProfile, CandidateProject,
-    CandidateSkill, Company, Interview, Job, JobCategory, JobSkill, MockInterview, MockInterviewQuestion, MockInterviewReport, Notification, RecruiterProfile,
+    AiConversation, AiMessage, Application, ApplicationPassPlan, ApplicationStatusHistory, AtsAnalysis, CandidateEducation, CandidateExperience, CandidatePlan, CandidateProfile, CandidateProject,
+    CandidateSkill, Company, Interview, Job, JobCategory, JobSkill, MockInterview, MockInterviewQuestion, MockInterviewReport, Notification, Payment, RecruiterProfile,
     SavedJob, Skill, User, UserPreference
 };
 
