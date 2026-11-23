@@ -20,12 +20,12 @@ const sequelize = new Sequelize(
 
         logging: false,
 
-        dialectOptions: {
-            ssl: {
-                ca: caCertificate,
-                rejectUnauthorized: true,
-            },
-        },
+        // dialectOptions: {
+        //     ssl: {
+        //         ca: caCertificate,
+        //         rejectUnauthorized: true,
+        //     },
+        // },
 
         pool: {
             max: 2,
