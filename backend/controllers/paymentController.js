@@ -148,3 +148,39 @@ export const createCheckoutSession = async (req, res) => {
         });
     }
 };
+
+
+export const stripeWebhook = async (req, res) => {
+    try {
+        const signature = req.headers["stripe-signature"];
+        const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+        if (!webhookSecret) {
+            console.error("Stripe webhook secret is missing");
+            return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+                success: false,
+                message: "Webhook configuration error",
+            });
+        }
+
+        // Verify Stripe webhook signature.
+        const event = stripe.webhooks.constructEvent(
+            req.body,
+            signature,
+            webhookSecret
+        );
+
+        console.log("Stripe Webhook Received:", event.type);
+        // We'll process payment events in the next step.
+        return res.status(STATUS_CODES.OK).json({
+            received: true,
+        });
+
+    } catch (error) {
+        console.error("Stripe Webhook Error:", error.message);
+        return res.status(STATUS_CODES.NOT_FOUND).json({
+            success: false,
+            message: "Webhook signature verification failed",
+        });
+    }
+};

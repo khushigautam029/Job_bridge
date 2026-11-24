@@ -2,6 +2,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import helmet from "helmet";
+import { stripeWebhook } from "./controllers/paymentController.js";
 import errorMiddleware from "./middleware/errorMiddleware.js";
 import notFoundMiddleware from "./middleware/notFoundMiddleware.js";
 import aiRoutes from "./routes/aiRoutes.js";
@@ -51,6 +52,13 @@ app.use(
         },
         credentials: true,
     })
+);
+
+// Stripe webhook must be registered BEFORE express.json()
+app.post(
+    "/api/payment/webhook",
+    express.raw({ type: "application/json" }),
+    stripeWebhook
 );
 
 app.use(express.json());
