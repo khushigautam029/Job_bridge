@@ -18,6 +18,7 @@ import interviewRoutes from "./routes/interviewRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
 import jobSkillRoutes from "./routes/jobSkillRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
 import recruiterRoutes from "./routes/recruiterRoutes.js";
 import savedJobRoutes from "./routes/savedJobRoutes.js";
 import skillRoutes from "./routes/skillRoutes.js";
@@ -97,6 +98,9 @@ app.use("/api/candidate/experience", candidateExperienceRoutes);
 app.use( "/api/candidate/projects", candidateProjectRoutes);
 // AI chatbot
 app.use("/api/ai", aiRoutes);
+
+//Payment
+app.use("/api/payment",paymentRoutes);
 
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
