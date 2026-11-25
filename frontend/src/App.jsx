@@ -39,6 +39,7 @@ import Home from "./pages/Home";
 import HomeJobs from "./pages/HomeJobs";
 import NotFound from "./pages/NotFound";
 
+import ApplicationPlans from "./pages/candidate/ApplicationPlans";
 import Candidates from "./pages/recruiter/Candidate";
 import Jobs from "./pages/recruiter/Jobs";
 import PostJob from "./pages/recruiter/PostJob";
@@ -222,6 +223,7 @@ const App = () => {
                         <Route path="interviews" element={<Interviews />} />
                         <Route path="profile" element={<CandidateProfile />} />
                         <Route path="settings" element={<CandidateSettings />} />
+                        <Route path="application-plans" element={<ApplicationPlans />}/>
                     </Route>
                 </Route>
 
