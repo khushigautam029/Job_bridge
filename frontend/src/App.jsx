@@ -40,6 +40,9 @@ import HomeJobs from "./pages/HomeJobs";
 import NotFound from "./pages/NotFound";
 
 import ApplicationPlans from "./pages/candidate/ApplicationPlans";
+import MySubscription from "./pages/candidate/MySubscription";
+import PaymentCancel from "./pages/candidate/PaymentCancel";
+import PaymentSuccess from "./pages/candidate/PaymentSuccess";
 import Candidates from "./pages/recruiter/Candidate";
 import Jobs from "./pages/recruiter/Jobs";
 import PostJob from "./pages/recruiter/PostJob";
@@ -188,7 +191,7 @@ const ScrollToTop = () => {
 const App = () => {
     return (
         <BrowserRouter>
-        <Toaster position="top-right" reverseOrder={false} toastOptions={{duration: 3000,}} />
+            <Toaster position="top-right" reverseOrder={false} toastOptions={{ duration: 3000, }} />
             <ScrollToTop />
             <Routes>
                 {/* Public Routes */}
@@ -197,12 +200,15 @@ const App = () => {
                 <Route path="/register" element={<Register />} />
                 <Route path="/jobs" element={<HomeJobs />} />
 
+                <Route path="/payment/success" element={<PaymentSuccess />} />
+                <Route path="/payment/cancel" element={<PaymentCancel />} />
+
                 {/* About and Footer Pages */}
                 <Route path="/about" element={<AboutUs />} />
                 <Route path="/features" element={<Features />} />
                 <Route path="/contact" element={<ContactUs />} />
                 <Route path="/privacy" element={<PrivacyPolicy />} />
-                <Route path="/terms" element={<TermsAndConditions />}/>
+                <Route path="/terms" element={<TermsAndConditions />} />
                 <Route path="/career-resources/resume-writing-tips" element={<ResumeWritingTips />} />
                 <Route path="/career-resources/interview-preparation" element={<InterviewPreparation />} />
                 <Route path="/career-resources/freshers-career-guide" element={<FreshersCareerGuide />} />
@@ -216,19 +222,20 @@ const App = () => {
                     <Route path="/candidate" element={<CandidateLayout />}>
                         <Route index element={<Navigate to="jobs" replace />} />
                         <Route path="jobs" element={<FindJobs />} />
-                        <Route path="jobs/:jobId" element={<JobDetails />}/>
-                        <Route path="jobs/:jobId/apply" element={<ApplyJob />}/>
-                        <Route path="applications" element={<Applications />}/>
+                        <Route path="jobs/:jobId" element={<JobDetails />} />
+                        <Route path="jobs/:jobId/apply" element={<ApplyJob />} />
+                        <Route path="applications" element={<Applications />} />
                         <Route path="saved-jobs" element={<SavedJobs />} />
                         <Route path="interviews" element={<Interviews />} />
                         <Route path="profile" element={<CandidateProfile />} />
                         <Route path="settings" element={<CandidateSettings />} />
-                        <Route path="application-plans" element={<ApplicationPlans />}/>
+                        <Route path="application-plans" element={<ApplicationPlans />} />
+                        <Route path="subscription" element={<MySubscription />} />
                     </Route>
                 </Route>
 
                 {/* Recruiter Routes: RECRUITER role only */}
-                <Route element={ <ProtectedRoute allowedRoles={["RECRUITER"]} /> }>
+                <Route element={<ProtectedRoute allowedRoles={["RECRUITER"]} />}>
                     <Route path="/recruiter" element={<RecruiterLayout />} >
                         <Route index element={<Navigate to="jobs" replace />} />
                         <Route path="jobs" element={<Jobs />} />
