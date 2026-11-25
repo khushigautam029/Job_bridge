@@ -18,45 +18,65 @@ import {
     updateApplicationStatusSchema,
 } from "../validation/applicationValidation.js";
 
-const apply = asyncHandler(
-    async (req, res) => {
-        const { error, value } =
-            createApplicationSchema.validate(
-                req.body,
-                {
-                    abortEarly: false,
-                    stripUnknown: true,
-                }
-            );
 
-        if (error) {
-            return sendError(
-                res,
-                STATUS_CODES.BAD_REQUEST,
-                MESSAGES.VALIDATION_FAILED,
-                error.details.map(
-                    (detail) => detail.message
-                )
-            );
-        }
+const apply = asyncHandler(async (req, res) => {
 
-        const application =
-            await applyForJob(
-                req.user.id,
-                req.params.jobId,
-                value
-            );
-
-        return sendSuccess(
+    // Only candidates can submit applications.
+    if (req.user.role !== "CANDIDATE") {
+        return sendError(
             res,
-            STATUS_CODES.CREATED,
-            MESSAGES.APPLIED,
-            {
-                application,
-            }
+            STATUS_CODES.FORBIDDEN,
+            "Only candidates can apply for jobs."
         );
     }
-);
+
+    // Validate job ID.
+    const jobId = Number(req.params.jobId);
+
+    if (
+        !Number.isSafeInteger(jobId) ||
+        jobId <= 0
+    ) {
+        return sendError(
+            res,
+            STATUS_CODES.BAD_REQUEST,
+            "Please provide a valid job ID."
+        );
+    }
+
+    // Validate application request body.
+    const { error, value } = createApplicationSchema.validate(
+        req.body,
+        {
+            abortEarly: false,
+            stripUnknown: true,
+        }
+    );
+
+    if (error) {
+        return sendError(
+            res,
+            STATUS_CODES.BAD_REQUEST,
+            MESSAGES.VALIDATION_FAILED,
+            error.details.map((detail) => detail.message)
+        );
+    }
+
+    const application = await applyForJob(
+        req.user.id,
+        jobId,
+        value
+    );
+
+    return sendSuccess(
+        res,
+        STATUS_CODES.CREATED,
+        MESSAGES.APPLIED,
+        {
+            application,
+        }
+    );
+});
 
 const getMine = asyncHandler(
     async (req, res) => {

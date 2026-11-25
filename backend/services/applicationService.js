@@ -7,6 +7,7 @@ import {
     AtsAnalysis,
     CandidateEducation,
     CandidateExperience,
+    CandidatePlan,
     CandidateProfile,
     CandidateProject,
     Company,
@@ -55,6 +56,35 @@ const getTodayIST = () =>
         timeZone: "Asia/Kolkata",
     }).format(new Date());
 
+// Returns the beginning and end of today's IST calendar day
+// as UTC Date objects for database comparisons.
+const getISTDayRange = () => {
+    const now = new Date();
+    const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone: "Asia/Kolkata",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+    }).formatToParts(now);
+
+    const dateParts = Object.fromEntries(
+        parts.map(({ type, value }) => [type, value])
+    );
+
+    // IST is UTC + 05:30.
+    const startUTC = new Date(
+        Date.UTC(
+            Number(dateParts.year),
+            Number(dateParts.month) - 1,
+            Number(dateParts.day)
+        ) - (5 * 60 + 30) * 60 * 1000
+    );
+    const endUTC = new Date(
+        startUTC.getTime() + 24 * 60 * 60 * 1000
+    );
+    return { startUTC, endUTC };
+};
+
 // A DATEONLY value may be returned by Sequelize as either a string
 // ("YYYY-MM-DD") or a Date object. Preserve the stored calendar date.
 const getDeadlineDate = (deadline) => {
@@ -98,121 +128,166 @@ const getPrivacySettings = (value) => {
 /*
     Candidate applies for a job
 */
-const applyForJob = async (
-    userId,
-    jobId,
-    data
-) => {
+
+/*
+    Candidate applies for a job
+*/
+const applyForJob = async (userId, jobId, data) => {
+
+    // 1. Check candidate profile.
     const candidate = await CandidateProfile.findOne({
-        where: {
-            userId,
-        },
+        where: { userId },
     });
 
     if (!candidate) {
-        const error = new Error(
-            MESSAGES.PROFILE_NOT_FOUND
-        );
-
+        const error = new Error(MESSAGES.PROFILE_NOT_FOUND);
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
+    // 2. Check whether the job exists.
     const job = await Job.findByPk(jobId);
 
     if (!job) {
-        const error = new Error(
-            MESSAGES.JOB_NOT_FOUND
-        );
-
+        const error = new Error(MESSAGES.JOB_NOT_FOUND);
         error.statusCode = STATUS_CODES.NOT_FOUND;
         throw error;
     }
 
+    // 3. Check job status.
     if (job.status !== "OPEN") {
-        const error = new Error(
-            MESSAGES.JOB_NOT_OPEN
-        );
-
+        const error = new Error(MESSAGES.JOB_NOT_OPEN);
         error.statusCode = STATUS_CODES.BAD_REQUEST;
         throw error;
     }
 
+    // 4. Check application deadline.
     const deadlineDate = getDeadlineDate(job.applicationDeadline);
 
     if (deadlineDate && deadlineDate < getTodayIST()) {
-        const error = new Error(
-            MESSAGES.JOB_DEADLINE_PASSED
-        );
+        const error = new Error(MESSAGES.JOB_DEADLINE_PASSED);
         error.statusCode = STATUS_CODES.BAD_REQUEST;
         throw error;
     }
 
-    const existingApplication =
-        await Application.findOne({
-            where: {
-                jobId,
-                candidateId: candidate.id,
-            },
-        });
-
-    // Find the recruiter who owns this job.
+    // 5. Find recruiter who owns the job.
     const recruiter = await RecruiterProfile.findByPk(
         job.recruiterId
     );
 
-    // Handle reapplication after withdrawal.
-    if (existingApplication) {
-        if (existingApplication.status === "WITHDRAWN") {
-            const appliedAt = new Date();
-            await sequelize.transaction(async (transaction) => {
-                await existingApplication.update(
-                    {
-                        ...data,
-                        status: "APPLIED",
-                        appliedAt,
-                    },
-                    { transaction }
-                );
+    // 6. Apply eligibility checks and save application
+    //    inside one transaction.
+    const result = await sequelize.transaction(async (transaction) => {
 
-                await ApplicationStatusHistory.create(
-                    {
-                        applicationId: existingApplication.id,
-                        status: "APPLIED",
-                        changedBy: userId,
-                    },
-                    { transaction }
-                );
-            });
+        // Lock the user's row. This serializes application
+        // requests from the same candidate.
+        const user = await User.findByPk(userId, {
+            transaction,
+            lock: transaction.LOCK.UPDATE,
+        });
 
-            await sendApplicationEmails({
-                candidateUserId: userId,
-                jobTitle: job.title,
-            });
-
-            if (recruiter) {
-                await createNotification({
-                    userId: recruiter.userId,
-                    title: "New Job Application",
-                    message: `A candidate has applied for your job: ${job.title}`,
-                    type: "APPLICATION",
-                });
-            }
-
-            return existingApplication;
+        if (!user || user.role !== "CANDIDATE" || !user.isActive) {
+            const error = new Error(
+                "Your account is not eligible to apply for jobs."
+            );
+            error.statusCode = STATUS_CODES.FORBIDDEN;
+            throw error;
         }
 
-        const error = new Error(
-            MESSAGES.ALREADY_APPLIED
-        );
+        // 7. Check duplicate application.
+        const existingApplication = await Application.findOne({
+            where: {
+                jobId,
+                candidateId: candidate.id,
+            },
+            transaction,
+            lock: transaction.LOCK.UPDATE,
+        });
 
-        error.statusCode = STATUS_CODES.CONFLICT;
-        throw error;
-    }
+        if (
+            existingApplication &&
+            existingApplication.status !== "WITHDRAWN"
+        ) {
+            const error = new Error(MESSAGES.ALREADY_APPLIED);
+            error.statusCode = STATUS_CODES.CONFLICT;
+            throw error;
+        }
 
-    // Create a new application.
-    const application = await sequelize.transaction(async (transaction) => {
-        const createdApplication = await Application.create(
+        const now = new Date();
+
+        // 8. Check whether candidate currently has a valid pass.
+        const activePlan = await CandidatePlan.findOne({
+            where: {
+                userId,
+                status: "ACTIVE",
+                startDate: {
+                    [Op.lte]: now,
+                },
+                endDate: {
+                    [Op.gt]: now,
+                },
+            },
+            order: [["endDate", "DESC"]],
+            transaction,
+        });
+
+        // 9. If there is no valid paid pass, check free limit.
+        if (!activePlan) {
+            const { startUTC, endUTC } = getISTDayRange();
+
+            const todayApplicationCount = await Application.count({
+                where: {
+                    candidateId: candidate.id,
+                    appliedAt: {
+                        [Op.gte]: startUTC,
+                        [Op.lt]: endUTC,
+                    },
+                },
+                transaction,
+            });
+
+            const DAILY_APPLICATION_LIMIT = 5;
+
+            if (
+                todayApplicationCount >= DAILY_APPLICATION_LIMIT
+            ) {
+                const error = new Error(
+                    "You have reached your daily limit of 5 job applications. Purchase an application pass to apply without this daily limit."
+                );
+
+                error.statusCode = STATUS_CODES.FORBIDDEN;
+                throw error;
+            }
+        }
+
+        // 10. Reapply after withdrawal.
+        if (existingApplication) {
+            await existingApplication.update(
+                {
+                    ...data,
+                    status: "APPLIED",
+                    appliedAt: now,
+                },
+                { transaction }
+            );
+
+            await ApplicationStatusHistory.create(
+                {
+                    applicationId: existingApplication.id,
+                    status: "APPLIED",
+                    changedBy: userId,
+                },
+                { transaction }
+            );
+
+            return {
+                application: existingApplication,
+                isReapplication: true,
+            };
+        }
+
+        // 11. Create a new application.
+        const application = await Application.create(
             {
                 jobId,
                 candidateId: candidate.id,
@@ -220,23 +295,29 @@ const applyForJob = async (
                 coverLetter: data.coverLetter || null,
                 expectedSalary: data.expectedSalary || null,
                 noticePeriod: data.noticePeriod || null,
+                status: "APPLIED",
+                appliedAt: now,
             },
             { transaction }
         );
 
+        // 12. Record application history.
         await ApplicationStatusHistory.create(
             {
-                applicationId: createdApplication.id,
+                applicationId: application.id,
                 status: "APPLIED",
                 changedBy: userId,
             },
             { transaction }
         );
 
-        return createdApplication;
+        return {
+            application,
+            isReapplication: false,
+        };
     });
 
-    // Create the recruiter's in-app notification.
+    // 13. Send notifications and email after transaction commits.
     if (recruiter) {
         await createNotification({
             userId: recruiter.userId,
@@ -246,15 +327,14 @@ const applyForJob = async (
         });
     }
 
-    // Send the application confirmation email to the candidate.
-    // The recruiter receives the in-app notification created above.
     await sendApplicationEmails({
         candidateUserId: userId,
         jobTitle: job.title,
     });
 
-    return application;
+    return result.application;
 };
+
 
 // Candidate gets all of their applications
 const getMyApplications = async (
