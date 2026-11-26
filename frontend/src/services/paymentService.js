@@ -16,3 +16,12 @@ export const getMySubscription = async () => {
     const response = await api.get("/payment/my-plan");
     return response.data;
 };
+
+export const verifyCheckoutSession = async(sessionId) =>{
+    const response = await api.get("/payment/verify-session",{
+        params:{
+            sessionId: sessionId,
+        },
+    });
+    return response.data;
+};

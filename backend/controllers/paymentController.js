@@ -117,7 +117,7 @@ export const createCheckoutSession = async (req, res) => {
                 },
 
                 success_url: `${frontendUrl}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-                cancel_url: `${frontendUrl}/payment/cancel`,
+                cancel_url: `${frontendUrl}/payment/cancel?session_id={CHECKOUT_SESSION_ID}`,
             });
 
             // Save Stripe Checkout Session ID.

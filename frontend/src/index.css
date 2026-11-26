@@ -2,7 +2,7 @@
 @import "tailwindcss";
 
 /* Enable Tailwind dark: classes using the .dark class on <html>. */
-@custom-variant dark (&:where(.dark, .dark *));
+/* @custom-variant dark (&:where(.dark, .dark *)); */
 
 * {
     box-sizing: border-box;
@@ -23,7 +23,7 @@ html {
     color-scheme: light;
 }
 
-html.dark {
+/* html.dark {
     color-scheme: dark;
     --jb-page-bg: #0f172a;
     --jb-surface: #1e293b;
@@ -32,7 +32,7 @@ html.dark {
     --jb-text-secondary: #cbd5e1;
     --jb-border: #475569;
     --jb-control-bg: #1e293b;
-}
+} */
 
 body {
     margin: 0;
@@ -46,10 +46,10 @@ body {
 }
 
 /* Global page colors in dark mode. */
-html.dark body {
+/* html.dark body {
     background-color: #0f172a;
     color: #e2e8f0;
-}
+} */
 
 /* Keep required markers consistent across candidate and recruiter forms. */
 form label:has(+ input[required])::after,
