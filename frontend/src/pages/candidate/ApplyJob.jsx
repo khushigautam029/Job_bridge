@@ -4,6 +4,7 @@ import {
     Building2,
     CheckCircle2,
     Clock3,
+    Crown,
     FileText,
     Laptop,
     Mail,
@@ -13,6 +14,7 @@ import {
     Upload,
     User,
     Users,
+    X
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -56,6 +58,7 @@ const ApplyJob = () => {
     const [coverLetter, setCoverLetter] = useState("");
     const [error, setError] = useState("");
     const [submitted, setSubmitted] = useState(false);
+    const [showPlanModal, setShowPlanModal] = useState(false);
 
     useEffect(() => {
         let active = true;
@@ -178,6 +181,17 @@ const ApplyJob = () => {
             const errorMessage =
                 submitError.response?.data?.message ||
                 "Unable to submit your application.";
+            const isDailyLimitReached =
+                submitError.response?.status === 403 &&
+                errorMessage.includes(
+                    "You have reached your daily limit of 5 job applications."
+                );
+
+            if (isDailyLimitReached) {
+                setError("");
+                setShowPlanModal(true);
+                return;
+            }
             setError(errorMessage);
             toast.error(errorMessage);
         } finally {
@@ -454,6 +468,64 @@ const ApplyJob = () => {
                     </div>
                 </form>
             </div>
+            {showPlanModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/60 px-4 backdrop-blur-sm">
+                    <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl sm:p-8">
+
+                        <button
+                            type="button"
+                            onClick={() => setShowPlanModal(false)}
+                            className="absolute right-4 top-4 rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                            aria-label="Close modal"
+                        >
+                            <X size={20} />
+                        </button>
+
+                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
+                            <Crown size={32} />
+                        </div>
+
+                        <h2 className="mt-5 text-center text-2xl font-bold text-slate-900">
+                            Daily Application Limit Reached
+                        </h2>
+
+                        <p className="mt-3 text-center text-sm leading-6 text-slate-600">
+                            You've used all 5 free job applications for today.
+                            Choose an application pass to continue applying
+                            without the daily limit.
+                        </p>
+
+                        <div className="mt-5 space-y-3 rounded-xl bg-slate-50 p-4">
+                            <div className="flex items-center gap-3 text-sm text-slate-700">
+                                <CheckCircle2 size={18} className="text-emerald-600" />
+                                Unlimited job applications
+                            </div>
+
+                            <div className="flex items-center gap-3 text-sm text-slate-700">
+                                <CheckCircle2 size={18} className="text-emerald-600" />
+                                Choose from flexible application passes
+                            </div>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={() => navigate("/candidate/application-plans")}
+                            className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 font-semibold text-white transition hover:bg-indigo-700"
+                        >
+                            <Crown size={18} />
+                            Choose Application Plan
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => setShowPlanModal(false)}
+                            className="mt-3 w-full rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                        >
+                            Maybe Later
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

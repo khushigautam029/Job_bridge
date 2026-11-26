@@ -80,6 +80,27 @@ const ApplicationPlans = () => {
         fetchPlans();
     }, []);
 
+
+    useEffect(() => {
+        const resetCheckoutState = () => {
+            setCheckoutLoading(null);
+        };
+
+        const handleVisibilityChange = () => {
+            if (!document.hidden) {
+                resetCheckoutState();
+            }
+        };
+
+        window.addEventListener("pageshow", resetCheckoutState);
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+
+        return () => {
+            window.removeEventListener("pageshow", resetCheckoutState);
+            document.removeEventListener("visibilitychange", handleVisibilityChange);
+        };
+    }, []);
+
     const handlePurchase = async (plan) => {
         try {
             setCheckoutLoading(plan.id);
@@ -185,11 +206,10 @@ const ApplicationPlans = () => {
                             return (
                                 <div
                                     key={plan.id}
-                                    className={`relative flex flex-col rounded-xl border bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md ${
-                                        isPopular
+                                    className={`relative flex flex-col rounded-xl border bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md ${isPopular
                                             ? "border-indigo-500 ring-1 ring-indigo-100"
                                             : "border-slate-200"
-                                    }`}
+                                        }`}
                                 >
                                     {isPopular && (
                                         <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-indigo-600 px-3 py-1 text-xs font-semibold text-white">
@@ -239,11 +259,10 @@ const ApplicationPlans = () => {
                                     <button
                                         onClick={() => handlePurchase(plan)}
                                         disabled={checkoutLoading !== null}
-                                        className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                                            isPopular
+                                        className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${isPopular
                                                 ? "bg-indigo-600 text-white hover:bg-indigo-700"
                                                 : "border border-indigo-600 text-indigo-600 hover:bg-indigo-50"
-                                        }`}
+                                            }`}
                                     >
                                         {isProcessing ? (
                                             <>

@@ -20,6 +20,7 @@ const PaymentSuccess = () => {
     const [searchParams] = useSearchParams();
 
     const sessionId = searchParams.get("session_id");
+    const retryKey = searchParams.get("retry");
 
     const [status, setStatus] = useState("VERIFYING");
     const [message, setMessage] = useState(
@@ -104,8 +105,8 @@ const PaymentSuccess = () => {
             cancelled = true;
             clearTimeout(timeoutId);
         };
-    }, [sessionId]);
-
+    }, [sessionId, retryKey]);
+    
     const handleRetry = () => {
         setStatus("VERIFYING");
         setMessage("Checking your payment status...");
@@ -202,14 +203,14 @@ const PaymentSuccess = () => {
 
                     {(isFailure || status === "ERROR" ||
                         (isPending && attempt >= 9)) && (
-                        <button
-                            onClick={handleRetry}
-                            className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
-                        >
-                            <RefreshCw size={17} />
-                            Check Payment Again
-                        </button>
-                    )}
+                            <button
+                                onClick={handleRetry}
+                                className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                            >
+                                <RefreshCw size={17} />
+                                Check Payment Again
+                            </button>
+                        )}
 
                     <button
                         onClick={() => navigate("/candidate/jobs")}

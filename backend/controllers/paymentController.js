@@ -447,8 +447,6 @@ export const getMyPlan = async (req, res) => {
         });
     }
 };
-
-
 export const verifyCheckoutSession = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -489,84 +487,91 @@ export const verifyCheckoutSession = async (req, res) => {
         const session = await stripe.checkout.sessions.retrieve(sessionId);
 
         // Verify session metadata.
+
+        // Verify session metadata.
         if (
             String(session.metadata?.paymentId) !== String(payment.id) ||
             String(session.metadata?.userId) !== String(payment.userId) ||
             String(session.metadata?.planId) !== String(payment.planId)
         ) {
+            console.error("Payment metadata mismatch:", {
+                stripeMetadata: session.metadata,
+                databasePayment: {
+                    id: payment.id,
+                    userId: payment.userId,
+                    planId: payment.planId,
+                },
+            });
+
             return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Stripe session details do not match the payment record",
             });
         }
 
-        // Verify the amount and currency.
+        // Verify amount and currency.
         if (
             Number(session.amount_total) !== Number(payment.amount) ||
             session.currency?.toUpperCase() !== payment.currency.toUpperCase()
         ) {
+            console.error("Payment amount/currency mismatch:", {
+                stripeAmount: session.amount_total,
+                databaseAmount: payment.amount,
+                stripeCurrency: session.currency,
+                databaseCurrency: payment.currency,
+            });
+
             return res.status(STATUS_CODES.BAD_REQUEST).json({
                 success: false,
                 message: "Payment amount or currency mismatch",
             });
         }
 
-        // If Stripe says the Checkout Session has expired,
-        // mark the still-pending payment as cancelled.
-        if (
-            session.status === "expired" &&
-            payment.status === "PENDING"
-        ) {
-            await payment.update({
-                status: "CANCELLED",
-            });
-        }
-
-        // Payment has been successfully processed by the webhook.
-        if (
-            session.payment_status === "paid" &&
-            payment.status === "SUCCESS"
-        ) {
+        // The webhook has already verified the payment and activated the pass.
+        // Therefore, the database SUCCESS status is authoritative.
+        if (payment.status === "SUCCESS") {
             return res.status(STATUS_CODES.OK).json({
                 success: true,
                 paymentStatus: "SUCCESS",
-                message: "Payment completed successfully",
+                message: "Payment completed successfully. Your application pass is active.",
             });
         }
 
-        // Stripe has received payment, but the webhook has not
-        // yet updated our database.
-        if (
-            session.payment_status === "paid" &&
-            payment.status === "PENDING"
-        ) {
+        // Handle expired sessions.
+        if (session.status === "expired" && payment.status === "PENDING") {
+            await payment.update({
+                status: "CANCELLED",
+            });
+
+            return res.status(STATUS_CODES.OK).json({
+                success: true,
+                paymentStatus: "CANCELLED",
+                message: "Your payment session has expired.",
+            });
+        }
+
+        // Stripe received payment, but the webhook has not activated the pass yet.
+        if (session.payment_status === "paid" && payment.status === "PENDING") {
             return res.status(STATUS_CODES.OK).json({
                 success: true,
                 paymentStatus: "PENDING",
-                message: "Payment received. Application pass activation is processing.",
+                message: "Payment received. Your application pass is being activated.",
             });
         }
 
-        // Return the current status for expired or cancelled payments.
-        if (
-            payment.status === "CANCELLED" ||
-            payment.status === "FAILED" ||
-            payment.status === "REFUNDED"
-        ) {
+        if (["CANCELLED", "FAILED", "REFUNDED"].includes(payment.status)) {
             return res.status(STATUS_CODES.OK).json({
                 success: true,
                 paymentStatus: payment.status,
-                message: "Payment was not completed successfully",
+                message: "Payment was not completed successfully.",
             });
         }
 
-        // Payment is still awaiting completion.
         return res.status(STATUS_CODES.OK).json({
             success: true,
             paymentStatus: "PENDING",
-            message: "Payment is still pending",
+            message: "Payment is still pending.",
         });
-
     } catch (error) {
         console.error("Verify Checkout Session Error:", error);
         return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
