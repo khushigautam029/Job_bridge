@@ -60,6 +60,39 @@ const Payment = sequelize.define(
             defaultValue: "PENDING",
         },
 
+        // Refund details
+        refundAmount: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            defaultValue: 0,
+            field: "refund_amount",
+            comment: "Refund amount in paise",
+        },
+
+        refundStatus: {
+            type: DataTypes.ENUM(
+                "NOT_REQUESTED",
+                "PENDING",
+                "SUCCESS",
+                "FAILED"
+            ),
+            allowNull: false,
+            defaultValue: "NOT_REQUESTED",
+            field: "refund_status",
+        },
+
+        stripeRefundId: {
+            type: DataTypes.STRING(255),
+            allowNull: true,
+            field: "stripe_refund_id",
+        },
+
+        refundedAt: {
+            type: DataTypes.DATE,
+            allowNull: true,
+            field: "refunded_at",
+        },
+
         paidAt: {
             type: DataTypes.DATE,
             allowNull: true,
