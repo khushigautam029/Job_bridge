@@ -447,3 +447,132 @@ export const getMyPlan = async (req, res) => {
         });
     }
 };
+
+
+export const verifyCheckoutSession = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        // Only candidates can verify application pass payments.
+        if (req.user.role !== "CANDIDATE") {
+            return res.status(STATUS_CODES.FORBIDDEN).json({
+                success: false,
+                message: "Only candidates can verify application pass payments",
+            });
+        }
+
+        const { session_id: sessionId } = req.query;
+
+        if (!sessionId || typeof sessionId !== "string") {
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
+                success: false,
+                message: "A valid Stripe session ID is required",
+            });
+        }
+
+        // Find the payment belonging to the logged-in candidate.
+        const payment = await Payment.findOne({
+            where: {
+                stripeSessionId: sessionId,
+                userId,
+            },
+        });
+
+        if (!payment) {
+            return res.status(STATUS_CODES.NOT_FOUND).json({
+                success: false,
+                message: "Payment record not found",
+            });
+        }
+
+        // Retrieve the Checkout Session directly from Stripe.
+        const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+        // Verify session metadata.
+        if (
+            String(session.metadata?.paymentId) !== String(payment.id) ||
+            String(session.metadata?.userId) !== String(payment.userId) ||
+            String(session.metadata?.planId) !== String(payment.planId)
+        ) {
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
+                success: false,
+                message: "Stripe session details do not match the payment record",
+            });
+        }
+
+        // Verify the amount and currency.
+        if (
+            Number(session.amount_total) !== Number(payment.amount) ||
+            session.currency?.toUpperCase() !== payment.currency.toUpperCase()
+        ) {
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
+                success: false,
+                message: "Payment amount or currency mismatch",
+            });
+        }
+
+        // If Stripe says the Checkout Session has expired,
+        // mark the still-pending payment as cancelled.
+        if (
+            session.status === "expired" &&
+            payment.status === "PENDING"
+        ) {
+            await payment.update({
+                status: "CANCELLED",
+            });
+        }
+
+        // Payment has been successfully processed by the webhook.
+        if (
+            session.payment_status === "paid" &&
+            payment.status === "SUCCESS"
+        ) {
+            return res.status(STATUS_CODES.OK).json({
+                success: true,
+                paymentStatus: "SUCCESS",
+                message: "Payment completed successfully",
+            });
+        }
+
+        // Stripe has received payment, but the webhook has not
+        // yet updated our database.
+        if (
+            session.payment_status === "paid" &&
+            payment.status === "PENDING"
+        ) {
+            return res.status(STATUS_CODES.OK).json({
+                success: true,
+                paymentStatus: "PENDING",
+                message: "Payment received. Application pass activation is processing.",
+            });
+        }
+
+        // Return the current status for expired or cancelled payments.
+        if (
+            payment.status === "CANCELLED" ||
+            payment.status === "FAILED" ||
+            payment.status === "REFUNDED"
+        ) {
+            return res.status(STATUS_CODES.OK).json({
+                success: true,
+                paymentStatus: payment.status,
+                message: "Payment was not completed successfully",
+            });
+        }
+
+        // Payment is still awaiting completion.
+        return res.status(STATUS_CODES.OK).json({
+            success: true,
+            paymentStatus: "PENDING",
+            message: "Payment is still pending",
+        });
+
+    } catch (error) {
+        console.error("Verify Checkout Session Error:", error);
+        return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "Unable to verify payment",
+        });
+    }
+};
+

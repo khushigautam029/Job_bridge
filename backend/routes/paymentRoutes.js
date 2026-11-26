@@ -1,5 +1,5 @@
 import express from "express";
-import { createCheckoutSession, getMyPlan, getPaymentPlans } from "../controllers/paymentController.js";
+import { createCheckoutSession, getMyPlan, getPaymentPlans, verifyCheckoutSession } from "../controllers/paymentController.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -13,6 +13,11 @@ router.get(
     "/my-plan",
     authMiddleware,
     getMyPlan
-)
+);
+router.get(
+    "/verify-session",
+    authMiddleware,
+    verifyCheckoutSession
+);
 
 export default router;
