@@ -125,10 +125,6 @@ const getPrivacySettings = (value) => {
     Candidate applies for a job
 */
 
-/*
-    Candidate applies for a job
-*/
-
 const applyForJob = async (userId, jobId, data) => {
     // 1. Find candidate profile.
     const candidate = await CandidateProfile.findOne({
@@ -283,6 +279,7 @@ const applyForJob = async (userId, jobId, data) => {
                     coverLetter: data.coverLetter ?? existingApplication.coverLetter,
                     expectedSalary: data.expectedSalary ?? existingApplication.expectedSalary,
                     noticePeriod: data.noticePeriod ?? existingApplication.noticePeriod,
+                    candidatePlanId: activePlan?.id ?? null,
                     status: "APPLIED",
                     appliedAt: now,
                 },
@@ -310,6 +307,7 @@ const applyForJob = async (userId, jobId, data) => {
             {
                 jobId,
                 candidateId: candidate.id,
+                candidatePlanId: activePlan?.id ?? null,
                 resume: data.resume || null,
                 coverLetter: data.coverLetter || null,
                 expectedSalary: data.expectedSalary ?? null,
@@ -817,7 +815,7 @@ const getRankedJobApplications = async (
             error.statusCode = STATUS_CODES.FORBIDDEN;
             throw error;
         }
-                // 3. Fetch applications with saved ATS results.
+        // 3. Fetch applications with saved ATS results.
         return Application.findAndCountAll({
             where: {
                 jobId,

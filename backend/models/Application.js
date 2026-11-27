@@ -66,6 +66,11 @@ const Application = sequelize.define(
             defaultValue: DataTypes.NOW,
             field: "applied_at",
         },
+        candidatePlanId: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+            field: "candidate_plan_id",
+        },
     },
     {
         tableName: "applications",

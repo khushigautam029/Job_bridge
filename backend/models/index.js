@@ -448,6 +448,16 @@ CandidatePlan.belongsTo(Payment, {
     as: "payment",
 });
 
+CandidatePlan.hasMany(Application, {
+    foreignKey: "candidatePlanId",
+    as: "applications",
+});
+
+Application.belongsTo(CandidatePlan, {
+    foreignKey: "candidatePlanId",
+    as: "candidatePlan",
+});
+
 
 export {
     AiConversation, AiMessage, Application, ApplicationPassPlan, ApplicationStatusHistory, AtsAnalysis, CandidateEducation, CandidateExperience, CandidatePlan, CandidateProfile, CandidateProject,
