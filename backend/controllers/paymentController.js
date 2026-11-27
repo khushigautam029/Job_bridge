@@ -417,6 +417,7 @@ export const getMyPlan = async (req, res) => {
             hasActivePlan: true,
             currentPlan: {
                 candidatePlanId: candidatePlan.id,
+                paymentId: candidatePlan.paymentId, // ADD THIS
                 planId: plan.id,
                 planCode: plan.planCode,
                 planName: plan.name,

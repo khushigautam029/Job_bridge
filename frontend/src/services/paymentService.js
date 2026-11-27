@@ -25,3 +25,19 @@ export const verifyCheckoutSession = async(sessionId) =>{
     });
     return response.data;
 };
+
+export const getRefundPreview = async (paymentId) => {
+    const response = await api.get(
+        `/payment/refund/${paymentId}/preview`
+    );
+
+    return response.data;
+};
+
+export const requestRefund = async (paymentId) => {
+    const response = await api.post(
+        `/payment/refund/${paymentId}`
+    );
+
+    return response.data;
+};
