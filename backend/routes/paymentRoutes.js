@@ -3,6 +3,7 @@ import {
     createCheckoutSession,
     getMyPlan,
     getPaymentPlans,
+    previewRefund,
     requestRefund,
     verifyCheckoutSession
 } from "../controllers/paymentController.js";
@@ -23,6 +24,12 @@ router.get(
 router.get(
     "/verify-session",
     verifyCheckoutSession
+);
+
+router.get(
+    "/refund/:paymentId/preview",
+    authMiddleware,
+    previewRefund
 );
 
 router.post(

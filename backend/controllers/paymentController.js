@@ -759,3 +759,44 @@ export const requestRefund = async (req, res) => {
     }
 };
 
+export const previewRefund = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const paymentId = Number(req.params.paymentId);
+
+        if (req.user.role !== "CANDIDATE") {
+            return res.status(STATUS_CODES.FORBIDDEN).json({
+                success: false,
+                message: "Only candidates can preview refunds.",
+            });
+        }
+
+        if (!Number.isInteger(paymentId) || paymentId <= 0) {
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
+                success: false,
+                message: "Invalid payment ID.",
+            });
+        }
+
+        const refundDetails = await getRefundDetails(userId, paymentId);
+
+        return res.status(STATUS_CODES.OK).json({
+            success: true,
+            message: "Refund details calculated successfully.",
+            refund: refundDetails,
+        });
+
+    } catch (error) {
+        console.error("Preview Refund Error:", error);
+
+        return res.status(
+            error.message === "Successful payment not found." ||
+            error.message === "Candidate plan not found for this payment."
+                ? STATUS_CODES.NOT_FOUND
+                : STATUS_CODES.BAD_REQUEST
+        ).json({
+            success: false,
+            message: error.message || "Unable to calculate refund.",
+        });
+    }
+};

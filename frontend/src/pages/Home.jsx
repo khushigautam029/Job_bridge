@@ -21,6 +21,7 @@ import {
     UserCircle,
     UserPlus,
     Users,
+    Wallet,
     X
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -1090,6 +1091,20 @@ const Home = () => {
                                 </div>
                             )}
                         </div>
+
+                        {/* MY SUBSCRIPTION */}
+                        <button
+                            type="button"
+                            onClick={() => navigate("/candidate/subscription")}
+                            title="My Subscription"
+                            aria-label="My Subscription"
+                            className="flex h-10 w-10 items-center justify-center rounded-lg
+                            text-slate-600 transition hover:bg-indigo-50
+                            hover:text-indigo-600"
+                        >
+                            <Wallet size={21} strokeWidth={1.8} />
+                        </button>
+                        
                         {/* DARK MODE TOGGLE
                         <button
                             type="button"
