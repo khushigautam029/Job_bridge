@@ -20,7 +20,7 @@ export const getMySubscription = async () => {
 export const verifyCheckoutSession = async(sessionId) =>{
     const response = await api.get("/payment/verify-session",{
         params:{
-            sessionId: sessionId,
+            session_id: sessionId,
         },
     });
     return response.data;

@@ -1,5 +1,11 @@
 import express from "express";
-import { createCheckoutSession, getMyPlan, getPaymentPlans, verifyCheckoutSession } from "../controllers/paymentController.js";
+import {
+    createCheckoutSession,
+    getMyPlan,
+    getPaymentPlans,
+    requestRefund,
+    verifyCheckoutSession
+} from "../controllers/paymentController.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -16,8 +22,13 @@ router.get(
 );
 router.get(
     "/verify-session",
-    authMiddleware,
     verifyCheckoutSession
+);
+
+router.post(
+    "/refund/:paymentId",
+    authMiddleware,
+    requestRefund
 );
 
 export default router;

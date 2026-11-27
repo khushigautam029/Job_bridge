@@ -1,6 +1,7 @@
 import { Op } from "sequelize";
 import stripe from "../config/stripe.js";
 import { ApplicationPassPlan, CandidatePlan, Payment, User } from "../models/index.js";
+import getRefundDetails from "../services/refundService.js";
 import { STATUS_CODES } from "../utils/setConstants.js";
 
 export const getPaymentPlans = async (req, res) => {
@@ -123,16 +124,6 @@ export const createCheckoutSession = async (req, res) => {
             // Save Stripe Checkout Session ID.
             await payment.update({
                 stripeSessionId: session.id,
-            });
-
-            const sessionCheck = await stripe.checkout.sessions.retrieve(session.id);
-
-            console.log("SESSION VERIFICATION:", {
-                id: sessionCheck.id,
-                payment_status: sessionCheck.payment_status,
-                status: sessionCheck.status,
-                amount_total: sessionCheck.amount_total,
-                currency: sessionCheck.currency,
             });
 
             return res.status(STATUS_CODES.OK).json({
@@ -449,16 +440,6 @@ export const getMyPlan = async (req, res) => {
 };
 export const verifyCheckoutSession = async (req, res) => {
     try {
-        const userId = req.user.id;
-
-        // Only candidates can verify application pass payments.
-        if (req.user.role !== "CANDIDATE") {
-            return res.status(STATUS_CODES.FORBIDDEN).json({
-                success: false,
-                message: "Only candidates can verify application pass payments",
-            });
-        }
-
         const { session_id: sessionId } = req.query;
 
         if (!sessionId || typeof sessionId !== "string") {
@@ -468,11 +449,10 @@ export const verifyCheckoutSession = async (req, res) => {
             });
         }
 
-        // Find the payment belonging to the logged-in candidate.
+        // The Checkout Session ID associates this request with its payment.
         const payment = await Payment.findOne({
             where: {
                 stripeSessionId: sessionId,
-                userId,
             },
         });
 
@@ -577,6 +557,203 @@ export const verifyCheckoutSession = async (req, res) => {
         return res.status(STATUS_CODES.INTERNAL_SERVER_ERROR).json({
             success: false,
             message: "Unable to verify payment",
+        });
+    }
+};
+
+
+export const requestRefund = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const paymentId = Number(req.params.paymentId);
+
+        // Only candidates can request refunds.
+        if (req.user.role !== "CANDIDATE") {
+            return res.status(STATUS_CODES.FORBIDDEN).json({
+                success: false,
+                message: "Only candidates can request refunds.",
+            });
+        }
+
+        if (!Number.isInteger(paymentId) || paymentId <= 0) {
+            return res.status(STATUS_CODES.BAD_REQUEST).json({
+                success: false,
+                message: "Invalid payment ID.",
+            });
+        }
+
+        // Calculate refund details using backend data.
+        const refundDetails = await getRefundDetails(userId, paymentId);
+
+        // Lock the payment and reserve the refund request.
+        const reservation = await Payment.sequelize.transaction(
+            async (transaction) => {
+                const payment = await Payment.findOne({
+                    where: {
+                        id: paymentId,
+                        userId,
+                    },
+                    transaction,
+                    lock: transaction.LOCK.UPDATE,
+                });
+
+                if (!payment) {
+                    const error = new Error("Payment not found.");
+                    error.statusCode = STATUS_CODES.NOT_FOUND;
+                    throw error;
+                }
+
+                if (payment.status !== "SUCCESS") {
+                    const error = new Error(
+                        "Only successful payments can be refunded."
+                    );
+                    error.statusCode = STATUS_CODES.BAD_REQUEST;
+                    throw error;
+                }
+
+                if (payment.refundStatus !== "NOT_REQUESTED") {
+                    const error = new Error(
+                        "A refund has already been requested or processed."
+                    );
+                    error.statusCode = STATUS_CODES.CONFLICT;
+                    throw error;
+                }
+
+                if (!payment.stripePaymentIntentId) {
+                    const error = new Error(
+                        "Stripe payment information is unavailable."
+                    );
+                    error.statusCode = STATUS_CODES.BAD_REQUEST;
+                    throw error;
+                }
+
+                await payment.update(
+                    {
+                        refundAmount: refundDetails.refundAmount,
+                        refundStatus: "PENDING",
+                    },
+                    { transaction }
+                );
+
+                return {
+                    amount: refundDetails.refundAmount,
+                    originalAmount: payment.amount,
+                    paymentIntentId: payment.stripePaymentIntentId,
+                };
+            }
+        );
+
+        // Request the refund from Stripe outside the DB transaction.
+        const stripeRefund = await stripe.refunds.create(
+            {
+                payment_intent: reservation.paymentIntentId,
+                amount: reservation.amount,
+                reason: "requested_by_customer",
+                metadata: {
+                    paymentId: String(paymentId),
+                    userId: String(userId),
+                    candidatePlanId: String(
+                        refundDetails.candidatePlanId
+                    ),
+                },
+            },
+            {
+                idempotencyKey: `payment-refund-${paymentId}`,
+            }
+        );
+
+        // Update database after receiving Stripe's response.
+        await Payment.sequelize.transaction(async (transaction) => {
+            const payment = await Payment.findByPk(paymentId, {
+                transaction,
+                lock: transaction.LOCK.UPDATE,
+            });
+
+            if (!payment) {
+                throw new Error("Payment record not found.");
+            }
+
+            if (stripeRefund.status === "succeeded") {
+                await payment.update(
+                    {
+                        refundAmount: stripeRefund.amount,
+                        refundStatus: "SUCCESS",
+                        stripeRefundId: stripeRefund.id,
+                        refundedAt: new Date(),
+                        status:
+                            stripeRefund.amount >= reservation.originalAmount
+                                ? "REFUNDED"
+                                : "SUCCESS",
+                    },
+                    { transaction }
+                );
+
+                // Revoke the pass only after Stripe succeeds.
+                await CandidatePlan.update(
+                    { status: "REVOKED" },
+                    {
+                        where: {
+                            paymentId: payment.id,
+                        },
+                        transaction,
+                    }
+                );
+            } else if (stripeRefund.status === "pending") {
+                await payment.update(
+                    {
+                        stripeRefundId: stripeRefund.id,
+                        refundAmount: stripeRefund.amount,
+                        refundStatus: "PENDING",
+                    },
+                    { transaction }
+                );
+            } else if (stripeRefund.status === "failed") {
+                await payment.update(
+                    {
+                        stripeRefundId: stripeRefund.id,
+                        refundStatus: "FAILED",
+                    },
+                    { transaction }
+                );
+            }
+        });
+
+        if (stripeRefund.status === "succeeded") {
+            return res.status(STATUS_CODES.OK).json({
+                success: true,
+                message: "Refund processed successfully. Your application pass has been revoked.",
+                refund: {
+                    refundId: stripeRefund.id,
+                    amount: stripeRefund.amount,
+                    currency: stripeRefund.currency,
+                    percentage: refundDetails.refundPercentage,
+                    status: "SUCCESS",
+                },
+            });
+        }
+
+        if (stripeRefund.status === "pending") {
+            return res.status(STATUS_CODES.OK).json({
+                success: true,
+                message: "Your refund request is being processed. Your pass will be revoked after Stripe confirms the refund.",
+                refundStatus: "PENDING",
+            });
+        }
+
+        return res.status(STATUS_CODES.BAD_REQUEST).json({
+            success: false,
+            message: "Stripe could not process the refund.",
+            refundStatus: "FAILED",
+        });
+
+    } catch (error) {
+        console.error("Request Refund Error:", error);
+
+        return res.status(
+            error.statusCode || STATUS_CODES.INTERNAL_SERVER_ERROR
+        ).json({
+            success: false,
+            message: error.message || "Unable to process refund request.",
         });
     }
 };
